@@ -1,0 +1,8 @@
+region none
+page contact.html Bytes lang-region=none fields=1
+page uk.html Bytes lang-region=GB fields=1
+page us.html Bytes lang-region=US fields=1
+organization none
+ungrouped #0 Phone contact.html Text raw="(202) 555-0150" text="(202) 555-0150" span=94+14 flags=Unnormalized issue=phone.region-required
+ungrouped #1 Phone uk.html Text raw="020 7946 0958" text="020 7946 0958" span=105+13 flags=RegionInferred => Phone:+442079460958
+ungrouped #2 Phone us.html Text raw="(202) 555-0143" text="(202) 555-0143" span=105+14 flags=RegionInferred => Phone:+12025550143

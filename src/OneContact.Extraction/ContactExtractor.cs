@@ -56,6 +56,62 @@ public sealed class ContactExtractor
     /// <exception cref="HtmlLimitExceededException">The page exceeds OneHtml's default parse limits.</exception>
     public static IReadOnlyList<ContactRecord> Extract(ReadOnlyMemory<byte> html) => new ContactExtractor().ExtractHtml(html).Records;
 
+    /// <summary>
+    /// Extracts the records of a set of pages from one site, merged: the same person or organization on several pages is one record.
+    /// The pages are only read; nothing is fetched. See <see cref="ExtractSite(IEnumerable{ContactPage})"/> for the full result.
+    /// </summary>
+    /// <param name="pages">The pages, each with the caller's id.</param>
+    /// <returns>The merged records, in the order their first page and markup begin.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="pages"/> is null.</exception>
+    /// <exception cref="ArgumentException">A page is a default value or two pages share an id.</exception>
+    /// <exception cref="HtmlLimitExceededException">A page exceeds OneHtml's default parse limits.</exception>
+    public static IReadOnlyList<ContactRecord> Extract(IEnumerable<ContactPage> pages) => new ContactExtractor().ExtractSite(pages).Records;
+
+    /// <summary>Starts reading a site page by page; the low-level form of <see cref="ExtractSite(IEnumerable{ContactPage})"/>.</summary>
+    /// <returns>A new <see cref="SiteExtraction"/> that reads with this extractor's <see cref="Sources"/> and <see cref="DefaultRegion"/>.</returns>
+    public SiteExtraction BeginSite() => new(Sources, DefaultRegion);
+
+    /// <summary>
+    /// Extracts a set of pages from one site and merges them. Each page is read on its own (its fields keep its id, source and offsets),
+    /// then records are de-duplicated across pages on the keys a single page uses, a site organization is assembled, persons are linked
+    /// to it where the pages support it, and values that disagree across pages are kept and flagged.
+    /// </summary>
+    /// <param name="pages">The pages. Each is parsed and released before the next is taken.</param>
+    /// <returns>The merged result.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="pages"/> is null.</exception>
+    /// <exception cref="ArgumentException">A page is a default value or two pages share an id.</exception>
+    /// <exception cref="HtmlLimitExceededException">A page exceeds OneHtml's default parse limits.</exception>
+    public SiteExtractResult ExtractSite(IEnumerable<ContactPage> pages)
+    {
+        ArgumentNullException.ThrowIfNull(pages);
+        SiteExtraction site = BeginSite();
+        foreach (ContactPage page in pages)
+        {
+            site.Add(page);
+        }
+
+        return site.Complete();
+    }
+
+    /// <summary>The stream twin of <see cref="ExtractSite(IEnumerable{ContactPage})"/>: pages are taken one at a time as the sequence yields them.</summary>
+    /// <param name="pages">The pages.</param>
+    /// <param name="cancellationToken">Stops the read between pages.</param>
+    /// <returns>The merged result.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="pages"/> is null.</exception>
+    /// <exception cref="ArgumentException">A page is a default value or two pages share an id.</exception>
+    /// <exception cref="OperationCanceledException">Cancelled.</exception>
+    public async Task<SiteExtractResult> ExtractSiteAsync(IAsyncEnumerable<ContactPage> pages, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(pages);
+        SiteExtraction site = BeginSite();
+        await foreach (ContactPage page in pages.WithCancellation(cancellationToken).ConfigureAwait(false))
+        {
+            site.Add(page);
+        }
+
+        return site.Complete();
+    }
+
     /// <summary>Extracts from an HTML string.</summary>
     /// <param name="html">The page.</param>
     /// <returns>The records, every field flat, and what the readers could not read. Offsets count UTF-16 code units of <paramref name="html"/>.</returns>

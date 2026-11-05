@@ -1,0 +1,23 @@
+region US
+page boston.html Bytes lang-region=none site-region fields=2
+page index.html Bytes lang-region=none fields=4
+page locations.html Bytes lang-region=none fields=8
+organization 0
+record 0 Organization pages=boston.html,index.html conf=1
+  #0 Name boston.html Microdata raw="Elm Coffee Roasters Inc" text="Elm Coffee Roasters Inc" span=174+23 => Company:Elm Coffee Roasters Inc
+    also index.html JsonLd span=198+23
+  #1 Address boston.html Microdata raw="<div itemprop=\"address\" itemscope itemtype=\"https://schema.org/PostalAddress\"><span itemprop=\"streetAddress\">1 Roast Way</span>, <span itemprop=\"addressLocality\">Boston</span>, <span itemprop=\"addressRegion\">MA</span> <span itemprop=\"postalCode\">02108</span> <span itemprop=\"addressCountry\">US</span></div>" text="1 Roast Way, Boston, MA, 02108, US" span=205+306 flags=Composed => Address:1 Roast Way, Boston MA 02108
+    also boston.html Text span=314+142
+    also index.html JsonLd span=276+157
+  #2 Website index.html JsonLd raw="https://elmcoffee.example.com/" text="https://elmcoffee.example.com/" span=232+30 => Web:https://elmcoffee.example.com/
+  #3 Phone index.html JsonLd raw="+1 617 555 0100" text="+1 617 555 0100" span=449+15 => Phone:+16175550100
+record 1 Organization pages=locations.html conf=1
+  #4 Name locations.html JsonLd raw="Elm Coffee Denver" text="Elm Coffee Denver" span=214+17 => Company:Elm Coffee Denver
+  #5 Website locations.html JsonLd raw="https://elmcoffee.example.com/" text="https://elmcoffee.example.com/" span=242+30 => Web:https://elmcoffee.example.com/
+  #6 Address locations.html JsonLd raw="{\"@type\": \"PostalAddress\", \"streetAddress\": \"22 Larimer St\", \"addressLocality\": \"Denver\", \"addressRegion\": \"CO\", \"postalCode\": \"80202\", \"addressCountry\": \"US\"}" text="22 Larimer St, Denver, CO, 80202, US" span=286+159 flags=Composed => Address:22 Larimer St, Denver CO 80202
+  #7 Phone locations.html JsonLd raw="+1 303 555 0122" text="+1 303 555 0122" span=461+15 => Phone:+13035550122
+record 2 Organization pages=locations.html conf=1
+  #8 Name locations.html JsonLd raw="Elm Coffee Austin" text="Elm Coffee Austin" span=519+17 => Company:Elm Coffee Austin
+  #9 Website locations.html JsonLd raw="https://elmcoffee.example.com/" text="https://elmcoffee.example.com/" span=547+30 => Web:https://elmcoffee.example.com/
+  #10 Address locations.html JsonLd raw="{\"@type\": \"PostalAddress\", \"streetAddress\": \"9 Congress Ave\", \"addressLocality\": \"Austin\", \"addressRegion\": \"TX\", \"postalCode\": \"78701\", \"addressCountry\": \"US\"}" text="9 Congress Ave, Austin, TX, 78701, US" span=591+160 flags=Composed => Address:9 Congress Ave, Austin TX 78701
+  #11 Phone locations.html JsonLd raw="+1 512 555 0133" text="+1 512 555 0133" span=767+15 => Phone:+15125550133

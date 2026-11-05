@@ -19,6 +19,12 @@ public sealed class ExtractResult
         Issues = issues;
     }
 
+    /// <summary>The region of the page's <c>lang</c>; unknown when it has none. Used when pages are merged into a site.</summary>
+    internal Region PageRegion { get; set; }
+
+    /// <summary>How many shape-found phone numbers were dropped only for want of a region.</summary>
+    internal int RegionDrops { get; set; }
+
     /// <summary>The readers that ran.</summary>
     public ExtractionSources Sources { get; }
 

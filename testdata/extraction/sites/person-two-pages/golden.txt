@@ -1,0 +1,12 @@
+region none
+page about.html Bytes lang-region=none fields=3
+page contact.html Bytes lang-region=none fields=3
+organization none
+record 0 Person pages=about.html,contact.html conf=1
+  #0 Name about.html JsonLd raw="Maria Gomez" text="Maria Gomez" span=192+11 => Person:Maria Gomez
+    also contact.html HCard span=135+11
+  #1 Email about.html JsonLd raw="maria@gomezdesign.example.com" text="maria@gomezdesign.example.com" span=216+29 flags=Disputed => Email:maria@gomezdesign.example.com
+  #2 Website about.html JsonLd raw="https://gomezdesign.example.com/" text="https://gomezdesign.example.com/" span=256+32 => Web:https://gomezdesign.example.com/
+  #3 Email contact.html HCard raw="mailto:m.gomez@gomezdesign.example.com" text="m.gomez@gomezdesign.example.com" span=179+38 flags=Disputed => Email:m.gomez@gomezdesign.example.com
+  #4 Phone contact.html HCard raw="tel:+12125550111" text="+12125550111" span=251+16 => Phone:+12125550111
+  disagreement Email: #1, #3

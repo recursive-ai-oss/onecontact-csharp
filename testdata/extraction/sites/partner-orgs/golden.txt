@@ -1,0 +1,14 @@
+region none
+page index.html Bytes lang-region=none fields=3
+page partners.html Bytes lang-region=none fields=4
+organization 0
+record 0 Organization pages=index.html conf=1
+  #0 Name index.html JsonLd raw="Kestrel Software Inc" text="Kestrel Software Inc" span=198+20 => Company:Kestrel Software Inc
+  #1 Website index.html JsonLd raw="https://kestrelsoft.example.com/" text="https://kestrelsoft.example.com/" span=229+32 => Web:https://kestrelsoft.example.com/
+  #2 Email index.html JsonLd raw="hello@kestrelsoft.example.com" text="hello@kestrelsoft.example.com" span=274+29 => Email:hello@kestrelsoft.example.com
+record 1 Organization pages=partners.html conf=1
+  #3 Name partners.html JsonLd raw="Larch Cloud Ltd" text="Larch Cloud Ltd" span=210+15 => Company:Larch Cloud Ltd
+  #4 Website partners.html JsonLd raw="https://larchcloud.example.org/" text="https://larchcloud.example.org/" span=236+31 => Web:https://larchcloud.example.org/
+record 2 Organization pages=partners.html conf=1
+  #5 Name partners.html JsonLd raw="Maple Data Inc" text="Maple Data Inc" span=306+14 => Company:Maple Data Inc
+  #6 Website partners.html JsonLd raw="https://mapledata.example.net/" text="https://mapledata.example.net/" span=331+30 => Web:https://mapledata.example.net/

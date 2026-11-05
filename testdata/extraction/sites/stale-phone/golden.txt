@@ -1,0 +1,13 @@
+region none
+page contact.html Bytes lang-region=none fields=3
+page index.html Bytes lang-region=none fields=3
+organization 0
+record 0 Organization pages=contact.html,index.html conf=1
+  #0 Name contact.html HCard raw="Birch Dental Group" text="Birch Dental Group" span=131+18 => Company:Birch Dental Group
+    also index.html JsonLd span=188+18
+  #1 Website contact.html HCard raw="https://birchdental.example.org/" text="https://birchdental.example.org/" span=180+32 => Web:https://birchdental.example.org/
+    also index.html JsonLd span=217+32
+  #2 Phone contact.html HCard raw="tel:+13035550177" text="+13035550177" span=245+16 flags=Disputed => Phone:+13035550177
+    also contact.html Text span=263+15
+  #3 Phone index.html JsonLd raw="+1 303 555 0101" text="+1 303 555 0101" span=266+15 flags=Disputed => Phone:+13035550101
+  disagreement Phone: #2, #3

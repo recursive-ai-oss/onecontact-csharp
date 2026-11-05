@@ -116,7 +116,10 @@ internal static class ExtractionPipeline
             issues.Add(new ExtractIssue(ExtractIssueKind.LimitExceeded, FieldSource.JsonLd, default, "A work budget was used up; the result holds what was read before that."));
         }
 
-        return Assemble(page, sources, works, ungroupedFields, issues);
+        ExtractResult result = Assemble(page, sources, works, ungroupedFields, issues);
+        result.PageRegion = page.PageRegion;
+        result.RegionDrops = normalizer.RegionDrops;
+        return result;
     }
 
     // The visible-text half: fields found in the text join the record whose element holds them, or are grouped with their neighbours.
@@ -370,12 +373,16 @@ internal static class ExtractionPipeline
                 continue;
             }
 
-            List<string> keys = [.. KeysOf(w, FieldKind.Name), .. ContactKeys(w)];
+            List<string> nameKeys = KeysOf(w, FieldKind.Name);
+            List<string> keys = [.. nameKeys, .. ContactKeys(w)];
             RecordWork? target = null;
             foreach (string k in keys)
             {
-                if (index.TryGetValue(k, out target))
+                // Two organizations with addresses that share none are two places (branches); a shared website or email alone does
+                // not make them one, but a shared name does.
+                if (index.TryGetValue(k, out RecordWork? candidate) && (nameKeys.Contains(k) || !AreBranches(w, candidate)))
                 {
+                    target = candidate;
                     break;
                 }
             }
@@ -507,6 +514,21 @@ internal static class ExtractionPipeline
         survivors.Sort((x, y) => position[x].CompareTo(position[y]));
         return survivors;
     }
+
+    private static bool AreBranches(RecordWork a, RecordWork b)
+    {
+        if (a.Draft.Kind != ContactRecordKind.Organization || b.Draft.Kind != ContactRecordKind.Organization)
+        {
+            return false;
+        }
+
+        HashSet<string> x = AddressKeys(a);
+        HashSet<string> y = AddressKeys(b);
+        return x.Count > 0 && y.Count > 0 && !x.Overlaps(y);
+    }
+
+    private static HashSet<string> AddressKeys(RecordWork w) =>
+        [.. w.Fields.Where(f => f.Kind == FieldKind.Address && f.IsNormalized).Select(f => f.DedupKey)];
 
     private static List<string> KeysOf(RecordWork w, FieldKind kind)
     {

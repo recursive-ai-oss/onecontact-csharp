@@ -1,0 +1,10 @@
+region none
+page a.html Bytes lang-region=none fields=2
+page b.html Bytes lang-region=none fields=2
+organization 0
+record 0 Organization pages=a.html,b.html conf=1
+  #0 Name a.html JsonLd raw="Quill Legal LLP" text="Quill Legal LLP" span=198+15 flags=Disputed => Company:Quill Legal LLP
+  #1 Website a.html JsonLd raw="https://quilllegal.example.com/" text="https://quilllegal.example.com/" span=224+31 => Web:https://quilllegal.example.com/
+    also b.html JsonLd span=225+31
+  #2 Name b.html JsonLd raw="Quill & Rowe LLP" text="Quill & Rowe LLP" span=198+16 flags=Disputed => Company:Quill & Rowe LLP
+  disagreement Name: #0, #2

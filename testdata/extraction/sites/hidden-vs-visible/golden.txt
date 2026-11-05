@@ -1,0 +1,12 @@
+region none
+page index.html Bytes lang-region=none fields=3
+page service.html Bytes lang-region=none fields=3
+organization 0
+record 0 Organization pages=index.html,service.html conf=1
+  #0 Name index.html JsonLd raw="Juniper Auto LLC" text="Juniper Auto LLC" span=198+16 => Company:Juniper Auto LLC
+    also service.html Microdata span=186+16
+  #1 Website index.html JsonLd raw="https://juniperauto.example.com/" text="https://juniperauto.example.com/" span=225+32 => Web:https://juniperauto.example.com/
+    also service.html Microdata span=279+32
+  #2 Phone index.html JsonLd raw="+1 206 555 0188" text="+1 206 555 0188" span=274+15 flags=Disputed => Phone:+12065550188
+  #3 Phone service.html Microdata raw="+1 206 555 0100" text="+1 206 555 0100" span=236+15 flags=Hidden|Disputed => Phone:+12065550100
+  disagreement Phone: #2, #3

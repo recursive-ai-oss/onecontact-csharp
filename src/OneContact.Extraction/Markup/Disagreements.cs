@@ -40,18 +40,18 @@ internal static class Disagreements
             return fields.Select(f => f.DedupKey).Distinct(StringComparer.Ordinal).Count() > 1;
         }
 
-        // Other kinds can have many values. They disagree when two sources each report values and share none of them.
-        var bySource = new Dictionary<FieldSource, HashSet<string>>();
+        // Other kinds can have many values. They disagree when two sources (on one page, or on different pages of a site) each report values and share none of them.
+        var bySource = new Dictionary<(string?, FieldSource), HashSet<string>>();
         foreach (ExtractedField f in fields)
         {
-            Add(bySource, f.Source, f.DedupKey);
+            Add(bySource, f.PageId, f.Source, f.DedupKey);
             foreach (ExtractedField d in f.Duplicates)
             {
-                Add(bySource, d.Source, d.DedupKey);
+                Add(bySource, d.PageId, d.Source, d.DedupKey);
             }
         }
 
-        List<FieldSource> sources = [.. bySource.Keys];
+        List<(string?, FieldSource)> sources = [.. bySource.Keys];
         for (int i = 0; i < sources.Count; i++)
         {
             for (int j = i + 1; j < sources.Count; j++)
@@ -66,11 +66,11 @@ internal static class Disagreements
         return false;
     }
 
-    private static void Add(Dictionary<FieldSource, HashSet<string>> map, FieldSource source, string key)
+    private static void Add(Dictionary<(string?, FieldSource), HashSet<string>> map, string? page, FieldSource source, string key)
     {
-        if (!map.TryGetValue(source, out HashSet<string>? set))
+        if (!map.TryGetValue((page, source), out HashSet<string>? set))
         {
-            map[source] = set = new HashSet<string>(StringComparer.Ordinal);
+            map[(page, source)] = set = new HashSet<string>(StringComparer.Ordinal);
         }
 
         set.Add(key);

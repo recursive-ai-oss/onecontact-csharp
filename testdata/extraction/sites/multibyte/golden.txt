@@ -1,0 +1,12 @@
+region none
+page accueil.html Bytes lang-region=none fields=3
+page contact.html Bytes lang-region=none fields=3
+organization 0
+record 0 Organization pages=accueil.html,contact.html conf=1
+  #0 Name accueil.html JsonLd raw="Café Léon SARL" text="Café Léon SARL" span=198+16 => Company:Café Léon SARL
+    also contact.html Microdata span=288+16
+  #1 Website accueil.html JsonLd raw="https://cafeleon.example.fr/" text="https://cafeleon.example.fr/" span=225+28 => Web:https://cafeleon.example.fr/
+    also contact.html Microdata span=335+28
+  #2 Phone accueil.html JsonLd raw="+33 1 23 45 67 89" text="+33 1 23 45 67 89" span=270+17 => Phone:+33123456789
+ungrouped #3 Email contact.html Link raw="mailto:bonjour@cafeleon.example.fr" text="bonjour@cafeleon.example.fr" span=116+34 => Email:bonjour@cafeleon.example.fr
+ungrouped   also contact.html Text span=152+27
