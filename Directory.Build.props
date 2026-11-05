@@ -14,16 +14,11 @@
     <!-- Build output stays out of the source folders. Each checkout (the main clone or a worktree) gets its own folder so they do not
          collide, named after the checkout folder; the main clone is "main". Where the output goes, first match wins:
            1. the environment variable ONECONTACT_ARTIFACTS: a directory that collects the output of every checkout;
-           2. a "scratch/onecontact/csharp" folder found a few levels above the checkout (a shared build area some machines have);
-           3. artifacts/ at the repository root, which .gitignore covers (CI and every other machine). -->
+           2. artifacts/ at the repository root, which .gitignore covers (CI and every other machine). -->
     <_CheckoutName>$([System.IO.Path]::GetFileName($([System.IO.Path]::GetDirectoryName($(MSBuildThisFileDirectory)))))</_CheckoutName>
     <_CheckoutSlot>$(_CheckoutName)</_CheckoutSlot>
     <_CheckoutSlot Condition="'$(_CheckoutName)' == 'onecontact-csharp'">main</_CheckoutSlot>
-    <_ProbeNear>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..', '..', '..', '..', 'scratch', 'onecontact', 'csharp'))</_ProbeNear>
-    <_ProbeFar>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..', '..', '..', '..', '..', 'scratch', 'onecontact', 'csharp'))</_ProbeFar>
     <_ArtifactsRoot Condition="'$(ONECONTACT_ARTIFACTS)' != ''">$([MSBuild]::EnsureTrailingSlash('$(ONECONTACT_ARTIFACTS)'))</_ArtifactsRoot>
-    <_ArtifactsRoot Condition="'$(_ArtifactsRoot)' == '' and Exists('$(_ProbeNear)')">$(_ProbeNear)</_ArtifactsRoot>
-    <_ArtifactsRoot Condition="'$(_ArtifactsRoot)' == '' and Exists('$(_ProbeFar)')">$(_ProbeFar)</_ArtifactsRoot>
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <ArtifactsPath Condition="'$(_ArtifactsRoot)' != ''">$(_ArtifactsRoot)$(_CheckoutSlot)</ArtifactsPath>
     <ArtifactsPath Condition="'$(_ArtifactsRoot)' == ''">$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
