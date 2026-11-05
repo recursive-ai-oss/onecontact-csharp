@@ -1,0 +1,8 @@
+unit Bytes
+record 0 Person src=Rdfa conf=1 span=104+191
+  #0 Name Rdfa raw="Wren Rdfa" text="Wren Rdfa" span=175+9 conf=1 => Person:Wren Rdfa
+  #1 Organization Rdfa raw="Wren Employer Co" text="Wren Employer Co" span=260+16 conf=1 => Company:Wren Employer Co
+  link WorksFor -> record 1
+record 1 Organization src=Rdfa conf=1 span=191+98
+  #2 Name Rdfa raw="Wren Employer Co" text="Wren Employer Co" span=260+16 conf=1 => Company:Wren Employer Co
+  link HasMember -> record 0

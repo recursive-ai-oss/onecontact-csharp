@@ -1,0 +1,3 @@
+unit Bytes
+ungrouped #0 Email Link raw="mailto:one@example.com,two@example.com?subject=Hi%20there&amp;cc=x@example.com" text="one@example.com" span=116+78 conf=0.9 => Email:one@example.com label="both"
+ungrouped #1 Email Link raw="mailto:one@example.com,two@example.com?subject=Hi%20there&amp;cc=x@example.com" text="two@example.com" span=116+78 conf=0.9 => Email:two@example.com label="both"

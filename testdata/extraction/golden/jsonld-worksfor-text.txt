@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Person src=JsonLd conf=1 span=125+103
+  #0 Name JsonLd raw="Taylor Text" text="Taylor Text" span=183+11 conf=1 => Person:Taylor Text
+  #1 Organization JsonLd raw="Text Employer GmbH" text="Text Employer GmbH" span=208+18 conf=1 => Company:Text Employer GmbH facts=HasLegalForm|LegalFormAmbiguous

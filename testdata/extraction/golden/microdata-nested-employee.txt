@@ -1,0 +1,8 @@
+unit Bytes
+record 0 Organization src=Microdata conf=1 span=104+279
+  #0 Name Microdata raw="Team Org" text="Team Org" span=187+8 conf=1 => Company:Team Org
+  link HasMember -> record 1
+record 1 Person src=Microdata conf=1 span=205+171
+  #1 Name Microdata raw="Lee Member" text="Lee Member" span=304+10 conf=1 => Person:Lee Member
+  #2 Email Microdata raw="lee@example.org" text="lee@example.org" span=345+15 conf=1 => Email:lee@example.org
+  link WorksFor -> record 0

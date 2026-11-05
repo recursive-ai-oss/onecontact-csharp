@@ -1,0 +1,5 @@
+unit Bytes
+record 0 Organization src=Microdata conf=1 span=104+219
+  #0 Name Microdata raw="Link Home Co" text="Link Home Co" span=187+12 conf=1 => Company:Link Home Co
+  #1 Email Link raw="mailto:questions@example.com" text="questions@example.com" span=232+28 conf=0.9 => Email:questions@example.com label="Ask us"
+  #2 Phone Link raw="tel:+12025550133" text="+12025550133" span=285+16 conf=0.9 => Phone:+12025550133 facts=Valid|InternationalInput label="call"

@@ -1,0 +1,5 @@
+unit Bytes
+record 0 Organization src=Microdata conf=1 span=104+487
+  #0 Name Microdata raw="Micro Org LLC" text="Micro Org LLC" span=184+13 conf=1 => Company:Micro Org LLC facts=HasLegalForm|LegalFormAmbiguous
+  #1 Address Microdata raw="<div itemprop=\"address\" itemscope itemtype=\"http://schema.org/PostalAddress\">\n    <span itemprop=\"streetAddress\">42 Galaxy Road</span>,\n    <span itemprop=\"addressLocality\">Denver</span>, <span itemprop=\"addressRegion\">CO</span>\n    <span itemprop=\"postalCode\">80202</span> <meta itemprop=\"addressCountry\" content=\"US\">\n  </div>" text="42 Galaxy Road, Denver, CO, 80202, US" span=205+328 conf=1 flags=Composed => Address:42 Galaxy Road, Denver CO 80202
+  #2 Phone Microdata raw="(202) 555-0166" text="(202) 555-0166" span=563+14 conf=1 flags=RegionInferred => Phone:+12025550166 facts=Valid

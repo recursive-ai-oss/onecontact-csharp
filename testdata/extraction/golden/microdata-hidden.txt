@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Organization src=Microdata conf=1 span=104+164
+  #0 Name Microdata raw="Hidden Micro Co" text="Hidden Micro Co" span=191+15 conf=1 flags=Hidden => Company:Hidden Micro Co
+  #1 Phone Microdata raw="+1 202 555 0120" text="+1 202 555 0120" span=240+15 conf=1 flags=Hidden => Phone:+12025550120 facts=Valid|InternationalInput

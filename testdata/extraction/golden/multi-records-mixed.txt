@@ -1,0 +1,9 @@
+unit Bytes
+record 0 Person src=JsonLd conf=1 span=125+70
+  #0 Name JsonLd raw="Mixed Zero" text="Mixed Zero" span=183+10 conf=1 => Person:Mixed Zero
+record 1 Person src=Microdata conf=1 span=221+96
+  #1 Name Microdata raw="Mixed One" text="Mixed One" span=295+9 conf=1 => Person:Mixed One
+record 2 Person src=HCard conf=1 span=318+63
+  #2 Name HCard raw="Mixed Two" text="Mixed Two" span=359+9 conf=1 => Person:Mixed Two
+record 3 Organization src=Rdfa conf=1 span=382+104
+  #3 Name Rdfa raw="Mixed Three Co" text="Mixed Three Co" span=459+14 conf=1 => Company:Mixed Three Co

@@ -1,0 +1,6 @@
+unit Bytes
+record 0 Organization src=Microdata conf=1 span=104+196
+  #0 Name Microdata raw="Phone Conflict Co" text="Phone Conflict Co" span=184+17 conf=1 => Company:Phone Conflict Co
+  #1 Phone Microdata raw="+1 202 555 0101" text="+1 202 555 0101" span=235+15 conf=1 flags=Disputed => Phone:+12025550101 facts=Valid|InternationalInput
+  #2 Phone Link raw="tel:+12025550202" text="+12025550202" span=268+16 conf=0.9 flags=Disputed => Phone:+12025550202 facts=Valid|InternationalInput label="Call"
+  disagreement Phone: #1, #2

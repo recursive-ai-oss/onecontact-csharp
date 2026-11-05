@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Turns the United States and Canadian open address registers into labelled free-text training examples through our own templates. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>OneContact.Data.AddressUsCa</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <NoWarn>$(NoWarn);CA1303;CA1848;CA1307;CA1305;CA1310;CA1304;CA1311;CA1834;CA1861;CA1862;CA1865;CA1866;CA1867;CA1869</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Used only to run the rule parser over rendered examples (the report on what rules alone recover). -->
+    <ProjectReference Include="../../../src/OneContact/OneContact.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The authority rule tables the renderer spells street types, directionals and units from, read from the library's own data files. -->
+    <None Include="../../../src/OneContact/Addresses/Data/US/*.tsv" Link="rules/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../../src/OneContact/Addresses/Data/CA/*.tsv" Link="rules/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../templates/*" Link="templates/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

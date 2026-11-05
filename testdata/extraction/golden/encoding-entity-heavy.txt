@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Person src=HCard conf=0.5 span=158+83
+  #1 Name HCard raw="&Eacute;mile &amp; Zo&euml;" text="Émile & Zoë" span=200+27 conf=0.5 flags=Unnormalized issue=person.ambiguous-connector
+ungrouped #0 Email Link raw="mailto:a&#46;b&#64;example&#46;com" text="a.b@example.com" span=116+34 conf=0.9 => Email:a.b@example.com label="x"

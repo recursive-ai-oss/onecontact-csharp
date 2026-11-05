@@ -1,0 +1,13 @@
+unit Bytes
+record 0 Organization src=JsonLd conf=1 span=125+222
+  #0 Name JsonLd raw="Nested Co" text="Nested Co" span=189+9 conf=1 => Company:Nested Co
+  link HasMember -> record 1
+  link HasMember -> record 2
+record 1 Person src=JsonLd conf=1 span=212+65
+  #1 Name JsonLd raw="Pat One" text="Pat One" span=238+7 conf=1 => Person:Pat One
+  #2 Email JsonLd raw="pat.one@example.com" text="pat.one@example.com" span=256+19 conf=1 => Email:pat.one@example.com
+  link WorksFor -> record 0
+record 2 Person src=JsonLd conf=1 span=278+67
+  #3 Name JsonLd raw="Chris Two" text="Chris Two" span=304+9 conf=1 => Person:Chris Two
+  #4 Phone JsonLd raw="+1 202 555 0188" text="+1 202 555 0188" span=328+15 conf=1 => Phone:+12025550188 facts=Valid|InternationalInput
+  link WorksFor -> record 0

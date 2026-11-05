@@ -2,6 +2,8 @@ using System.Buffers;
 using System.Text.Json;
 using RecursiveAI.OneContact;
 using RecursiveAI.OneContact.Addresses;
+using RecursiveAI.OneContact.Extraction;
+using RecursiveAI.OneContact.Extraction.Records;
 using RecursiveAI.OneContact.Phones;
 using RecursiveAI.OneContact.Addresses.Expansion;
 using RecursiveAI.OneContact.Addresses.Standardization;
@@ -125,6 +127,19 @@ EmailAddress mailbox = EmailAddress.Parse("\"J. Smith\" <J.Smith+crm@GoogleMail.
 Check(mailbox.Canonical == "J.Smith+crm@googlemail.com" && mailbox.Key == "jsmith@gmail.com" && mailbox.DisplayName == "J. Smith", "email happy path");
 Check(EmailAddress.Parse("info@B\u00fccher.example").Domain == "xn--bcher-kva.example", "email idn domain");
 Check(EmailAddress.Parse("x@mailinator.com").Flags.HasFlag(EmailFacts.Disposable), "email disposable flag");
+
+// Extraction of structured markup: JSON-LD, microdata, h-card and links, with byte offsets (OneHtml parses; nothing reflects).
+string page = "<html lang=\"en-US\"><script type=\"application/ld+json\">{\"@type\":\"Organization\",\"name\":\"Smoke Co\",\"telephone\":\"(202) 555-0143\",\"employee\":{\"@type\":\"Person\",\"name\":\"Jo Smoke\"}}</script>" +
+    "<div itemscope itemtype=\"https://schema.org/Person\"><span itemprop=\"name\">Micro Person</span></div><div class=\"h-card\"><span class=\"p-name\">Card Person</span></div><a href=\"mailto:hi@example.com\">hi</a></html>";
+byte[] pageBytes = System.Text.Encoding.UTF8.GetBytes(page);
+ExtractResult extracted = new ContactExtractor().ExtractHtml(pageBytes);
+Check(extracted.Records.Count == 4 && extracted.OffsetUnit == OffsetUnit.Bytes, "extraction records");
+Check(extracted.Records[0].Kind == ContactRecordKind.Organization && extracted.Records[0].Phones.Count == 1 && extracted.Records[0].Phones[0].Normalized.Canonical == "+12025550143", "extraction org phone");
+Check(extracted.Records[1].Organization == extracted.Records[0], "extraction link");
+Check(extracted.Ungrouped.Count == 1 && extracted.Ungrouped[0].Source == FieldSource.Link, "extraction link field");
+ExtractedField first = extracted.Records[0].Name!;
+Check(System.Text.Encoding.UTF8.GetString(pageBytes, first.Span.Start, first.Span.Length) == first.Raw, "extraction offsets");
+Check(ContactExtractor.Extract("<script type=\"application/ld+json\">{oops</script>").Count == 0, "extraction rejects malformed json-ld");
 
 Console.WriteLine(failures == 0 ? "OneContact AOT smoke: ok" : $"OneContact AOT smoke: {failures} failure(s)");
 return failures == 0 ? 0 : 1;

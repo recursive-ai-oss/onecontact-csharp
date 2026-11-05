@@ -1,0 +1,5 @@
+unit Bytes
+record 0 Organization src=JsonLd conf=1 span=125+298
+  #0 Name JsonLd raw="Location Co" text="Location Co" span=189+11 conf=1 => Company:Location Co. facts=HasLegalForm
+  #1 Address JsonLd raw="{\"@type\":\"PostalAddress\",\"streetAddress\":\"7 Oak Avenue\",\"addressLocality\":\"Toronto\",\"addressRegion\":\"ON\",\"postalCode\":\"M5V 2T6\",\"addressCountry\":\"Canada\"}" text="7 Oak Avenue, Toronto, ON, M5V 2T6, Canada" span=240+154 conf=1 flags=Composed => Address:7 Oak Avenue, Toronto ON M5V 2T6
+  #2 Phone JsonLd raw="416-555-0111" text="416-555-0111" span=408+12 conf=1 flags=RegionInferred => Phone:+14165550111 facts=Valid

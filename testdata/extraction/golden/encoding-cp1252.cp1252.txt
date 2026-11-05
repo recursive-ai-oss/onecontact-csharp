@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Organization src=Microdata conf=1 span=111+156
+  #0 Name Microdata raw="Café Français S.A." text="Café Français S.A." span=191+18 conf=1 => Company:Café Français S.A. facts=HasLegalForm|LegalFormAmbiguous
+  #1 Email Microdata raw="info@example.fr" text="info@example.fr" span=239+15 conf=1 => Email:info@example.fr facts=RoleAccount

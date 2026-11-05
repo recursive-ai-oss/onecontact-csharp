@@ -8,7 +8,8 @@ Normative notes on how the code and its data fit together. Behaviour of each con
 |---|---|
 | `src/OneContact` | `RecursiveAI.OneContact`: the value types, `Contacts`, parse results, keys, JSON converters and every kind's parsing. Base class library only. |
 | `src/OneContact.Phones.Geo` | Geocoder, carrier and time-zone mappers. References core. |
-| `src/OneContact.Models.*`, `src/OneContact.Extraction` | Placeholders until their stage; not packable yet. |
+| `src/OneContact.Extraction` | Extraction of structured markup into person and organization records (`docs/extraction.md`). References core and OneHtml; not packable yet. |
+| `src/OneContact.Models.*` | Placeholders until their stage; not packable yet. |
 | `tests/OneContact.Tests` | xUnit v3 tests. |
 | `tools/Ingest`, `tools/Ingest.<Source>` | The ingest harness and one converter per upstream source. |
 | `tools/fetch` | Fetch scripts: exact files at a pinned ref into a cache outside the repository. |
@@ -72,7 +73,7 @@ Tables are written in ordinal name order, so the same inputs give the same bytes
 </Project>
 ```
 
-The core project imports `Data/*.ingest.props`, so adding a source never edits a shared file. The tool is also added as a project reference with no output reference, so restoring the consuming project restores the tool; a fresh checkout needs no extra step. Before compiling, `build/Ingest.targets` builds the tool, runs it over the fetched files (`$ONECONTACT_UPSTREAM/<source>`, or the `Files` metadata), and embeds `<source>.ocd` as the resource `OneContact.Data.<source>.ocd`. The notice text and the provenance record are packed under `notices/` in the package. In code:
+The core project imports `Data/*.ingest.props`, so adding a source never edits a shared file. The tool is restored and built by the target itself, not referenced as a project (a reference would copy the tool into the output and publish folder of everything that uses the library); a fresh checkout needs no extra step. Before compiling, `build/Ingest.targets` builds the tool, runs it over the fetched files (`$ONECONTACT_UPSTREAM/<source>`, or the `Files` metadata), and embeds `<source>.ocd` as the resource `OneContact.Data.<source>.ocd`. The notice text and the provenance record are packed under `notices/` in the package. In code:
 
 ```csharp
 private static readonly EmbeddedTables Tables = new(typeof(Marker).Assembly, "OneContact.Data.phonenumber.ocd");

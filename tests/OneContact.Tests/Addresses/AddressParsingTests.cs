@@ -192,6 +192,60 @@ public class AddressParsingTests
         Assert.True(Parse("123 Main St Apt 4, Dover OH 44622").Facts.HasFlag(AddressFacts.HasUnit));
     }
 
+    [Theory]
+    [InlineData("1600 Pennsylvania Avenue NW NW\nWashington, DC 20500")]
+    [InlineData("1600 Pennsylvania Avenue N E\nWashington, DC 20500")]
+    [InlineData("1 Main St St\nSpringfield, VA 22162")]
+    [InlineData("1 Main St Apt Apt 4\nSpringfield, VA 22162")]
+    [InlineData("1 Rue Rue Principale Bureau Bureau 3\nQu\u00e9bec QC G1R 5R7")]
+    public void RepeatedTokensParseOrAreRefusedAndNeverThrow(string text)
+    {
+        foreach (Region hint in new[] { Region.US, Region.CA, Region.Unknown })
+        {
+            OperationStatus status = PostalAddress.TryParse(text, hint, out PostalAddress value, out ParseDetail detail);
+            if (status == OperationStatus.Done)
+            {
+                Assert.NotEmpty(value.ToString(AddressStyle.Postal));
+                _ = value.ToString(AddressStyle.Display, AddressLayout.SingleLine);
+            }
+            else
+            {
+                Assert.False(detail.PrimaryReason.IsNone);
+            }
+        }
+
+        PostalAddress parsed = PostalAddress.Parse("1600 Pennsylvania Avenue NW NW\nWashington, DC 20500");
+        Assert.Contains("PENNSYLVANIA", parsed.StreetLines[0], StringComparison.Ordinal);
+        Assert.Equal(2, parsed.StreetLines[0].Split(" ", StringSplitOptions.RemoveEmptyEntries).Count(w => w == "NW"));
+    }
+
+    [Fact]
+    public void DisplayWritesTheHashDesignatorWithoutASpaceAndPostalKeepsIt()
+    {
+        ParsedAddress a = Parse("425 Flower Blvd # 72\nLos Angeles CA 90012");
+        Assert.Equal("425 FLOWER BLVD # 72\nLOS ANGELES CA  90012", a.ToString(AddressStyle.Postal));
+        Assert.Equal("425 FLOWER BLVD # 72, LOS ANGELES CA 90012", a.ToString(AddressStyle.Postal, AddressLayout.SingleLine));
+        Assert.Equal("425 Flower Blvd #72\nLos Angeles, CA 90012", a.ToString(AddressStyle.Display));
+        Assert.Equal("425 Flower Blvd #72, Los Angeles, CA 90012", a.ToString(AddressStyle.Display, AddressLayout.SingleLine));
+        Assert.Equal("425 Flower Blvd #72, Los Angeles, CA 90012", Parse("425 flower blvd #72, los angeles, ca 90012").ToString(AddressStyle.Display, AddressLayout.SingleLine));
+    }
+
+    [Theory]
+    [InlineData("N6W23001 Bluemound Rd\nWaukesha WI 53186", "N6W23001 Bluemound Rd\nWaukesha, WI 53186")]
+    [InlineData("123A Main St Apt 4B\nSpringfield VA 22162", "123A Main St Apt 4B\nSpringfield, VA 22162")]
+    [InlineData("123 Main St Apt 4E\nSpringfield VA 22162", "123 Main St Apt 4E\nSpringfield, VA 22162")]
+    [InlineData("123 Main St Apt B12\nSpringfield VA 22162", "123 Main St Apt B12\nSpringfield, VA 22162")]
+    [InlineData("PO Box 12A\nFairview TX 75069", "PO Box 12A\nFairview, TX 75069")]
+    [InlineData("RR 4 Box 87A\nDover OH 44622", "RR 4 Box 87A\nDover, OH 44622")]
+    [InlineData("123 Main St\nCalgary AB T2P 1J9", "123 Main St\nCalgary, AB T2P 1J9")]
+    [InlineData("350 21st Ave\nNew York NY 10001", "350 21st Ave\nNew York, NY 10001")]
+    [InlineData("12 1re Rue\nMontréal QC H3Z 2Y7", "12 1re Rue\nMontréal, QC H3Z 2Y7")]
+    [InlineData("PSC 3022 Box 684\nFPO AE 09397-0007", "PSC 3022 Box 684\nFPO, AE 09397-0007")]
+    public void DisplayKeepsLettersOfIdentifiersWithDigits(string input, string expected)
+    {
+        Assert.Equal(expected, Parse(input).ToString(AddressStyle.Display));
+    }
+
     [Fact]
     public void DisplayIsTitleCaseWithAuthorityAbbreviations()
     {
@@ -271,7 +325,10 @@ public class AddressParsingTests
         [
             "123 Main St Apt 4, Springfield, VA 22162-1234", "PO Box 12\nFairview TX 75069", "RR 4 Box 87A, Dover OH 44622", "10-123 1/2 Rue Principale, Montréal QC H3Z 2Y7",
             "PSC 3022 Box 684\nAPO AE 09397-0007", "URB Los Olmos\n1234 Calle Aurora\nPonce PR 00731", "GD STN A\nCalgary AB T0H 1A0", "\u00e9\u0301 123 \ud83d\ude00 St, X",
+            "1600 Pennsylvania Avenue NW NW\nWashington, DC 20500", "100 N E Main St Apt Apt 4, Dover DE 19901", "5 Oak St St Ste Ste 2, Boise ID 83702", "1 Rue Rue Principale Bureau 3, Qu\u00e9bec QC G1R 5R7",
         ];
+        // Words that, repeated or inserted, exercise the directional, street type and unit rules.
+        string[] vocabulary = ["NW", "N", "E", "SW", "AVE", "AVENUE", "ST", "BLVD", "RD", "APT", "STE", "UNIT", "#", "BOX", "RR", "RUE", "BOUL", "1/2", "4B", "NORTH", "WEST"];
         Random rng = new(20261105);
         string alphabet = " ,\n\r\t#-/.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\u00e9\u00c9\u0301\ud83d\ude00\ud83d";
         long runs = 0;
@@ -308,6 +365,15 @@ public class AddressParsingTests
             }
 
             string text = new([.. list]);
+            if (rng.Next(2) == 0)
+            {
+                // Repeat a word or insert a vocabulary word at a word boundary.
+                string[] words = text.Split(' ');
+                int at = rng.Next(words.Length);
+                words[at] = rng.Next(2) == 0 ? words[at] + " " + words[at] : vocabulary[rng.Next(vocabulary.Length)] + " " + words[at];
+                text = string.Join(' ', words);
+            }
+
             runs++;
             OperationStatus status = RuleAddressParser.TryParse(text, default, out ParsedAddress? a, out ParseDetail d);
             if (status == OperationStatus.Done)
@@ -327,6 +393,16 @@ public class AddressParsingTests
             }
 
             _ = AddressExpander.Expand(text);
+            foreach (Region hint in new[] { Region.US, Region.CA })
+            {
+                if (PostalAddress.TryParse(text, hint, out PostalAddress value, out _) == OperationStatus.Done)
+                {
+                    _ = value.ToString(AddressStyle.Postal);
+                    _ = value.ToString(AddressStyle.Display, AddressLayout.SingleLine);
+                    _ = value.Key;
+                    _ = value.Validate();
+                }
+            }
         }
 
         Assert.True(runs > 100);

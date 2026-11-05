@@ -1,0 +1,3 @@
+unit Bytes
+record 0 Organization src=JsonLd conf=1 span=125+97
+  #0 Name JsonLd raw="Multi Type Corp" text="Multi Type Corp" span=205+15 conf=1 => Company:Multi Type Corp facts=HasLegalForm|LegalFormAmbiguous

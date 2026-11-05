@@ -1,0 +1,7 @@
+unit Bytes
+record 0 Person src=JsonLd conf=1 span=125+123
+  #0 Name JsonLd raw="Dee Dup" text="Dee Dup" span=183+7 conf=1 => Person:Dee Dup
+    also HCard span=315+7
+  #1 Email JsonLd raw="dee@example.com" text="dee@example.com" span=201+15 conf=1 => Email:dee@example.com
+    also HCard span=355+22
+  #2 Phone JsonLd raw="+1 202 555 0105" text="+1 202 555 0105" span=231+15 conf=1 => Phone:+12025550105 facts=Valid|InternationalInput

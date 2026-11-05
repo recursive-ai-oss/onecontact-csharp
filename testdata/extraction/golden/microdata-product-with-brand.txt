@@ -1,0 +1,3 @@
+unit Bytes
+record 0 Organization src=Microdata conf=1 span=195+125
+  #0 Name Microdata raw="Brand Maker Inc" text="Brand Maker Inc" span=292+15 conf=1 => Company:Brand Maker Inc facts=HasLegalForm|LegalFormAmbiguous

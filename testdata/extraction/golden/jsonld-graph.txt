@@ -1,0 +1,11 @@
+unit Bytes
+record 0 Organization src=JsonLd conf=1 span=249+172
+  #0 Name JsonLd raw="Example Corp" text="Example Corp" span=314+12 conf=1 => Company:Example Corp facts=HasLegalForm|LegalFormAmbiguous
+  #2 Website JsonLd raw="https://www.linkedin.com/company/example-corp" text="https://www.linkedin.com/company/example-corp" span=339+45 conf=1 => Web:https://www.linkedin.com/company/example-corp facts=SocialLinkedIn
+  #3 Website JsonLd raw="https://github.com/example-corp" text="https://github.com/example-corp" span=387+31 conf=1 => Web:https://github.com/example-corp facts=SocialGitHub
+  link HasMember -> record 1
+record 1 Person src=JsonLd conf=1 span=425+115
+  #1 Organization JsonLd raw="Example Corp" text="Example Corp" span=314+12 conf=1 => Company:Example Corp facts=HasLegalForm|LegalFormAmbiguous
+  #4 Name JsonLd raw="Sam Placeholder" text="Sam Placeholder" span=451+15 conf=1 => Person:Sam Placeholder
+  #5 Email JsonLd raw="sam@example.com" text="sam@example.com" span=523+15 conf=1 => Email:sam@example.com
+  link WorksFor -> record 0

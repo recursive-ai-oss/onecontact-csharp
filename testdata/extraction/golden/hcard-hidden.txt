@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Person src=HCard conf=1 span=104+138
+  #0 Name HCard raw="Hidden Card" text="Hidden Card" span=171+11 conf=1 flags=Hidden => Person:Hidden Card
+  #1 Email HCard raw="hidden@example.com" text="hidden@example.com" span=211+18 conf=1 flags=Hidden => Email:hidden@example.com

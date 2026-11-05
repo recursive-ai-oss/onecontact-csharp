@@ -1,0 +1,3 @@
+unit Bytes
+record 0 Person src=HCard conf=1 span=104+88
+  #0 Name HCard raw="Abbreviated Title Name" text="Abbreviated Title Name" span=152+22 conf=1 => Person:Abbreviated Title Name

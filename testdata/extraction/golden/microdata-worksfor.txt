@@ -1,0 +1,8 @@
+unit Bytes
+record 0 Person src=Microdata conf=1 span=104+237
+  #0 Name Microdata raw="Kim Worker" text="Kim Worker" span=181+10 conf=1 => Person:Kim Worker
+  #1 Organization Microdata raw="Kim's Employer Inc" text="Kim's Employer Inc" span=302+18 conf=1 => Company:Kim's Employer Inc facts=HasLegalForm|LegalFormAmbiguous
+  link WorksFor -> record 1
+record 1 Organization src=Microdata conf=1 span=201+133
+  #2 Name Microdata raw="Kim's Employer Inc" text="Kim's Employer Inc" span=302+18 conf=1 => Company:Kim's Employer Inc facts=HasLegalForm|LegalFormAmbiguous
+  link HasMember -> record 0

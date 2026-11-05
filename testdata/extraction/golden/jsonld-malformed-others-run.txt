@@ -1,0 +1,6 @@
+unit Bytes
+record 0 Person src=Microdata conf=1 span=166+99
+  #0 Name Microdata raw="Micro Person" text="Micro Person" span=240+12 conf=1 => Person:Micro Person
+record 1 Person src=HCard conf=1 span=266+65
+  #1 Name HCard raw="Card Person" text="Card Person" span=307+11 conf=1 => Person:Card Person
+issue MalformedJsonLd JsonLd span=125+0

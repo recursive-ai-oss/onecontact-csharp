@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Person src=HCard conf=1 span=104+229
+  #0 Name HCard raw="Direct Parts" text="Direct Parts" span=145+12 conf=1 => Person:Direct Parts
+  #1 Address HCard raw="20 Flat Road</span> <span class=\"p-locality\">Boise</span> <span class=\"p-region\">ID</span> <span class=\"p-postal-code\">83702" text="20 Flat Road, Boise, ID, 83702" span=196+124 conf=1 flags=Composed => Address:20 Flat Road, Boise issue=address.country-required

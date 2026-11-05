@@ -895,6 +895,12 @@ internal sealed class StreetLineParser
             trailing++;
         }
 
+        // Two trailing directionals that do not make one (NW NW, N E) leave only the last as the postdirectional; the other stays in the name, so the suffix test below looks before the last one only.
+        if (trailing == 2 && IsUsDirectional(w[hi - 2].Key, out string firstTrailing) && IsUsDirectional(w[hi - 1].Key, out string lastTrailing) && !ShouldJoinDirectionals(firstTrailing, lastTrailing))
+        {
+            trailing = 1;
+        }
+
         // Suffix (234): the last word before the directionals, with a street name before it. COUNTY ROAD, STATE HIGHWAY and the like are names (237).
         int s = hi - 1 - trailing;
         bool hasSuffix = s - lo >= 1 && UsCaRules.UsSuffixes.ContainsKey(w[s].Key) && !IsNumberOnly(w[s].Key)
@@ -928,9 +934,11 @@ internal sealed class StreetLineParser
         StreetPart? suffix = null;
         if (hasSuffix && hi - lo >= 2)
         {
-            UsCaRules.UsSuffixes.TryGetValue(w[hi - 1].Key, out (string Standard, string Primary) sx);
-            suffix = new StreetPart(StreetPartRole.StreetType, w[hi - 1].Text, sx.Standard, w[hi - 1].Span, "pub28-234.1");
-            hi--;
+            if (UsCaRules.UsSuffixes.TryGetValue(w[hi - 1].Key, out (string Standard, string Primary) sx))
+            {
+                suffix = new StreetPart(StreetPartRole.StreetType, w[hi - 1].Text, sx.Standard, w[hi - 1].Span, "pub28-234.1");
+                hi--;
+            }
         }
 
         // A directional between the street name and the suffix is part of the name and spelled out (233.3).
