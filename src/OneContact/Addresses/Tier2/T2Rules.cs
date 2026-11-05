@@ -1,0 +1,216 @@
+using System.Text;
+using RecursiveAI.OneContact.Addresses.Expansion;
+using RecursiveAI.OneContact.Addresses.Standardization;
+
+namespace RecursiveAI.OneContact.Addresses.Tier2;
+
+/// <summary>How the postcode of a country is written.</summary>
+internal enum PostcodeForm
+{
+    FiveDigits,
+    FourDigits,
+    FourDigitsTwoLetters,
+}
+
+/// <summary>The rules of one country of the first Tier 2 group, read from <c>t2-countries.tsv</c>.</summary>
+internal sealed record T2Country(
+    string Code,
+    string CountryLine,
+    bool Afnor,
+    string[] Languages,
+    PostcodeForm Postcode,
+    string[] Prefixes,
+    string PrintedPrefix,
+    bool NumberFirst,
+    bool NumberLast,
+    int MaxLine,
+    int LocalitySpaces,
+    string[] TypeSets);
+
+/// <summary>A street type or its abbreviation as an authority lists it.</summary>
+internal sealed record T2Type(string Set, string Full, string Abbreviation);
+
+/// <summary>A box, poste restante or parcel locker word.</summary>
+internal sealed record T2Delivery(string Role, string Printed);
+
+/// <summary>
+/// The rule tables of the first Tier 2 group (France with its overseas departments, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria,
+/// Switzerland, Liechtenstein), loaded once from the embedded data files under <c>Addresses/Data/T2</c>. Keys are upper case without accents.
+/// </summary>
+internal static class T2Rules
+{
+    private static readonly Lazy<Tables> Loaded = new(Load, LazyThreadSafetyMode.ExecutionAndPublication);
+
+    /// <summary>The countries by code.</summary>
+    internal static IReadOnlyDictionary<string, T2Country> Countries => Loaded.Value.Countries;
+
+    /// <summary>Country names as they end an address, to the country code.</summary>
+    internal static IReadOnlyDictionary<string, string> CountryNames => Loaded.Value.CountryNames;
+
+    /// <summary>The most words of a country name.</summary>
+    internal static int MaxCountryWords => Loaded.Value.MaxCountryWords;
+
+    /// <summary>Words that start a line which is never a street line.</summary>
+    internal static IReadOnlySet<string> SpatialWords => Loaded.Value.SpatialWords;
+
+    /// <summary>Swiss canton codes.</summary>
+    internal static IReadOnlySet<string> Cantons => Loaded.Value.Cantons;
+
+    /// <summary>Gets a value indicating whether the country belongs to the group.</summary>
+    internal static bool Handles(Region country) => !country.IsUnknown && Countries.ContainsKey(country.Code);
+
+    /// <summary>Finds the type a stretch of words names, in the sets of a country.</summary>
+    internal static T2Type? FindType(T2Country country, string words)
+    {
+        foreach (string set in country.TypeSets)
+        {
+            if (Loaded.Value.TypesBySetAndVariant.TryGetValue((set, words), out T2Type? type))
+            {
+                return type;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>Finds the type whose full form ends a name word (Dendermondestraat ends in STRAAT), with the length of the ending.</summary>
+    internal static T2Type? FindSuffixType(T2Country country, string word)
+    {
+        T2Type? best = null;
+        foreach (string set in country.TypeSets)
+        {
+            if (set == "afnor")
+            {
+                continue;
+            }
+
+            foreach (T2Type type in Loaded.Value.TypesBySet[set])
+            {
+                if (word.Length > type.Full.Length && word.EndsWith(type.Full, StringComparison.Ordinal) && (best is null || type.Full.Length > best.Full.Length))
+                {
+                    best = type;
+                }
+            }
+        }
+
+        return best;
+    }
+
+    /// <summary>Finds a delivery word (the longest one starting at the first of the words).</summary>
+    internal static T2Delivery? FindDelivery(string country, string words) =>
+        Loaded.Value.Delivery.TryGetValue((country, words), out T2Delivery? d) ? d : null;
+
+    /// <summary>The most words of a delivery word.</summary>
+    internal static int MaxDeliveryWords => 2;
+
+    /// <summary>Upper case without accents, hyphens and apostrophes read as spaces, periods dropped: the form every table is matched in.</summary>
+    internal static string Key(string text)
+    {
+        string folded = AddressExpander.Fold(text);
+        StringBuilder sb = new(folded.Length);
+        foreach (char c in folded)
+        {
+            if (c is '-' or '\'' or '\u2019' or '\u2013' or '\u2014')
+            {
+                sb.Append(' ');
+            }
+            else if (c != '.')
+            {
+                sb.Append(char.ToUpperInvariant(c));
+            }
+        }
+
+        return string.Join(' ', sb.ToString().Split(' ', StringSplitOptions.RemoveEmptyEntries));
+    }
+
+    private static Tables Load()
+    {
+        Tables t = new();
+        foreach (string[] r in RuleFile.Read("t2-countries.tsv"))
+        {
+            t.Countries[r[0]] = new T2Country(
+                r[0],
+                r[1],
+                r[2] == "afnor",
+                r[3].Split(','),
+                r[4] switch { "5d" => PostcodeForm.FiveDigits, "4d" => PostcodeForm.FourDigits, _ => PostcodeForm.FourDigitsTwoLetters },
+                r[5].Split(','),
+                r[6],
+                r[7] is "first" or "both",
+                r[7] is "last" or "both",
+                int.Parse(r[8], System.Globalization.CultureInfo.InvariantCulture),
+                int.Parse(r[9], System.Globalization.CultureInfo.InvariantCulture),
+                r[10].Split(','));
+        }
+
+        foreach (string[] r in RuleFile.Read("t2-country-names.tsv"))
+        {
+            t.CountryNames[r[0]] = r[1];
+            t.MaxCountryWords = Math.Max(t.MaxCountryWords, r[0].Count(c => c == ' ') + 1);
+        }
+
+        foreach (string[] r in RuleFile.Read("t2-street-types.tsv"))
+        {
+            T2Type type = new(r[0], r[1], r[2] == "-" ? string.Empty : r[2]);
+            if (!t.TypesBySet.TryGetValue(r[0], out List<T2Type>? list))
+            {
+                list = [];
+                t.TypesBySet[r[0]] = list;
+            }
+
+            list.Add(type);
+            t.TypesBySetAndVariant[(r[0], r[1])] = type;
+            if (type.Abbreviation.Length > 0)
+            {
+                t.TypesBySetAndVariant[(r[0], Key(type.Abbreviation))] = type;
+            }
+
+            if (r.Length > 3)
+            {
+                foreach (string v in r[3].Split(';'))
+                {
+                    t.TypesBySetAndVariant[(r[0], Key(v))] = type;
+                }
+            }
+        }
+
+        foreach (string[] r in RuleFile.Read("t2-delivery-words.tsv"))
+        {
+            foreach (string country in r[0].Split(','))
+            {
+                t.Delivery[(country, r[2])] = new T2Delivery(r[1], r[3]);
+            }
+        }
+
+        foreach (string[] r in RuleFile.Read("t2-spatial-words.tsv"))
+        {
+            t.SpatialWords.Add(r[0]);
+        }
+
+        foreach (string[] r in RuleFile.Read("t2-cantons.tsv"))
+        {
+            t.Cantons.Add(r[0]);
+        }
+
+        return t;
+    }
+
+    private sealed class Tables
+    {
+        internal Dictionary<string, T2Country> Countries { get; } = new(StringComparer.Ordinal);
+
+        internal Dictionary<string, string> CountryNames { get; } = new(StringComparer.Ordinal);
+
+        internal int MaxCountryWords { get; set; } = 1;
+
+        internal Dictionary<string, List<T2Type>> TypesBySet { get; } = new(StringComparer.Ordinal);
+
+        internal Dictionary<(string, string), T2Type> TypesBySetAndVariant { get; } = [];
+
+        internal Dictionary<(string, string), T2Delivery> Delivery { get; } = [];
+
+        internal HashSet<string> SpatialWords { get; } = new(StringComparer.Ordinal);
+
+        internal HashSet<string> Cantons { get; } = new(StringComparer.Ordinal);
+    }
+}

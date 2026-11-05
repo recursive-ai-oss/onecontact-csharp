@@ -14,6 +14,11 @@ internal static class AddressKeyV1
 {
     internal static string Compute(ParsedAddress a)
     {
+        if (a.Tier2 is not null)
+        {
+            return Tier2.T2Key.Compute(a);
+        }
+
         string lang = a.Country == Region.CA ? "en" : "en";
         List<string> segments = [a.Country.IsUnknown ? "zz" : a.Country.ToString().ToLowerInvariant()];
         foreach (StreetLine line in a.DeliveryLines)

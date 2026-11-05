@@ -23,7 +23,7 @@ public static class AddressKey
         }
 
         // The canonical form is the postal-style rendering of a parsed address, so reading it back gives the parts the key is made from.
-        if (RuleAddressParser.TryParse(value.Canonical, value.Country == Region.US || value.Country == Region.CA ? value.Country : Region.Unknown, out ParsedAddress? address, out _) == System.Buffers.OperationStatus.Done && address is not null)
+        if (RuleAddressParser.TryParse(value.Canonical, value.Country == Region.US || value.Country == Region.CA || Addresses.Tier2.Tier2Reader.Handles(value.Country) ? value.Country : Region.Unknown, out ParsedAddress? address, out _) == System.Buffers.OperationStatus.Done && address is not null)
         {
             return Compute(address, version);
         }

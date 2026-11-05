@@ -9,7 +9,7 @@ public readonly partial struct ReasonCode
     public static ReasonCode AddressCountryUndetermined { get; } = new(ContactKind.Address, 111, "country-undetermined", "the country cannot be told from the content; give a country hint");
 
     /// <summary>The address is for a country the rules do not cover yet.</summary>
-    public static ReasonCode AddressUnsupportedCountry { get; } = new(ContactKind.Address, 112, "unsupported-country", "the rules cover addresses in the United States and Canada");
+    public static ReasonCode AddressUnsupportedCountry { get; } = new(ContactKind.Address, 112, "unsupported-country", "the rules cover addresses in the United States, Canada, France, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland and Liechtenstein");
 
     /// <summary>The country hint disagrees with what the content says; the content was followed.</summary>
     public static ReasonCode AddressCountryConflict { get; } = new(ContactKind.Address, 113, "country-conflict", "the country hint disagrees with the postal code or state in the address");
