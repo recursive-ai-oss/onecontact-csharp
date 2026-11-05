@@ -211,6 +211,10 @@ internal static class UrlParser
         var fragment = new StringBuilder(); // appended to url.Fragment when the parse ends
         int bufferLength = 0; // code points in buffer, for the authority state's pointer rewind
         bool atSignSeen = false;
+
+        // The credentials grow by one chunk per @ sign, so they are collected here and stored once when the authority ends; copying them at every @ would be quadratic.
+        StringBuilder? usernameBuilder = null;
+        StringBuilder? passwordBuilder = null;
         bool insideBrackets = false;
         bool passwordTokenSeen = false;
         int pointer = 0;
@@ -470,8 +474,8 @@ internal static class UrlParser
                         }
 
                         atSignSeen = true;
-                        var username = new StringBuilder(url.Username);
-                        var password = new StringBuilder(url.Password);
+                        StringBuilder username = usernameBuilder ??= new StringBuilder(url.Username);
+                        StringBuilder password = passwordBuilder ??= new StringBuilder(url.Password);
                         foreach (Rune r in buffer.ToString().EnumerateRunes())
                         {
                             if (r.Value == ':' && !passwordTokenSeen)
@@ -483,8 +487,6 @@ internal static class UrlParser
                             PercentEncoding.AppendEncoded(passwordTokenSeen ? password : username, r.Value, PercentEncodeSet.Userinfo);
                         }
 
-                        url.Username = username.ToString();
-                        url.Password = password.ToString();
                         buffer.Clear();
                         bufferLength = 0;
                     }
@@ -493,6 +495,12 @@ internal static class UrlParser
                         if (atSignSeen && buffer.Length == 0)
                         {
                             return Fail(out failure, UrlFailure.HostMissing);
+                        }
+
+                        if (usernameBuilder is not null && passwordBuilder is not null)
+                        {
+                            url.Username = usernameBuilder.ToString();
+                            url.Password = passwordBuilder.ToString();
                         }
 
                         pointer -= bufferLength + 1;

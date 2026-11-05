@@ -53,30 +53,45 @@ public class WebFuzzSmokeTests
         Assert.True(parsed > 4_000, "the mutations should leave plenty of valid inputs, got " + parsed);
     }
 
+    // The guard is the growth rate, not the clock: each hostile shape is parsed at n and at 4n repeats, taking the best of several runs so that a busy
+    // machine cannot fail it, and the larger run may cost at most 10 times the smaller (linear work is about 4, quadratic work is 16).
     [Fact]
-    public void HostileShapesAreFast()
+    public void HostileShapesGrowLinearly()
     {
         // Pathological inputs: long runs, many labels, many combining marks, many percent signs, deep dot segments.
-        string[] hostile =
+        (string Name, Func<int, string> Build)[] shapes =
         [
-            "https://" + new string('a', 200_000) + ".com/",
-            "https://" + string.Concat(Enumerable.Repeat("a.", 50_000)) + "com/",
-            "https://example." + new string('\u0301', 100_000) + "/",
-            "https://xn--" + new string('a', 100_000) + ".com/",
-            "https://example.com/" + string.Concat(Enumerable.Repeat("%", 200_000)),
-            "https://example.com/" + string.Concat(Enumerable.Repeat("../", 100_000)),
-            "mailto:" + new string(' ', 200_000) + "?" + new string('x', 200_000) + "#" + new string('y', 200_000),
-            "https://" + string.Concat(Enumerable.Repeat("@", 100_000)) + "example.com",
-            "http://" + string.Concat(Enumerable.Repeat("1.", 60_000)) + "1",
-            string.Concat(Enumerable.Repeat("\ud800", 100_000)),
+            ("long label", n => "https://" + new string('a', n) + ".com/"),
+            ("many labels", n => "https://" + string.Concat(Enumerable.Repeat("a.", n / 4)) + "com/"),
+            ("combining marks", n => "https://example." + new string('\u0301', n / 2) + "/"),
+            ("punycode run", n => "https://xn--" + new string('a', n / 2) + ".com/"),
+            ("percent signs", n => "https://example.com/" + new string('%', n)),
+            ("dot segments", n => "https://example.com/" + string.Concat(Enumerable.Repeat("../", n / 2))),
+            ("opaque path, query, fragment", n => "mailto:" + new string(' ', n) + "?" + new string('x', n) + "#" + new string('y', n)),
+            ("at signs", n => "https://" + new string('@', n / 2) + "example.com"),
+            ("ipv4 parts", n => "http://" + string.Concat(Enumerable.Repeat("1.", n / 3)) + "1"),
+            ("lone surrogates", n => new string('\ud800', n / 2)),
         ];
-        var sw = System.Diagnostics.Stopwatch.StartNew();
-        foreach (string s in hostile)
+        foreach ((string name, Func<int, string> build) in shapes)
         {
-            _ = WebAddress.TryParse(s, out _);
+            double small = Best(build(25_000));
+            double large = Best(build(100_000));
+            Assert.True(large <= 10 * Math.Max(small, 2.0), $"{name}: {small:F1} ms at n, {large:F1} ms at 4n");
+        }
+    }
+
+    // Best of five runs, in milliseconds.
+    private static double Best(string input)
+    {
+        double best = double.MaxValue;
+        for (int i = 0; i < 5; i++)
+        {
+            long start = System.Diagnostics.Stopwatch.GetTimestamp();
+            _ = WebAddress.TryParse(input, out _);
+            best = Math.Min(best, System.Diagnostics.Stopwatch.GetElapsedTime(start).TotalMilliseconds);
         }
 
-        Assert.True(sw.Elapsed < TimeSpan.FromSeconds(20), "hostile inputs took " + sw.Elapsed);
+        return best;
     }
 
     private static string Mutate(Random r)
