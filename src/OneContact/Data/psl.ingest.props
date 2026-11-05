@@ -9,9 +9,9 @@
     <_PslUpstream Condition="'$(_PslUpstream)' == ''">$(MSBuildThisFileDirectory)../../../.upstream</_PslUpstream>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="$(_PslUpstream)/psl/public_suffix_list.dat" Pack="true" PackagePath="notices/" Link="notices/public_suffix_list.dat" />
-    <None Include="$(MSBuildThisFileDirectory)../../../upstream/psl/LICENSE" Pack="true" PackagePath="notices/" Link="notices/psl.LICENSE" />
-    <None Include="$(MSBuildThisFileDirectory)../../../upstream/unicode-idna/LICENSE" Pack="true" PackagePath="notices/" Link="notices/unicode.LICENSE" />
+    <None Include="$(_PslUpstream)/psl/public_suffix_list.dat" Pack="true" PackagePath="notices/psl/" Link="notices/psl/public_suffix_list.dat" />
+    <None Include="$(MSBuildThisFileDirectory)../../../upstream/psl/LICENSE" Pack="true" PackagePath="notices/psl/" Link="notices/psl/LICENSE" />
+    <None Include="$(MSBuildThisFileDirectory)../../../upstream/unicode-idna/LICENSE" Pack="true" PackagePath="notices/unicode/" Link="notices/unicode/LICENSE" />
     <!-- Rules of ours, kept apart from the list so the list stays unmodified. -->
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)../Web/Data/psl-additions.txt" LogicalName="OneContact.Data.psl-additions.txt" />
   </ItemGroup>
