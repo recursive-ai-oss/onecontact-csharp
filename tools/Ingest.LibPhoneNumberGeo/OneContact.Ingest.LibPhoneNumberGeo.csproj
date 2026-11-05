@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Compiles the pinned libphonenumber geocoding, carrier and time-zone data files and the CLDR territory names (see
+       upstream/libphonenumber-geocoding, -carrier, -timezones and cldr-territories) into the tables of the Phones.Geo package. One tool
+       serves the four pins: the pin's source entry chooses the converter. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Ingest/OneContact.Ingest.csproj" />
+    <!-- The reader of the prefix-map layout lives in the library; the tool uses it to check what it wrote. -->
+    <Compile Include="../../src/OneContact.Phones.Geo/Data/PrefixMap.cs" Link="Shared/PrefixMap.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="iso3166-1-alpha2.txt" LogicalName="iso3166-1-alpha2.txt" />
+    <EmbeddedResource Include="unavailable-locales.txt" LogicalName="unavailable-locales.txt" />
+  </ItemGroup>
+
+</Project>

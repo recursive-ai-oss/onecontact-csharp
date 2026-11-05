@@ -29,5 +29,7 @@
     <Project Path="tools/EmailCompare/OneContact.EmailCompare.csproj" />
     <Project Path="tools/Ingest.LibPhoneNumber/OneContact.Ingest.LibPhoneNumber.csproj" />
     <Project Path="tools/Oracles/Phones/OneContact.Oracles.Phones.csproj" />
+    <Project Path="tools/Ingest.LibPhoneNumberGeo/OneContact.Ingest.LibPhoneNumberGeo.csproj" />
+    <Project Path="tools/Oracles/PhonesGeo/OneContact.Oracles.PhonesGeo.csproj" />
   </Folder>
 </Solution>

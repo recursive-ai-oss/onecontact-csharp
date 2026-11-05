@@ -2,11 +2,21 @@
 
   <PropertyGroup>
     <IsPackable>true</IsPackable>
-    <Description>libphonenumber- and libpostal-class contact data for .NET: Geocoder, carrier and time-zone mappers for phone numbers, an add-on to RecursiveAI.OneContact. In development.</Description>
+    <Description>libphonenumber- and libpostal-class contact data for .NET: Geocoder, carrier and time-zone mappers for phone numbers, an add-on to RecursiveAI.OneContact. The carrier mapper names the carrier a number range was first assigned to, which may not be its carrier today. In development.</Description>
   </PropertyGroup>
+
+  <!-- Compiled data sets: each is declared by a Data/<name>.ingest.props file (see docs/architecture.md). -->
+  <Import Project="Data/*.ingest.props" />
 
   <ItemGroup>
     <ProjectReference Include="../OneContact/OneContact.csproj" />
+    <!-- The reader of compiled table files is shared with the core library's source; it is internal to each assembly. -->
+    <Compile Include="../OneContact/Data/CompiledTableFile.cs" Link="Data/CompiledTableFile.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Tests" />
+    <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).AotSmoke" />
   </ItemGroup>
 
   <ItemGroup>

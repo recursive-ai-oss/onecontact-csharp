@@ -1,0 +1,7 @@
+# Google libphonenumber's time-zone map files (not its code), at a commit, by exact path.
+source   libphonenumber-timezones
+licence  Apache-2.0
+repo     https://github.com/google/libphonenumber
+ref      86ea33cee5c22ab7e23b3de368e7cc7fa439a2b7
+urlbase  https://raw.githubusercontent.com/google/libphonenumber/86ea33cee5c22ab7e23b3de368e7cc7fa439a2b7/resources/
+file     timezones/map_data.txt 3543e31bd0cb18b714f39b916efe39840ada3dce01f226a0b0dd94e2b7226542
