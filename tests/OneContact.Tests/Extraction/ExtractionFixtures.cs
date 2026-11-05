@@ -57,11 +57,13 @@ internal static class ExtractionFixtures
     }
 
     /// <summary>One line per fact about a result: stable, readable and complete enough that a golden file shows every field.</summary>
-    internal static string Dump(ExtractResult result)
+    internal static string Dump(ExtractResult result) => DumpParts(result.OffsetUnit.ToString(), result.Records, result.Ungrouped, result.Issues);
+
+    internal static string DumpParts(string unit, IEnumerable<ContactRecord> records, IEnumerable<ExtractedField> ungrouped, IEnumerable<ExtractIssue> issues)
     {
         var sb = new StringBuilder();
-        sb.Append("unit ").Append(result.OffsetUnit).Append('\n');
-        foreach (ContactRecord r in result.Records)
+        sb.Append("unit ").Append(unit).Append('\n');
+        foreach (ContactRecord r in records)
         {
             sb.Append("record ").Append(r.Id).Append(' ').Append(r.Kind).Append(" src=").Append(r.Source)
               .Append(" conf=").Append(r.Confidence.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))
@@ -82,12 +84,12 @@ internal static class ExtractionFixtures
             }
         }
 
-        foreach (ExtractedField f in result.Ungrouped)
+        foreach (ExtractedField f in ungrouped)
         {
             Field(sb, f, "ungrouped ");
         }
 
-        foreach (ExtractIssue i in result.Issues)
+        foreach (ExtractIssue i in issues)
         {
             sb.Append("issue ").Append(i.Kind).Append(' ').Append(i.Source).Append(" span=").Append(i.Span.Start).Append('+').Append(i.Span.Length).Append('\n');
         }

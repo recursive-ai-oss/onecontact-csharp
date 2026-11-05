@@ -93,6 +93,37 @@ public sealed class ExtractedField
     /// <summary>The other places the same value was read for the same record, each as its own field. Empty when it was read once.</summary>
     public IReadOnlyList<ExtractedField> Duplicates { get; internal set; } = [];
 
+    /// <summary>
+    /// The caller's id of the page this field was read from, when it came from a page set (see <see cref="SiteExtractResult"/>); null for
+    /// an extraction of a single input. <see cref="Span"/> counts in that page's <see cref="SitePage.OffsetUnit"/>.
+    /// </summary>
+    public string? PageId { get; internal set; }
+
+    internal int PageIndex { get; set; }
+
+    /// <summary>A copy for a site result, so that the page's own result stays as it was read. Duplicates are copied with it.</summary>
+    internal ExtractedField CloneForPage(string pageId, int pageIndex)
+    {
+        var copy = new ExtractedField(Kind, Source, Raw, Text, Span, HasSpan, Flags & ~ExtractedFieldFacts.Disputed, Label)
+        {
+            Id = Id,
+            Confidence = Confidence,
+            Normalized = Normalized,
+            Issue = Issue,
+            Facts = Facts,
+            RecordId = RecordId,
+            BlockId = BlockId,
+            PageId = pageId,
+            PageIndex = pageIndex,
+        };
+        if (Duplicates.Count > 0)
+        {
+            copy.Duplicates = [.. Duplicates.Select(d => d.CloneForPage(pageId, pageIndex))];
+        }
+
+        return copy;
+    }
+
     internal string DedupKey => IsNormalized ? Normalized.Key : "raw:" + Text.ToLowerInvariant();
 
     /// <summary>Returns the kind, the source and the text, for debugging.</summary>
@@ -220,6 +251,12 @@ public sealed class ContactRecord
 
     /// <summary>Kinds of field on which the record's values disagree. Empty when they all fit.</summary>
     public IReadOnlyList<FieldDisagreement> Disagreements => _disagreements;
+
+    /// <summary>
+    /// The ids of the pages that contributed fields, in page order. Empty for an extraction of a single input. <see cref="Span"/> is
+    /// the record's position on the first of them.
+    /// </summary>
+    public IReadOnlyList<string> Pages { get; internal set; } = [];
 
     internal void AddLink(RecordLinkKind kind, ContactRecord target)
     {

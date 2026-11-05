@@ -1,0 +1,9 @@
+region none
+page about.html Bytes lang-region=none fields=1
+page index.html Bytes lang-region=none fields=2
+organization 0
+record 0 Organization pages=index.html conf=1
+  #1 Name index.html JsonLd raw="Nettle Press LLC" text="Nettle Press LLC" span=198+16 => Company:Nettle Press LLC
+  #2 Email index.html JsonLd raw="books@nettlepress.example.com" text="books@nettlepress.example.com" span=227+29 => Email:books@nettlepress.example.com
+ungrouped #0 Email about.html Link raw="mailto:books@nettlepress.example.com" text="books@nettlepress.example.com" span=201+36 => Email:books@nettlepress.example.com
+issue about.html MalformedJsonLd JsonLd

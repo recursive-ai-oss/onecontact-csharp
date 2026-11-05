@@ -1,0 +1,10 @@
+region none
+page ann.html Bytes lang-region=none fields=2
+page ben.html Bytes lang-region=none fields=2
+organization none
+record 0 Person pages=ann.html conf=1
+  #0 Name ann.html HCard raw="Ann Park" text="Ann Park" span=135+8 => Person:Ann Park
+  #1 Email ann.html HCard raw="mailto:sales@oakline.example.com" text="sales@oakline.example.com" span=176+32 => Email:sales@oakline.example.com
+record 1 Person pages=ben.html conf=1
+  #2 Name ben.html HCard raw="Ben Cho" text="Ben Cho" span=135+7 => Person:Ben Cho
+  #3 Email ben.html HCard raw="mailto:sales@oakline.example.com" text="sales@oakline.example.com" span=175+32 => Email:sales@oakline.example.com

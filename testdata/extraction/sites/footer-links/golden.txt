@@ -1,0 +1,12 @@
+region none
+page index.html Bytes lang-region=none fields=2
+page menu.html Bytes lang-region=none fields=2
+page visit.html Bytes lang-region=none fields=2
+organization none
+record 0 Unknown pages=index.html,menu.html,visit.html conf=0.5
+  #0 Email index.html Link raw="mailto:contact@hazelcafe.example.com" text="contact@hazelcafe.example.com" span=120+36 => Email:contact@hazelcafe.example.com
+    also menu.html Link span=119+36
+    also visit.html Link span=120+36
+  #1 Phone index.html Link raw="tel:+14155550177" text="+14155550177" span=176+16 => Phone:+14155550177
+    also menu.html Link span=175+16
+    also visit.html Link span=176+16

@@ -13,6 +13,9 @@ internal sealed class FieldNormalizer
     private readonly PageContext _page;
     private readonly Region _fallbackRegion;
 
+    /// <summary>Phone numbers found in text by their shape that were dropped only because no region was known to read them in.</summary>
+    public int RegionDrops { get; private set; }
+
     public FieldNormalizer(PageContext page, Region callerDefault)
     {
         _page = page;
@@ -55,6 +58,11 @@ internal sealed class FieldNormalizer
             ExtractedField f = results[i]!;
             if (drafts[i].RequireValid && !(f.IsNormalized && f.Facts.Contains("Valid")))
             {
+                if (f.Issue == ReasonCode.PhoneRegionRequired)
+                {
+                    RegionDrops++;
+                }
+
                 continue;
             }
 

@@ -90,3 +90,36 @@ Each decoded field carries `Deobfuscated`; its offsets span the text as written 
 ## Text grouping
 
 Fields group into a record when they share a qualifying container (`tr`, `article` and `address` always; other containers only when they hold two kinds of field), the same landmark and heading, and sit at most four lines apart. A second different email or address starts a new group. A group needs two kinds of field. A group with no certain name has kind `Unknown`; a `Name:` label makes a person, and a lone `Company:` label an organization. Unknown groups merge into a markup record that shares an email (role accounts count for organizations only), a website or an address (organizations only); a lone text field joins the single record that already holds its key. Disagreeing values stay, flagged `Disputed`.
+
+## Pages of one site
+
+The fourth input is a set of pages the caller supplies from one site. Nothing is fetched: the extractor reads what it is given, and the id of a page is only a label (normally its URL) that must be unique in the set.
+
+```csharp
+IReadOnlyList<ContactRecord> records = ContactExtractor.Extract(new[]
+{
+    ContactPage.FromHtml("https://example.com/", homeHtml),
+    ContactPage.FromHtml("https://example.com/contact", contactBytes, contentType: "text/html"),
+    ContactPage.FromText("note-17", crmNote),
+});
+
+SiteExtractResult site = new ContactExtractor { DefaultRegion = Region.US }.ExtractSite(pages);
+SiteExtractResult streamed = await extractor.ExtractSiteAsync(pageStream);      // IAsyncEnumerable<ContactPage>
+SiteExtraction run = extractor.BeginSite();  run.Add(page);  SiteExtractResult done = run.Complete();   // the engine form
+```
+
+**Each page is read on its own**, with the readers and region rules above, so a field's `Span` is in its page and in that page's `SitePage.OffsetUnit` (bytes for a page given as bytes, UTF-16 code units for a string or a text item). `ExtractedField.PageId` names the page. Pages are parsed and released one at a time; what stays is the values read (strings and spans), plus the input of a page that needs the site's region (below), held by reference until `Complete`.
+
+**Records merge across pages** on the keys a single page uses: a name key, or a non-role email, or (organizations) a non-social website; phones never decide. Text groups of kind `Unknown` join as they do on a page (a shared email, an organization's website or address, a role account an organization lists). One addition applies to a page too: two organizations whose addresses share none are branches, and a shared website or email alone does not merge them (a shared name does). The result lists records in the order of their first page, then their markup; `ContactRecord.Pages` lists the pages that contributed and `Span` is the position on the first of them.
+
+**Fields.** A value seen more than once for a record is one field; the other sightings are in `Duplicates`, each with its own page, source and span. Across pages the sighting in markup is the primary one and the same text found in the visible text of another page is its echo. A value found in text that no record claims joins the one record that holds it, from any page (a `mailto:` link, which only suggests a role, does not). Fields come in page order, then document order, and `Id` counts across the site.
+
+**Disagreements** are kept, never picked. They are computed per (page, reader): a record's phones, emails or websites disagree when two of those groups each report values and share none (a stale number on one page against the one on another), and two different names are always a disagreement. All the values stay, flagged `Disputed`. Two different values on different pages are visible this way even when each page is consistent.
+
+**The site's organization.** `SiteExtractResult.Organization` is the organization record found on the most pages (the first on a tie), which is what footer, contact and about pages describe together; markup and text sightings merge into it by the rules above. Other organizations (branches, partners) are records of their own.
+
+**Persons are linked** (`WorksFor` / `HasMember`) where the pages say so: through the markup as on a page; when the person names an employer that is a record's name on any page; or, for a person who names no employer at all, when the person's page describes exactly one organization. Nothing else is inferred.
+
+**Region.** `SiteExtractResult.Region` is the one region the site's own content points to: the `lang` regions of its pages and the countries its markup gives for addresses, when they all agree. A page that has values needing a region (a national phone number, a free-text address) and names none is read a second time in that region; its values carry `RegionInferred` and its `SitePage.RegionFromSite` is true. A site with two regions has none; a region is never guessed, and a `DefaultRegion` the caller gave always stands in place of it.
+
+**Errors and limits.** A default `ContactPage`, a duplicate id or a null set throws `ArgumentException` / `ArgumentNullException`; a page over OneHtml's parse limits throws as for a single page. Problems of a page (`MalformedJsonLd`, `LimitExceeded`) come back in `Issues` with the page id. The single-page limits apply per page; the number of pages is the caller's to bound.

@@ -1,0 +1,8 @@
+region none
+page contact.html Bytes lang-region=none fields=1
+page index.html Bytes lang-region=none fields=2
+organization 0
+record 0 Organization pages=index.html conf=1
+  #0 Name index.html JsonLd raw="Iris Studio LLC" text="Iris Studio LLC" span=198+15 => Company:Iris Studio LLC
+  #1 Email index.html JsonLd raw="studio@irisstudio.example.com" text="studio@irisstudio.example.com" span=226+29 => Email:studio@irisstudio.example.com
+    also contact.html Text span=134+46 deobfuscated

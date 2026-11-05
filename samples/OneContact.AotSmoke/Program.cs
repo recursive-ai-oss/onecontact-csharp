@@ -161,5 +161,28 @@ Check(System.Text.Encoding.UTF8.GetString(textBytes, decoded.Span.Start, decoded
 ExtractResult note = new ContactExtractor().ExtractText("Name: Jo Smoke\nTel: +1 202 555 0145\njo@example.com");
 Check(note.Records.Count == 1 && note.Records[0].Kind == ContactRecordKind.Person && note.Records[0].Name!.Text == "Jo Smoke" && note.OffsetUnit == OffsetUnit.Chars, "plain text extraction");
 
+// A site: two pages merged, a stale phone kept and flagged, ids on every field, the stream form agreeing.
+ContactPage[] sitePages =
+[
+    ContactPage.FromHtml("index", "<html lang=\"en-US\"><script type=\"application/ld+json\">{\"@type\":\"Organization\",\"name\":\"Site Co\",\"url\":\"https://siteco.example.com/\",\"telephone\":\"+1 202 555 0101\"}</script></html>"),
+    ContactPage.FromHtml("contact", System.Text.Encoding.UTF8.GetBytes("<html><div class=\"h-card\"><span class=\"p-name p-org\">Site Co</span><a class=\"u-url\" href=\"https://siteco.example.com/\">w</a><a class=\"p-tel\" href=\"tel:+12025550177\">t</a></div></html>")),
+];
+SiteExtractResult siteResult = new ContactExtractor().ExtractSite(sitePages);
+Check(siteResult.Records.Count == 1 && siteResult.Organization == siteResult.Records[0] && siteResult.Records[0].Pages.Count == 2, "site merges the same organization");
+Check(siteResult.Records[0].Phones.Count == 2 && siteResult.Records[0].Disagreements.Any(d => d.Kind == FieldKind.Phone), "site keeps a stale phone");
+Check(siteResult.Fields.All(f => f.PageId is "index" or "contact"), "site fields carry their page");
+Check(ContactExtractor.Extract(sitePages).Count == 1, "site happy path");
+SiteExtractResult streamed = await new ContactExtractor().ExtractSiteAsync(Pages(sitePages));
+Check(streamed.Records.Count == 1 && streamed.Fields.Count == siteResult.Fields.Count, "site stream form");
+
+static async IAsyncEnumerable<ContactPage> Pages(ContactPage[] pages)
+{
+    foreach (ContactPage p in pages)
+    {
+        await Task.Yield();
+        yield return p;
+    }
+}
+
 Console.WriteLine(failures == 0 ? "OneContact AOT smoke: ok" : $"OneContact AOT smoke: {failures} failure(s)");
 return failures == 0 ? 0 : 1;

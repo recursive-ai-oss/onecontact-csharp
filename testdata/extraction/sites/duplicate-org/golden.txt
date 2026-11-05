@@ -1,0 +1,19 @@
+region US
+page about.html Bytes lang-region=none fields=1
+page contact.html Bytes lang-region=none fields=5
+page index.html Bytes lang-region=none fields=5
+organization 0
+record 0 Organization pages=contact.html,index.html conf=1
+  #1 Name contact.html Microdata raw="Acme Plumbing LLC" text="Acme Plumbing LLC" span=169+17 => Company:Acme Plumbing LLC
+    also index.html JsonLd span=193+17
+  #2 Website contact.html Microdata raw="https://acmeplumbing.example.com/" text="https://acmeplumbing.example.com/" span=218+33 => Web:https://acmeplumbing.example.com/
+    also index.html JsonLd span=221+33
+  #3 Email contact.html Link raw="mailto:office@acmeplumbing.example.com" text="office@acmeplumbing.example.com" span=271+38 => Email:office@acmeplumbing.example.com
+    also index.html JsonLd span=267+31
+  #4 Phone contact.html Microdata raw="+1 202 555 0143" text="+1 202 555 0143" span=351+15 => Phone:+12025550143
+    also contact.html Text span=351+15
+    also index.html JsonLd span=315+15
+  #5 Phone contact.html Microdata raw="+1 202 555 0144" text="+1 202 555 0144" span=401+15 => Phone:+12025550144
+    also contact.html Text span=401+15
+  #6 Address index.html JsonLd raw="{\"@type\": \"PostalAddress\", \"streetAddress\": \"100 Main St\", \"addressLocality\": \"Springfield\", \"addressRegion\": \"IL\", \"postalCode\": \"62701\", \"addressCountry\": \"US\"}" text="100 Main St, Springfield, IL, 62701, US" span=344+162 flags=Composed => Address:100 Main St, Springfield IL 62701
+ungrouped #0 Phone about.html Link raw="tel:+12025550143" text="+12025550143" span=130+16 => Phone:+12025550143
