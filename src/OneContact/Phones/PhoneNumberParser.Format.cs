@@ -378,7 +378,7 @@ public sealed partial class PhoneNumberParser
         }
     }
 
-    private static NumberFormatRule? ChooseFormattingRule(NumberFormatRule[] rules, string nsn)
+    internal static NumberFormatRule? ChooseFormattingRule(NumberFormatRule[] rules, string nsn)
     {
         foreach (NumberFormatRule rule in rules)
         {
@@ -400,7 +400,7 @@ public sealed partial class PhoneNumberParser
         return rule is null ? nsn : FormatNsnUsingRule(nsn, rule, format, carrierCode);
     }
 
-    private static string FormatNsnUsingRule(string nsn, NumberFormatRule rule, PhoneFormat format, string? carrierCode)
+    internal static string FormatNsnUsingRule(string nsn, NumberFormatRule rule, PhoneFormat format, string? carrierCode)
     {
         PhoneRegex pattern = rule.Pattern.Get();
         // Bounds: at most 2 * (32 + 1) integers.

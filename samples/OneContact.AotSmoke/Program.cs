@@ -41,6 +41,30 @@ PhoneNumberParser phones = PhoneNumberParser.Default;
 Check(phones.GetExample(Region.Parse("DE"), PhoneNumberType.Mobile) is not null, "phone example");
 Check(phones.TryParse("tel:+1-202-456-1111;ext=5", Region.Unknown, false, out PhoneNumber ext, out _) == OperationStatus.Done && ext.Extension == "5", "phone tel uri");
 
+AsYouTypeFormatter typing = new(Region.US);
+string typed = "";
+foreach (char c in "2024561111")
+{
+    typed = typing.InputDigit(c);
+}
+
+Check(typed == "(202) 456-1111", "as-you-type formatting");
+typing.Clear();
+Check(typing.InputDigitAndRememberPosition('1') == "1" && typing.RememberedPosition == 1, "as-you-type remembered position");
+
+PhoneNumberMatch[] found = [.. PhoneNumber.FindAll("Call 202-456-1111 or +44 20 7946 0958 today", Region.US, PhoneMatchLeniency.Valid)];
+Check(found.Length == 2 && found[0].Start == 5 && found[0].RawString == "202-456-1111" && found[1].Number.CountryCode == 44, "phone matcher");
+Check(PhoneNumber.FindAll("on 12/03/2021 at 10:30", Region.US, PhoneMatchLeniency.Possible).Any() == false, "matcher skips dates");
+int nextIndex = 0;
+long triesLeft = 100;
+Check(PhoneNumberMatcher.Default.TryFindNext("x 650-253-0000", Region.US, PhoneMatchLeniency.ExactGrouping, ref nextIndex, ref triesLeft, out PhoneNumberMatch low) && low.End == 14, "matcher low level");
+
+ShortNumberInfo shorts = ShortNumberInfo.Default;
+PhoneNumber nineOneOne = PhoneNumber.Parse("+1911");
+Check(shorts.IsValidForRegion(nineOneOne, Region.US) && shorts.GetExpectedCostForRegion(nineOneOne, Region.US) == ShortNumberCost.TollFree, "short number validity and cost");
+Check(shorts.IsEmergencyNumber("911", Region.US) && shorts.ConnectsToEmergencyNumber("9115", Region.US) && !shorts.IsEmergencyNumber("9115", Region.US), "emergency numbers");
+Check(shorts.GetExample(Region.US).Length > 0 && shorts.SupportedRegions.Count > 100, "short number examples");
+
 EmailAddress email = EmailAddress.Parse("  a@example.com ");
 Check(email.Source.Start == 2 && email.Source.Length == 13, "email offsets");
 WebAddress web = WebAddress.Parse("https://example.com/");

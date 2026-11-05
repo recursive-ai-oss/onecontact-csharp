@@ -30,7 +30,11 @@ internal static class PhoneText
     private const string AmbiguousSeparator = "[- ]+";
     private const string AutoDiallingAndExtLabelsFound = "(?:,{2}|;)";
 
-    private static readonly string ExtensionPatternsForParsing = BuildExtensionPatterns();
+    private static readonly string ExtensionPatternsForParsing = BuildExtensionPatterns(forParsing: true);
+    private static readonly string ExtensionPatternsForMatching = BuildExtensionPatterns(forParsing: false);
+
+    /// <summary>The extension forms a number inside running text may carry; the forms that need a clear number before them (a comma or a semicolon) are left to parsing.</summary>
+    internal static string ExtensionForMatching => ExtensionPatternsForMatching;
 
     private static PhoneRegex? s_validStart;
     private static PhoneRegex? s_unwantedEnd;
@@ -47,15 +51,21 @@ internal static class PhoneText
 
     private static string ExtnDigits(int max) => "(" + Digit + "{1," + max.ToString(CultureInfo.InvariantCulture) + "})";
 
-    private static string BuildExtensionPatterns()
+    private static string BuildExtensionPatterns(bool forParsing)
     {
         string rfcExtn = ";ext=" + ExtnDigits(20);
         string explicitExtn = PossibleSeparatorsBetweenNumberAndExtLabel + ExplicitExtLabels + PossibleCharsAfterExtLabel + ExtnDigits(20) + OptionalExtnSuffix;
         string ambiguousExtn = PossibleSeparatorsBetweenNumberAndExtLabel + AmbiguousExtLabels + PossibleCharsAfterExtLabel + ExtnDigits(9) + OptionalExtnSuffix;
         string americanStyleExtnWithSuffix = AmbiguousSeparator + ExtnDigits(6) + "#";
+        string basic = rfcExtn + "|" + explicitExtn + "|" + ambiguousExtn + "|" + americanStyleExtnWithSuffix;
+        if (!forParsing)
+        {
+            return basic;
+        }
+
         string autoDiallingExtn = PossibleSeparatorsNumberExtLabelNoComma + AutoDiallingAndExtLabelsFound + PossibleCharsAfterExtLabel + ExtnDigits(15) + OptionalExtnSuffix;
         string onlyCommasExtn = PossibleSeparatorsNumberExtLabelNoComma + "(?:,)+" + PossibleCharsAfterExtLabel + ExtnDigits(9) + OptionalExtnSuffix;
-        return rfcExtn + "|" + explicitExtn + "|" + ambiguousExtn + "|" + americanStyleExtnWithSuffix + "|" + autoDiallingExtn + "|" + onlyCommasExtn;
+        return basic + "|" + autoDiallingExtn + "|" + onlyCommasExtn;
     }
 
     internal static PhoneRegex ValidStart => s_validStart ??= PhoneRegex.Compile("[" + PlusChars + Digit + "]");
