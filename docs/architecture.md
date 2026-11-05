@@ -72,7 +72,7 @@ Tables are written in ordinal name order, so the same inputs give the same bytes
 </Project>
 ```
 
-The core project imports `Data/*.ingest.props`, so adding a source never edits a shared file. Before compiling, `build/Ingest.targets` builds the tool, runs it over the fetched files (`$ONECONTACT_UPSTREAM/<source>`, or the `Files` metadata), and embeds `<source>.ocd` as the resource `OneContact.Data.<source>.ocd`. The notice text and the provenance record are packed under `notices/` in the package. In code:
+The core project imports `Data/*.ingest.props`, so adding a source never edits a shared file. The tool is also added as a project reference with no output reference, so restoring the consuming project restores the tool; a fresh checkout needs no extra step. Before compiling, `build/Ingest.targets` builds the tool, runs it over the fetched files (`$ONECONTACT_UPSTREAM/<source>`, or the `Files` metadata), and embeds `<source>.ocd` as the resource `OneContact.Data.<source>.ocd`. The notice text and the provenance record are packed under `notices/` in the package. In code:
 
 ```csharp
 private static readonly EmbeddedTables Tables = new(typeof(Marker).Assembly, "OneContact.Data.phonenumber.ocd");
@@ -85,6 +85,7 @@ ReadOnlyMemory<byte> regions = Tables.GetTable("regions");   // first call reads
 
 - A **pin** (`PIN`) is a text file: `source`, `licence` (SPDX), `repo`, `ref` (tag or full commit), `urlbase`, and one `file <path> <sha256>` line per file. Paths are plain relative paths.
 - `tools/fetch/fetch-pin.sh <PIN>` fetches each file by exact path (never a clone or archive) into the cache and checks every hash. A mismatch fails and the file is not kept.
+- `tools/fetch/all.sh` runs `fetch-pin.sh` for every `upstream/*/PIN`; CI runs it before building, with `ONECONTACT_UPSTREAM` pointing at a temporary folder. A new source needs no registration there.
 - The harness (`IngestRunner`) checks every hash again before it converts anything, then writes `<source>.ocd`, `<source>.provenance.json` (source, licence, repo, ref, tool version, the path, hash and size of each input, and the hash and size of the output) and `<source>.notice.txt`. Exit codes: 0 ok, 2 file missing or hash differs, 3 bad pin, 64 bad arguments.
 - Conversion must be deterministic: no clocks, no random numbers, no dependence on dictionary order. Rerunning on the same inputs gives byte-identical outputs; files whose content is unchanged are not rewritten.
 - Notices that must ship (Apache-2.0 for the libphonenumber and libaddressinput data, MIT for the libpostal dictionaries, MPL-2.0 for the Public Suffix List, CC0 credit lines for the legal-form list and the disposable-domain list) are listed in `THIRD-PARTY-NOTICES.md`, which every package carries.
