@@ -1,0 +1,16 @@
+# Open name lists and company registers behind the name and company training data (tools/data/provenance/names-us-ca.md has the
+# licence of each, quoted from its publisher). Format: file <local name> <size in bytes> <sha256> <url>.
+# Several of these are replaced in place by their publisher (the SEC list, the Companies House snapshot is dated, GLEIF is a daily
+# copy), so the pin is the hash; a newer release fails the check until the pin and the provenance entry are updated on purpose.
+register names
+file census/names.zip 12874389 117c41cb4668727b7627b2845b6df3f83eb2a22a1813f42c0ff4bdcab86de135 https://www2.census.gov/topics/genealogy/2010surnames/names.zip
+file census/surnames.pdf 90917 e39daac09cc976ec8578d2f3875b908d29f9661b87e9fe50914a95edc4cf8b89 https://www2.census.gov/topics/genealogy/2010surnames/surnames.pdf
+# ssa.gov refuses scripted downloads (HTTP 403 from its edge); the Internet Archive snapshot of 2026-11-02 is byte-identical to the file the SSA publishes (US government work).
+file ssa/names.zip 7860026 cd78e975ed7bb358e018dd62fbe14ced89295e9581c49172ca4eedcb011b3724 https://web.archive.org/web/20261102233045id_/https://www.ssa.gov/oact/babynames/names.zip
+file insee/nat2022_csv.zip 2571727 c13b45e770c684b3c8531f28b6e3eae62194dc6dc86205fa17e4c6447b01b81d https://www.insee.fr/fr/statistiques/fichier/7633685/nat2022_csv.zip
+file insee/noms2008nat_txt.zip 3003271 c8693ff69bed32621250f1fc06e71b686e72bba1dbd771055e431d305527cfba https://www.insee.fr/fr/statistiques/fichier/3536630/noms2008nat_txt.zip
+file qc/grande_listeg_csv.csv 4632740 de0a0396c1317d61e02a6dc33f9d0f58a463644d96b76832a39a0b7fc42a3207 https://www.donneesquebec.ca/recherche/dataset/93d640ec-d059-4768-b7ed-388604b278aa/resource/039539f5-af55-4d8f-9010-ca718e45c2a5/download/grande_listeg_csv.csv
+file qc/grande_listef_csv.csv 4654671 08a0768fc5a1c2a930d0a651e228787efd68d325ceff8393f3f8df72f91434e5 https://www.donneesquebec.ca/recherche/dataset/13db2583-427a-4e5f-b679-8532d3df571f/resource/bf77b504-54b9-4db8-be53-b92156175c12/download/grande_listef_csv.csv
+file ch/BasicCompanyDataAsOneFile-2026-11-01.zip 494554856 b6f8e0912397c50943a36a1ae5dce23357d2153e6fbbb3b6ed94ebcdfaf7d7ca http://download.companieshouse.gov.uk/BasicCompanyDataAsOneFile-2026-11-01.zip
+file gleif/20261105-0800-gleif-goldencopy-lei2-golden-copy.csv.zip 508017554 de9a5fe23b3e9291cb318c385cb6c974a6bba3f6256f79cb45363061e4351ce0 https://goldencopy.gleif.org/storage/golden-copy-files/2026/11/05/1297280/20261105-0800-gleif-goldencopy-lei2-golden-copy.csv.zip
+file sec/cik-lookup-data.txt 40424249 f95d9fb411b1798f4edb5e45efc5a8bd1d7d94268386959110fe720e6f4c7dd5 https://www.sec.gov/Archives/edgar/cik-lookup-data.txt

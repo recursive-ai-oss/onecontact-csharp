@@ -1,0 +1,31 @@
+# Legal forms written after a synthesized company name: country <TAB> text <TAB> weight. Our own list of the spellings used on signs and
+# letterheads; the ISO 20275 list (GLEIF) is used for the register records, not here.
+US	LLC	30
+US	Inc.	22
+US	Inc	8
+US	Corp.	6
+US	Co.	3
+US	LP	2
+US	LLP	3
+US	PLLC	2
+US	P.C.	2
+US	Incorporated	1
+US	Limited Liability Company	1
+CA	Inc.	30
+CA	Ltd.	14
+CA	Ltd	6
+CA	Limited	3
+CA	Corp.	6
+CA	Incorporated	1
+CA	Inc	6
+GB	Ltd	36
+GB	Limited	24
+GB	LLP	5
+GB	PLC	2
+GB	Ltd.	4
+FR	inc.	40
+FR	ltée	20
+FR	Ltée	8
+FR	inc	6
+FR	s.e.n.c.	3
+FR	limitée	2
