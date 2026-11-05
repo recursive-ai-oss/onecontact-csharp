@@ -16,6 +16,11 @@ using RecursiveAI.OneContact.Models.Tier1;
 //   eval-extraction speed <model.onenlp> <blocks dev jsonl> [pages]   indicative pages/s on synthetic pages, next to Microsoft.Recognizers.Text
 // The input is the rendered contact-block dev set (never evaluation text). A field is right when its kind and its start and end offsets equal the
 // label's ("exact"), or when it overlaps a label of the same kind ("overlap").
+if (Environment.GetEnvironmentVariable("ONECONTACT_SPAN_CUT") is { Length: > 0 } cut)
+{
+    RecursiveAI.OneContact.Extraction.Text.TextFieldReader.MinConfidence = float.Parse(cut, CultureInfo.InvariantCulture);
+}
+
 string mode = args[0];
 string modelPath = args[1];
 string blocksPath = args[2];

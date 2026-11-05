@@ -25,13 +25,6 @@ public sealed class ExtractResult
     /// <summary>How many shape-found phone numbers were dropped only for want of a region.</summary>
     internal int RegionDrops { get; set; }
 
-    /// <summary>
-    /// The NuGet package to add so that text spans are found by a trained model as well as by rules, or <see langword="null"/> when a model
-    /// is in use or the visible text was not read. Without it the text half finds only what rules can: emails, websites, phones, addresses
-    /// with a known country and labelled names.
-    /// </summary>
-    public string? TextModelPackage { get; internal set; }
-
     /// <summary>The readers that ran.</summary>
     public ExtractionSources Sources { get; }
 

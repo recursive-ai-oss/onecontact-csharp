@@ -30,6 +30,19 @@ if (args.Length < 3)
     return 64;
 }
 
+// A trained model is used when ONECONTACT_TIER1_MODEL names a saved pipeline; ONECONTACT_SPAN_CUT sets the confidence cut of its text spans.
+if (Environment.GetEnvironmentVariable("ONECONTACT_SPAN_CUT") is { Length: > 0 } cut)
+{
+    TextFieldReader.MinConfidence = float.Parse(cut, System.Globalization.CultureInfo.InvariantCulture);
+}
+
+if (Environment.GetEnvironmentVariable("ONECONTACT_TIER1_MODEL") is { Length: > 0 } modelPath)
+{
+    using FileStream modelStream = File.OpenRead(modelPath);
+    var tier1 = RecursiveAI.OneContact.Models.Tier1.Tier1Model.Load(modelStream);
+    RecursiveAI.OneContact.Models.ContactModels.Register(RecursiveAI.OneContact.Models.Tier1.Tier1Model.PackageId, 1, tier1, tier1, tier1);
+}
+
 HashSet<string>? ids = null;
 int idsAt = Array.IndexOf(args, "--ids");
 if (idsAt >= 0 && idsAt + 1 < args.Length)

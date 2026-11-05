@@ -119,7 +119,6 @@ internal static class ExtractionPipeline
 
         ExtractResult result = Assemble(page, sources, works, ungroupedFields, issues);
         result.PageRegion = page.PageRegion;
-        result.TextModelPackage = sources.HasFlag(ExtractionSources.Text) && ContactModels.Spans is null ? ContactModels.Tier1PackageId : null;
         result.RegionDrops = normalizer.RegionDrops;
         return result;
     }

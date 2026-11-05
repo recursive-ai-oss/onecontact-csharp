@@ -4,6 +4,7 @@ using RecursiveAI.OneContact.Addresses.Parsing;
 using RecursiveAI.OneContact.Extraction;
 using RecursiveAI.OneContact.Extraction.Records;
 using RecursiveAI.OneContact.Models;
+using RecursiveAI.OneContact.Models.Tier1;
 using RecursiveAI.OneContact.Names;
 
 // Loads the Tier 1 model from its embedded weights, with no call from this program but the parsers', and uses it. Exits non-zero on the first failure.
@@ -33,11 +34,14 @@ Check(r == OperationStatus.Done && ruled is not null && rd.Fields.All(f => f.Sou
 NameModelResult n = ContactModels.Name!.Analyze("Northwind Traders LLC");
 Check(n.Class == NameClass.Company, "name class");
 
-// Text extraction finds the name and the company with the span head; the e-mail address is the rules' and stays theirs.
+// Text extraction stays rules and markup with the package referenced: the span head is in the weights but is not registered.
+Check(ContactModels.Spans is null, "the span model is not registered by the package");
 ExtractResult x = new ContactExtractor { Sources = ExtractionSources.Text, DefaultRegion = Region.US }.ExtractText("Best regards\nJohn Carter\nAcme Plumbing LLC\nTel: (217) 555-0143\njcarter@acmeplumbing.example");
-Check(x.TextModelPackage is null, "the span model is in use");
-Check(x.Fields.Any(f => f.Decision == DecisionSource.Model && f.Kind == FieldKind.Name || f.Decision == DecisionSource.Model && f.Kind == FieldKind.Organization), "a name or company comes from the model");
-Check(x.Of(FieldKind.Email).All(f => f.Decision == DecisionSource.Rule), "rule fields stay rule fields in extraction");
+Check(x.Fields.All(f => f.Decision == DecisionSource.Rule), "every extracted field is a rule's");
+Check(x.Of(FieldKind.Email).Count == 1, "the e-mail address is found");
+
+// The head is reachable for anyone who asks for it.
+Check(Tier1Model.Instance.Find("John Carter\njcarter@acmeplumbing.example").Spans.Count > 0, "the span head runs");
 
 Console.WriteLine(failures == 0 ? "ok" : "failed");
 return failures == 0 ? 0 : 1;

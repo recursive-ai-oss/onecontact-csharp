@@ -96,7 +96,6 @@ public class SpanModelTests
         ExtractResult rulesOnly = new ContactExtractor { Sources = ExtractionSources.Text, DefaultRegion = Region.US }.ExtractText(Signature);
         switchable.On = true;
         ExtractResult withModel = new ContactExtractor { Sources = ExtractionSources.Text, DefaultRegion = Region.US }.ExtractText(Signature);
-        Assert.Null(withModel.TextModelPackage);
         foreach (ExtractedField f in rulesOnly.Fields)
         {
             Assert.Contains(withModel.Fields, g => g.Kind == f.Kind && g.Span == f.Span && g.Decision == DecisionSource.Rule);
