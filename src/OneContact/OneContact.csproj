@@ -13,6 +13,8 @@
     <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Fuzz" />
     <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Bench" />
     <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).AotSmoke" />
+    <!-- Extraction asks the Public Suffix List whether a name ends in a real top-level domain. -->
+    <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Extraction" />
   </ItemGroup>
 
   <ItemGroup>

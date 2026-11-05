@@ -9,7 +9,7 @@ public sealed class ExtractionBehaviourTests
     private static ExtractResult Page(string name, ContactExtractor? extractor = null)
     {
         string file = ExtractionFixtures.PageFiles().Single(f => ExtractionFixtures.NameOf(f) == name);
-        return (extractor ?? new ContactExtractor()).ExtractHtml(File.ReadAllBytes(file));
+        return (extractor ?? new ContactExtractor { Sources = ExtractionSources.Markup }).ExtractHtml(File.ReadAllBytes(file));
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public sealed class ExtractionBehaviourTests
         Assert.True(page.Flags.HasFlag(ExtractedFieldFacts.RegionInferred));
         Assert.Equal("+12025550123", page.Normalized.Canonical);
 
-        ExtractedField caller = Assert.Single(Page("links-tel-national-no-region", new ContactExtractor { DefaultRegion = Region.US }).Fields);
+        ExtractedField caller = Assert.Single(Page("links-tel-national-no-region", new ContactExtractor { Sources = ExtractionSources.Markup, DefaultRegion = Region.US }).Fields);
         Assert.True(caller.Flags.HasFlag(ExtractedFieldFacts.RegionInferred));
 
         ExtractedField international = Page("links-tel-label").Fields[0];
@@ -318,7 +318,7 @@ public sealed class ExtractionBehaviourTests
     {
         foreach (string file in ExtractionFixtures.PageFiles())
         {
-            ExtractResult r = new ContactExtractor().ExtractHtml(File.ReadAllBytes(file));
+            ExtractResult r = new ContactExtractor { Sources = ExtractionSources.Markup }.ExtractHtml(File.ReadAllBytes(file));
             for (int i = 0; i < r.Fields.Count; i++)
             {
                 Assert.Equal(i, r.Fields[i].Id);
@@ -339,7 +339,7 @@ public sealed class ExtractionBehaviourTests
     public void A_document_parsed_by_the_caller_can_be_extracted()
     {
         OneHtml.Document doc = OneHtml.Document.Parse("<div class=\"h-card\"><span class=\"p-name\">Doc Person</span></div>");
-        ExtractResult r = new ContactExtractor().Extract(doc);
+        ExtractResult r = new ContactExtractor { Sources = ExtractionSources.Markup }.Extract(doc);
         Assert.Equal("Doc Person", r.Records.Single().Name!.Text);
     }
 
@@ -347,11 +347,11 @@ public sealed class ExtractionBehaviourTests
     public void Hostile_nesting_and_huge_repetition_finish()
     {
         string deep = string.Concat(Enumerable.Repeat("<div itemscope itemtype=\"https://schema.org/Organization\"><span itemprop=\"employee\" itemscope itemtype=\"https://schema.org/Person\">", 2000)) + "<span itemprop=\"name\">x</span>";
-        ExtractResult r = new ContactExtractor().ExtractHtml(deep);
+        ExtractResult r = new ContactExtractor { Sources = ExtractionSources.Markup }.ExtractHtml(deep);
         Assert.NotNull(r);
 
         string json = string.Concat(Enumerable.Repeat("[", 5000)) + string.Concat(Enumerable.Repeat("]", 5000));
-        ExtractResult bad = new ContactExtractor().ExtractHtml("<script type=\"application/ld+json\">" + json + "</script>");
+        ExtractResult bad = new ContactExtractor { Sources = ExtractionSources.Markup }.ExtractHtml("<script type=\"application/ld+json\">" + json + "</script>");
         Assert.Equal(ExtractIssueKind.MalformedJsonLd, Assert.Single(bad.Issues).Kind);
 
         // A billion-laughs shape: every node references the next one many times over.
@@ -363,7 +363,7 @@ public sealed class ExtractionBehaviourTests
         }
 
         sb.Append("{\"@type\":\"Organization\",\"@id\":\"#n30\",\"name\":\"End\"}]}");
-        ExtractResult bomb = new ContactExtractor().ExtractHtml("<script type=\"application/ld+json\">" + sb + "</script>");
+        ExtractResult bomb = new ContactExtractor { Sources = ExtractionSources.Markup }.ExtractHtml("<script type=\"application/ld+json\">" + sb + "</script>");
         Assert.NotNull(bomb);
     }
 }

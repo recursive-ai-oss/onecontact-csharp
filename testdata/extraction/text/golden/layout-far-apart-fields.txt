@@ -1,0 +1,3 @@
+unit Bytes
+ungrouped #0 Email Text raw="far1@acme.example" text="far1@acme.example" span=113+17 conf=0.9 => Email:far1@acme.example
+ungrouped #1 Phone Text raw="+1 202 555 0162" text="+1 202 555 0162" span=212+15 conf=0.85 => Phone:+12025550162 facts=Valid|InternationalInput label="Call"

@@ -1,0 +1,2 @@
+unit Bytes
+ungrouped #0 Email Text raw="john {at} example {dot} com" text="john@example.com" span=111+27 conf=0.8 flags=Deobfuscated => Email:john@example.com

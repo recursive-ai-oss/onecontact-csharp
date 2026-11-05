@@ -3,12 +3,13 @@
   <PropertyGroup>
     <!-- Not packable until the text half of extraction exists: it will also reference OneNLP then. -->
     <IsPackable>false</IsPackable>
-    <Description>libphonenumber- and libpostal-class contact data for .NET: Contact extraction from web pages for OneContact: structured markup (JSON-LD, microdata, RDFa, h-card, mailto and tel links, address elements) read into person and organization records. Not packable yet.</Description>
+    <Description>libphonenumber- and libpostal-class contact data for .NET: Contact extraction from web pages and plain text for OneContact: structured markup (JSON-LD, microdata, RDFa, h-card, mailto and tel links, address elements) and visible text read into person and organization records. Not packable yet.</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="../OneContact/OneContact.csproj" />
     <PackageReference Include="RecursiveAI.OneHtml" />
+    <PackageReference Include="RecursiveAI.OneHtml.Accessibility" />
   </ItemGroup>
 
   <ItemGroup>

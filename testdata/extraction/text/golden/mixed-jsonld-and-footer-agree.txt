@@ -1,0 +1,7 @@
+unit Bytes
+record 0 Organization src=JsonLd conf=1 span=121+104
+  #0 Name JsonLd raw="Acme Anvils" text="Acme Anvils" span=153+11 conf=1 => Company:Acme Anvils
+  #1 Phone JsonLd raw="+1 202 555 0140" text="+1 202 555 0140" span=179+15 conf=1 => Phone:+12025550140 facts=Valid|InternationalInput
+    also Text span=283+15
+  #2 Email JsonLd raw="hello@acme.example" text="hello@acme.example" span=205+18 conf=1 => Email:hello@acme.example facts=RoleAccount
+    also Text span=305+18

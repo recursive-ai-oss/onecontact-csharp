@@ -1,0 +1,5 @@
+unit Bytes
+ungrouped #0 Email Text raw="jo@acme.example" text="jo@acme.example" span=115+15 conf=0.9 => Email:jo@acme.example
+ungrouped #1 Email Text raw="jim@acme.example" text="jim@acme.example" span=140+16 conf=0.9 => Email:jim@acme.example
+ungrouped #2 Email Text raw="kay@acme.example" text="kay@acme.example" span=160+16 conf=0.9 => Email:kay@acme.example
+ungrouped #3 Email Text raw="lee@acme.example" text="lee@acme.example" span=179+16 conf=0.9 => Email:lee@acme.example

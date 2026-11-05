@@ -20,7 +20,7 @@ public sealed class ExtractionFixtureTests
         foreach (string file in ExtractionFixtures.PageFiles())
         {
             string name = ExtractionFixtures.NameOf(file);
-            ExtractResult result = new ContactExtractor().ExtractHtml(File.ReadAllBytes(file));
+            ExtractResult result = new ContactExtractor { Sources = ExtractionSources.Markup }.ExtractHtml(File.ReadAllBytes(file));
             string actual = ExtractionFixtures.Dump(result);
             if (!string.IsNullOrEmpty(update))
             {
@@ -64,7 +64,7 @@ public sealed class ExtractionFixtureTests
         {
             byte[] bytes = File.ReadAllBytes(file);
             Encoding encoding = ExtractionFixtures.EncodingOf(file);
-            ExtractResult result = new ContactExtractor().ExtractHtml(bytes);
+            ExtractResult result = new ContactExtractor { Sources = ExtractionSources.Markup }.ExtractHtml(bytes);
             Assert.Equal(OffsetUnit.Bytes, result.OffsetUnit);
             foreach (ExtractedField f in AllFields(result))
             {
@@ -94,7 +94,7 @@ public sealed class ExtractionFixtureTests
     {
         string file = ExtractionFixtures.PageFiles().Single(f => ExtractionFixtures.NameOf(f) == "encoding-utf8-multibyte");
         byte[] bytes = File.ReadAllBytes(file);
-        ExtractResult result = new ContactExtractor().ExtractHtml(bytes);
+        ExtractResult result = new ContactExtractor { Sources = ExtractionSources.Markup }.ExtractHtml(bytes);
         ExtractedField zoe = result.Fields.Single(f => f.Raw.StartsWith("Zo", StringComparison.Ordinal));
         string text = Encoding.UTF8.GetString(bytes);
         int charOffset = text.IndexOf("Zo\u00eb", StringComparison.Ordinal);
@@ -107,7 +107,7 @@ public sealed class ExtractionFixtureTests
     {
         string file = ExtractionFixtures.PageFiles().Single(f => ExtractionFixtures.NameOf(f) == "encoding-utf8-bom");
         byte[] bytes = File.ReadAllBytes(file);
-        ExtractedField name = new ContactExtractor().ExtractHtml(bytes).Records.Single().Name!;
+        ExtractedField name = new ContactExtractor { Sources = ExtractionSources.Markup }.ExtractHtml(bytes).Records.Single().Name!;
         Assert.Equal("B\u00f6mb Name", Encoding.UTF8.GetString(bytes, name.Span.Start, name.Span.Length));
     }
 
@@ -123,7 +123,7 @@ public sealed class ExtractionFixtureTests
             }
 
             string html = new UTF8Encoding(false).GetString(File.ReadAllBytes(file)).TrimStart('\uFEFF');
-            ExtractResult result = new ContactExtractor().ExtractHtml(html);
+            ExtractResult result = new ContactExtractor { Sources = ExtractionSources.Markup }.ExtractHtml(html);
             Assert.Equal(OffsetUnit.Chars, result.OffsetUnit);
             foreach (ExtractedField f in AllFields(result).Where(f => f.HasSpan))
             {
@@ -140,8 +140,8 @@ public sealed class ExtractionFixtureTests
         {
             byte[] bytes = File.ReadAllBytes(file);
             string html = new UTF8Encoding(false).GetString(bytes).TrimStart('\uFEFF');
-            string[] fromBytes = [.. AllFields(new ContactExtractor().ExtractHtml(bytes)).Select(f => f.Kind + "|" + f.Text)];
-            string[] fromString = [.. AllFields(new ContactExtractor().ExtractHtml(html)).Select(f => f.Kind + "|" + f.Text)];
+            string[] fromBytes = [.. AllFields(new ContactExtractor { Sources = ExtractionSources.Markup }.ExtractHtml(bytes)).Select(f => f.Kind + "|" + f.Text)];
+            string[] fromString = [.. AllFields(new ContactExtractor { Sources = ExtractionSources.Markup }.ExtractHtml(html)).Select(f => f.Kind + "|" + f.Text)];
             Assert.Equal(fromBytes, fromString);
         }
     }

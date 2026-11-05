@@ -12,6 +12,14 @@ internal static class ExtractionFixtures
     internal static IEnumerable<string> PageFiles() =>
         Directory.EnumerateFiles(Path.Combine(Root, "pages"), "*.html").Order(StringComparer.Ordinal);
 
+    /// <summary>The HTML pages that exercise the visible-text rules.</summary>
+    internal static IEnumerable<string> TextPageFiles() =>
+        Directory.EnumerateFiles(Path.Combine(Root, "text", "pages"), "*.html").Order(StringComparer.Ordinal);
+
+    /// <summary>The plain-text notes (CRM and comment strings) that exercise the text rules.</summary>
+    internal static IEnumerable<string> NoteFiles() =>
+        Directory.EnumerateFiles(Path.Combine(Root, "text", "notes"), "*.txt").Order(StringComparer.Ordinal);
+
     internal static string NameOf(string pageFile) => Path.GetFileNameWithoutExtension(pageFile);
 
     /// <summary>The encoding a fixture is written in, by its name: <c>.cp1252</c> and <c>.utf16le</c> mark the others; the rest are UTF-8.</summary>

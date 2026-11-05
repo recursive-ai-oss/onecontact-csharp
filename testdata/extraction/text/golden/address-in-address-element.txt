@@ -1,0 +1,3 @@
+unit Bytes
+ungrouped #0 Address AddressElement raw="Acme Anvils<br>100 Main Street<br>Springfield, IL 62701" text="Acme Anvils\n100 Main Street\nSpringfield, IL 62701" span=110+55 conf=0.7 flags=RegionInferred => Address:ACME ANVILS, 100 MAIN ST, SPRINGFIELD IL 62701 facts=CountryInferred block=10
+ungrouped   also Text span=125+40

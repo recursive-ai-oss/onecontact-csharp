@@ -1,0 +1,5 @@
+unit Chars
+record 0 Person src=Text conf=0.8 span=6+54
+  #0 Name Text raw="Jan Kowalski" text="Jan Kowalski" span=6+12 conf=0.8 => Person:Jan Kowalski
+  #1 Phone Text raw="202-555-0176" text="202-555-0176" span=24+12 conf=0.43 flags=Unnormalized issue=phone.region-required label="Tel"
+  #2 Email Text raw="jan@acme.example" text="jan@acme.example" span=44+16 conf=0.9 => Email:jan@acme.example

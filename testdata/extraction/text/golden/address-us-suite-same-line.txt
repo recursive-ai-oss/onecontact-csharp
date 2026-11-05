@@ -1,0 +1,2 @@
+unit Bytes
+ungrouped #0 Address Text raw="600 Birch Way, Apt 4B, Seattle, WA 98101" text="600 Birch Way, Apt 4B, Seattle, WA 98101" span=104+40 conf=0.7 flags=RegionInferred => Address:600 BIRCH WAY APT 4B, SEATTLE WA 98101 facts=HasUnit|CountryInferred

@@ -1,0 +1,3 @@
+unit Bytes
+ungrouped #0 Email Text raw="jo&#104;n&#64;example&#46;com" text="john@example.com" span=104+29 conf=0.9 flags=Deobfuscated => Email:john@example.com
+ungrouped #1 Email Text raw="jane&commat;example.org" text="jane@example.org" span=138+23 conf=0.9 flags=Deobfuscated => Email:jane@example.org

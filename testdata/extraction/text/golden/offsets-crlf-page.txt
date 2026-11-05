@@ -1,0 +1,2 @@
+unit Bytes
+ungrouped #0 Email Text raw="crlf@acme.example" text="crlf@acme.example" span=139+17 conf=0.9 => Email:crlf@acme.example

@@ -1,0 +1,7 @@
+Name: Ada Example
+Email: ada@acme.example
+Phone: +1 202 555 0171
+
+Name: Bo Sample
+Email: bo@acme.example
+Phone: +1 202 555 0172

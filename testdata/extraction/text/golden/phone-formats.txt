@@ -1,0 +1,6 @@
+unit Bytes
+ungrouped #0 Phone Text raw="(202) 555-0120" text="(202) 555-0120" span=109+14 conf=0.85 flags=RegionInferred => Phone:+12025550120 facts=Valid label="Tel"
+ungrouped #1 Phone Text raw="202.555.0121" text="202.555.0121" span=137+12 conf=0.85 flags=RegionInferred => Phone:+12025550121 facts=Valid label="Mobile"
+ungrouped #2 Phone Text raw="202-555-0122" text="202-555-0122" span=161+12 conf=0.85 flags=RegionInferred => Phone:+12025550122 facts=Valid label="Fax"
+ungrouped #3 Phone Text raw="+44 20 7946 0958" text="+44 20 7946 0958" span=180+16 conf=0.8 => Phone:+442079460958 facts=Valid|InternationalInput
+ungrouped #4 Phone Text raw="+1 (202) 555-0124" text="+1 (202) 555-0124" span=206+17 conf=0.85 => Phone:+12025550124 facts=Valid|InternationalInput label="T"

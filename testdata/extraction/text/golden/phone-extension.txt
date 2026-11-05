@@ -1,0 +1,3 @@
+unit Bytes
+ungrouped #0 Phone Text raw="202-555-0125 ext. 301" text="202-555-0125 ext. 301" span=111+21 conf=0.85 flags=RegionInferred => Phone:+12025550125;ext=301 facts=Valid|HasExtension|Vanity label="Phone"
+ungrouped #1 Phone Text raw="+1 202 555 0126 x12" text="+1 202 555 0126 x12" span=143+19 conf=0.85 => Phone:+12025550126;ext=12 facts=Valid|HasExtension|InternationalInput label="Tel"

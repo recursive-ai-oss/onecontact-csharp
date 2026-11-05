@@ -1,0 +1,8 @@
+unit Bytes
+record 0 Unknown src=Text conf=0.5 span=110+162
+  #0 Address AddressElement raw="Acme Anvils<br>100 Main Street<br>Springfield, IL 62701<br><a href=\"mailto:addr@acme.example\">addr@acme.example</a> <a href=\"tel:+12025550146\">+1 202 555 0146</a>" text="Acme Anvils\n100 Main Street\nSpringfield, IL 62701" span=110+162 conf=0.7 flags=RegionInferred => Address:ACME ANVILS, 100 MAIN ST, SPRINGFIELD IL 62701 facts=CountryInferred
+    also Text span=125+40
+  #1 Email Link raw="mailto:addr@acme.example" text="addr@acme.example" span=178+24 conf=0.9 => Email:addr@acme.example
+    also Text span=204+17
+  #2 Phone Link raw="tel:+12025550146" text="+12025550146" span=235+16 conf=0.9 => Phone:+12025550146 facts=Valid|InternationalInput label="+1 202 555 0146"
+    also Text span=253+15

@@ -1,0 +1,6 @@
+unit Chars
+record 0 Unknown src=Text conf=0.5 span=32+89
+  #0 Address Text raw="100 Main Street\nSpringfield, IL 62701" text="100 Main Street\nSpringfield, IL 62701" span=32+37 conf=0.35 flags=Unnormalized issue=address.country-required
+  #1 Phone Text raw="+1 202 555 0173" text="+1 202 555 0173" span=73+15 conf=0.85 => Phone:+12025550173 facts=Valid|InternationalInput label="T"
+  #2 Email Text raw="jo@acme.example" text="jo@acme.example" span=89+15 conf=0.9 => Email:jo@acme.example
+  #3 Website Text raw="www.acme.example" text="www.acme.example" span=105+16 conf=0.8 => Web:https://www.acme.example/ facts=SchemeAssumed

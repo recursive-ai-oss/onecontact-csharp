@@ -1,0 +1,4 @@
+unit Bytes
+ungrouped #0 Email Link raw="mailto:link@acme.example" text="link@acme.example" span=113+24 conf=0.9 => Email:link@acme.example
+ungrouped   also Text span=139+17
+ungrouped #1 Email Link raw="mailto:other@acme.example" text="other@acme.example" span=174+25 conf=0.9 => Email:other@acme.example label="write to us"

@@ -1,0 +1,4 @@
+unit Chars
+record 0 Unknown src=Text conf=0.5 span=15+40
+  #0 Email Text raw="émile@acme.example" text="émile@acme.example" span=15+18 conf=0.9 => Email:émile@acme.example facts=InternationalizedLocalPart
+  #1 Phone Text raw="+33 1 70 18 99 01" text="+33 1 70 18 99 01" span=38+17 conf=0.85 => Phone:+33170189901 facts=Valid|InternationalInput label="Tel"

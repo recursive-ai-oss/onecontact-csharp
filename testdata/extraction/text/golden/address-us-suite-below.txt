@@ -1,0 +1,2 @@
+unit Bytes
+ungrouped #0 Address Text raw="400 Pine Road<br>Suite 200<br>Denver, CO 80202" text="400 Pine Road\nSuite 200\nDenver, CO 80202" span=104+46 conf=0.7 flags=RegionInferred => Address:400 PINE RD STE 200, DENVER CO 80202 facts=HasUnit|CountryInferred

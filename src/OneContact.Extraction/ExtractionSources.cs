@@ -28,6 +28,9 @@ public enum ExtractionSources
     /// <summary>Every markup reader.</summary>
     Markup = JsonLd | Microdata | Rdfa | HCard | Links | AddressElements,
 
-    /// <summary>Reserved for the visible-text reader of a later version; ignored today.</summary>
+    /// <summary>The visible text of a page, or a plain string: email addresses, web addresses, phone numbers and United States and Canadian addresses found by rule, with obfuscated forms decoded.</summary>
     Text = 64,
+
+    /// <summary>Every reader: the markup readers and the text rules.</summary>
+    All = Markup | Text,
 }

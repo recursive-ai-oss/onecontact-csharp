@@ -48,7 +48,20 @@ internal sealed class FieldNormalizer
             results[i] ??= Normalize(drafts[i], kind, recordRegion);
         }
 
-        return [.. results.Select(r => r!)];
+        // A phone number found in text by its shape is a number only when the numbering plan says so.
+        var kept = new List<ExtractedField>(drafts.Count);
+        for (int i = 0; i < drafts.Count; i++)
+        {
+            ExtractedField f = results[i]!;
+            if (drafts[i].RequireValid && !(f.IsNormalized && f.Facts.Contains("Valid")))
+            {
+                continue;
+            }
+
+            kept.Add(f);
+        }
+
+        return kept;
     }
 
     private ExtractedField Normalize(FieldDraft d, ContactRecordKind? recordKind, Region recordRegion)
@@ -64,6 +77,11 @@ internal sealed class FieldNormalizer
         if (d.Composed)
         {
             flags |= ExtractedFieldFacts.Composed;
+        }
+
+        if (d.Deobfuscated)
+        {
+            flags |= ExtractedFieldFacts.Deobfuscated;
         }
 
         string text = d.Text;
@@ -115,12 +133,14 @@ internal sealed class FieldNormalizer
             flags |= ExtractedFieldFacts.Unnormalized;
         }
 
+        // A number the numbering plan parses but does not accept (a labelled "123-456-7890") is only half as sure as one it accepts.
+        bool notValidNumber = d.Kind == FieldKind.Phone && d.Source == FieldSource.Text && !facts.Contains("Valid");
         var field = new ExtractedField(d.Kind, d.Source, raw, text, span, span.Length > 0 || d.Raw.IsPresent, flags, d.Label)
         {
             Normalized = ok ? value : default,
             Issue = issue,
             Facts = facts,
-            Confidence = ConfidenceOf(d.Source) * (ok ? 1.0 : 0.5),
+            Confidence = (d.Confidence ?? ConfidenceOf(d.Source)) * (ok && !notValidNumber ? 1.0 : 0.5),
         };
         field.BlockId = d.BlockId;
         return field;

@@ -1,0 +1,2 @@
+unit Bytes
+ungrouped #0 Address Text raw="100 Main Street<br>Springfield, IL 62701" text="100 Main Street\nSpringfield, IL 62701" span=119+40 conf=0.7 flags=RegionInferred => Address:100 MAIN ST, SPRINGFIELD IL 62701 facts=CountryInferred

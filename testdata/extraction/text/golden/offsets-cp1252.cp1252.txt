@@ -1,0 +1,2 @@
+unit Bytes
+ungrouped #0 Email Text raw="café@acme.example" text="café@acme.example" span=124+17 conf=0.9 => Email:café@acme.example facts=InternationalizedLocalPart

@@ -1,0 +1,7 @@
+unit Chars
+record 0 Unknown src=Text conf=0.5 span=0+32
+  #0 Email Text raw="ada@acme.example" text="ada@acme.example" span=0+16 conf=0.9 => Email:ada@acme.example
+  #1 Phone Text raw="+1 202 555 0171" text="+1 202 555 0171" span=17+15 conf=0.8 => Phone:+12025550171 facts=Valid|InternationalInput
+record 1 Unknown src=Text conf=0.5 span=39+31
+  #2 Email Text raw="bo@acme.example" text="bo@acme.example" span=39+15 conf=0.9 => Email:bo@acme.example
+  #3 Phone Text raw="+1 202 555 0172" text="+1 202 555 0172" span=55+15 conf=0.8 => Phone:+12025550172 facts=Valid|InternationalInput

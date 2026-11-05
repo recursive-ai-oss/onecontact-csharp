@@ -117,5 +117,17 @@ ExtractedField first = extracted.Records[0].Name!;
 Check(System.Text.Encoding.UTF8.GetString(pageBytes, first.Span.Start, first.Span.Length) == first.Raw, "extraction offsets");
 Check(ContactExtractor.Extract("<script type=\"application/ld+json\">{oops</script>").Count == 0, "extraction rejects malformed json-ld");
 
+// Extraction of visible text: the cascade hides a trap, obfuscated and reversed addresses are decoded, a note is read as plain text.
+byte[] textBytes = System.Text.Encoding.UTF8.GetBytes("<html lang=\"en-US\"><body><div style=\"display:none\">trap@example.com</div><footer><p>Call +1 202 555 0144</p>" +
+    "<p>john [at] example [dot] com</p><span style=\"direction:rtl;unicode-bidi:bidi-override\">moc.elpmaxe@enaj</span></footer></body></html>");
+ExtractResult visible = new ContactExtractor().ExtractHtml(textBytes);
+Check(visible.Of(FieldKind.Email).Count == 2 && visible.Of(FieldKind.Email).All(f => f.Flags.HasFlag(ExtractedFieldFacts.Deobfuscated) && f.Text != "trap@example.com"), "text extraction decodes and skips hidden text");
+Check(visible.Of(FieldKind.Email).Select(f => f.Text).Order().SequenceEqual(["jane@example.com", "john@example.com"]), "text extraction values");
+Check(visible.Records.Count == 1 && visible.Records[0].Kind == ContactRecordKind.Unknown && visible.Records[0].Phones.Count == 1, "text extraction groups a block");
+ExtractedField decoded = visible.Of(FieldKind.Email).First(f => f.Text == "john@example.com");
+Check(System.Text.Encoding.UTF8.GetString(textBytes, decoded.Span.Start, decoded.Span.Length) == "john [at] example [dot] com", "text extraction raw form");
+ExtractResult note = new ContactExtractor().ExtractText("Name: Jo Smoke\nTel: +1 202 555 0145\njo@example.com");
+Check(note.Records.Count == 1 && note.Records[0].Kind == ContactRecordKind.Person && note.Records[0].Name!.Text == "Jo Smoke" && note.OffsetUnit == OffsetUnit.Chars, "plain text extraction");
+
 Console.WriteLine(failures == 0 ? "OneContact AOT smoke: ok" : $"OneContact AOT smoke: {failures} failure(s)");
 return failures == 0 ? 0 : 1;

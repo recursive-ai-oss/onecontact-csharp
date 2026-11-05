@@ -3,6 +3,9 @@ namespace RecursiveAI.OneContact.Extraction.Records;
 /// <summary>What a <see cref="ContactRecord"/> describes.</summary>
 public enum ContactRecordKind
 {
+    /// <summary>Fields that sit together in visible text (a footer, a signature) without anything that says whether they belong to a person or an organization. The rules never guess which.</summary>
+    Unknown = 0,
+
     /// <summary>One person.</summary>
     Person = 1,
 
@@ -35,7 +38,7 @@ public enum FieldKind
     Address = 6,
 }
 
-/// <summary>Where in the page a field was read. Later versions add readers for <see cref="Text"/>; the member is reserved now.</summary>
+/// <summary>Where in the page a field was read.</summary>
 public enum FieldSource
 {
     /// <summary>A <c>script type="application/ld+json"</c> block.</summary>
@@ -56,7 +59,7 @@ public enum FieldSource
     /// <summary>An <c>address</c> element.</summary>
     AddressElement = 6,
 
-    /// <summary>Visible text read by a model. Not produced by the markup readers.</summary>
+    /// <summary>Visible text of the page, or a plain string, read by the text rules (a model will read it too in a later version).</summary>
     Text = 7,
 }
 
@@ -82,7 +85,7 @@ public enum ExtractedFieldFacts
     /// <summary>The text was put together from several pieces of markup (a given and a family name, or address parts), so <see cref="ExtractedField.Raw"/> spans all of them and <see cref="ExtractedField.Text"/> differs from it.</summary>
     Composed = 16,
 
-    /// <summary>Reserved: the value was decoded from an obfuscated form. Set by the obfuscation decoder in a later version.</summary>
+    /// <summary>The value was decoded from an obfuscated form: <c>[at]</c> and <c>dot</c> words, entity-encoded characters, a Cloudflare <c>data-cfemail</c> attribute, text reversed by CSS, or text split by markup. <see cref="ExtractedField.Raw"/> is the form as written.</summary>
     Deobfuscated = 32,
 }
 

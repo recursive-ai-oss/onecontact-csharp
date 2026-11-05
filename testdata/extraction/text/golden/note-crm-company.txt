@@ -1,0 +1,5 @@
+unit Chars
+record 0 Organization src=Text conf=0.8 span=9+62
+  #0 Name Text raw="Acme Anvils Ltd" text="Acme Anvils Ltd" span=9+15 conf=0.8 => Company:Acme Anvils Ltd facts=HasLegalForm|LegalFormAmbiguous
+  #1 Email Text raw="sales@acme.example" text="sales@acme.example" span=32+18 conf=0.9 => Email:sales@acme.example facts=RoleAccount
+  #2 Phone Text raw="+1 202 555 0174" text="+1 202 555 0174" span=56+15 conf=0.85 => Phone:+12025550174 facts=Valid|InternationalInput label="Tel"

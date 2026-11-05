@@ -1,4 +1,5 @@
 using RecursiveAI.OneContact.Extraction.Records;
+using RecursiveAI.OneContact.Extraction.Text;
 using RecursiveAI.OneHtml;
 
 namespace RecursiveAI.OneContact.Extraction.Markup;
@@ -12,6 +13,12 @@ internal static class ExtractionPipeline
     {
         var issues = new List<ExtractIssue>();
         var items = new List<MarkupItem>();
+        if (page.IsPlainText)
+        {
+            // A plain string has no markup: only the text rules apply.
+            sources &= ExtractionSources.Text;
+        }
+
         if (sources.HasFlag(ExtractionSources.JsonLd))
         {
             JsonLdReader.Read(page, items, issues);
@@ -47,10 +54,6 @@ internal static class ExtractionPipeline
         var builder = new RecordBuilder(items);
         builder.Build(items);
 
-        // Records come in the order their markup begins, whichever reader found them (the sort is stable).
-        List<RecordDraft> ordered = [.. builder.Records.OrderBy(r => r.Range.IsPresent ? r.Range.Start : int.MaxValue)];
-        builder.Records.Clear();
-        builder.Records.AddRange(ordered);
         bool limited = builder.LimitReached;
 
         // A loose field joins the innermost record whose element holds it: markup nesting decides, not proximity.
@@ -82,6 +85,16 @@ internal static class ExtractionPipeline
             }
         }
 
+        if (sources.HasFlag(ExtractionSources.Text))
+        {
+            ReadText(page, builder, byElement, ungrouped, issues);
+        }
+
+        // Records come in the order their text begins, whichever reader found them (the sort is stable).
+        List<RecordDraft> ordered = [.. builder.Records.OrderBy(r => r.Range.IsPresent ? r.Range.Start : int.MaxValue)];
+        builder.Records.Clear();
+        builder.Records.AddRange(ordered);
+
         int total = builder.Records.Sum(r => r.Fields.Count) + ungrouped.Count;
         if (total > MaxFields)
         {
@@ -97,12 +110,107 @@ internal static class ExtractionPipeline
         }
 
         List<ExtractedField> ungroupedFields = normalizer.NormalizeAll(ungrouped, null);
+        AttachTextToRecords(works, ungroupedFields);
         if (limited)
         {
             issues.Add(new ExtractIssue(ExtractIssueKind.LimitExceeded, FieldSource.JsonLd, default, "A work budget was used up; the result holds what was read before that."));
         }
 
         return Assemble(page, sources, works, ungroupedFields, issues);
+    }
+
+    // The visible-text half: fields found in the text join the record whose element holds them, or are grouped with their neighbours.
+    private static void ReadText(PageContext page, RecordBuilder builder, Dictionary<int, RecordDraft> byElement, List<FieldDraft> ungrouped, List<ExtractIssue> issues)
+    {
+        TextView view;
+        if (page.IsPlainText)
+        {
+            view = PlainTextView.Build(page.Text);
+        }
+        else
+        {
+            view = VisibleTextReader.Read(page, out bool truncated);
+            if (truncated)
+            {
+                issues.Add(new ExtractIssue(ExtractIssueKind.LimitExceeded, FieldSource.Text, default, "The visible text is longer than the reader's budget; the text after it was not read."));
+            }
+        }
+
+        List<FieldDraft> found = TextFieldReader.Read(page, view);
+        var pending = new List<FieldDraft>();
+        foreach (FieldDraft d in found)
+        {
+            RecordDraft? home = null;
+            for (Node n = d.ElementIndex >= 0 ? page.GetNode(d.ElementIndex) : default; !n.IsNull && home is null; n = n.Parent)
+            {
+                byElement.TryGetValue(n.Index, out home);
+            }
+
+            if (home is not null)
+            {
+                home.Fields.Add(d);
+            }
+            else
+            {
+                pending.Add(d);
+            }
+        }
+
+        // Links and address elements that no record took sit among the text: they take part in the grouping.
+        var loose = new List<FieldDraft>();
+        foreach (FieldDraft d in ungrouped)
+        {
+            if (d.Raw.IsPresent && d.ElementIndex >= 0)
+            {
+                d.Line = view.LineAtSource(d.Raw.Start, page.OuterRange(page.GetNode(d.ElementIndex)));
+                if (d.Line >= 0)
+                {
+                    loose.Add(d);
+                }
+            }
+        }
+
+        var grouped = new HashSet<FieldDraft>(ReferenceEqualityComparer.Instance);
+        List<RecordDraft> groups = TextGrouper.Group(page, view, [.. pending, .. loose], grouped);
+        builder.Records.AddRange(groups);
+        ungrouped.RemoveAll(grouped.Contains);
+        foreach (FieldDraft d in pending)
+        {
+            if (!grouped.Contains(d))
+            {
+                ungrouped.Add(d);
+            }
+        }
+    }
+
+    // A text field that no group took, and that repeats a field of exactly one record, is another sighting of that field.
+    private static void AttachTextToRecords(List<RecordWork> works, List<ExtractedField> ungrouped)
+    {
+        for (int i = ungrouped.Count - 1; i >= 0; i--)
+        {
+            ExtractedField f = ungrouped[i];
+            if (f.Source != FieldSource.Text || !f.IsNormalized || f.Kind is FieldKind.Name or FieldKind.Organization)
+            {
+                continue;
+            }
+
+            RecordWork? only = null;
+            bool several = false;
+            foreach (RecordWork w in works)
+            {
+                if (w.Fields.Any(x => x.Kind == f.Kind && x.DedupKey == f.DedupKey))
+                {
+                    several |= only is not null;
+                    only ??= w;
+                }
+            }
+
+            if (only is not null && !several)
+            {
+                only.Fields.Add(f);
+                ungrouped.RemoveAt(i);
+            }
+        }
     }
 
     private static void Truncate(List<RecordDraft> records, List<FieldDraft> ungrouped, int max)
@@ -232,11 +340,13 @@ internal static class ExtractionPipeline
         return new ExtractResult(sources, page.HasBytes ? OffsetUnit.Bytes : OffsetUnit.Chars, records, flat, issues);
     }
 
+    // Where two fields start at the same place (an itemprop and the text it holds), the markup reading comes first.
     private static int CompareBySpan(ExtractedField a, ExtractedField b)
     {
         int x = a.HasSpan ? a.Span.Start : int.MaxValue;
         int y = b.HasSpan ? b.Span.Start : int.MaxValue;
-        return x.CompareTo(y);
+        int byStart = x.CompareTo(y);
+        return byStart != 0 ? byStart : (a.Source == FieldSource.Text).CompareTo(b.Source == FieldSource.Text);
     }
 
     // A record that was merged into another forwards to it.
@@ -255,6 +365,11 @@ internal static class ExtractionPipeline
         var index = new Dictionary<string, RecordWork>(StringComparer.Ordinal);
         foreach (RecordWork w in works)
         {
+            if (w.Draft.Kind == ContactRecordKind.Unknown)
+            {
+                continue;
+            }
+
             List<string> keys = [.. KeysOf(w, FieldKind.Name), .. ContactKeys(w)];
             RecordWork? target = null;
             foreach (string k in keys)
@@ -282,6 +397,114 @@ internal static class ExtractionPipeline
             }
         }
 
+        // Fields that sit together in text with nothing saying whose they are (kind Unknown) join a record of either kind that has the
+        // same email address, an organization that has the same website or the same address, or an earlier group of the same kind.
+        // A role account (info@, sales@) is what an organization lists as its own, so for an organization it counts here, though it never
+        // merges two records of the markup.
+        var addresses = new Dictionary<string, RecordWork>(StringComparer.Ordinal);
+        var organizationEmails = new Dictionary<string, RecordWork>(StringComparer.Ordinal);
+        foreach (RecordWork w in survivors.Where(w => w.Draft.Kind == ContactRecordKind.Organization))
+        {
+            foreach (ExtractedField f in w.Fields.Where(f => f.IsNormalized))
+            {
+                if (f.Kind == FieldKind.Address)
+                {
+                    addresses.TryAdd(f.DedupKey, w);
+                }
+                else if (f.Kind == FieldKind.Email)
+                {
+                    organizationEmails.TryAdd(f.DedupKey, w);
+                }
+            }
+        }
+
+        foreach (RecordWork w in works)
+        {
+            if (w.Draft.Kind != ContactRecordKind.Unknown)
+            {
+                continue;
+            }
+
+            var own = new List<string>();
+            var lookups = new List<string>();
+            RecordWork? target = null;
+            foreach (ExtractedField f in w.Fields)
+            {
+                bool role = f.Facts.Contains("RoleAccount");
+                bool social = f.Facts.Any(x => x.StartsWith("Social", StringComparison.Ordinal));
+                if (!f.IsNormalized || social)
+                {
+                    continue;
+                }
+
+                if (f.Kind == FieldKind.Email)
+                {
+                    own.Add("Unknown|Email|" + f.DedupKey);
+                    if (target is null && organizationEmails.TryGetValue(f.DedupKey, out RecordWork? org))
+                    {
+                        target = org;
+                    }
+
+                    if (!role)
+                    {
+                        lookups.Add("Person|Email|" + f.DedupKey);
+                        lookups.Add("Organization|Email|" + f.DedupKey);
+                    }
+                }
+                else if (f.Kind == FieldKind.Website)
+                {
+                    own.Add("Unknown|Website|" + f.DedupKey);
+                    lookups.Add("Organization|Website|" + f.DedupKey);
+                }
+            }
+
+            if (target is null)
+            {
+                foreach (string k in lookups.Concat(own))
+                {
+                    if (index.TryGetValue(k, out target))
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (target is null)
+            {
+                foreach (ExtractedField f in w.Fields.Where(f => f.Kind == FieldKind.Address && f.IsNormalized))
+                {
+                    if (addresses.TryGetValue(f.DedupKey, out target))
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (target is null)
+            {
+                survivors.Add(w);
+                target = w;
+            }
+            else
+            {
+                target.Fields.AddRange(w.Fields);
+                redirect[w] = target;
+            }
+
+            foreach (string k in own)
+            {
+                index.TryAdd(k, target);
+            }
+        }
+
+        // Survivors keep the order their records began in.
+        var position = new Dictionary<RecordWork, int>(ReferenceEqualityComparer.Instance);
+        for (int i = 0; i < works.Count; i++)
+        {
+            position[works[i]] = i;
+        }
+
+        survivors.Sort((x, y) => position[x].CompareTo(position[y]));
         return survivors;
     }
 
