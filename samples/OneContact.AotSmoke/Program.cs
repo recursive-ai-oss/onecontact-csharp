@@ -91,6 +91,10 @@ Check(fr.ToString(AddressStyle.Display, AddressLayout.SingleLine) == "Monsieur J
 PostalAddress be = PostalAddress.Parse("Dhr Paul Janssens\nKortijkstraat 37 b 1\n9800 Deinze\nBelgium");
 Check(be.ToString(AddressStyle.Postal, AddressLayout.SingleLine) == "Dhr Paul Janssens, Kortijkstraat 37 bus 1, 9800 DEINZE", "Belgian address");
 Check(PostalAddress.Parse("Adrianastraat 34\n6832 AM Arnhem").Country.Code == "NL", "Dutch address inferred");
+PostalAddress es = PostalAddress.Parse("Calle Huertas 18, 4º, C\n29400 Marbella\nMálaga\nSpain");
+Check(es.Country.Code == "ES" && es.ToString(AddressStyle.Postal, AddressLayout.Label, includeCountry: true) == "Calle Huertas 18, 4º, C\n29400 MARBELLA\nMÁLAGA\nSPAIN", "Spanish address, postal style");
+PostalAddress gb = PostalAddress.Parse("10B Barry Jackson Tower, Estone Walk, Birmingham B6 5BA");
+Check(gb.Country.Code == "GB" && gb.ToString(AddressStyle.Postal, AddressLayout.Label) == "10B Barry Jackson Tower\nEstone Walk\nBIRMINGHAM\nB6 5BA", "British address, postal style");
 PostalAddress de = ParseIn("Wacholderweg 52a\n26133 Oldenburg", "DE");
 Check(AddressKey.Compute(de, KeyVersion.V1) == AddressKey.Compute(ParseIn("Wacholderweg 52a, 26133 OLDENBURG", "DE"), KeyVersion.V1), "German address key");
 Check(AddressExpander.Expand("Hauptstr", ExpansionLanguages.German).Contains("hauptstrasse"), "German expansion");

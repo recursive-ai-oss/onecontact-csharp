@@ -8,25 +8,25 @@ using RecursiveAI.OneContact.Keys;
 namespace RecursiveAI.OneContact.Fuzz;
 
 /// <summary>
-/// A bounded smoke run for the address rule parser over text in the style of France, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland and
-/// Liechtenstein: mutates the committed guide examples at random (seeded), feeds every mutant to the parser with each country as the hint and without one, and checks that
+/// A bounded smoke run for the address rule parser over text in the style of France, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland,
+/// Liechtenstein, the United Kingdom with Jersey, Guernsey and the Isle of Man, Ireland, Spain, Portugal, Italy, San Marino, the Vatican, Malta and Andorra: mutates the committed guide examples at random (seeded), feeds every mutant to the parser with each country as the hint and without one, and checks that
 /// nothing throws, that every field's offsets lie inside the input and slice to its text, and that both renderings and the key can be computed.
-/// Usage: <c>fuzz address-smoke &lt;authority-examples-tier2a.tsv&gt; &lt;seconds&gt;</c>.
+/// Usage: <c>fuzz address-smoke &lt;example files, separated by a semicolon&gt; &lt;seconds&gt;</c>; the Tier 2 example files are testdata/addresses/authority-examples-tier2a.tsv and -tier2b.tsv.
 /// </summary>
 internal static class AddressSmoke
 {
     private static readonly string[] Specials =
     [
         "\n", ", ", " / ", " - ", "L-", "CH-", "FL-", "D-", "B-", "F-", "MC-", " CEDEX ", " BP ", "Postfach ", "Postbus ", " bus ", " bte ", " // ", "0", "9", "98000", "1234 AB", "\u0000",
-        "\u0301", "\u00DF", "\u00E9", "\ud83d\ude00", "\u4e2d", "\t", "  ", "'", "\u2019", ".", "-", "\r\n", "FRANCE", "BELGIUM", "Switzerland",
+        "\u0301", "\u00DF", "\u00E9", "\ud83d\ude00", "\u4e2d", "\t", "  ", "'", "\u2019", ".", "-", "\r\n", "FRANCE", "BELGIUM", "Switzerland", "SW1A 1AA", "T37 F8HK", "HMR 1428", "AD500", "2725–079", "00120", "47890", "3º, C", "CO. ", " RM", "(Madrid)", "Apartado ", "P.O. Box ", "UNITED KINGDOM", "CHANNEL ISLANDS", "15,500",
     ];
 
-    private static readonly string[] Countries = ["FR", "MC", "GP", "BE", "NL", "LU", "DE", "AT", "CH", "LI"];
+    private static readonly string[] Countries = ["FR", "MC", "GP", "BE", "NL", "LU", "DE", "AT", "CH", "LI", "GB", "JE", "GG", "IM", "IE", "ES", "PT", "IT", "SM", "VA", "MT", "AD"];
 
     internal static int Run(string examples, int seconds)
     {
         List<string> seeds = [];
-        foreach (string line in File.ReadLines(examples))
+        foreach (string line in examples.Split(';').SelectMany(File.ReadLines))
         {
             string[] c = line.Split('\t');
             if (line.Length > 0 && line[0] != '#' && c.Length > 4)

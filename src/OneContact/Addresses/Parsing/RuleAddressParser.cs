@@ -22,13 +22,13 @@ public static class RuleAddressParser
 
     /// <summary>Reads an address.</summary>
     /// <param name="input">The text: one or several lines. Offsets in the result index this span.</param>
-    /// <param name="hint">The country to assume when the content does not say; <see cref="Region.Unknown"/> for none. A hint outside the United States, Canada and the first Tier 2 group (France with its overseas departments, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland, Liechtenstein) is refused.</param>
+    /// <param name="hint">The country to assume when the content does not say; <see cref="Region.Unknown"/> for none. A hint outside the United States, Canada and the Tier 2 countries (France with its overseas departments, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland, Liechtenstein; the United Kingdom with Jersey, Guernsey and the Isle of Man, Ireland, Spain, Portugal, Italy, San Marino, the Vatican, Malta, Andorra) is refused.</param>
     /// <param name="address">The parsed address, or <see langword="null"/> when the status is not <see cref="OperationStatus.Done"/>.</param>
     /// <param name="detail">Issues, and per field its offsets and decision source.</param>
     /// <returns><see cref="OperationStatus.Done"/>, or <see cref="OperationStatus.InvalidData"/> with the reason in <paramref name="detail"/>.</returns>
     public static OperationStatus TryParse(ReadOnlySpan<char> input, Region hint, out ParsedAddress? address, out ParseDetail detail)
     {
-        // A country of the first Tier 2 group is read by its own rules. Without a hint the United States and Canada are tried first, and text they cannot read is
+        // A Tier 2 country is read by its own rules. Without a hint the United States and Canada are tried first, and text they cannot read is
         // offered to the Tier 2 rules, which read it only when the postcode and the content point to one country.
         if (Tier2.Tier2Reader.Handles(hint))
         {

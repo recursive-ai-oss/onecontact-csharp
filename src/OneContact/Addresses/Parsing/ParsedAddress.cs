@@ -54,7 +54,7 @@ public sealed class ParsedAddress
         Span = span;
     }
 
-    /// <summary>Gets the country the rules decided on: the United States, Canada, or a country of the first Tier 2 group (France with its overseas departments, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland, Liechtenstein).</summary>
+    /// <summary>Gets the country the rules decided on: the United States, Canada, or a Tier 2 country (France with its overseas departments, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland, Liechtenstein, the United Kingdom with Jersey, Guernsey and the Isle of Man, Ireland, Spain, Portugal, Italy, San Marino, the Vatican, Malta, Andorra).</summary>
     public Region Country { get; }
 
     /// <summary>Gets how sure the country is, from 0 to 1.</summary>
@@ -95,7 +95,7 @@ public sealed class ParsedAddress
 
     internal Region Hint { get; set; }
 
-    // The printed lines of an address of the first Tier 2 group of countries; null for the United States and Canada.
+    // The printed lines of an address of a Tier 2 country; null for the United States and Canada.
     internal Tier2.T2Layout? Tier2 { get; set; }
 
     /// <summary>Writes the address.</summary>

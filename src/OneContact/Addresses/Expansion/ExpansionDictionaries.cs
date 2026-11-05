@@ -27,6 +27,27 @@ public enum ExpansionLanguages
 
     /// <summary>Luxembourgish (street types).</summary>
     Luxembourgish = 32,
+
+    /// <summary>Spanish (street types, directionals, unit and level words, post office words).</summary>
+    Spanish = 64,
+
+    /// <summary>Portuguese (street types, directionals, unit and level words, post office words).</summary>
+    Portuguese = 128,
+
+    /// <summary>Catalan (as written in Andorra and in Spanish addresses).</summary>
+    Catalan = 256,
+
+    /// <summary>Basque (as written in Spanish addresses).</summary>
+    Basque = 512,
+
+    /// <summary>Galician (as written in Spanish addresses).</summary>
+    Galician = 1024,
+
+    /// <summary>Maltese (street types, place names).</summary>
+    Maltese = 2048,
+
+    /// <summary>Irish (street types, building and unit words).</summary>
+    Irish = 4096,
 }
 
 /// <summary>What kind of word a dictionary phrase is; it decides where the phrase may be expanded.</summary>
@@ -78,6 +99,12 @@ internal static class ExpansionDictionaries
     /// <summary>Gets the longest phrase in the dictionaries, in words.</summary>
     internal static int MaxWords => Loaded.Value.MaxWords;
 
+    private static readonly string[] Legacy = ["en", "fr", "de", "nl", "it", "lb"];
+
+    /// <summary>Gets whether a language lists the phrase as ambiguous (a later language's own list; the first six languages share <see cref="Ambiguous"/>).</summary>
+    internal static bool AmbiguousIn(string language, string phrase) =>
+        Loaded.Value.AmbiguousByLanguage.TryGetValue(language, out HashSet<string>? set) && set.Contains(phrase);
+
     /// <summary>Gets the phrases that are ambiguous (a single letter that may be an initial, a word that may be a name) as listed by the dictionaries.</summary>
     internal static IReadOnlySet<string> Ambiguous => Loaded.Value.Ambiguous;
 
@@ -104,7 +131,7 @@ internal static class ExpansionDictionaries
     {
         EmbeddedTables tables = new(typeof(ExpansionDictionaries).Assembly, "OneContact.Data.libpostal-dictionaries.ocd");
         Index index = new();
-        foreach (string language in new[] { "en", "fr", "de", "nl", "it", "lb" })
+        foreach (string language in new[] { "en", "fr", "de", "nl", "it", "lb", "es", "pt", "ca", "eu", "gl", "mt", "ga" })
         {
             foreach (string file in new[] { "concatenated_suffixes_separable", "concatenated_suffixes_inseparable" })
             {
@@ -178,9 +205,12 @@ internal static class ExpansionDictionaries
                     continue;
                 }
 
+                // The first six languages share one set (it is what the keys of the United States, Canada and the first Tier 2 group were built with);
+                // each later language keeps its own, used only when that language is asked for.
+                HashSet<string> target = Array.IndexOf(Legacy, language) >= 0 ? index.Ambiguous : index.AmbiguousByLanguage.GetValueOrDefault(language) ?? (index.AmbiguousByLanguage[language] = new HashSet<string>(StringComparer.Ordinal));
                 foreach (string line in lines)
                 {
-                    index.Ambiguous.Add(line.Split('\t')[0]);
+                    target.Add(line.Split('\t')[0]);
                 }
             }
         }
@@ -200,6 +230,8 @@ internal static class ExpansionDictionaries
         internal Dictionary<string, List<(string, string)>> Suffixes { get; } = [];
 
         internal HashSet<string> Ambiguous { get; } = new(StringComparer.Ordinal);
+
+        internal Dictionary<string, HashSet<string>> AmbiguousByLanguage { get; } = [];
 
         internal HashSet<string> Elisions { get; } = new(StringComparer.Ordinal);
 

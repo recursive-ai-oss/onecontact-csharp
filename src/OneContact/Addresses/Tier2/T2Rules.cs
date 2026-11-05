@@ -10,6 +10,21 @@ internal enum PostcodeForm
     FiveDigits,
     FourDigits,
     FourDigitsTwoLetters,
+
+    /// <summary>Outward and inward code of the United Kingdom, Jersey, Guernsey and the Isle of Man (<c>EC1Y 8SY</c>).</summary>
+    Uk,
+
+    /// <summary>Eircode: a routing key and a unique identifier (<c>T37 F8HK</c>).</summary>
+    Eircode,
+
+    /// <summary>Four digits, a dash and three digits (<c>2725-079</c>).</summary>
+    Portuguese,
+
+    /// <summary>Three letters and four digits (<c>HMR 1428</c>).</summary>
+    Maltese,
+
+    /// <summary><c>AD</c> and three digits (<c>AD700</c>).</summary>
+    Andorran,
 }
 
 /// <summary>The rules of one country of the first Tier 2 group, read from <c>t2-countries.tsv</c>.</summary>
@@ -25,7 +40,14 @@ internal sealed record T2Country(
     bool NumberLast,
     int MaxLine,
     int LocalitySpaces,
-    string[] TypeSets);
+    string[] TypeSets)
+{
+    /// <summary>How the country writes a line (<c>uk</c>, <c>ie</c>, <c>es</c>, <c>pt</c>, <c>it</c>, <c>sm</c>, <c>va</c>, <c>mt</c>, <c>ad</c>); empty for the first group.</summary>
+    internal string Profile { get; init; } = string.Empty;
+
+    /// <summary>Gets whether the postcode follows the locality (the United Kingdom, Ireland, Malta).</summary>
+    internal bool PostcodeLast => Postcode is PostcodeForm.Uk or PostcodeForm.Eircode or PostcodeForm.Maltese;
+}
 
 /// <summary>A street type or its abbreviation as an authority lists it.</summary>
 internal sealed record T2Type(string Set, string Full, string Abbreviation);
@@ -52,6 +74,18 @@ internal static class T2Rules
 
     /// <summary>Words that start a line which is never a street line.</summary>
     internal static IReadOnlySet<string> SpatialWords => Loaded.Value.SpatialWords;
+
+    /// <summary>Postcode areas of the United Kingdom and the Crown dependencies, to the country.</summary>
+    internal static IReadOnlyDictionary<string, string> UkAreas => Loaded.Value.UkAreas;
+
+    /// <summary>Spanish province names (upper case, no accents) to the postcode prefix.</summary>
+    internal static IReadOnlyDictionary<string, string> EsProvinces => Loaded.Value.EsProvinces;
+
+    /// <summary>Italian province codes.</summary>
+    internal static IReadOnlySet<string> ItProvinces => Loaded.Value.ItProvinces;
+
+    /// <summary>Words that follow a house number and belong to it (staircase, floor, door).</summary>
+    internal static IReadOnlySet<string> UnitWords => Loaded.Value.UnitWords;
 
     /// <summary>Swiss canton codes.</summary>
     internal static IReadOnlySet<string> Cantons => Loaded.Value.Cantons;
@@ -133,14 +167,27 @@ internal static class T2Rules
                 r[1],
                 r[2] == "afnor",
                 r[3].Split(','),
-                r[4] switch { "5d" => PostcodeForm.FiveDigits, "4d" => PostcodeForm.FourDigits, _ => PostcodeForm.FourDigitsTwoLetters },
+                r[4] switch
+                {
+                    "5d" => PostcodeForm.FiveDigits,
+                    "4d" => PostcodeForm.FourDigits,
+                    "uk" => PostcodeForm.Uk,
+                    "eircode" => PostcodeForm.Eircode,
+                    "pt" => PostcodeForm.Portuguese,
+                    "mt" => PostcodeForm.Maltese,
+                    "ad" => PostcodeForm.Andorran,
+                    _ => PostcodeForm.FourDigitsTwoLetters,
+                },
                 r[5].Split(','),
                 r[6],
                 r[7] is "first" or "both",
                 r[7] is "last" or "both",
                 int.Parse(r[8], System.Globalization.CultureInfo.InvariantCulture),
                 int.Parse(r[9], System.Globalization.CultureInfo.InvariantCulture),
-                r[10].Split(','));
+                r[10].Split(','))
+            {
+                Profile = r.Length > 11 ? r[11] : string.Empty,
+            };
         }
 
         foreach (string[] r in RuleFile.Read("t2-country-names.tsv"))
@@ -187,6 +234,29 @@ internal static class T2Rules
             t.SpatialWords.Add(r[0]);
         }
 
+        foreach (string[] r in RuleFile.Read("t2-uk-areas.tsv"))
+        {
+            t.UkAreas[r[0]] = r[1];
+        }
+
+        foreach (string[] r in RuleFile.Read("t2-es-provinces.tsv"))
+        {
+            foreach (string name in r[1].Split(';'))
+            {
+                t.EsProvinces[Key(name)] = r[0];
+            }
+        }
+
+        foreach (string[] r in RuleFile.Read("t2-it-provinces.tsv"))
+        {
+            t.ItProvinces.Add(r[0]);
+        }
+
+        foreach (string[] r in RuleFile.Read("t2-unit-words.tsv"))
+        {
+            t.UnitWords.Add(r[0]);
+        }
+
         foreach (string[] r in RuleFile.Read("t2-cantons.tsv"))
         {
             t.Cantons.Add(r[0]);
@@ -212,5 +282,13 @@ internal static class T2Rules
         internal HashSet<string> SpatialWords { get; } = new(StringComparer.Ordinal);
 
         internal HashSet<string> Cantons { get; } = new(StringComparer.Ordinal);
+
+        internal Dictionary<string, string> UkAreas { get; } = new(StringComparer.Ordinal);
+
+        internal Dictionary<string, string> EsProvinces { get; } = new(StringComparer.Ordinal);
+
+        internal HashSet<string> ItProvinces { get; } = new(StringComparer.Ordinal);
+
+        internal HashSet<string> UnitWords { get; } = new(StringComparer.Ordinal);
     }
 }

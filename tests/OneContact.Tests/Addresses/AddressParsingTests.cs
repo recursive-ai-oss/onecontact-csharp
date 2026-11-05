@@ -75,7 +75,7 @@ public class AddressParsingTests
     [Fact]
     public void UnsupportedHintIsRefused()
     {
-        OperationStatus s = RuleAddressParser.TryParse("10 Downing Street, London SW1A 2AA", Region.Parse("GB"), out _, out ParseDetail d);
+        OperationStatus s = RuleAddressParser.TryParse("1-1 Chiyoda, Chiyoda-ku, Tokyo 100-8111", Region.Parse("JP"), out _, out ParseDetail d);
         Assert.Equal(OperationStatus.InvalidData, s);
         Assert.Equal(ReasonCode.AddressUnsupportedCountry, d.PrimaryReason);
     }

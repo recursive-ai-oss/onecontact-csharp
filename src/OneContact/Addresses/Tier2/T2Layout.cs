@@ -43,7 +43,9 @@ internal sealed class T2Layout
             lines.Add(postal ? p : d);
         }
 
-        lines.Add(postal ? Last.Postal : Last.Display);
+        // The last line of Britain, Ireland, Malta and Spain is several lines (post town, county or province, postcode).
+        string last = postal ? Last.Postal : Last.Display;
+        lines.Add(layout == AddressLayout.SingleLine ? last.Replace("\n", ", ", StringComparison.Ordinal) : last);
         if (includeCountry)
         {
             lines.Add(postal ? CountryLine : T2Text.Title(CountryLine, capitalsKept: false));
@@ -59,7 +61,7 @@ internal static class T2Text
     // Words that stay in capitals in the display style: acronyms the authorities print so, and Roman numerals.
     private static readonly HashSet<string> Capitals = new(StringComparer.Ordinal)
     {
-        "CEDEX", "BP", "CS", "TSA", "PF", "PB", "ZI", "ZA", "ZAC", "ZAD", "CCAL", "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII", "NV", "SA", "AG", "BV", "GMBH", "SARL", "SAS", "SPRL", "CVBA", "VZW", "ASBL",
+        "CEDEX", "BP", "CS", "TSA", "PF", "PB", "ZI", "ZA", "ZAC", "ZAD", "CCAL", "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII", "CCI", "RC", "AP", "NV", "SA", "AG", "BV", "GMBH", "SARL", "SAS", "SPRL", "CVBA", "VZW", "ASBL",
     };
 
     // Particles that are written in lower case inside a name.
@@ -68,6 +70,7 @@ internal static class T2Text
         "DE", "DU", "DES", "LA", "LE", "LES", "ET", "SUR", "SOUS", "EN", "AU", "AUX", "D", "L",
         "VAN", "DER", "DEN", "TE", "TEN", "HET", "VON", "ZU", "ZUR", "ZUM", "AM", "AN", "IM", "IN", "UND", "BEI", "OB",
         "DI", "DEL", "DELLA", "DA", "AL",
+        "LAS", "LOS", "Y", "DO", "DOS", "DAS", "DEI", "DEGLI", "DELLE", "DELLO", "OF",
     };
 
     /// <summary>

@@ -18,3 +18,18 @@ DE	GERMANY	plain	de	5d	D,DE		last	0	1	bpost-de
 AT	AUSTRIA	plain	de	4d	A,AT		last	0	1	bpost-de
 CH	SWITZERLAND	plain	de,fr,it	4d	CH		last	0	1	bpost-de
 LI	LIECHTENSTEIN	plain	de	4d	FL,LI		last	0	1	bpost-de
+# Tier 2 group B (the United Kingdom with Jersey, Guernsey and the Isle of Man, Ireland, Spain, Portugal, Italy, San Marino, the Vatican, Malta, Andorra). A twelfth column names the profile that decides how the reader writes a line.
+# Postcode forms: uk (UPU United Kingdom sheet, six formats and GIR 0AA, own line after the post town), eircode (UPU Ireland sheet, 3 + 4 characters, own line last), pt (UPU Portugal sheet, 4 digits, a dash, 3 digits), mt (UPU Malta sheet, 3 letters, a space, 4 digits, after the locality), ad (UPU Andorra sheet, AD and 3 digits), 5d (Spain, Italy, San Marino, Vatican).
+# Profiles: uk, ie (delivery lines and locality in capitals, UPU Ireland examples), es (commas kept before the floor and door, UPU Spain sheet), pt (capitals, UPU Portugal sheet), it (capitals, no punctuation from the street line on, UPU Italy sheet), sm, va (Italian system, lines as written), mt, ad.
+GB	UNITED KINGDOM	plain	en	uk			first	0	1	-	uk
+JE	CHANNEL ISLANDS	plain	en	uk			first	0	1	-	uk
+GG	CHANNEL ISLANDS	plain	en	uk			first	0	1	-	uk
+IM	ISLE OF MAN	plain	en	uk			first	0	1	-	uk
+IE	IRELAND	plain	en,ga	eircode			first	0	1	-	ie
+ES	SPAIN	plain	es,ca,eu,gl	5d	E,ES		last	0	1	road-es	es
+PT	PORTUGAL	plain	pt	pt			last	0	1	road-pt	pt
+IT	ITALY	plain	it	5d	I,IT		last	0	1	road-it	it
+SM	SAN MARINO	plain	it	5d	SM		last	0	1	road-it	sm
+VA	VATICAN	plain	it	5d	V,VA		last	0	1	road-it	va
+MT	MALTA	plain	mt,en	mt			first	0	1	road-mt	mt
+AD	ANDORRA	plain	ca,es,fr	ad			both	0	1	road-ad	ad

@@ -16,6 +16,17 @@ namespace RecursiveAI.OneContact.Addresses.Expansion;
 /// </remarks>
 public static class AddressExpander
 {
+    private static readonly (ExpansionLanguages Flag, string Code)[] LaterLanguages =
+    [
+        (ExpansionLanguages.Spanish, "es"),
+        (ExpansionLanguages.Portuguese, "pt"),
+        (ExpansionLanguages.Catalan, "ca"),
+        (ExpansionLanguages.Basque, "eu"),
+        (ExpansionLanguages.Galician, "gl"),
+        (ExpansionLanguages.Maltese, "mt"),
+        (ExpansionLanguages.Irish, "ga"),
+    ];
+
     /// <summary>Expands an address.</summary>
     /// <param name="address">The address text, one line or several.</param>
     /// <param name="languages">The dictionaries to use; both by default.</param>
@@ -62,6 +73,14 @@ public static class AddressExpander
         if (languages.HasFlag(ExpansionLanguages.Luxembourgish))
         {
             codes.Add("lb");
+        }
+
+        foreach ((ExpansionLanguages flag, string code) in LaterLanguages)
+        {
+            if (languages.HasFlag(flag))
+            {
+                codes.Add(code);
+            }
         }
 
         // Each slot is a stretch of words with its alternatives; the first alternative is the expanded one.
@@ -232,7 +251,7 @@ public static class AddressExpander
             }
 
             // A word the dictionaries call ambiguous (a bare letter, a short word that is also a name) is also kept as written.
-            if (ExpansionDictionaries.Ambiguous.Contains(phrase) || phrase.Length == 1)
+            if (ExpansionDictionaries.Ambiguous.Contains(phrase) || phrase.Length == 1 || codes.Any(c => ExpansionDictionaries.AmbiguousIn(c, phrase)))
             {
                 alternatives.Add(phrase);
             }
@@ -251,8 +270,8 @@ public static class AddressExpander
         switch (entry.Kind)
         {
             case PhraseKind.StreetType:
-                // A street type is not the first word of an English address ("st marys church" is a saint); French types lead the name.
-                return i > 0 || entry.Language == "fr" && words.Count > length;
+                // A street type is not the first word of an English address ("st marys church" is a saint); French, Italian, Iberian and Maltese types lead the name.
+                return i > 0 || entry.Language is "fr" or "it" or "es" or "pt" or "ca" or "eu" or "gl" or "mt" && words.Count > length;
             case PhraseKind.NumberedUnit:
             case PhraseKind.NumberWord:
                 return nextLooksNumeric;
