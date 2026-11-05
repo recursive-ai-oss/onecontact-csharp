@@ -1,0 +1,20 @@
+# Tier 2 group A countries (France and its overseas departments, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland, Liechtenstein).
+# Columns: code, country line (English; UPU country sheets and PostNL print it so), line style, languages, postcode form, accepted country prefixes before a postcode,
+# printed prefix, house number position, longest address line before abbreviations are used (0 = no limit), spaces between postcode and locality, street type sets.
+# Line style afnor: capitals, no accents, no punctuation (La Poste, Guide pratique courrier 2026, p. 19-21; SP 8855 volume 2, section 3.1). Line style plain: lines as written, locality in capitals.
+# Postcode form: 5d, 4d, or 4d2l (four digits, a space, two letters). House number position: first, last or both.
+# Maximum line: La Poste 38 characters (SP 8855, 3.1; UPU France sheet); bpost 50 characters (Belgian template, 3. Representation rules).
+FR	FRANCE	afnor	fr	5d	F		first	38	1	afnor
+MC	MONACO	afnor	fr	5d	MC		first	38	1	afnor
+GP	GUADELOUPE	afnor	fr	5d	F		first	38	1	afnor
+MQ	MARTINIQUE	afnor	fr	5d	F		first	38	1	afnor
+GF	GUYANE FRANCAISE	afnor	fr	5d	F		first	38	1	afnor
+RE	REUNION	afnor	fr	5d	F		first	38	1	afnor
+YT	MAYOTTE	afnor	fr	5d	F		first	38	1	afnor
+BE	BELGIUM	plain	fr,nl,de	4d	B,BE		last	50	1	bpost-fr,bpost-nl,bpost-de
+NL	NETHERLANDS	plain	nl	4d2l	NL		last	0	2	bpost-nl
+LU	LUXEMBOURG	plain	fr,de,lb	4d	L,LU	L-	both	0	1	afnor
+DE	GERMANY	plain	de	5d	D,DE		last	0	1	bpost-de
+AT	AUSTRIA	plain	de	4d	A,AT		last	0	1	bpost-de
+CH	SWITZERLAND	plain	de,fr,it	4d	CH		last	0	1	bpost-de
+LI	LIECHTENSTEIN	plain	de	4d	FL,LI		last	0	1	bpost-de

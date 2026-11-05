@@ -44,6 +44,26 @@ public static class AddressExpander
             codes.Add("fr");
         }
 
+        if (languages.HasFlag(ExpansionLanguages.German))
+        {
+            codes.Add("de");
+        }
+
+        if (languages.HasFlag(ExpansionLanguages.Dutch))
+        {
+            codes.Add("nl");
+        }
+
+        if (languages.HasFlag(ExpansionLanguages.Italian))
+        {
+            codes.Add("it");
+        }
+
+        if (languages.HasFlag(ExpansionLanguages.Luxembourgish))
+        {
+            codes.Add("lb");
+        }
+
         // Each slot is a stretch of words with its alternatives; the first alternative is the expanded one.
         List<List<string>> slots = [];
         int i = 0;
@@ -57,7 +77,9 @@ public static class AddressExpander
             }
             else
             {
-                slots.Add(Ordinal(words[i]));
+                // German and Dutch street names end in the type (Hauptstr is Hauptstrasse): the full ending is the first alternative, the word as written the second.
+                string? suffixed = ExpandEnding(words[i], codes);
+                slots.Add(suffixed is null ? Ordinal(words[i]) : [suffixed, words[i]]);
                 i++;
             }
         }
@@ -86,6 +108,38 @@ public static class AddressExpander
         }
 
         return result;
+    }
+
+    /// <summary>Replaces an abbreviated ending of a German or Dutch name word (<c>hauptstr</c>) by the full ending (<c>hauptstrasse</c>).</summary>
+    /// <param name="word">The word, lower case.</param>
+    /// <param name="codes">The language codes in use.</param>
+    /// <returns>The word with its full ending, or <see langword="null"/> when no known ending abbreviation ends the word.</returns>
+    internal static string? ExpandEnding(string word, List<string> codes)
+    {
+        foreach (string code in codes)
+        {
+            if (code is not ("de" or "nl"))
+            {
+                continue;
+            }
+
+            string folded = Fold(word);
+            (string Abbreviation, string Full)? best = null;
+            foreach ((string abbreviation, string full) in ExpansionDictionaries.Suffixes(code))
+            {
+                if (folded.Length > abbreviation.Length && folded.EndsWith(abbreviation, StringComparison.Ordinal) && (best is null || abbreviation.Length > best.Value.Abbreviation.Length))
+                {
+                    best = (abbreviation, full);
+                }
+            }
+
+            if (best is { } b)
+            {
+                return folded[..^b.Abbreviation.Length] + Fold(b.Full);
+            }
+        }
+
+        return null;
     }
 
     /// <summary>Normalizes text the way expansion does: lower case (invariant), punctuation to spaces, hyphens between letters to spaces, one space between words.</summary>

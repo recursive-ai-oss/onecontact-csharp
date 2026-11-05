@@ -1,0 +1,68 @@
+# Street types. Columns: set, full form (upper case, words separated by single spaces), abbreviation as the authority prints it, variants (semicolon separated, same spelling rules).
+# A type is written in full unless the line is longer than the authority's limit (La Poste 38 characters, bpost 50), then the abbreviation is used.
+# afnor: La Poste, SP 8855 volume 2, section 3.3 "liste alphabétique des abréviations autorisées pour les types de voies", and the UPU France sheet (extract). Types without an abbreviation there have none here.
+# bpost-fr, bpost-nl, bpost-de: bpost MassPost guide January 2025, section 1, 4.2 "Summary table of abbreviations for street types". Dutch and German types are the endings of a name (Dendermondestraat, Hauptstrasse).
+afnor	ALLEE	ALL	ALLEES
+afnor	AVENUE	AV	AVE;AVENUES
+afnor	BOULEVARD	BD	BLVD;BOULEVARDS
+afnor	CENTRE	CTRE
+afnor	CENTRE COMMERCIAL	CCAL
+afnor	IMMEUBLE	IMM	IMMEUBLES
+afnor	IMPASSE	IMP	IMPASSES
+afnor	LIEU DIT	LD	LIEUDIT
+afnor	LOTISSEMENT	LOT
+afnor	PASSAGE	PAS
+afnor	PLACE	PL
+afnor	RESIDENCE	RES
+afnor	ROND POINT	RPT	ROND-POINT;ROUND POINT
+afnor	ROUTE	RTE
+afnor	SQUARE	SQ
+afnor	VILLAGE	VLGE
+afnor	ZONE D ACTIVITE	ZA
+afnor	ZONE D AMENAGEMENT CONCERTE	ZAC
+afnor	ZONE D AMENAGEMENT DIFFERE	ZAD
+afnor	ZONE INDUSTRIELLE	ZI
+# Types the authority lists no abbreviation for: recognized so the street name starts after them.
+afnor	RUE	-
+afnor	CHEMIN	-
+afnor	QUAI	-
+afnor	COURS	-
+afnor	VOIE	-
+afnor	SENTIER	-
+afnor	CITE	-
+afnor	VILLA	-
+afnor	HAMEAU	-
+afnor	CHAUSSEE	-
+afnor	PROMENADE	-
+afnor	PARVIS	-
+afnor	ESPLANADE	-
+afnor	FAUBOURG	-
+afnor	MONTEE	-
+afnor	TRAVERSE	-
+afnor	PONT	-
+afnor	CLOS	-
+afnor	DOMAINE	-
+afnor	PORT	-
+afnor	GRAND RUE	-
+bpost-fr	AVENUE	Av.	AV
+bpost-fr	BOULEVARD	Bd	BD
+bpost-fr	CENTRE	Ctre	CTRE
+bpost-fr	PLACE	Pl.	PL
+bpost-fr	ROUTE	Rte	RTE
+bpost-fr	SQUARE	Sq.	SQ
+bpost-fr	ZONE INDUSTRIELLE	Z.I.	ZI
+bpost-fr	CHAUSSEE	Chée	CHEE
+bpost-fr	IMPASSE	Imp.	IMP
+bpost-fr	RESIDENCE	Rés.	RES
+bpost-nl	STRAAT	str.	STR
+bpost-nl	LAAN	ln	LN
+bpost-nl	PLEIN	pl.	PL
+bpost-nl	STEENWEG	stwg	STWG
+bpost-nl	INDUSTRIEZONE	I.Z.	IZ
+bpost-nl	GEBOUW	geb.	GEB
+bpost-nl	SQUARE	sq.	SQ
+bpost-de	STRASSE	Str.	STR;STRAßE
+bpost-de	ALLEE	All.	ALL
+bpost-de	PLATZ	Pl.	PL
+bpost-de	GEWERBEGEBIET	GG.	GG
+bpost-de	RESIDENZ	Res.	RES

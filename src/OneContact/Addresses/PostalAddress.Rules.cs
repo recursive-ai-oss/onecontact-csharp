@@ -15,7 +15,7 @@ public readonly partial struct PostalAddress
             return _parsed;
         }
 
-        if (_parts is null || (_parts.Country != Region.US && _parts.Country != Region.CA))
+        if (_parts is null || (_parts.Country != Region.US && _parts.Country != Region.CA && !Addresses.Tier2.Tier2Reader.Handles(_parts.Country)))
         {
             return null;
         }

@@ -143,6 +143,11 @@ internal static class AddressRenderer
     /// <returns>The text.</returns>
     internal static string Render(ParsedAddress a, AddressStyle style, AddressLayout layout, bool includeCountry)
     {
+        if (a.Tier2 is not null)
+        {
+            return a.Tier2.Render(style, layout, includeCountry);
+        }
+
         List<string> lines = [];
         foreach (ParsedAddressText lead in a.LeadingLines)
         {

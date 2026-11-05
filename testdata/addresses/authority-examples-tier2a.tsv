@@ -1,0 +1,58 @@
+# Examples transcribed from the postal authorities' free public guides, for the first Tier 2 group of countries.
+# id <TAB> citation <TAB> country hint (empty = none) <TAB> country line (1 = the example prints it, so the test renders it) <TAB> input (a backslash-n is a line break) <TAB> expected Postal rendering <TAB> expected Display rendering (= when not pinned)
+# The input is the guide's example as printed. The Postal expectation is the form the guide asks for: La Poste's lines are capitals without accents or punctuation (Guide pratique courrier 2026 p. 19;
+# SP 8855 volume 2, 3.1), the other authorities' lines are kept as written and their locality is in capitals (bpost MassPost 2025 p. 12; UPU sheets; PostNL).
+# Sources: UPU country sheets (upu.int, addressing unit): France 09/2011, Belgium 09/2012, Netherlands 05/2016, Luxembourg 06/2013, Germany 01/2015, Austria 04/2014, Switzerland 06/2024, Monaco 05/2004;
+# bpost, Documentation_Belgian_Template.pdf, section 4; bpost MassPost Guide January 2025 section 1 p. 11; La Poste SP 8855 volume 2 version 1.9 pp. 6-8; La Poste Guide pratique courrier January 2026 pp. 18, 22.
+upu-fr-1	UPU France p.1	FR	1	Monsieur Jean DURAND\n25 RUE DES FLEURS\n33500 LIBOURNE\nFRANCE	MONSIEUR JEAN DURAND\n25 RUE DES FLEURS\n33500 LIBOURNE\nFRANCE	Monsieur Jean Durand\n25 Rue des Fleurs\n33500 Libourne\nFrance
+upu-fr-2	UPU France p.2 residence	FR	1	Monsieur Jean DELHOURME\nChez Mireille COPEAU Appartement 2\nEntrée A Bâtiment Jonquille\n25 RUE DE L EGLISE\nCAUDOS\n33380 MIOS\nFRANCE	MONSIEUR JEAN DELHOURME\nCHEZ MIREILLE COPEAU APPARTEMENT 2\nENTREE A BATIMENT JONQUILLE\n25 RUE DE L EGLISE\nCAUDOS\n33380 MIOS\nFRANCE	=
+upu-fr-3	UPU France p.2 hamlet	FR	1	Madame Isabelle RICHARD\nLE VILLAGE\n82500 AUTERIVE\nFRANCE	MADAME ISABELLE RICHARD\nLE VILLAGE\n82500 AUTERIVE\nFRANCE	=
+upu-fr-4	UPU France p.2 company	FR	1	DURAND SA\nService achat\nZone industrielle Ouest\n22 RUE DES FLEURS\nBP 40122\n33506 LIBOURNE CEDEX\nFRANCE	DURAND SA\nSERVICE ACHAT\nZONE INDUSTRIELLE OUEST\n22 RUE DES FLEURS\nBP 40122\n33506 LIBOURNE CEDEX\nFRANCE	=
+upu-fr-5	UPU France p.2 company box	FR	1	Société DUPONT\nMademoiselle Lucie MARTIN\nRésidence les Capucines\n56 RUE EMILE ZOLA\nBP 90432 MONTFERRIER SUR LEZ\n34092 MONTPELLIER CEDEX 5\nFRANCE	SOCIETE DUPONT\nMADEMOISELLE LUCIE MARTIN\nRESIDENCE LES CAPUCINES\n56 RUE EMILE ZOLA\nBP 90432 MONTFERRIER SUR LEZ\n34092 MONTPELLIER CEDEX 5\nFRANCE	=
+upu-fr-6	UPU France p.1 envelope	FR	1	M. Jean DELHOURME\n25 RUE DE L EGLISE\nCAUDOS\n33380 MIOS\nFRANCE	M JEAN DELHOURME\n25 RUE DE L EGLISE\nCAUDOS\n33380 MIOS\nFRANCE	=
+sp8855-fr-1	SP 8855 v2 p.7 individual	FR	0	Monsieur Jean DELORME\nAppartement 2\nENTREE A BATIMENT JONQUILLE\n25 RUE DE L'EGLISE\nCAUDOS\n33380 MIOS	MONSIEUR JEAN DELORME\nAPPARTEMENT 2\nENTREE A BATIMENT JONQUILLE\n25 RUE DE L EGLISE\nCAUDOS\n33380 MIOS	=
+sp8855-fr-2	SP 8855 v2 p.7 company	FR	0	Société DUPONT\nMonsieur Martin Service Achats\nZONE INDUSTRIELLE OUEST\n35 IMPASSE DES GABARRES\nBP 18 ARVEYRES\n33506 LIBOURNE CEDEX	SOCIETE DUPONT\nMONSIEUR MARTIN SERVICE ACHATS\nZONE INDUSTRIELLE OUEST\n35 IMPASSE DES GABARRES\nBP 18 ARVEYRES\n33506 LIBOURNE CEDEX	=
+guide26-fr-1	Guide courrier 2026 p.18	FR	0	ENTREPRISE SPECIMEN\nMONSIEUR CLAUDE DUPONT\nBATIMENT B\n2 RUE GAMMA\n21000 DIJON	ENTREPRISE SPECIMEN\nMONSIEUR CLAUDE DUPONT\nBATIMENT B\n2 RUE GAMMA\n21000 DIJON	=
+guide26-fr-2	Guide courrier 2026 p.22	FR	0	MME ISABELLE DUPONT\n9 RUE DU COLONEL PIERRE AVIA\n75015 PARIS	MME ISABELLE DUPONT\n9 RUE DU COLONEL PIERRE AVIA\n75015 PARIS	=
+upu-mc-1	UPU Monaco	MC	1	M. René Martin\n1 AVENUE DE L HERMITAGE\n98000 MONACO\nMONACO	M RENE MARTIN\n1 AVENUE DE L HERMITAGE\n98000 MONACO\nMONACO	=
+upu-be-1	UPU Belgium p.2 house	BE	1	Monsieur Alain Dupont\nRue du Vivier 7\n1000 Bruxelles\nBELGIUM	Monsieur Alain Dupont\nRue du Vivier 7\n1000 BRUXELLES\nBELGIUM	Monsieur Alain Dupont\nRue du Vivier 7\n1000 Bruxelles\nBelgium
+upu-be-2	UPU Belgium p.2 care of	BE	1	Monsieur Alain Dupont\nChez Mme Charlotte Durant\nRue du Vivier 15\n1000 Bruxelles\nBELGIUM	Monsieur Alain Dupont\nChez Mme Charlotte Durant\nRue du Vivier 15\n1000 BRUXELLES\nBELGIUM	=
+upu-be-3	UPU Belgium p.2 flat	BE	1	Dhr Paul Janssens\nKortijkstraat 37 bus 1\n9800 Deinze\nBELGIUM	Dhr Paul Janssens\nKortijkstraat 37 bus 1\n9800 DEINZE\nBELGIUM	=
+upu-be-4	UPU Belgium p.2 bpack	BE	1	Mr Alain Dupont\n123-456-789\nbpack De Brouckère\n1000 Bruxelles\nBELGIUM	Mr Alain Dupont\n123-456-789\nbpack De Brouckère\n1000 BRUXELLES\nBELGIUM	=
+upu-be-5	UPU Belgium p.2 spatial	BE	1	Dhr Paul Janssens\nGebouw A - Verdiep 3 - Kamer 8\nVolklorenlaan 81-83 bus 15\n2610 Wilrijk\nBELGIUM	Dhr Paul Janssens\nGebouw A - Verdiep 3 - Kamer 8\nVolklorenlaan 81-83 bus 15\n2610 WILRIJK\nBELGIUM	=
+upu-be-6	UPU Belgium p.2 company	BE	1	Monsieur Alain Dupont\nDurand SA\nRue du Vivier 7C bte 5\n1000 Bruxelles\nBELGIUM	Monsieur Alain Dupont\nDurand SA\nRue du Vivier 7C bte 5\n1000 BRUXELLES\nBELGIUM	=
+upu-be-7	UPU Belgium p.3 function	BE	1	Monsieur Alain Dupont\nManager Service Achats\nDurand SA\nRue du Vivier 7C bte 5\n1000 Bruxelles\nBELGIUM	Monsieur Alain Dupont\nManager Service Achats\nDurand SA\nRue du Vivier 7C bte 5\n1000 BRUXELLES\nBELGIUM	=
+upu-be-8	UPU Belgium p.3 industrial zone	BE	1	Dhr Paul Janssens\nAcme NV\nBuilding West – Verdieping 4\nIndustriele Park B\nBloemendalelaan 62/3 bus 47\n9990 Maldegem\nBELGIUM	Dhr Paul Janssens\nAcme NV\nBuilding West – Verdieping 4\nIndustriele Park B\nBloemendalelaan 62/3 bus 47\n9990 MALDEGEM\nBELGIUM	=
+upu-be-9	UPU Belgium p.3 post box	BE	1	Dhr Paul Janssens\nPostbus 24\n9000 Gent Centrum\nBELGIUM	Dhr Paul Janssens\nPostbus 24\n9000 GENT CENTRUM\nBELGIUM	=
+upu-be-10	UPU Belgium p.1 diagram	BE	1	Dhr Paul Janssens\nAcme NV\nGebouw A – Verdiep 3\nVolklorenlaan 81 bus 15\n2610 Wilrijk\nBELGIUM	Dhr Paul Janssens\nAcme NV\nGebouw A – Verdiep 3\nVolklorenlaan 81 bus 15\n2610 WILRIJK\nBELGIUM	=
+bpost-tpl-1	bpost template s.4 example 1	BE	0	Monsieur Alain Dupont\nRue du Vivier 7\n1000 Bruxelles	Monsieur Alain Dupont\nRue du Vivier 7\n1000 BRUXELLES	=
+bpost-tpl-2	bpost template s.4 example 2	BE	0	Monsieur Alain Dupont\nChez Madame Charlotte Durant\nRue du Vivier 15\n1000 Bruxelles	Monsieur Alain Dupont\nChez Madame Charlotte Durant\nRue du Vivier 15\n1000 BRUXELLES	=
+bpost-tpl-3	bpost template s.4 example 3	BE	0	Dhr Paul Janssens\nKortijkstraat 37 bus 1\n9800 Deinze	Dhr Paul Janssens\nKortijkstraat 37 bus 1\n9800 DEINZE	=
+bpost-tpl-4	bpost template s.4 example 4	BE	0	Dhr Paul Janssens\nPostbus 24\n9000 Gent Centrum	Dhr Paul Janssens\nPostbus 24\n9000 GENT CENTRUM	=
+bpost-mp-1	bpost MassPost 2025 p.11	BE	0	De heer Pierre De Backer\nDepartement Kwaliteit\nbpost\nBroekstraat 130\n9000 Gent	De heer Pierre De Backer\nDepartement Kwaliteit\nbpost\nBroekstraat 130\n9000 GENT	=
+bpost-mp-2	bpost MassPost 2025 p.12 spaces	BE	0	Paul Janssens\nKwaliteitsafdeling\nbpost\nDendermondestraat 55 bus  12\n2018  Antwerpen	Paul Janssens\nKwaliteitsafdeling\nbpost\nDendermondestraat 55 bus 12\n2018 ANTWERPEN	=
+bpost-tpl-box	bpost template s.3 box literal	BE	0	Dhr Paul Janssens\nKortijkstraat 37, b 1\n9800 Deinze	Dhr Paul Janssens\nKortijkstraat 37 bus 1\n9800 DEINZE	=
+upu-nl-1	UPU Netherlands home	NL	1	Dr. Anna de Groot\nDrieslag 5-1\n6832 AM ARNHEM\nNETHERLANDS	Dr. Anna de Groot\nDrieslag 5-1\n6832 AM  ARNHEM\nNETHERLANDS	=
+upu-nl-2	UPU Netherlands organisation	NL	1	Mevr. B. de Jong-Bosch\nHumanoid Enterprise b.v.\nAfdeling 4B\nGebouw Westpoint Kamer 8 II\n2e Hugo de Grootstraat 81-83\n1052 MA AMSTERDAM\nNETHERLANDS	Mevr. B. de Jong-Bosch\nHumanoid Enterprise b.v.\nAfdeling 4B\nGebouw Westpoint Kamer 8 II\n2e Hugo de Grootstraat 81-83\n1052 MA  AMSTERDAM\nNETHERLANDS	=
+upu-nl-3	UPU Netherlands box	NL	1	Mr. Jan Jansen\nPostbus 278\n6880 AC OOSTERBEEK\nNETHERLANDS	Mr. Jan Jansen\nPostbus 278\n6880 AC  OOSTERBEEK\nNETHERLANDS	=
+upu-nl-4	UPU Netherlands diagram	NL	1	Mr. J. de Vries\nAdrianastraat 34\n6832 AM ARNHEM\nNETHERLANDS	Mr. J. de Vries\nAdrianastraat 34\n6832 AM  ARNHEM\nNETHERLANDS	=
+upu-nl-5	UPU Netherlands unspaced postcode	NL	0	Mr. J. de Vries\nAdrianastraat 34\n6832am Arnhem	Mr. J. de Vries\nAdrianastraat 34\n6832 AM  ARNHEM	=
+upu-lu-1	UPU Luxembourg home	LU	1	Mr. Jacques Muller\n71, route de Berlin\nL-1234 DUDELANGE\nLUXEMBOURG	Mr. Jacques Muller\n71 route de Berlin\nL-1234 DUDELANGE\nLUXEMBOURG	=
+upu-lu-2	UPU Luxembourg box	LU	1	Société MJM\nFAO: M. Jacques Muller\nBP 1234\nL-9874 REMICH\nLUXEMBOURG	Société MJM\nFAO: M. Jacques Muller\nBP 1234\nL-9874 REMICH\nLUXEMBOURG	=
+upu-lu-3	UPU Luxembourg bulk user	LU	1	Post Department\nCustomer Department\nL-2998 LUXEMBOURG\nLUXEMBOURG	Post Department\nCustomer Department\nL-2998 LUXEMBOURG\nLUXEMBOURG	=
+upu-lu-4	UPU Luxembourg pack up	LU	1	Mr Jean Dupond\n5001234\n4 rue des Prés\nL-0111 Remich\nLUXEMBOURG	Mr Jean Dupond\n5001234\n4 rue des Prés\nL-0111 REMICH\nLUXEMBOURG	=
+upu-de-1	UPU Germany street	DE	1	Herrn\nQuincy Happy\nWacholderweg 52a\n26133 OLDENBURG\nGERMANY	Herrn\nQuincy Happy\nWacholderweg 52a\n26133 OLDENBURG\nGERMANY	=
+upu-de-2	UPU Germany flats	DE	1	Liselotte Sommer\nRhondorfer Str. 666 // Appartment 47\n50939 KÖLN\nGERMANY	Liselotte Sommer\nRhondorfer Str. 666 // Appartment 47\n50939 KÖLN\nGERMANY	=
+upu-de-3	UPU Germany sub-locality	DE	1	Schloß Britz\nOrtsteil Neukoelln\nAlt-Britz 73\n12359 BERLIN\nGERMANY	Schloß Britz\nOrtsteil Neukoelln\nAlt-Britz 73\n12359 BERLIN\nGERMANY	=
+upu-de-4	UPU Germany poste restante	DE	1	Harry Hase\nPostlagernd\n53131 BONN\nGERMANY	Harry Hase\nPostlagernd\n53131 BONN\nGERMANY	=
+upu-de-5	UPU Germany box	DE	1	Sitftung Warentest\nPostfach 3 41 41\n10724 BERLIN\nGERMANY	Sitftung Warentest\nPostfach 3 41 41\n10724 BERLIN\nGERMANY	=
+upu-de-6	UPU Germany large receiver	DE	1	Citibank Privatkunden AG\n68151 MANNHEIM\nGERMANY	Citibank Privatkunden AG\n68151 MANNHEIM\nGERMANY	=
+upu-de-7	UPU Germany Packstation	DE	1	Lara Lustig\n1234567\nPackstation 101\n53113 BONN\nGERMANY	Lara Lustig\n1234567\nPackstation 101\n53113 BONN\nGERMANY	=
+upu-at-1	UPU Austria home	AT	1	Mr. Max Maier\nRennbahnweg 25/2/15\n1220 WIEN\nAUSTRIA	Mr. Max Maier\nRennbahnweg 25/2/15\n1220 WIEN\nAUSTRIA	=
+upu-at-2	UPU Austria box	AT	1	Mr. Max Maier\nPostfach 100\n1011 WIEN\nAUSTRIA	Mr. Max Maier\nPostfach 100\n1011 WIEN\nAUSTRIA	=
+upu-at-3	UPU Austria rural	AT	1	Mr. Max Maier\nPulkau 18\n3741 PULKAU\nAUSTRIA	Mr. Max Maier\nPulkau 18\n3741 PULKAU\nAUSTRIA	=
+upu-at-4	UPU Austria rural village	AT	1	Mr. Max Maier\nWeingartenweg 1\nRafing\n3741 PULKAU\nAUSTRIA	Mr. Max Maier\nWeingartenweg 1\nRafing\n3741 PULKAU\nAUSTRIA	=
+upu-at-5	UPU Austria diagram	AT	1	Frau\nYvonne Leskovar\nPostgasse 1\n1010 WIEN\nAUSTRIA	Frau\nYvonne Leskovar\nPostgasse 1\n1010 WIEN\nAUSTRIA	=
+upu-ch-1	UPU Switzerland street	CH	1	Herrn\nRudolf Weber\nSolothurnerstrasse 28\n2544 BETTLACH\nSWITZERLAND	Herrn\nRudolf Weber\nSolothurnerstrasse 28\n2544 BETTLACH\nSWITZERLAND	=
+upu-ch-2	UPU Switzerland box	CH	1	Sandoz SA\nRue de Bourgogne 5\nCase postale 12\n1211 GENEVA 6\nSWITZERLAND	Sandoz SA\nRue de Bourgogne 5\nCase postale 12\n1211 GENEVA 6\nSWITZERLAND	=
+upu-ch-3	UPU Switzerland canton	CH	1	Monsieur\nFernand Genoud\nRue du Marché 8\n1556 CERNIAZ VD\nSWITZERLAND	Monsieur\nFernand Genoud\nRue du Marché 8\n1556 CERNIAZ VD\nSWITZERLAND	=

@@ -1,4 +1,4 @@
-# libpostal's per-language address dictionaries (data files only), English and French, as needed for expansion of US and Canadian addresses.
+# libpostal's per-language address dictionaries (data files only): English and French for United States and Canadian addresses, German, Dutch, Italian and Luxembourgish for the Tier 2 group of countries (Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland, Liechtenstein).
 source   libpostal-dictionaries
 licence  MIT
 repo     https://github.com/openvenues/libpostal
@@ -48,3 +48,59 @@ file     fr/cross_streets.txt 35a149287d8a4b57d7e6a5d87c45baa3f04392898afde3f164
 file     fr/elisions.txt 6b6f8aab7262d9527578fb54e4a47678473378682a35c398d921691adaa64f75
 file     all/ambiguous_expansions.txt 288668c54f6a65f83859548be27fcaa88b1a949bceba94780261813f4ec46db2
 file     en/street_names.txt 28c532f9d7108de1bb2ddcdf13c037605e36c5ee0fdbec31e17f624e3490c4b5
+file     de/ambiguous_expansions.txt 39b06bf1de3a8c98915e69056eedb0b252a54f2f87c2dbf5c13685b58ade3dd6
+file     de/concatenated_suffixes_inseparable.txt b223f196c8267f250da467bc173f5776b5908edfa06c0c5e279ddb7b42ff422d
+file     de/concatenated_suffixes_separable.txt fab6c710ec43e01449cd7a5c53b2db8866f3d74b096e436464002998edbfe752
+file     de/cross_streets.txt 90220b1328d91ec5a3215f9e797fcdbed063b9cd1aaeb2a7380c82413672dff8
+file     de/directionals.txt 25b26b95021007345682038c55fbe8f4034d0a6dad5d161837d2648486e015a5
+file     de/entrances.txt d2032d8e270fbbbdd2a72a48d6af6d5abe80cf4674b4c967c0d647b2163b92a8
+file     de/level_types_basement.txt 2eb17a6b36c28cbc156ebb40c941756f0cb2e33d5af00b7c039020e5dd971390
+file     de/level_types_numbered.txt 2b0a42a0d914c4494730c451dfd39c53b70d8c2f9d00866b7e925a2c28141f36
+file     de/level_types_standalone.txt 693672b741e5f0d3a85e211c608648284b321d8887b627d716773d816bffd987
+file     de/near.txt 65f50f8c0af820c2e7fe182efc937af07af619d07d870695c618b58c265ab62c
+file     de/number.txt 62b2bfc4212d88ee156450c469a2fed393310c97b0983aefd0e09ca2a1f05781
+file     de/post_office.txt 01dd1b6cdd0a0353b01ee19b621586adf2e04e4cd60fbe6c08cf7554da20c91e
+file     de/qualifiers.txt 9eb60a8f79f8886d4fe3525f1b0489cc151f9dd290e93425edf44ddd90ccf074
+file     de/staircases.txt 0bff5fde6eee728feabfe26dbd8ff796f26c07044f3df0f300288afe077d73ed
+file     de/stopwords.txt 7a04eef01c400809964810dc6dff3a877e7ca9a587e4729699ef5b6e627192ec
+file     de/street_types.txt c374d5b6b5f6d2cc42d3f3faa9fa2eba95453c538a74aac283d364cb35e4c0e9
+file     de/synonyms.txt 7d4b90115678193853c44f8a59d963272371a38bbf7c8c57ce350e9dd9067733
+file     de/unit_types_numbered.txt 893cb187501a0f96001292f10a2488d016df7967e94bdd8dc62c9b1fe83750d3
+file     nl/ambiguous_expansions.txt 06106e89997218e37c3c6dbb207423afc5f185c05f4141bf1ca5e881d9cd0509
+file     nl/building_types.txt a58e570576143d61da3a1bf69db3b329a4b4ed8e404fd67aaf1331775c66c472
+file     nl/concatenated_suffixes_inseparable.txt 4a9104ac3b6aef3e276c08fd31418a55d809e71a1763084a754083621935c062
+file     nl/concatenated_suffixes_separable.txt da1665812ec69820a65eb88bdcfbca42009e637e2bc4abac7fd374749263ddfd
+file     nl/cross_streets.txt aa408e540eb4d670c41bbb3d69e7fbcac8e991127e2a2dbf22434fd794692e61
+file     nl/directionals.txt 562853166278f674634639ae53cb35d61abc7c339b84b92b8e7acd0170290ab3
+file     nl/entrances.txt 60ac94bee593e937a9a2200d9ddde5233e7d791a6114e069c1d2c6d304e8ab22
+file     nl/level_types_numbered.txt 08d1c37b9896324918c68e04a433b95eda0d14a727a950d99215d00d72f6cba9
+file     nl/level_types_standalone.txt c5e31e136bd71658d46bcea61b4d08d7712ea7cebab8f725928a7f9343ea9140
+file     nl/near.txt 395b2746bc2cf417d4fc551f0bada8f74c38e2499c1bf49d79527957ff7efe3c
+file     nl/number.txt ac84088bef5bee9d4cedac4ab1884919dcadec7b420612c9382e933f800d785d
+file     nl/post_office.txt f62b06eb5b60710ce9c5e75fdbdaa3dbb523874e8f1bfddc28d021bc54e18fe7
+file     nl/qualifiers.txt 177cfda0bdad4093282b8a3d9d79183a7de16d4cfaa950e60a067f3e65a9c9e1
+file     nl/staircases.txt 1b70885abbbe4eee0f8b54f1e31ac62af55055ed44efe8b1660676f5ce929bd5
+file     nl/stopwords.txt 425e9c5a4f5caa180f6d7749075fc3dcadeea5056fb0d060e6d9dd469122500c
+file     nl/street_types.txt a3bbb559d38530b775d5edd210e9e7ce2d809364b16478c9948e7057848965ad
+file     nl/synonyms.txt d69e10582d893c7e46b7c726731b23d39f689193c0ce7d169644986164dd1a3c
+file     nl/unit_types_numbered.txt 25fac3ac5dbb9b21d444897b85cd636e16740882c0d182e0b42b86bc7a542afe
+file     it/ambiguous_expansions.txt c92ab535d33c362b9ef3a985f82e185f99c3e5fd863babc6692d12cf09aa82bb
+file     it/building_types.txt 0daefdce1735c74b385eef3145cb3eda27a53cfb122ffb7adc3fad4a6e0aa200
+file     it/cross_streets.txt 74740c1c8669b78ddd582155a9d880c82b8e3c9b5e2a7ebfa866778123b28a05
+file     it/directionals.txt 76f7a360b718303d904a991a5c42869b65272d80025af74604d8420b7d5d1212
+file     it/entrances.txt 3ef62019e2ff1b73a0b87c08af6dcf91cd01454f7c5d93313d19958935eae881
+file     it/level_types_basement.txt fb727688efe904d375a39f02641df0dacf1da88518fdaffa2c187c7418f37bfc
+file     it/level_types_numbered.txt f9e826bf0c1272bd507fd42287011a7b72f7ceb77f39958a4e8c8daa0c76f919
+file     it/level_types_standalone.txt e72987d1437f138d08a02996b73b83ea73cff89c63d7edea44b3fa82b79a77a9
+file     it/near.txt 0170b827115165f62fa926baf2df72a82592ba4a7493ceac65a5c8320ffe4e74
+file     it/no_number.txt dc4fe44b2d247dd893876fc6afcdb2bc775fbb3b059cf5492e4a3040e6a541c2
+file     it/number.txt fc548d2f8dd55f1b7d80226e1bf05c9eb7704cb42a1d24e8d84f5c7ac732c3b8
+file     it/post_office.txt 9fd4f6864d7c6212bb45fbca6fb8e51b85c708deedaf05d864cc86f1dfa91c67
+file     it/qualifiers.txt 402b759c614341962dc5f9596d81e02b23fa2d3cf907c044d91555a13ae60ff7
+file     it/staircases.txt a1c176cc5c0cbe6de947836adf270a2d8d53164b5dc617b4816a2d759fd056b6
+file     it/stopwords.txt 19c5c2c0984ce12934eea766bf8c8665257b5043f25327b94499fe6c2daa2bd4
+file     it/street_types.txt b2514f188caeefc447a59b107cdc9c6e862f676491f359bb21ed57126170d27b
+file     it/synonyms.txt 6adc11d6afa736aebe8468283df7b51bcd63cd0e418d973c6777ea6e6fe45105
+file     it/unit_types_numbered.txt 6b0c566457315c97827949b399d6f6d9232253c89a775b50471a897016ec80ef
+file     lb/concatenated_suffixes_separable.txt df319b6ba1a15aadb9344736466ee162e4e95787ec1ab5f38f248f175c00b9d0
+file     lb/street_types.txt df319b6ba1a15aadb9344736466ee162e4e95787ec1ab5f38f248f175c00b9d0

@@ -1,0 +1,19 @@
+# Delivery words. Columns: countries (comma separated), role, variant (upper case, no accents), printed form.
+# role box: a box designator followed by the box number. role general: a poste restante word that stands alone. role station: a parcel locker designator followed by its number.
+# La Poste guide p. 20 (BP, CS, TSA, poste restante); UPU Germany, Austria, Switzerland, Luxembourg and Belgium sheets; bpost template 2 (Postbus, Boite Postale, PB, BP).
+FR,MC,GP,MQ,GF,RE,YT,LU	box	BP	BP
+FR,MC,GP,MQ,GF,RE,YT,LU	box	BOITE POSTALE	BP
+FR,MC,GP,MQ,GF,RE,YT	box	CS	CS
+FR,MC,GP,MQ,GF,RE,YT	box	TSA	TSA
+FR,MC,GP,MQ,GF,RE,YT	general	POSTE RESTANTE	POSTE RESTANTE
+DE,AT,CH,LI,LU	box	POSTFACH	Postfach
+DE,AT,CH,LI	box	PF	Postfach
+CH,LI	box	CASE POSTALE	Case postale
+CH,LI	box	CASELLA POSTALE	Casella postale
+NL,BE,LU	box	POSTBUS	Postbus
+BE	box	BOITE POSTALE	Boite Postale
+BE	box	BP	BP
+BE	box	PB	PB
+DE	general	POSTLAGERND	Postlagernd
+DE	station	PACKSTATION	Packstation
+BE	station	BPACK	bpack

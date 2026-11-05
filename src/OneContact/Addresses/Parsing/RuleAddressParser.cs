@@ -22,11 +22,54 @@ public static class RuleAddressParser
 
     /// <summary>Reads an address.</summary>
     /// <param name="input">The text: one or several lines. Offsets in the result index this span.</param>
-    /// <param name="hint">The country to assume when the content does not say; <see cref="Region.Unknown"/> for none. A hint other than the United States or Canada is refused.</param>
+    /// <param name="hint">The country to assume when the content does not say; <see cref="Region.Unknown"/> for none. A hint outside the United States, Canada and the first Tier 2 group (France with its overseas departments, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland, Liechtenstein) is refused.</param>
     /// <param name="address">The parsed address, or <see langword="null"/> when the status is not <see cref="OperationStatus.Done"/>.</param>
     /// <param name="detail">Issues, and per field its offsets and decision source.</param>
     /// <returns><see cref="OperationStatus.Done"/>, or <see cref="OperationStatus.InvalidData"/> with the reason in <paramref name="detail"/>.</returns>
     public static OperationStatus TryParse(ReadOnlySpan<char> input, Region hint, out ParsedAddress? address, out ParseDetail detail)
+    {
+        // A country of the first Tier 2 group is read by its own rules. Without a hint the United States and Canada are tried first, and text they cannot read is
+        // offered to the Tier 2 rules, which read it only when the postcode and the content point to one country.
+        if (Tier2.Tier2Reader.Handles(hint))
+        {
+            return Tier2.Tier2Reader.TryParse(input.ToString(), hint, out address, out detail);
+        }
+
+        // A country name, a country letter before the postcode (L-1234) or a Dutch postcode names the country outright, so it is read before the United States rules
+        // could take the five digits for a ZIP.
+        ParsedAddress? other = null;
+        ParseDetail otherDetail = ParseDetail.Failure(ReasonCode.AddressNoLastLine, default);
+        OperationStatus otherStatus = OperationStatus.InvalidData;
+        if (hint.IsUnknown)
+        {
+            otherStatus = Tier2.Tier2Reader.TryParse(input.ToString(), hint, out other, out otherDetail);
+            if (otherStatus == OperationStatus.Done && other is { CountryConfidence: >= 0.97f })
+            {
+                address = other;
+                detail = otherDetail;
+                return OperationStatus.Done;
+            }
+        }
+
+        OperationStatus status = TryParseUsCa(input, hint, out address, out detail);
+        if (status != OperationStatus.Done && otherStatus == OperationStatus.Done)
+        {
+            address = other;
+            detail = otherDetail;
+            return OperationStatus.Done;
+        }
+
+        // Text that has a postcode and a locality of a Tier 2 country but no way to tell which: the reason is more useful than "no last line".
+        if (status != OperationStatus.Done && hint.IsUnknown && detail.PrimaryReason.Equals(ReasonCode.AddressNoLastLine)
+            && (otherDetail.PrimaryReason.Equals(ReasonCode.AddressCountryUndetermined) || otherDetail.PrimaryReason.Equals(ReasonCode.AddressCountryConflict)))
+        {
+            detail = otherDetail;
+        }
+
+        return status;
+    }
+
+    private static OperationStatus TryParseUsCa(ReadOnlySpan<char> input, Region hint, out ParsedAddress? address, out ParseDetail detail)
     {
         address = null;
         string text = input.ToString();
