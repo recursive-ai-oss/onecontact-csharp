@@ -18,7 +18,7 @@ public sealed class WebAddressJsonConverter : JsonConverter<WebAddress>
     public override void Write(Utf8JsonWriter writer, WebAddress value, JsonSerializerOptions options)
     {
         ArgumentNullException.ThrowIfNull(writer);
-        writer.WriteStringValue(value.Canonical);
+        JsonText.WriteString(writer, value.Canonical);
     }
 
     /// <inheritdoc/>
@@ -29,7 +29,7 @@ public sealed class WebAddressJsonConverter : JsonConverter<WebAddress>
     public override void WriteAsPropertyName(Utf8JsonWriter writer, [DisallowNull] WebAddress value, JsonSerializerOptions options)
     {
         ArgumentNullException.ThrowIfNull(writer);
-        writer.WritePropertyName(value.Canonical);
+        JsonText.WritePropertyName(writer, value.Canonical);
     }
 
     private static WebAddress Parse(string? text)

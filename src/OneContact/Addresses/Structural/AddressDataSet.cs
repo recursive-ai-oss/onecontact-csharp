@@ -184,6 +184,12 @@ internal sealed class AddressDataSet
     /// <returns>The node, or <see langword="null"/> when there is none.</returns>
     internal AddressNode? Find(string key)
     {
+        // Every stored key is well-formed UTF-8, so a key with a lone surrogate matches none and cannot be encoded.
+        if (!RecursiveAI.OneContact.Text.Utf16Text.IsWellFormed(key))
+        {
+            return null;
+        }
+
         byte[] wanted = Utf8.GetBytes(key);
         int low = 0;
         int high = _nodeCount - 1;

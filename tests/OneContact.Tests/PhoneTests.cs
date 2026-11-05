@@ -429,7 +429,7 @@ public class PhoneTests
     {
         PhoneNumber p = PhoneNumber.Parse("+1 202 456 1111 ext 5");
         string json = JsonSerializer.Serialize(p, ContactJsonContext.Default.PhoneNumber);
-        Assert.Equal("\"\\u002B12024561111;ext=5\"", json);
+        Assert.Equal("\"+12024561111;ext=5\"", json);
         Assert.Equal(p, JsonSerializer.Deserialize(json, ContactJsonContext.Default.PhoneNumber));
     }
 

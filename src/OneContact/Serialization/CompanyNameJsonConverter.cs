@@ -18,7 +18,7 @@ public sealed class CompanyNameJsonConverter : JsonConverter<CompanyName>
     public override void Write(Utf8JsonWriter writer, CompanyName value, JsonSerializerOptions options)
     {
         ArgumentNullException.ThrowIfNull(writer);
-        writer.WriteStringValue(value.Canonical);
+        JsonText.WriteString(writer, value.Canonical);
     }
 
     /// <inheritdoc/>
@@ -29,7 +29,7 @@ public sealed class CompanyNameJsonConverter : JsonConverter<CompanyName>
     public override void WriteAsPropertyName(Utf8JsonWriter writer, [DisallowNull] CompanyName value, JsonSerializerOptions options)
     {
         ArgumentNullException.ThrowIfNull(writer);
-        writer.WritePropertyName(value.Canonical);
+        JsonText.WritePropertyName(writer, value.Canonical);
     }
 
     private static CompanyName Parse(string? text)

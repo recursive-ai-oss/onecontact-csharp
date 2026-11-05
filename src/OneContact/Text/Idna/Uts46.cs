@@ -108,7 +108,9 @@ internal static class Uts46
 
             foreach (int cp in labels[i])
             {
-                sb.Append(char.ConvertFromUtf32(cp));
+                // Punycode can decode to a surrogate code point, which is not a scalar value and cannot be written as UTF-16; it is already an error
+                // (surrogates are disallowed), so the result carries U+FFFD in its place.
+                sb.Append(cp is >= 0xD800 and <= 0xDFFF ? '�' : char.ConvertFromUtf32(cp));
             }
         }
 
@@ -143,8 +145,8 @@ internal static class Uts46
             }
             else if (char.IsSurrogate(domain[i]))
             {
-                // A lone surrogate is not a scalar value; it can only be disallowed.
-                cp = domain[i];
+                // The domain is a USVString: a lone surrogate reads as U+FFFD (WHATWG URL, domain to ASCII), which is disallowed.
+                cp = 0xFFFD;
             }
 
             IdnaStatus status = IdnaTables.GetStatus(cp, out ReadOnlySpan<char> mapping);
@@ -274,14 +276,14 @@ internal static class Uts46
     {
         for (int i = 0; i < text.Length; i++)
         {
-            if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length)
+            if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
             {
                 target.Add(char.ConvertToUtf32(text[i], text[i + 1]));
                 i++;
             }
             else
             {
-                target.Add(text[i]);
+                target.Add(char.IsSurrogate(text[i]) ? 0xFFFD : text[i]);
             }
         }
     }

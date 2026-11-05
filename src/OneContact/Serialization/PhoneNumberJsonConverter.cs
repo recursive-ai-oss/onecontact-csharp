@@ -18,7 +18,7 @@ public sealed class PhoneNumberJsonConverter : JsonConverter<PhoneNumber>
     public override void Write(Utf8JsonWriter writer, PhoneNumber value, JsonSerializerOptions options)
     {
         ArgumentNullException.ThrowIfNull(writer);
-        writer.WriteStringValue(value.Canonical);
+        JsonText.WriteString(writer, value.Canonical);
     }
 
     /// <inheritdoc/>
@@ -29,7 +29,7 @@ public sealed class PhoneNumberJsonConverter : JsonConverter<PhoneNumber>
     public override void WriteAsPropertyName(Utf8JsonWriter writer, [DisallowNull] PhoneNumber value, JsonSerializerOptions options)
     {
         ArgumentNullException.ThrowIfNull(writer);
-        writer.WritePropertyName(value.Canonical);
+        JsonText.WritePropertyName(writer, value.Canonical);
     }
 
     private static PhoneNumber Parse(string? text)

@@ -29,12 +29,14 @@
     <Project Path="tools/Ingest.Synthetic/OneContact.Ingest.Synthetic.csproj" />
     <Project Path="tools/Ingest.LibPostalDictionaries/OneContact.Ingest.LibPostalDictionaries.csproj" />
     <Project Path="tools/Eval.AddressGold/OneContact.Eval.AddressGold.csproj" />
+    <Project Path="tools/Eval/Rules/OneContact.Eval.Rules.csproj" />
     <Project Path="tools/Ingest.LibAddressInput/OneContact.Ingest.LibAddressInput.csproj" />
     <Project Path="tools/Ingest.DisposableEmail/OneContact.Ingest.DisposableEmail.csproj" />
     <Project Path="tools/EmailCompare/OneContact.EmailCompare.csproj" />
     <Project Path="tools/Ingest.LibPhoneNumber/OneContact.Ingest.LibPhoneNumber.csproj" />
     <Project Path="tools/Oracles/Phones/OneContact.Oracles.Phones.csproj" />
     <Project Path="tools/data/AddressUsCa/OneContact.Data.AddressUsCa.csproj" />
+    <Project Path="tools/data/blocks/OneContact.Data.Blocks.csproj" />
     <Project Path="tools/Ingest.LibPhoneNumberGeo/OneContact.Ingest.LibPhoneNumberGeo.csproj" />
     <Project Path="tools/Oracles/PhonesGeo/OneContact.Oracles.PhonesGeo.csproj" />
   </Folder>

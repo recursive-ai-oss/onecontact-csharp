@@ -43,6 +43,12 @@ public static class RuleAddressParser
         }
 
         OperationStatus status = new Reader(text, hint).Run(out address, out detail);
+        if (address is not null)
+        {
+            address.SourceText = text;
+            address.Hint = hint;
+        }
+
         Models.IAddressFieldModel? model = Models.ContactModels.Address;
         if (model is null)
         {
@@ -53,6 +59,8 @@ public static class RuleAddressParser
         if (status == OperationStatus.Done && address is not null)
         {
             address = ModelAddressReader.Refine(model, text, address, detail.Issues, out detail);
+            address.SourceText = text;
+            address.Hint = hint;
             return status;
         }
 
@@ -63,6 +71,8 @@ public static class RuleAddressParser
             if (ModelAddressReader.TryRead(model, text, hint, out ParsedAddress? read, out ParseDetail modelDetail) == OperationStatus.Done)
             {
                 address = read;
+                address!.SourceText = text;
+                address.Hint = hint;
                 detail = modelDetail;
                 return OperationStatus.Done;
             }
