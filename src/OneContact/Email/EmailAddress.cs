@@ -27,10 +27,14 @@ public readonly partial struct EmailAddress :
     IEqualityOperators<EmailAddress, EmailAddress, bool>
 {
     private readonly string? _canonical;
+    private readonly int _localLength;
+    private readonly string? _displayName;
 
-    internal EmailAddress(string canonical, SourceSpan source, EmailFacts flags)
+    internal EmailAddress(string canonical, int localLength, string? displayName, SourceSpan source, EmailFacts flags)
     {
         _canonical = canonical;
+        _localLength = localLength;
+        _displayName = displayName;
         Source = source;
         Flags = flags;
     }
@@ -43,6 +47,21 @@ public readonly partial struct EmailAddress :
 
     /// <summary>Gets the facts found about the value.</summary>
     public EmailFacts Flags { get; }
+
+    /// <summary>Gets the local part as written in the canonical form (a quoted local part keeps its quotes). Empty for the default value.</summary>
+    public string LocalPart => Canonical[.._localLength];
+
+    /// <summary>Gets the domain of the canonical form: lowercase, with internationalized labels as A-labels (<c>xn--</c>), or a domain literal in brackets. Empty for the default value.</summary>
+    public string Domain => _canonical is null ? string.Empty : _canonical[(_localLength + 1)..];
+
+    /// <summary>Gets the domain with A-labels shown as Unicode U-labels (UTS 46 ToUnicode). Equal to <see cref="Domain"/> when no label is internationalized and for domain literals.</summary>
+    public string UnicodeDomain => EmailDomain.ToUnicode(Domain);
+
+    /// <summary>Gets the display name of a <c>Name &lt;address&gt;</c> input: quoted strings unquoted, RFC 2047 encoded words decoded, comments dropped; <see langword="null"/> when the input had none. It is not part of the canonical form or the key.</summary>
+    public string? DisplayName => _displayName;
+
+    /// <summary>Gets the address with a suggested domain when the domain looks like a mistyped well-known provider (<c>gmial.com</c> for <c>gmail.com</c>); <see langword="null"/> otherwise. This is only a suggestion: nothing in the value is ever changed.</summary>
+    public string? TypoSuggestion => _canonical is null ? null : EmailRules.SuggestTypoFix(this);
 
     /// <summary>Gets the comparison key for the latest <see cref="KeyVersion"/> (<see cref="KeyVersions.Latest"/>).</summary>
     public string Key => GetKey(KeyVersions.Latest);
@@ -101,7 +120,7 @@ public readonly partial struct EmailAddress :
     /// <param name="result">The parsed value, or the default value when parsing fails.</param>
     /// <returns><see langword="true"/> when the text was parsed.</returns>
     public static bool TryParse(ReadOnlySpan<char> s, out EmailAddress result) =>
-        TryParse(s, out result, out _) == OperationStatus.Done;
+        EmailAddressParser.TryParseValue(s, out result);
 
     /// <summary>The low-level parse: returns a status and a <see cref="ParseDetail"/> instead of throwing.</summary>
     /// <param name="s">The text to parse.</param>

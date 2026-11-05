@@ -1,0 +1,38 @@
+# Cases where the isemail list's own category differs from our reading of the RFCs. Each is listed here with the clause that decides it;
+# none is a divergence from a reference implementation. The first run lists the disagreements; this file records each decision.
+# Format: isemail id ¦ expected (valid | invalid) ¦ reason
+23 ¦ invalid ¦ RFC 3696 section 2: the top-level domain is not all-numeric (the list calls it valid for RFC 5321)
+24 ¦ invalid ¦ RFC 3696 section 2: the top-level domain is not all-numeric (the list calls it valid for RFC 5321)
+63 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+64 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+65 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+67 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+69 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+70 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+73 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+74 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+76 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+78 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+80 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+82 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+83 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+84 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+159 ¦ invalid ¦ RFC 5321 section 4.1.3: an IPv4 or IPv6 address literal that is not well formed is refused; the list files it as valid RFC 5322 domain-literal text
+99 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+127 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+128 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+132 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+141 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+142 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+143 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+145 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+146 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+147 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+150 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+151 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+152 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+154 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+155 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+156 ¦ valid ¦ Surrounding white space, line breaks included, is ignored by every Parse (documented on the value types); RFC 5322 section 3.2.2 puts folding white space around an addr-spec in the same place
+160 ¦ valid ¦ RFC 6532 section 3.2: VCHAR includes UTF8-non-ascii, so a quoted-pair may quote a non-ASCII character (the list predates RFC 6532)
+161 ¦ invalid ¦ RFC 5321 section 4.1.2: a domain label is Let-dig [Ldh-str]; a slash is atext in RFC 5322 but cannot be in a host name

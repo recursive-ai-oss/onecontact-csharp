@@ -1,0 +1,7 @@
+# The isemail address test list (data only), BSD-3-Clause. Test data only; never packed.
+source   isemail
+licence  BSD-3-Clause
+repo     https://github.com/dominicsayers/isemail
+ref      cfeefc3f2f88cb195053f6a309fa4f640cd369b5
+urlbase  https://raw.githubusercontent.com/dominicsayers/isemail/cfeefc3f2f88cb195053f6a309fa4f640cd369b5/
+file     test/tests.xml                       5a87895d3913c97d45e4f46a34e0d36aad956329b8fd83635850b92cd501bff9

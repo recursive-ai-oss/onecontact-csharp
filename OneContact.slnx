@@ -23,5 +23,7 @@
     <Project Path="tools/Ingest/OneContact.Ingest.csproj" />
     <Project Path="tools/Ingest.Synthetic/OneContact.Ingest.Synthetic.csproj" />
     <Project Path="tools/Ingest.LibAddressInput/OneContact.Ingest.LibAddressInput.csproj" />
+    <Project Path="tools/Ingest.DisposableEmail/OneContact.Ingest.DisposableEmail.csproj" />
+    <Project Path="tools/EmailCompare/OneContact.EmailCompare.csproj" />
   </Folder>
 </Solution>

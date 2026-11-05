@@ -70,5 +70,11 @@ Check(AddressRegions.TryGet(Region.US, out AddressRegionInfo? usInfo) && usInfo!
 Check(AddressRegions.TryFindByName("united kingdom", out Region uk) && uk.Code == "GB", "region by name");
 Check(PostalAddress.TryParse("1-1 Chiyoda", Region.Parse("JP"), out _, out ParseDetail refused) == OperationStatus.InvalidData && refused.PrimaryReason == ReasonCode.AddressFreeTextRefused, "free text refused");
 
+// Email: display name, key rules, internationalized domain (the IDNA tables are embedded data), disposable list.
+EmailAddress mailbox = EmailAddress.Parse("\"J. Smith\" <J.Smith+crm@GoogleMail.com>");
+Check(mailbox.Canonical == "J.Smith+crm@googlemail.com" && mailbox.Key == "jsmith@gmail.com" && mailbox.DisplayName == "J. Smith", "email happy path");
+Check(EmailAddress.Parse("info@B\u00fccher.example").Domain == "xn--bcher-kva.example", "email idn domain");
+Check(EmailAddress.Parse("x@mailinator.com").Flags.HasFlag(EmailFacts.Disposable), "email disposable flag");
+
 Console.WriteLine(failures == 0 ? "OneContact AOT smoke: ok" : $"OneContact AOT smoke: {failures} failure(s)");
 return failures == 0 ? 0 : 1;

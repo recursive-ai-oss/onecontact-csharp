@@ -1,0 +1,68 @@
+# Conformance cases from RFC 3696 section 3 (with its verified errata), RFC 2047 encoded words in display names, and RFC 6531/6532.
+# RFC 6531 and RFC 6532 contain no example addresses: the cases below are derived from their grammar changes, each citing the section.
+# Format: id ¦ source ¦ input ¦ expect ¦ canonical ¦ flags ¦ display ¦ key  (see rfc5322.cases)
+#
+# RFC 3696 section 3. Errata 246 (verified) says the three backslash examples are not valid as written: a backslash can only quote
+# inside a quoted-string (RFC 5322 3.2.4), and the quoted forms are the valid ones. Erratum 3563 (also verified) is the opposite
+# reading; the RFC 5322 grammar, which RFC 3696 defers to, sides with erratum 246.
+3696-3-a ¦ RFC 3696 3 with erratum 246 (backslash outside quotes) ¦ Abc\\@def@example.com ¦ invalid:email.invalid-local-part
+3696-3-b ¦ RFC 3696 3 with erratum 246 (backslash outside quotes) ¦ Fred\\\sBloggs@example.com ¦ invalid:email.invalid-local-part
+3696-3-c ¦ RFC 3696 3 with erratum 246 (backslash outside quotes) ¦ Joe.\\\\Blow@example.com ¦ invalid:email.invalid-local-part
+3696-3-d ¦ RFC 3696 3 with erratum 246 (the corrected form) ¦ "Abc\\@def"@example.com ¦ valid ¦ "Abc\\@def"@example.com ¦ QuotedLocalPart ¦ - ¦ "abc\\@def"@example.com
+3696-3-e ¦ RFC 3696 3 with erratum 246 (the corrected form) ¦ "Fred\\\sBloggs"@example.com ¦ valid ¦ "Fred\\\sBloggs"@example.com ¦ QuotedLocalPart
+3696-3-f ¦ RFC 3696 3 with erratum 246 (the corrected form) ¦ "Joe.\\\\Blow"@example.com ¦ valid ¦ "Joe.\\\\Blow"@example.com ¦ QuotedLocalPart
+3696-3-g ¦ RFC 3696 3 ¦ "Abc@def"@example.com ¦ valid ¦ "Abc@def"@example.com ¦ QuotedLocalPart
+3696-3-h ¦ RFC 3696 3 ¦ "Fred Bloggs"@example.com ¦ valid ¦ "Fred Bloggs"@example.com ¦ QuotedLocalPart
+3696-3-i ¦ RFC 3696 3 ¦ user+mailbox@example.com ¦ valid ¦ user+mailbox@example.com ¦ -
+3696-3-j ¦ RFC 3696 3 ¦ customer/department=shipping@example.com ¦ valid ¦ customer/department=shipping@example.com ¦ -
+3696-3-k ¦ RFC 3696 3 ¦ $A12345@example.com ¦ valid ¦ $A12345@example.com ¦ -
+3696-3-l ¦ RFC 3696 3 ¦ !def!xyz%abc@example.com ¦ valid ¦ !def!xyz%abc@example.com ¦ -
+3696-3-m ¦ RFC 3696 3 ¦ _somename@example.com ¦ valid ¦ _somename@example.com ¦ -
+3696-3-n ¦ RFC 3696 3 (apostrophe and acute accent are ordinary characters) ¦ o'brien`s@example.com ¦ valid ¦ o'brien`s@example.com ¦ -
+3696-3-o ¦ RFC 3696 3 (a period may not start the local part) ¦ .user@example.com ¦ invalid:email.invalid-local-part
+3696-3-p ¦ RFC 3696 3 (a period may not end the local part) ¦ user.@example.com ¦ invalid:email.invalid-local-part
+3696-3-q ¦ RFC 3696 3 (no consecutive periods) ¦ us..er@example.com ¦ invalid:email.invalid-local-part
+3696-3-r ¦ RFC 3696 3 (the at-sign, backslash, double quote, comma and brackets need quoting) ¦ a"b@example.com ¦ invalid:email.invalid-local-part
+3696-3-s ¦ RFC 3696 3 and erratum 1690 (254 octets is the longest address: local 64 + @ + domain 189 = 254) ¦ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com ¦ valid ¦ * ¦ -
+3696-3-t ¦ RFC 3696 3 and erratum 1690 (one octet more) ¦ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.coma ¦ valid ¦ * ¦ ExceedsLengthLimit
+3696-2-a ¦ RFC 3696 2 (a label must not start with a hyphen) ¦ a@-example.com ¦ invalid:email.invalid-domain
+3696-2-b ¦ RFC 3696 2 (the top-level domain is not all-numeric) ¦ a@example.1com1 ¦ valid ¦ a@example.1com1 ¦ -
+3696-2-c ¦ RFC 3696 2 (all-numeric top-level domain) ¦ a@example.42 ¦ invalid:email.numeric-top-level-domain
+#
+# RFC 2047 section 5 rule 3 and section 8 examples (display names). The address part is parsed as always.
+2047-8-a ¦ RFC 2047 8 ¦ =?US-ASCII?Q?Keith_Moore?= <moore@cs.utk.edu> ¦ valid ¦ moore@cs.utk.edu ¦ HasDisplayName ¦ Keith Moore
+2047-8-b ¦ RFC 2047 8 ¦ =?ISO-8859-1?Q?Keld_J=F8rn_Simonsen?= <keld@dkuug.dk> ¦ valid ¦ keld@dkuug.dk ¦ HasDisplayName ¦ Keld J\u00f8rn Simonsen
+2047-8-c ¦ RFC 2047 8 (an encoded word next to plain words; the local part keeps its case) ¦ =?ISO-8859-1?Q?Andr=E9?= Pirard <PIRARD@vm1.ulg.ac.be> ¦ valid ¦ PIRARD@vm1.ulg.ac.be ¦ HasDisplayName ¦ Andr\u00e9 Pirard
+2047-8-d ¦ RFC 2047 8 (B encoding, UTF-8) ¦ =?UTF-8?B?SsO8cmdlbg==?= <j@example.com> ¦ valid ¦ j@example.com ¦ HasDisplayName ¦ J\u00fcrgen
+2047-6.2-a ¦ RFC 2047 6.2 (white space between adjacent encoded words is dropped) ¦ =?utf-8?q?a?= =?utf-8?q?b?= <x@y.example> ¦ valid ¦ x@y.example ¦ HasDisplayName ¦ ab
+2047-5-a ¦ RFC 2047 5 (encoded words are not decoded inside a quoted-string) ¦ "=?utf-8?q?a?=" <x@y.example> ¦ valid ¦ x@y.example ¦ HasDisplayName ¦ =?utf-8?q?a?=
+2047-5-b ¦ RFC 2047 5 (an encoded word that cannot be decoded is kept as written) ¦ =?utf-8?q?=ZZ?= <x@y.example> ¦ valid ¦ x@y.example ¦ HasDisplayName ¦ =?utf-8?q?=ZZ?=
+2047-5-c ¦ RFC 2047 5 (a charset this library does not read is kept as written) ¦ =?koi8-r?q?abc?= <x@y.example> ¦ valid ¦ x@y.example ¦ HasDisplayName ¦ =?koi8-r?q?abc?=
+2047-4.2-a ¦ RFC 2047 4.2 (underscore is a space in Q encoding) ¦ =?utf-8?Q?a_b?= <x@y.example> ¦ valid ¦ x@y.example ¦ HasDisplayName ¦ a b
+2047-2231-a ¦ RFC 2231 5 (a language tag after the charset) ¦ =?utf-8*en?q?hi?= <x@y.example> ¦ valid ¦ x@y.example ¦ HasDisplayName ¦ hi
+#
+# RFC 6532 section 3.2: atext, qtext, ctext and dtext include UTF8-non-ascii. RFC 6531 section 3.3: sub-domain may be a U-label.
+6532-3.2-a ¦ RFC 6532 3.2 atext ¦ Pel\u00e9@example.com ¦ valid ¦ Pel\u00e9@example.com ¦ InternationalizedLocalPart
+6532-3.2-b ¦ RFC 6532 3.2 atext (Chinese) ¦ \u7528\u6237@example.com ¦ valid ¦ \u7528\u6237@example.com ¦ InternationalizedLocalPart
+6532-3.2-c ¦ RFC 6532 3.2 atext in a dot-atom ¦ j\u00f6rg.m\u00fcller@example.com ¦ valid ¦ j\u00f6rg.m\u00fcller@example.com ¦ InternationalizedLocalPart
+6532-3.2-d ¦ RFC 6532 3.2 qtext ¦ "j\u00f6rg m"@example.com ¦ valid ¦ "j\u00f6rg m"@example.com ¦ QuotedLocalPart|InternationalizedLocalPart
+6532-3.2-e ¦ RFC 6532 3.2 ctext ¦ a(\u00e9)@example.com ¦ valid ¦ a@example.com ¦ HasComment
+6532-3.2-f ¦ RFC 6532 3.2 (a character outside the BMP, as a surrogate pair) ¦ a\ud83d\ude00@example.com ¦ valid ¦ a\ud83d\ude00@example.com ¦ InternationalizedLocalPart
+6532-3.2-g ¦ RFC 6532 3.2 (an unpaired surrogate is not UTF-8) ¦ a\ud83d@example.com ¦ invalid:email.invalid-character
+6532-3.2-h ¦ RFC 6532 3.2 (a display name with non-ASCII) ¦ J\u00f6rg <j@example.com> ¦ valid ¦ j@example.com ¦ HasDisplayName ¦ J\u00f6rg
+6531-3.3-a ¦ RFC 6531 3.3 (U-label domain, Greek, IANA test names) ¦ \u03b4\u03bf\u03ba\u03b9\u03bc\u03ae@\u03c0\u03b1\u03c1\u03ac\u03b4\u03b5\u03b9\u03b3\u03bc\u03b1.\u03b4\u03bf\u03ba\u03b9\u03bc\u03ae ¦ valid ¦ \u03b4\u03bf\u03ba\u03b9\u03bc\u03ae@xn--hxajbheg2az3al.xn--jxalpdlp ¦ InternationalizedLocalPart|InternationalizedDomain
+6531-3.3-b ¦ RFC 6531 3.3 (U-label domain, Chinese, IANA test names) ¦ \u7528\u6237@\u4f8b\u5b50.\u6d4b\u8bd5 ¦ valid ¦ \u7528\u6237@xn--fsqu00a.xn--0zwm56d ¦ InternationalizedLocalPart|InternationalizedDomain
+6531-3.3-c ¦ RFC 6531 3.3 (an ASCII local part with a U-label domain) ¦ info@b\u00fccher.example ¦ valid ¦ info@xn--bcher-kva.example ¦ RoleAccount|InternationalizedDomain
+6531-3.3-d ¦ RFC 6531 3.3 (UTS 46 maps uppercase) ¦ a@B\u00dcCHER.Example ¦ valid ¦ a@xn--bcher-kva.example ¦ InternationalizedDomain
+6531-3.3-e ¦ RFC 6531 3.3 / UTS 46 (the sharp s is a deviation kept in non-transitional processing) ¦ a@fa\u00df.de ¦ valid ¦ a@xn--fa-hia.de ¦ InternationalizedDomain
+6531-3.3-f ¦ RFC 6531 3.3 (an A-label given as such) ¦ a@xn--mnchen-3ya.de ¦ valid ¦ a@xn--mnchen-3ya.de ¦ InternationalizedDomain
+6531-3.3-g ¦ RFC 6531 3.3 / UTS 46 (an A-label in capitals) ¦ a@XN--MNCHEN-3YA.DE ¦ valid ¦ a@xn--mnchen-3ya.de ¦ InternationalizedDomain
+6531-3.3-h ¦ RFC 6531 3.3 (an A-label that is not Punycode) ¦ a@xn--.example ¦ invalid:email.domain-idna-failed
+6531-3.3-i ¦ RFC 6531 3.3 (an A-label whose decoded form is ASCII only) ¦ a@xn--abc-.example ¦ invalid:email.domain-idna-failed
+6531-3.3-j ¦ RFC 6531 3.3 / RFC 5893 (a right-to-left label next to an ASCII one is a valid bidi domain) ¦ a@\u05d0.com ¦ valid ¦ a@xn--4db.com ¦ InternationalizedDomain
+6531-3.3-k ¦ RFC 6531 3.3 / RFC 5893 rule 1 (a right-to-left label must not start with a digit) ¦ a@0\u05d0.com ¦ invalid:email.domain-idna-failed
+6531-3.3-l ¦ RFC 6531 3.3 / RFC 5892 A.2 (a zero width joiner needs a virama before it) ¦ a@a\u200db.example ¦ invalid:email.domain-idna-failed
+6531-3.3-m ¦ RFC 6531 3.3 / RFC 5891 4.2.3.1 (hyphens in positions 3 and 4 of a U-label) ¦ a@ab--c\u00e9.example ¦ invalid:email.domain-idna-failed
+6531-3.3-n ¦ RFC 6531 3.3 / UTS 46 (a disallowed character: a symbol that IDNA2008 does not allow) ¦ a@ex\u00a9mple.com ¦ valid ¦ a@xn--exmple-jia.com ¦ InternationalizedDomain
+6531-3.3-o ¦ RFC 6531 3.3 / UTS 46 (the ideographic full stop separates labels after mapping) ¦ a@b\u00fccher\u3002example ¦ valid ¦ a@xn--bcher-kva.example ¦ InternationalizedDomain
+6531-3.3-p ¦ RFC 6531 3.3 (the Unicode form is available) ¦ a@xn--bcher-kva.example ¦ valid ¦ a@xn--bcher-kva.example ¦ InternationalizedDomain

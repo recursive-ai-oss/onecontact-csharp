@@ -32,4 +32,4 @@ None packed yet. When packed: the ISO 20275 Entity Legal Form code list publishe
 
 ## disposable-email-domains (CC0 1.0)
 
-None packed yet. When packed: the domain list of the `disposable-email-domains` project, dedicated to the public domain under CC0 1.0, with a credit line.
+The list of disposable email domains (`disposable_email_blocklist.conf`) of the disposable-email-domains project, https://github.com/disposable-email-domains/disposable-email-domains, commit a72c0cecfcdd940d666265e44c0f661282e2d4aa, file SHA-256 e66aa85a1f16d2afa14cbf8a82517091d6df811cf405e29481238c365649c93e. The project dedicates it to the public domain under CC0 1.0 Universal. Credit: the disposable-email-domains contributors. Compiled into the library as the `Disposable` flag data.
