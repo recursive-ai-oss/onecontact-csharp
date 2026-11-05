@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Compiles the per-region address data of libaddressinput into the structural tables of the core library. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Ingest/OneContact.Ingest.csproj" />
+  </ItemGroup>
+
+</Project>

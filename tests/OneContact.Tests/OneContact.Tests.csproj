@@ -17,6 +17,7 @@
     <ProjectReference Include="../../src/OneContact/OneContact.csproj" />
     <ProjectReference Include="../../tools/Ingest/OneContact.Ingest.csproj" />
     <ProjectReference Include="../../tools/Ingest.Synthetic/OneContact.Ingest.Synthetic.csproj" />
+    <ProjectReference Include="../../tools/Ingest.LibAddressInput/OneContact.Ingest.LibAddressInput.csproj" />
   </ItemGroup>
 
   <!-- The synthetic source goes through the same path real data will: built by its tool, verified against its pin, embedded here. -->
@@ -34,6 +35,7 @@
 
   <ItemGroup>
     <Content Include="../../testdata/ingest-synthetic/**" Link="testdata/ingest-synthetic/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../testdata/addresses-structural/**" Link="testdata/addresses-structural/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

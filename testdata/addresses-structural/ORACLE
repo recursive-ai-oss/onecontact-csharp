@@ -1,0 +1,6 @@
+oracle: libaddressinput common module built from google/libaddressinput 81eb9628382b07d371d8ea0b11badf7de3857fd5
+common.jar sha256: dafcc8caee00048a2525cbd8b002bc6117e760f1594c2a99367e8849a68b7292
+json jar: org.json:json:20240303 sha256 3cf6cd6892e32e2b4c1c39e0f52f5248a2f5b37646fdfbb79a66b46b618414ed
+java: openjdk version "21.0.13" 2026-10-20 LTS
+countryinfo.txt sha256: 51a5da9ac621f3457b96b99de798a47a02004f57e4289c1dd587a95730dad720
+cases: 32883
