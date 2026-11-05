@@ -137,6 +137,6 @@ public readonly partial struct PostalAddress
             return OperationStatus.InvalidData;
         }
 
-        return TryParse(text, out value, out detail);
+        return PostalAddressParser.TryParse(text, country, out value, out detail);
     }
 }

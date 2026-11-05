@@ -63,6 +63,10 @@ public static class Contacts
                 OperationStatus web = WebAddress.TryParse(text, out WebAddress w, out detail);
                 value = web == OperationStatus.Done ? ContactValue.From(w) : default;
                 return web;
+            case ContactKind.Address:
+                OperationStatus address = PostalAddress.TryParse(text, out PostalAddress a, out detail);
+                value = address == OperationStatus.Done ? ContactValue.From(a) : default;
+                return address;
             default:
                 value = default;
                 detail = ParseDetail.Failure(

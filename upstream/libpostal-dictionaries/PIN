@@ -1,0 +1,50 @@
+# libpostal's per-language address dictionaries (data files only), English and French, as needed for expansion of US and Canadian addresses.
+source   libpostal-dictionaries
+licence  MIT
+repo     https://github.com/openvenues/libpostal
+ref      ffafa3fcd687631955453df70906c53d5677ce9a
+urlbase  https://raw.githubusercontent.com/openvenues/libpostal/ffafa3fcd687631955453df70906c53d5677ce9a/resources/dictionaries/
+file     en/street_types.txt 203697833de7e8a287a662d7b939f466079c13acd1647771697d1a6a5005156d
+file     en/directionals.txt a994235286b0734fc85b464a8235c683b85889548f0d9b0272c990a22620e97d
+file     en/unit_types_numbered.txt 147e86f3a76ae89de796cc3b757d55472c359d69ff2395377db105ab75c70ff2
+file     en/unit_types_standalone.txt 1d31514c7ba83cb1ede2f27d8da7c2f2cfe17965ea11fc5412f7852ef3e96093
+file     en/level_types_numbered.txt 61e9de010a52b072dd0d7c8714a62055b5cfeb5cfd94a0c4d51415bda007b538
+file     en/level_types_standalone.txt 734f50d2585530f6eda79541462dc03c7a87244d209fc5fcbbaacc123c94217b
+file     en/level_types_basement.txt d34303f6141b4c9ddf6c48c322e6807ba6af80f973f308b24c0ce4d24ce941db
+file     en/level_types_mezzanine.txt 5489297f01c16e75b38581d2611da3d36f323e8236da367d8c49c2d7565a261a
+file     en/level_types_sub_basement.txt f6f1e34c715ba1aeb1950b7c19588f409f710c80e9589a7372f6b331802030e8
+file     en/building_types.txt 5151cdd8a182e5fdd74e30258261a1d78159fa23e2e268caf23348eaef080b61
+file     en/post_office.txt 0424aaf96c342ad06ae8e62048041af6f446c3af021e63968534a2074281cad9
+file     en/no_number.txt a2a093678035056e74dc432c619254e1bd383ccf0ac1d229999e4a062d2054a2
+file     en/number.txt c43231c98dc9ffdd9cba733454c13cf45078d374bfb4897663d17e32ec4d3604
+file     en/qualifiers.txt 12aa6a2ec1115cba8e40f9b398e5b96d6cba14a06140d7dcd030c0caa0000679
+file     en/ambiguous_expansions.txt 264bae60a64b7c7475f34777ead5d7de25fcef4c5908e859b923013181cf986b
+file     en/entrances.txt 8c2eee35e5a4996b51bb295cc80be5ca1b0abff0490d2a2ebc5c66ea5d223488
+file     en/staircases.txt 226e270c2e1bb5f61b4acb537d573cec28dc2cbdef9cbc525697ab74afa626ee
+file     en/synonyms.txt 77155a57c576ac5cd7b10470046305dcd06acdaf137c333cd639a1a6c506a366
+file     en/stopwords.txt 8f270cdc3cc889ac8e612211da6737d0bb3070044f91f36ae29dde7d870531a3
+file     en/near.txt b3d69eb0de33a7052834b029b88e3a4e4d157cf0b0ca0fd354b8b4fd3319ed91
+file     en/cross_streets.txt 149f5cc26df56c58eff83a550dc63bb46dcad96b21cfc7d064f4ffa581b4abeb
+file     fr/street_types.txt d273dd2a05eaaf930ca8cbef93d33bbb45750507d63cf673f1c07d0dd358c08f
+file     fr/directionals.txt 353c75738920c002799f745a4a5f36fd648a7db1e1b1917075b21eda75476903
+file     fr/unit_types_numbered.txt 8f7acb2ae82697fb475442f837d2e0641ba3703c0d3f1e1634a13996f2aae5f0
+file     fr/level_types_numbered.txt 4debc24e760795b6b5294b9c445da1bcb25d51d39ce63ad464ce04955a184642
+file     fr/level_types_standalone.txt 4eacba9f5ccbf7bcacd0cb096506cedcbf3e3c9bb90d6586735a3cd9f037d92b
+file     fr/level_types_basement.txt e29f9bb774843e96be5853f9170be294a905b2807d17feea2e29a9687f7f0174
+file     fr/level_types_mezzanine.txt 184a33b8ae33fc1a1518bc5a8aae653b1e33a48533d0ef47c69b0e4c9dc57c6e
+file     fr/level_types_sub_basement.txt ff4a9fffe245b6e576351135aacdb5cd00a32fc52f015fa71ca20bbe334c7b8b
+file     fr/building_types.txt 4675059b47d921f8ce90296a9742a799c6210115608b7d79844a43260b5a47d2
+file     fr/post_office.txt 73dffe5839e79826e72d38a3b345a6bda9c692a5bbdc1a974f4d136ecb8890a3
+file     fr/no_number.txt ab5e04dc231e897886c566f4c5d28a5ed0cf6d6ad8eec3e1bc7f4a583a4be074
+file     fr/number.txt 6b3a13396b5ace281f862c59a3be9359a76164b16e4676a694665b7fc80001f6
+file     fr/qualifiers.txt 9c2c6e76e551fb4e87be932016b7dc9cbb78bc85a37d7682e96c24da70abdb7a
+file     fr/ambiguous_expansions.txt f9191042ceab0f327214b9493b90ec50227c5a5527b322c3cac439b3434cdee9
+file     fr/entrances.txt fcd5071ba63d0dd6c58b24151b982dbb62aff928dd811984cce60ab11ddc2369
+file     fr/staircases.txt de357598dcd807844b0346a68ca42f9c172e8671acceb5988eed2e3a29dd6e69
+file     fr/synonyms.txt 60a33e86c768ddb39f6326a6f58f79170cb21fdd09c110f9663f1ffdbf63ad30
+file     fr/stopwords.txt 982ad44521da6c46ca492e7eaa99fb8811bdf41183d9589218a36163d63c3d8f
+file     fr/near.txt c84d934319ecd5ea2a9fdcd5e336d8a7c5d3b08c64d1d6bb52cad521b378164c
+file     fr/cross_streets.txt 35a149287d8a4b57d7e6a5d87c45baa3f04392898afde3f16465bc09231ab5ae
+file     fr/elisions.txt 6b6f8aab7262d9527578fb54e4a47678473378682a35c398d921691adaa64f75
+file     all/ambiguous_expansions.txt 288668c54f6a65f83859548be27fcaa88b1a949bceba94780261813f4ec46db2
+file     en/street_names.txt 28c532f9d7108de1bb2ddcdf13c037605e36c5ee0fdbec31e17f624e3490c4b5

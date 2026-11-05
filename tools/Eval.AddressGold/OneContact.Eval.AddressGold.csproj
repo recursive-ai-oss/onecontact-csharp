@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Scores the rule-based address parser on the synthetic gold set and, for the United States rows, a regex address parser from NuGet run as a black box. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <NoWarn>$(NoWarn);CA1303;CA1848</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AddressParser" />
+    <ProjectReference Include="../../src/OneContact/OneContact.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Text.Json.Serialization;
 using RecursiveAI.OneContact.Keys;
 using RecursiveAI.OneContact.Addresses;
+using RecursiveAI.OneContact.Addresses.Parsing;
 using RecursiveAI.OneContact.Serialization;
 
 namespace RecursiveAI.OneContact;
@@ -28,10 +29,14 @@ public readonly partial struct PostalAddress :
 {
     private readonly string? _canonical;
     private readonly AddressParts? _parts;
+    private readonly ParsedAddress? _parsed;
 
-    internal PostalAddress(string canonical, SourceSpan source, AddressFacts flags)
+    // Used by the rule parser: the canonical form is the postal-style line, the parts are what the rules read, and the parsed address keeps the street parts and offsets.
+    internal PostalAddress(string canonical, AddressParts parts, ParsedAddress? parsed, SourceSpan source, AddressFacts flags)
     {
         _canonical = canonical;
+        _parts = parts;
+        _parsed = parsed;
         Source = source;
         Flags = flags;
     }
@@ -110,7 +115,7 @@ public readonly partial struct PostalAddress :
     /// <param name="detail">Issues with reason codes, per-field offsets and confidence, and whether a rule or a model decided each field.</param>
     /// <returns><see cref="OperationStatus.Done"/>, or <see cref="OperationStatus.InvalidData"/> with the reason in <paramref name="detail"/>.</returns>
     public static OperationStatus TryParse(ReadOnlySpan<char> s, out PostalAddress value, out ParseDetail detail) =>
-        PostalAddressParser.TryParse(s, out value, out detail);
+        PostalAddressParser.TryParse(s, Region.Unknown, out value, out detail);
 
     static PostalAddress IParsable<PostalAddress>.Parse(string s, IFormatProvider? provider) => Parse(s);
 

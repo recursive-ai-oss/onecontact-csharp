@@ -1,0 +1,209 @@
+# Examples transcribed from USPS Publication 28 (October 2024, pe.usps.com) and the Canada Post Addressing Guidelines (updated 2021-06-14, English and French editions).
+# id <TAB> citation <TAB> kind <TAB> input <TAB> expected; a backslash-n is a line break. Where a guide shows only the standard form the input is that form in lower case.
+# kind: full = a whole address, rendered as a postal-style label; line-us / line-pr / line-ca = delivery lines only, the test adds a fixed last line.
+p28-211	Pub28 211 fig. 28c2_001	full	abc movers\n1500 e main ave ste 201\nspringfield va 22162-1010	ABC MOVERS\n1500 E MAIN AVE STE 201\nSPRINGFIELD VA 22162-1010
+p28-212	Pub28 212 fig. 28c2_002	full	mr john doe\n123 magnolia st\nhempstead ny 11550-1234	MR JOHN DOE\n123 MAGNOLIA ST\nHEMPSTEAD NY 11550-1234
+p28-213.1-1	Pub28 213.1 fig. 28c2_003_1	line-us	102 main st apt 101	102 MAIN ST APT 101
+p28-213.1-2	Pub28 213.1 fig. 28c2_003_1	line-us	1356 executive dr ste 202	1356 EXECUTIVE DR STE 202
+p28-213.1-3	Pub28 213.1 fig. 28c2_003_1	line-us	1600 central pl bldg 14	1600 CENTRAL PL BLDG 14
+p28-213.1-4	Pub28 213.1 fig. 28c2_003_1	line-us	55 sylvan blvd rm 108	55 SYLVAN BLVD RM 108
+p28-213.2	Pub28 213.2 fig. 28c2_003_2	line-us	425 flower blvd #72	425 FLOWER BLVD # 72
+p28-213.3	Pub28 213.3 fig. 28c2_003_3	full	mr m murray\napt c\n5800 springfield gardens cir\nspringfield va 22162-1058	MR M MURRAY\nAPT C\n5800 SPRINGFIELD GARDENS CIR\nSPRINGFIELD VA 22162-1058
+p28-214a	Pub28 214 fig. 28c2_004	full	john doe\nabc company\n1401 main st\nfalls church va 22042-1441	JOHN DOE\nABC COMPANY\n1401 MAIN ST\nFALLS CHURCH VA 22042-1441
+p28-214b	Pub28 214 fig. 28c2_004	full	attn john doe\nabc company\n1401 main st\nfalls church va 22042-1441	ATTN JOHN DOE\nABC COMPANY\n1401 MAIN ST\nFALLS CHURCH VA 22042-1441
+p28-215a	Pub28 215 fig. 28c2_005 (mailer file)	full	1201 broad st e\npo box 1001\nfalls church va 22062-1234	1201 BROAD ST E\nPO BOX 1001\nFALLS CHURCH VA 22062-1234
+p28-215b	Pub28 215 fig. 28c2_005 (mailpiece)	full	1201 broad st e\npo box 1001\nfalls church va 22041-1001	1201 BROAD ST E\nPO BOX 1001\nFALLS CHURCH VA 22041-1001
+p28-215c	Pub28 215 fig. 28c2_005	full	po box 1001\nfalls church va 22041-1001	PO BOX 1001\nFALLS CHURCH VA 22041-1001
+p28-222	Pub28 222 fig. 28c2_007 (acceptable to preferred)	full	MR. WALTER W. WITHERSPOON JR.\nMDM ENTERPRISES, INC.\n1401 S. MAIN ST.\nPLUMMER'S LANDING, KY 41081-1411	MR WALTER W WITHERSPOON JR\nMDM ENTERPRISES INC\n1401 S MAIN ST\nPLUMMER'S LANDING KY 41081-1411
+p28-222p	Pub28 222 fig. 28c2_007 (preferred)	full	mr walter w witherspoon jr\nmdm enterprises inc\n1401 s main st\nplummer's landing ky 41081-1411	MR WALTER W WITHERSPOON JR\nMDM ENTERPRISES INC\n1401 S MAIN ST\nPLUMMER'S LANDING KY 41081-1411
+p28-225.1a	Pub28 225.1 fig. 28c2_010_1	full	psc 3022 box 684\napo ae 09001-5275	PSC 3022 BOX 684\nAPO AE 09001-5275
+p28-225.1b	Pub28 225.1 fig. 28c2_010_1	full	psc 3022 box 684\nfpo ap 96606-2783	PSC 3022 BOX 684\nFPO AP 96606-2783
+p28-225.1c	Pub28 225.1 fig. 28c2_010_1	full	psc 3022 box 684\napo aa 34035-4198	PSC 3022 BOX 684\nAPO AA 34035-4198
+p28-225.2	Pub28 225.2 fig. 28c2_010_2	full	123 main st\nminot afb nd 58705-1253	123 MAIN ST\nMINOT AFB ND 58705-1253
+p28-224	Pub28 224 fig. 28c2_009	full	123 main st\ntampa fl 33630-9998	123 MAIN ST\nTAMPA FL 33630-9998
+p28-232p	Pub28 232 fig. 28c2_013 (preferred)	line-us	mid island plz	MID ISLAND PLZ
+p28-232a	Pub28 232 fig. 28c2_013 (acceptable)	line-us	MID-ISLAND PLZ	MID ISLAND PLZ
+p28-231-1	Pub28 231/233 fig. 28c2_012_1	line-us	101 main st	101 MAIN ST
+p28-231-2	Pub28 231/233 fig. 28c2_012_1	line-us	101 main st apt 12	101 MAIN ST APT 12
+p28-231-3	Pub28 231/233 fig. 28c2_012_1	line-us	101 w main st apt 12	101 W MAIN ST APT 12
+p28-231-4	Pub28 231/233 fig. 28c2_012_1	line-us	101 w main st s apt 12	101 W MAIN ST S APT 12
+p28-233.2-1	Pub28 233.21/233.22 fig. 28c2_014_1	line-us	234 nw smith st	234 NW SMITH ST
+p28-233.2-2	Pub28 233.21/233.22 fig. 28c2_014_1	line-us	678 main dr s	678 MAIN DR S
+p28-233.2-3	Pub28 233.21/233.22 fig. 28c2_014_1	line-us	101 n bay dr	101 N BAY DR
+p28-233.2-4	Pub28 233.21/233.22 fig. 28c2_014_1	line-us	599 bay blvd sw	599 BAY BLVD SW
+p28-233.1p-1	Pub28 233.1 fig. 28c2_014_2 (preferred)	line-us	n bay st	N BAY ST
+p28-233.1a-1	Pub28 233.1 fig. 28c2_014_2 (acceptable)	line-us	NORTH BAY ST	N BAY ST
+p28-233.1p-2	Pub28 233.1 fig. 28c2_014_2 (preferred)	line-us	e end ave	E END AVE
+p28-233.1a-2	Pub28 233.1 fig. 28c2_014_2 (acceptable)	line-us	EAST END AVE	E END AVE
+p28-233.1p-3	Pub28 233.1 fig. 28c2_014_3 (preferred)	line-us	bay dr w	BAY DR W
+p28-233.1a-3	Pub28 233.1 fig. 28c2_014_3 (acceptable)	line-us	BAY DRIVE WEST	BAY DR W
+p28-233.23	Pub28 233.23 text (two directional words before the name)	line-us	NORTH EAST MAIN ST	NE MAIN ST
+p28-233.3p-1	Pub28 233.3 fig. 28c2_014_5 (preferred)	line-us	county road n e	COUNTY ROAD N E
+p28-233.3a-1	Pub28 233.3 fig. 28c2_014_5 (acceptable)	line-us	COUNTY ROAD N EAST	COUNTY ROAD N E
+p28-233.3p-2	Pub28 233.3 fig. 28c2_014_6 (preferred)	line-us	southeast fwy n	SOUTHEAST FWY N
+p28-233.3a-2	Pub28 233.3 fig. 28c2_014_6 (acceptable)	line-us	SOUTHEAST FREEWAY NORTH	SOUTHEAST FWY N
+p28-233.3p-3	Pub28 233.3 fig. 28c2_014_7 (preferred)	line-us	bay west dr	BAY WEST DR
+p28-233.3a-3	Pub28 233.3 fig. 28c2_014_7 (acceptable)	line-us	BAY W DRIVE	BAY WEST DR
+p28-233.3p-4	Pub28 233.3 fig. 28c2_014_7 (preferred)	line-us	north ave	NORTH AVE
+p28-233.3a-4	Pub28 233.3 fig. 28c2_014_7 (acceptable)	line-us	NORTH AVENUE	NORTH AVE
+p28-233.3-alpha-1	Pub28 233.3 fig. 28c2_014_8 (alphabet indicators)	line-us	bay a dr	BAY A DR
+p28-233.3-alpha-2	Pub28 233.3 fig. 28c2_014_8 (alphabet indicators)	line-us	bay b dr	BAY B DR
+p28-233.3-alpha-3	Pub28 233.3 fig. 28c2_014_8 (alphabet indicators)	line-us	bay c dr	BAY C DR
+p28-234p-1	Pub28 234 fig. 28c2_015 (preferred)	line-us	789 main avenue dr	789 MAIN AVENUE DR
+p28-234a-1	Pub28 234 fig. 28c2_015 (acceptable)	line-us	789 MAIN AVENUE DRIVE	789 MAIN AVENUE DR
+p28-234p-2	Pub28 234 fig. 28c2_015 (preferred)	line-us	4513 3rd street cir w	4513 3RD STREET CIR W
+p28-234a-2	Pub28 234 fig. 28c2_015 (acceptable)	line-us	4513 3RD STREET CIRCLE WEST	4513 3RD STREET CIR W
+p28-234p-3	Pub28 234 fig. 28c2_015 (preferred)	line-us	1000 avenue e	1000 AVENUE E
+p28-234a-3	Pub28 234 fig. 28c2_015 (acceptable)	line-us	1000 AVE E	1000 AVENUE E
+p28-235	Pub28 235 fig. 28c2_017 (preferred)	line-us	514 high st	514 HIGH ST
+p28-237-1	Pub28 237 table	line-us	101 county road 20	101 COUNTY ROAD 20
+p28-237-2	Pub28 237 table	line-us	11216 county highway 140	11216 COUNTY HIGHWAY 140
+p28-237-3	Pub28 237 table	line-us	1501 highway 50	1501 HIGHWAY 50
+p28-237-4	Pub28 237 table	line-us	220 interstate 680	220 INTERSTATE 680
+p28-237-5	Pub28 237 table	line-us	22604 road 123	22604 ROAD 123
+p28-237-6	Pub28 237 table	line-us	1650 state highway 335	1650 STATE HIGHWAY 335
+p28-237-7	Pub28 237 table	line-us	7777 state route 39	7777 STATE ROUTE 39
+p28-237-8	Pub28 237 table	line-us	1155 us highway 70	1155 US HIGHWAY 70
+p28-237-9	Pub28 237 table	line-us	3000 township road 20	3000 TOWNSHIP ROAD 20
+p28-238.1-1	Pub28 238.1 fig. 28c2_019_1	line-us	cpr 830 box 51	CPR 830 BOX 51
+p28-238.1-2	Pub28 238.1 fig. 28c2_019_1	line-us	opc 8 box 74	OPC 8 BOX 74
+p28-238.1-3	Pub28 238.1 fig. 28c2_019_1	line-us	psc 1650 box 10	PSC 1650 BOX 10
+p28-238.1-4	Pub28 238.1 fig. 28c2_019_1	line-us	upr 6 box 96	UPR 6 BOX 96
+p28-238.1-5	Pub28 238.1 fig. 28c2_019_1	line-us	unit 908 box 111	UNIT 908 BOX 111
+p28-238.1-full1	Pub28 238.1 fig. 28c2_019_2	full	sgt robert smith\ncpr 895 box 74\napo ae 09499-0001	SGT ROBERT SMITH\nCPR 895 BOX 74\nAPO AE 09499-0001
+p28-238.1-full2	Pub28 238.1 fig. 28c2_019_2	full	commander\n123 water purification unit\nopc 8 box 74\napo ae 09001-9990	COMMANDER\n123 WATER PURIFICATION UNIT\nOPC 8 BOX 74\nAPO AE 09001-9990
+p28-238.1-full3	Pub28 238.1 fig. 28c2_019_2	full	pvt mike jones\npsc 3022 box 684\nfpo ae 09397-0007	PVT MIKE JONES\nPSC 3022 BOX 684\nFPO AE 09397-0007
+p28-238.1-full4	Pub28 238.1 fig. 28c2_019_2	full	ssgt kevin taylor\nupr 10150 box 4190\napo ap 96278-5041	SSGT KEVIN TAYLOR\nUPR 10150 BOX 4190\nAPO AP 96278-5041
+p28-238.1-full5	Pub28 238.1 fig. 28c2_019_2	full	po3 chad walters\nunit 209856 box 121\nfpo ap 96699-5601	PO3 CHAD WALTERS\nUNIT 209856 BOX 121\nFPO AP 96699-5601
+p28-239	Pub28 239 fig. 28c2_020	full	name\nunit 9900 box 0500\ndpo ae 09701-0500	NAME\nUNIT 9900 BOX 0500\nDPO AE 09701-0500
+p28-241-1	Pub28 241 fig. 28c2_021	line-us	rr 2 box 152	RR 2 BOX 152
+p28-241-2	Pub28 241 fig. 28c2_021	line-us	rr 9 box 23a	RR 9 BOX 23A
+p28-242p	Pub28 242 fig. 28c2_022 (preferred)	line-us	rr 3 box 98d	RR 3 BOX 98D
+p28-242a	Pub28 242 fig. 28c2_022 (acceptable)	line-us	RR03 BOX 98D	RR 3 BOX 98D
+p28-243	Pub28 243 fig. 28c2_023	line-us	rr 4 box 19-1a	RR 4 BOX 19-1A
+p28-244c	Pub28 244 fig. 28c2_024 (correct)	line-us	rr 4 box 87a	RR 4 BOX 87A
+p28-244i	Pub28 244 fig. 28c2_024 (incorrect to correct)	line-us	RFD ROUTE 4 #87A	RR 4 BOX 87A
+p28-245c	Pub28 245 fig. 28c2_025 (correct)	line-us	rr 2 box 18	RR 2 BOX 18
+p28-245i	Pub28 245 fig. 28c2_025 (incorrect; the extra words move above the line)	line-us	RR 2 BOX 18 BRYAN DAIRY RD	BRYAN DAIRY RD\nRR 2 BOX 18
+p28-251c	Pub28 251 fig. 28c2_027 (correct)	line-us	hc 68 box 23a	HC 68 BOX 23A
+p28-251i	Pub28 251 fig. 28c2_027 (incorrect to correct)	line-us	HIGHWAY CONTRACT ROUTE 68 BOX 23A	HC 68 BOX 23A
+p28-252p	Pub28 252 fig. 28c2_028 (preferred)	line-us	hc 68 box 98d	HC 68 BOX 98D
+p28-252a	Pub28 252 fig. 28c2_028 (acceptable)	line-us	HC068 BOX 98D	HC 68 BOX 98D
+p28-252.1	Pub28 252.1 fig. 28c2_028_2	line-us	hc 68 box 19-2b	HC 68 BOX 19-2B
+p28-253c	Pub28 253 fig. 28c2_029 (correct)	line-us	hc 68 box 45	HC 68 BOX 45
+p28-253i	Pub28 253 fig. 28c2_029 (incorrect to correct)	line-us	STAR ROUTE 68 BOX # 45	HC 68 BOX 45
+p28-254c	Pub28 254 fig. 28c2_030 (correct)	line-us	hc 72 box 18	HC 72 BOX 18
+p28-254i	Pub28 254 fig. 28c2_030 (incorrect; the extra words move above the line)	line-us	HC 72 BOX 18 BRYAN DAIRY RD	BRYAN DAIRY RD\nHC 72 BOX 18
+p28-261	Pub28 261 fig. 28c2_032	full	mr john adams\ngeneral delivery\ntampa fl 33602-9999	MR JOHN ADAMS\nGENERAL DELIVERY\nTAMPA FL 33602-9999
+p28-271	Pub28 271 fig. 28c2_034	full	john doe\npostmaster general\nunited states postal service\n475 lenfant plz sw rm 10022\nwashington dc 20260-0010	JOHN DOE\nPOSTMASTER GENERAL\nUNITED STATES POSTAL SERVICE\n475 LENFANT PLZ SW RM 10022\nWASHINGTON DC 20260-0010
+p28-281-1	Pub28 281 fig. 28c2_036	line-us	po box 11890	PO BOX 11890
+p28-281-2	Pub28 281 fig. 28c2_036	line-us	po box g	PO BOX G
+p28-282	Pub28 282 fig. 28c2_037 (ZIP+4 file form to mailpiece)	line-us	PO BOX -0145	PO BOX 00145
+p28-282m	Pub28 282 fig. 28c2_037 (mailpiece)	line-us	po box 00145	PO BOX 00145
+p28-283c	Pub28 283 fig. 28c2_038 (correct)	full	abc company\npo box l\nanytown va 22042	ABC COMPANY\nPO BOX L\nANYTOWN VA 22042
+p28-283i	Pub28 283 fig. 28c2_038 (incorrect to correct)	full	ABC COMPANY\nDRAWER L\nANYTOWN VA 22042	ABC COMPANY\nPO BOX L\nANYTOWN VA 22042
+p28-284	Pub28 284 fig. 28c2_039 (preferred)	full	mr john doe\n123 main st unit 4567\nkryton tn 38101	MR JOHN DOE\n123 MAIN ST UNIT 4567\nKRYTON TN 38101
+p28-285a	Pub28 285 fig. 28c2_040_1	full	john doe\npmb 234\nrr 1 box 12\nherndon va 22071-2716	JOHN DOE\nPMB 234\nRR 1 BOX 12\nHERNDON VA 22071-2716
+p28-285b	Pub28 285 fig. 28c2_040_3 (acceptable)	full	john doe\n10 main st ste 11 pmb 234\nherndon va 22071-2716	JOHN DOE\n10 MAIN ST STE 11 PMB 234\nHERNDON VA 22071-2716
+p28-285c	Pub28 285 fig. 28c2_040_3 (acceptable)	full	joe doe\nrr 1 box 12 pmb 596\nherndon va 22071-2716	JOE DOE\nRR 1 BOX 12 PMB 596\nHERNDON VA 22071-2716
+p28-285d	Pub28 285 fig. 28c2_040_2	full	joe doe\npo box 159753 pmb 3571\nherndon va 22071-2716	JOE DOE\nPO BOX 159753 PMB 3571\nHERNDON VA 22071-2716
+p28-285e	Pub28 285 fig. 28c2_040_5	full	msc 1587\nabc company\n12 e main ave ste 209\nkryton tn 38188-3637	MSC 1587\nABC COMPANY\n12 E MAIN AVE STE 209\nKRYTON TN 38188-3637
+p28-285f	Pub28 285 fig. 28c2_040_5	full	msc 1587\nabc company\npo box 7530\nkryton tn 38188-7530	MSC 1587\nABC COMPANY\nPO BOX 7530\nKRYTON TN 38188-7530
+p28-291a	Pub28 291 fig. 28c2_041_1	full	1234 ave ashford apt 1a\nsan juan pr 00907-1021	1234 AVE ASHFORD APT 1A\nSAN JUAN PR 00907-1021
+p28-291b	Pub28 291 fig. 28c2_041_2	full	mr john doe\n1234 urb los olmos\nponce pr 00731-1235	MR JOHN DOE\n1234 URB LOS OLMOS\nPONCE PR 00731-1235
+p28-291c	Pub28 291 fig. 28c2_041_2	full	mrs jane doe\nurb las gladiolas\n150 calle a\nsan juan pr 00926-0221	MRS JANE DOE\nURB LAS GLADIOLAS\n150 CALLE A\nSAN JUAN PR 00926-0221
+p28-291d	Pub28 291 fig. 28c2_041_2	full	mr john doe\n1234 calle aurora\nmayaguez pr 00680-1234	MR JOHN DOE\n1234 CALLE AURORA\nMAYAGUEZ PR 00680-1234
+p28-291e	Pub28 291 fig. 28c2_041_4	full	mr john doe\nres las margaritas\nedif 1 apt 104\ncaguas pr 00725-1103	MR JOHN DOE\nRES LAS MARGARITAS\nEDIF 1 APT 104\nCAGUAS PR 00725-1103
+p28-291f	Pub28 291 fig. 28c2_041_3	full	mr ralph doe\ncond garden hills plaza\ntorre 2 apt 905\nguaynabo pr 00966-2325	MR RALPH DOE\nCOND GARDEN HILLS PLAZA\nTORRE 2 APT 905\nGUAYNABO PR 00966-2325
+p28-292a	Pub28 292 text (URBANIZATION is written URB)	line-pr	URBANIZACION GOLDEN GATE	URB GOLDEN GATE
+p28-292b	Pub28 292 fig. 28c2_042	full	mr john smith\nurb fair oaks\n123 ave wilson churchill\nrio piedras pr 00926-0123	MR JOHN SMITH\nURB FAIR OAKS\n123 AVE WILSON CHURCHILL\nRIO PIEDRAS PR 00926-0123
+p28-293a	Pub28 293 table (Apartado is PO Box)	full	MR JOHN DOE\nAPARTADO 825\nSAN JUAN PR 00936-0825	MR JOHN DOE\nPO BOX 825\nSAN JUAN PR 00936-0825
+p28-293b	Pub28 293 fig. 28c2_043 (English version)	full	mr john doe\npo box 825\nsan juan pr 00936-0825	MR JOHN DOE\nPO BOX 825\nSAN JUAN PR 00936-0825
+p28-295-1	Pub28 295 fig. 28c2_045_2	line-pr	1510 calle 3 no	1510 CALLE 3 NO
+p28-295-2	Pub28 295 fig. 28c2_045_2	line-pr	1620 calle 17 so	1620 CALLE 17 SO
+p28-295-3	Pub28 295 fig. 28c2_045_3 (correct)	line-pr	150 julio enrique vizcarrondo	150 JULIO ENRIQUE VIZCARRONDO
+p28-295-3i	Pub28 295 fig. 28c2_045_3 (incorrect to correct: the number moves first; the guide also drops CALLE here, which its other examples keep)	line-pr	CALLE JULIO ENRIQUE VIZCARRONDO 150	150 CALLE JULIO ENRIQUE VIZCARRONDO
+p28-295-4a	Pub28 295 fig. 28c2_045_4 (correct)	line-pr	a17 calle 1	A17 CALLE 1
+p28-295-4b	Pub28 295 fig. 28c2_045_4 (correct)	line-pr	b113 calle 191	B113 CALLE 191
+p28-295-4ai	Pub28 295 fig. 28c2_045_4 (incorrect to correct)	line-pr	CALLE 1 A17	A17 CALLE 1
+p28-295-4bi	Pub28 295 fig. 28c2_045_4 (incorrect to correct)	line-pr	CALLE 191 B113	B113 CALLE 191
+p28-295-5	Pub28 295 fig. 28c2_045_5 (correct)	line-pr	a19 calle 117	A19 CALLE 117
+p28-295-5i	Pub28 295 fig. 28c2_045_5 (incorrect to correct)	line-pr	CALLE 117 A-19	A19 CALLE 117
+p28-295-6	Pub28 295 fig. 28c2_045_6 (correct)	line-pr	b17a calle 1	B17A CALLE 1
+p28-295-6i	Pub28 295 fig. 28c2_045_6 (incorrect to correct)	line-pr	B-17A CALLE 1	B17A CALLE 1
+p28-295-7a	Pub28 295 fig. 28c2_045_7 (correct)	line-pr	199-123 calle 19	199-123 CALLE 19
+p28-295-7b	Pub28 295 fig. 28c2_045_7 (correct)	line-pr	23-18 calle 117	23-18 CALLE 117
+p28-295-7ai	Pub28 295 fig. 28c2_045_7 (incorrect to correct)	line-pr	CALLE 19 BLQ 199 123	199-123 CALLE 19
+p28-295-7bi	Pub28 295 fig. 28c2_045_7 (incorrect to correct)	line-pr	CALLE 117 BLOQUE 23 NUM 18	23-18 CALLE 117
+p28-295-8	Pub28 295 fig. 28c2_045_8 (correct)	line-pr	urb golden gate	URB GOLDEN GATE
+p28-295-8i	Pub28 295 fig. 28c2_045_8 (incorrect to correct)	line-pr	URBANIZATION GOLDEN GATE	URB GOLDEN GATE
+p28-295-9a	Pub28 295 fig. 28c2_045_9	full	a17 jard fagota\nponce pr 00731	A17 JARD FAGOTA\nPONCE PR 00731
+p28-295-9b	Pub28 295 fig. 28c2_045_9	full	b133 urb golden gate\nsan juan pr 00920	B133 URB GOLDEN GATE\nSAN JUAN PR 00920
+p28-295-10	Pub28 295 fig. 28c2_045_10	line-pr	po box 1195	PO BOX 1195
+p28-295-11	Pub28 295 fig. 28c2_045_11 (correct)	line-pr	po box 2018	PO BOX 2018
+p28-295-13	Pub28 295 fig. 28c2_045_13	line-pr	rr 2 box 152	RR 2 BOX 152
+p28-295-14c	Pub28 295 fig. 28c2_045_14 (correct)	line-pr	rr 3 box 9800	RR 3 BOX 9800
+p28-295-14i	Pub28 295 fig. 28c2_045_14 (incorrect to correct)	line-pr	RR03 BOX 9800	RR 3 BOX 9800
+p28-295-15c	Pub28 295 fig. 28c2_045_15 (correct)	line-pr	rr 4 box 1725	RR 4 BOX 1725
+p28-295-15i	Pub28 295 fig. 28c2_045_15 (incorrect to correct)	line-pr	RFD ROUTE 4 BZN 1725	RR 4 BOX 1725
+p28-295-16	Pub28 295 fig. 28c2_045_16 (correct)	line-pr	rr 2 box 1980	RR 2 BOX 1980
+p28-i-1	Pub28 Appendix I2 fig. 28api_004_1	full	mrs maría suárez\nurb las gladiolas\n150 calle a\nsan juan pr 00926-3232	MRS MARÍA SUÁREZ\nURB LAS GLADIOLAS\n150 CALLE A\nSAN JUAN PR 00926-3232
+p28-i-2	Pub28 Appendix I2 fig. 28api_004_2	full	mr juan santiago\n1234 calle aurora\nmayagüez pr 00680-1233	MR JUAN SANTIAGO\n1234 CALLE AURORA\nMAYAGÜEZ PR 00680-1233
+p28-i-3	Pub28 Appendix I2 fig. 28api_004_3	full	mr pedro ríos\n1234 urb los olmos\nponce pr 00731-1235	MR PEDRO RÍOS\n1234 URB LOS OLMOS\nPONCE PR 00731-1235
+p28-i-4	Pub28 Appendix I2 fig. 28api_004_4	full	mr pedro o valentín\n23 res llorens torres\nsan juan pr 00924-1234	MR PEDRO O VALENTÍN\n23 RES LLORENS TORRES\nSAN JUAN PR 00924-1234
+p28-i-5	Pub28 Appendix I22 fig. 28api_005_1	full	mr emilio arroyo\ncond ashford palace\n1234 ave ashford apt 1a\nsan juan pr 00907-1234	MR EMILIO ARROYO\nCOND ASHFORD PALACE\n1234 AVE ASHFORD APT 1A\nSAN JUAN PR 00907-1234
+p28-i-6	Pub28 Appendix I22 fig. 28api_005_2	full	mrs nora ríos\n1 cond miraflor apt 104\nsan juan pr 00907-1335	MRS NORA RÍOS\n1 COND MIRAFLOR APT 104\nSAN JUAN PR 00907-1335
+p28-i-7	Pub28 Appendix I5 fig. 28api_008_2	full	mr osiris gonzález\nurb royal oaks\n123 calle 1\nbayamón pr 00961-0123	MR OSIRIS GONZÁLEZ\nURB ROYAL OAKS\n123 CALLE 1\nBAYAMÓN PR 00961-0123
+p28-i-8	Pub28 Appendix I5 fig. 28api_008_2	full	mr pedro rivera\nurb hermosillo\n123 calle 1\nbayamón pr 00961-1212	MR PEDRO RIVERA\nURB HERMOSILLO\n123 CALLE 1\nBAYAMÓN PR 00961-1212
+p28-j-1	Pub28 Appendix J fig. 28apj_003/004	full	123 agnes fancy\nst thomas vi 00802-1222	123 AGNES FANCY\nST THOMAS VI 00802-1222
+p28-j-2	Pub28 Appendix J fig. 28apj_003/004	full	2901 cecelie gade\nst thomas vi 00802-6641	2901 CECELIE GADE\nST THOMAS VI 00802-6641
+p28-j-3	Pub28 Appendix J fig. 28apj_003/004	full	7100 estate bellevue\nst thomas vi 00802-3010	7100 ESTATE BELLEVUE\nST THOMAS VI 00802-3010
+p28-j-4	Pub28 Appendix J fig. 28apj_003/004	full	2 mount royale est\nchristiansted vi 00820-4470	2 MOUNT ROYALE EST\nCHRISTIANSTED VI 00820-4470
+p28-j-5	Pub28 Appendix J fig. 28apj_003/004	full	400 vaglioway way\nfrederiksted vi 00850-2700	400 VAGLIOWAY WAY\nFREDERIKSTED VI 00850-2700
+p28-j-6	Pub28 Appendix J fig. 28apj_003/004	full	rr 1 box 6601\nkingshill vi 00850-9802	RR 1 BOX 6601\nKINGSHILL VI 00850-9802
+p28-j-7	Pub28 Appendix J fig. 28apj_003/004	full	po box 11419\nst thomas vi 00801-4419	PO BOX 11419\nST THOMAS VI 00801-4419
+p28-j-8	Pub28 Appendix J fig. 28apj_003/004	full	po box 131\nchristiansted vi 00821-0131	PO BOX 131\nCHRISTIANSTED VI 00821-0131
+p28-j-9	Pub28 Appendix J fig. 28apj_003/004	full	po box 3500\nfrederiksted vi 00841-3500	PO BOX 3500\nFREDERIKSTED VI 00841-3500
+p28-a2-1	Pub28 A2 fig. 28apa_003 (address types)	full	mr stanley doe\nlast national bank\npo box 345\nnew york ny 10163-0345	MR STANLEY DOE\nLAST NATIONAL BANK\nPO BOX 345\nNEW YORK NY 10163-0345
+p28-a2-2	Pub28 A2 fig. 28apa_003 (individual)	full	mr james f jones\n4417 brooks st ne\nwashington dc 20019-4649	MR JAMES F JONES\n4417 BROOKS ST NE\nWASHINGTON DC 20019-4649
+p28-a2-3	Pub28 A2 fig. 28apa_003 (rural route)	full	h e brown\nrr 3 box 9\ncanton oh 44730-9521	H E BROWN\nRR 3 BOX 9\nCANTON OH 44730-9521
+p28-a2-4	Pub28 A2 fig. 28apa_003 (attention line)	full	rufus langdon\nlaw department\nus postal service\n475 lenfant plz sw rm 6627\nwashington dc 20260-1120	RUFUS LANGDON\nLAW DEPARTMENT\nUS POSTAL SERVICE\n475 LENFANT PLZ SW RM 6627\nWASHINGTON DC 20260-1120
+p28-a2-5	Pub28 A2 fig. 28apa_003 (highway contract)	full	b g light co\nhc 72 box 293a\nduluth mn 55811-9702	B G LIGHT CO\nHC 72 BOX 293A\nDULUTH MN 55811-9702
+p28-a2-6	Pub28 A2 fig. 28apa_003 (post office box)	full	miss janice smith\npo box 34\nduluth mn 55803-0034	MISS JANICE SMITH\nPO BOX 34\nDULUTH MN 55803-0034
+p28-a2-7	Pub28 A2 fig. 28apa_003 (military)	full	ssgt kevin beasley\nunit 2050 box 4190\napo ap 96522-1215	SSGT KEVIN BEASLEY\nUNIT 2050 BOX 4190\nAPO AP 96522-1215
+p28-a32	Pub28 A32 fig. 28apa_005 (Canada; the figure spells STREET out, Canada Post 4.4 abbreviates it)	full-country	ms helen saunders\n1010 clear street\nottawa on  k1a 0b1\ncanada	MS HELEN SAUNDERS\n1010 CLEAR ST\nOTTAWA ON  K1A 0B1\nCANADA
+cp-p4-1	CanadaPost EN p.4 civic address	full	john jones\n10-123 1/2 main st se\nmontreal qc  h3z 2y7	JOHN JONES\n10-123 1/2 MAIN ST SE\nMONTREAL QC  H3Z 2Y7
+cp-p4-2	CanadaPost EN p.4 civic address with additional delivery information	full	john jones\nmarketing dept\n10-123 1/2 main st se\nmontreal qc  h3z 2y7	JOHN JONES\nMARKETING DEPT\n10-123 1/2 MAIN ST SE\nMONTREAL QC  H3Z 2Y7
+cp-p4-3	CanadaPost EN p.4 civic address in a rural area	full	john jones\n123 main st\nmillarville ab  t0l 1k0	JOHN JONES\n123 MAIN ST\nMILLARVILLE AB  T0L 1K0
+cp-p4-4	CanadaPost EN p.4 postal box address	full	john jones\npo box 4001 stn a\nvictoria bc  v8x 3x4	JOHN JONES\nPO BOX 4001 STN A\nVICTORIA BC  V8X 3X4
+cp-p5-1	CanadaPost EN p.5 postal box with civic address and additional delivery information	full	john jones\nmarketing dept\n1425 james st\npo box 4001 stn a\nvictoria bc  v8x 3x4	JOHN JONES\nMARKETING DEPT\n1425 JAMES ST\nPO BOX 4001 STN A\nVICTORIA BC  V8X 3X4
+cp-p5-2	CanadaPost EN p.5 rural route address	full	john jones\nrr 4 lcd main\nlloydminster ab  t9v 2z9	JOHN JONES\nRR 4 LCD MAIN\nLLOYDMINSTER AB  T9V 2Z9
+cp-p5-3	CanadaPost EN p.5 rural route address with civic address	full	john jones\n462 cedar st\nrr 4 lcd main\nlloydminster ab  t9v 2z9	JOHN JONES\n462 CEDAR ST\nRR 4 LCD MAIN\nLLOYDMINSTER AB  T9V 2Z9
+cp-p6-1	CanadaPost EN p.6 rural route with additional address information	full	john jones\nsite 6 comp 10\nrr 4 lcd main\nlloydminster ab  t9v 2z9	JOHN JONES\nSITE 6 COMP 10\nRR 4 LCD MAIN\nLLOYDMINSTER AB  T9V 2Z9
+cp-p6-2	CanadaPost EN p.6 general delivery address	full	john jones\ngd stn a\ncalgary ab  t0h 1a0	JOHN JONES\nGD STN A\nCALGARY AB  T0H 1A0
+cp-p7	CanadaPost EN p.7 basic U.S. address	full-country	john jones\n101 w main st s apt 101\nwashington dc  20019-4649\nusa	JOHN JONES\n101 W MAIN ST S APT 101\nWASHINGTON DC  20019-4649\nUSA
+cp-p10-1	CanadaPost EN p.10 additional address information	full	john jones\nsite 6 comp 10\nrr 6 stn main\nvictoria bc  v8x 3x4	JOHN JONES\nSITE 6 COMP 10\nRR 6 STN MAIN\nVICTORIA BC  V8X 3X4
+cp-p11	CanadaPost EN p.11 additional delivery information	full	john jones\nmarketing dept\n10-123 main st\nmontreal qc  h3z 2y7	JOHN JONES\nMARKETING DEPT\n10-123 MAIN ST\nMONTREAL QC  H3Z 2Y7
+cp-p12-1	CanadaPost EN p.12 unit number before the civic number	full	john jones\n10-123 main st\nmontreal qc  h3z 2y7	JOHN JONES\n10-123 MAIN ST\nMONTREAL QC  H3Z 2Y7
+cp-p12-2	CanadaPost EN p.12 unit number after the street type	full	john jones\n123 main st apt 10\nmontreal qc  h3z 2y7	JOHN JONES\n123 MAIN ST APT 10\nMONTREAL QC  H3Z 2Y7
+cp-p12-3	CanadaPost EN p.12 unit number on the line above	full	john jones\napt 10\n123 main st\nmontreal qc  h3z 2y7	JOHN JONES\nAPT 10\n123 MAIN ST\nMONTREAL QC  H3Z 2Y7
+cp-p13-1	CanadaPost EN p.13 civic number suffix, a letter	full	john jones\n10-123a main st\nmontreal qc  h3z 2y7	JOHN JONES\n10-123A MAIN ST\nMONTREAL QC  H3Z 2Y7
+cp-p13-2	CanadaPost EN p.13 civic number suffix, a fraction	full	john jones\n10-123 1/2 main st\nmontreal qc  h3z 2y7	JOHN JONES\n10-123 1/2 MAIN ST\nMONTREAL QC  H3Z 2Y7
+cp-p14-1	CanadaPost EN p.14 ordinal street name	full	john jones\n10-123 2nd st\nmontreal qc  h3z 2y7	JOHN JONES\n10-123 2ND ST\nMONTREAL QC  H3Z 2Y7
+cp-p14-2	CanadaPost EN p.14 alphanumeric street name	full	john jones\n10-123 36a st\nmontreal qc  h3z 2y7	JOHN JONES\n10-123 36A ST\nMONTREAL QC  H3Z 2Y7
+cp-p15-1	CanadaPost EN p.15 French street type before the name	full	john jones\n10-123 rue main\nmontreal qc  h3z 2y7	JOHN JONES\n10-123 RUE MAIN\nMONTREAL QC  H3Z 2Y7
+cp-p15-2	CanadaPost EN p.15 French street type after an ordinal name	full	john jones\n10-123 1re rue\nmontreal qc  h3z 2y7	JOHN JONES\n10-123 1RE RUE\nMONTREAL QC  H3Z 2Y7
+cp-p15-3	CanadaPost EN p.15/16 street direction last	full	john jones\n10-123 main st se\nmontreal qc  h3z 2y7	JOHN JONES\n10-123 MAIN ST SE\nMONTREAL QC  H3Z 2Y7
+cp-p17-1	CanadaPost EN p.17 province written in full	full	JOHN JONES\n10-123 MAIN ST\nMONTREAL (QUEBEC) H3Z 2Y7	JOHN JONES\n10-123 MAIN ST\nMONTREAL QC  H3Z 2Y7
+cp-p17-2	CanadaPost EN p.17 postal code with a hyphen is unacceptable	full	JOHN JONES\n123 MAIN ST\nMILLARVILLE AB T0L-1K0	JOHN JONES\n123 MAIN ST\nMILLARVILLE AB  T0L 1K0
+cpf-p4-1	CanadaPost FR p.4 adresse municipale	full	claude m untel\n10-123 rue main se\nmontréal qc  h3z 2y7	CLAUDE M UNTEL\n10-123 RUE MAIN SE\nMONTRÉAL QC  H3Z 2Y7
+cpf-p4-2	CanadaPost FR p.4 renseignements supplémentaires sur la livraison	full	claude m untel\ndepartement du marketing\n10-123 rue main se\nmontréal qc  h3z 2y7	CLAUDE M UNTEL\nDEPARTEMENT DU MARKETING\n10-123 RUE MAIN SE\nMONTRÉAL QC  H3Z 2Y7
+cpf-p5-1	CanadaPost FR p.5 adresse municipale en secteur rural	full	claude m untel\n123 rue main\nmillarville ab  t0l 1k0	CLAUDE M UNTEL\n123 RUE MAIN\nMILLARVILLE AB  T0L 1K0
+cpf-p5-2	CanadaPost FR p.5 adresse de case postale	full	claude m untel\ncp 4001 succ a\nvictoria bc  v8x 3x4	CLAUDE M UNTEL\nCP 4001 SUCC A\nVICTORIA BC  V8X 3X4
+cpf-p5-3	CanadaPost FR p.5 case postale avec adresse municipale	full	claude m untel\ndepartement du marketing\n1425 rue james\ncp 4001 succ a\nvictoria bc  v8x 3x4	CLAUDE M UNTEL\nDEPARTEMENT DU MARKETING\n1425 RUE JAMES\nCP 4001 SUCC A\nVICTORIA BC  V8X 3X4
+cpf-p13-1	CanadaPost FR p.13 numéro d unité avant le numéro municipal	full	claude m untel\n10-123 rue main\nmontréal qc  h3z 2y7	CLAUDE M UNTEL\n10-123 RUE MAIN\nMONTRÉAL QC  H3Z 2Y7
+cpf-p13-2	CanadaPost FR p.13 unité après le type de rue	full	claude m untel\n123 rue main app 10\nmontréal qc  h3z 2y7	CLAUDE M UNTEL\n123 RUE MAIN APP 10\nMONTRÉAL QC  H3Z 2Y7
+cpf-p13-3	CanadaPost FR p.13 unité sur la ligne au-dessus	full	claude m untel\napp 10\n123 rue main\nmontréal qc  h3z 2y7	CLAUDE M UNTEL\nAPP 10\n123 RUE MAIN\nMONTRÉAL QC  H3Z 2Y7
+cpf-p14-1	CanadaPost FR p.14 suffixe alphabétique	full	claude m untel\n10-123a rue main\nmontréal qc  h3z 2y7	CLAUDE M UNTEL\n10-123A RUE MAIN\nMONTRÉAL QC  H3Z 2Y7
+cpf-p14-2	CanadaPost FR p.14 suffixe fraction	full	claude m untel\n10-123 1/2 rue main\nmontréal qc  h3z 2y7	CLAUDE M UNTEL\n10-123 1/2 RUE MAIN\nMONTRÉAL QC  H3Z 2Y7
+cpf-p14-3	CanadaPost FR p.14 nom de rue numérique	full	claude m untel\n10-123 2ème rue\nmontréal qc  h3z 2y7	CLAUDE M UNTEL\n10-123 2ÈME RUE\nMONTRÉAL QC  H3Z 2Y7

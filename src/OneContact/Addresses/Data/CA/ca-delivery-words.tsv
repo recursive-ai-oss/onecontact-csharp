@@ -1,0 +1,24 @@
+# Canada Post Addressing Guidelines, section 4.4: delivery identifiers. variant, standard form, role, language.
+# role: box = postal box number, route = rural route identifier, general = general delivery indicator, station = station, outlet = retail postal outlet, site = additional rural information (SITE), comp = compartment (COMP).
+PO BOX	PO BOX	box	en
+P O BOX	PO BOX	box	en
+POST OFFICE BOX	PO BOX	box	en
+CP	CP	box	fr
+C P	CP	box	fr
+CASE POSTALE	CP	box	fr
+RR	RR	route	en
+RURAL ROUTE	RR	route	en
+GD	GD	general	en
+GENERAL DELIVERY	GD	general	en
+PR	PR	general	fr
+POSTE RESTANTE	PR	general	fr
+STN	STN	station	en
+STATION	STN	station	en
+SUCC	SUCC	station	fr
+SUCCURSALE	SUCC	station	fr
+RPO	RPO	outlet	en
+COP	COP	outlet	fr
+SITE	SITE	site	en
+EMPL	EMPL	site	fr
+COMP	COMP	comp	en
+LCD	LCD	station	en

@@ -1,0 +1,33 @@
+# Canada Post Addressing Guidelines, section 5 street directions: variant, abbreviation, language.
+# The French edition lists South-West as South-Ouest, a misprint for Sud-Ouest.
+EAST	E	en
+NORTH	N	en
+NORTHEAST	NE	en
+NORTHWEST	NW	en
+SOUTH	S	en
+SOUTHEAST	SE	en
+SOUTHWEST	SW	en
+WEST	W	en
+E	E	en
+N	N	en
+NE	NE	en
+NW	NW	en
+S	S	en
+SE	SE	en
+SW	SW	en
+W	W	en
+EST	E	fr
+NORD	N	fr
+NORD-EST	NE	fr
+NORD EST	NE	fr
+NORD-OUEST	NO	fr
+NORD OUEST	NO	fr
+SUD	S	fr
+SUD-EST	SE	fr
+SUD EST	SE	fr
+SUD-OUEST	SO	fr
+SUD OUEST	SO	fr
+OUEST	O	fr
+O	O	fr
+NO	NO	fr
+SO	SO	fr
