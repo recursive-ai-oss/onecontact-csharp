@@ -137,6 +137,13 @@ internal sealed class StreetLineParser
             return -1;
         }
 
+        // A suffix word right after the suffix and more words after it: it is either part of the street (section 234.2) or the start of the city (MOUNT VERNON,
+        // FORT WORTH, LAKE CITY). Words that begin city names cannot be told apart by rules, so the end of the street is left to the model.
+        if (j + 2 < n && IsSuffix(tokens[j + 1].Key, canada, out _) && CityStartWords.Contains(tokens[j + 1].Key))
+        {
+            return -1;
+        }
+
         while (j + 1 < n && IsSuffix(tokens[j + 1].Key, canada, out _) && j + 2 < n)
         {
             j++;
@@ -176,7 +183,7 @@ internal sealed class StreetLineParser
         return i;
     }
 
-    private static int BoxPhraseEnd(IReadOnlyList<AddressToken> tokens, int i, bool canada)
+    internal static int BoxPhraseEnd(IReadOnlyList<AddressToken> tokens, int i, bool canada)
     {
         string a = i < tokens.Count ? tokens[i].Key : string.Empty;
         string b = i + 1 < tokens.Count ? tokens[i + 1].Key : string.Empty;
@@ -308,7 +315,7 @@ internal sealed class StreetLineParser
         return s is "ST" or "ND" or "RD" or "TH" or "RE" or "ERE" or "ÈRE" or "E" or "ER" or "EME" or "ÈME" or "IÈME" or "IEME" or "D" or "DE" or "ND" or "NDE";
     }
 
-    private static bool IsSuffix(string key, bool canada, out string standard)
+    internal static bool IsSuffix(string key, bool canada, out string standard)
     {
         if (canada)
         {
@@ -345,7 +352,7 @@ internal sealed class StreetLineParser
         return false;
     }
 
-    private static bool IsUnitDesignator(string key, bool canada, out bool needsRange)
+    internal static bool IsUnitDesignator(string key, bool canada, out bool needsRange)
     {
         if (canada)
         {
@@ -403,8 +410,8 @@ internal sealed class StreetLineParser
         {
             Add(StreetPartRole.MilitaryDesignator, 0, k, "pub28-238.1");
             Add(StreetPartRole.MilitaryNumber, 1, Key(1), "pub28-238.1");
-            Add(StreetPartRole.MilitaryDesignator, 2, "BOX", "pub28-238.1");
-            Add(StreetPartRole.MilitaryNumber, 3, Key(3), "pub28-238.1");
+            Add(StreetPartRole.BoxDesignator, 2, "BOX", "pub28-238.1");
+            Add(StreetPartRole.BoxNumber, 3, Key(3), "pub28-238.1");
             return One(StreetLineKind.Military, _parts);
         }
 
@@ -556,6 +563,14 @@ internal sealed class StreetLineParser
 
         if (_ca)
         {
+            // "RR 4 BOX 932": the United States form is also written in Canada; the box is a box and the words are kept as they are.
+            if (i + 1 < _t.Count && Key(i) == "BOX" && IsNumberLike(Key(i + 1)))
+            {
+                Add(StreetPartRole.BoxDesignator, i, "BOX", rule);
+                Add(StreetPartRole.BoxNumber, i + 1, Key(i + 1), rule);
+                i += 2;
+            }
+
             i = AddStation(i);
             if (i < _t.Count)
             {
@@ -880,6 +895,16 @@ internal sealed class StreetLineParser
 
     private static string Clean(string key, bool us) => us ? key.Replace('-', ' ') : key;
 
+    // COUNTY ROAD, STATE HIGHWAY and the like are names (section 237); STATE ST and OLD FARM RD are not, so the rule applies to the road words only.
+    private static bool IsRoadWord(string key) =>
+        UsCaRules.UsSuffixes.TryGetValue(key, out (string Standard, string Primary) sx) && sx.Primary is "ROAD" or "HIGHWAY" or "ROUTE" or "FREEWAY" or "EXPRESSWAY" or "TURNPIKE";
+
+    private static readonly HashSet<string> CityStartWords = new(StringComparer.Ordinal)
+    {
+        "MOUNT", "MT", "MNT", "MOUNTAIN", "PORT", "FORT", "FT", "LAKE", "LK", "POINT", "PT", "SPRING", "SPRINGS", "SPG", "SPGS", "HARBOR", "HBR", "ISLAND", "IS", "ISLE", "BEACH", "BCH", "CITY", "FALLS", "FLS",
+        "HEIGHTS", "HTS", "PARK", "VALLEY", "VLY", "VILLAGE", "VLG", "CENTER", "CTR", "CREEK", "CRK", "GROVE", "GRV", "HILL", "HL", "HILLS", "HLS", "FOREST", "FRST", "RIDGE", "RDG", "RIVER", "RIV", "ORCHARD", "ORCH",
+    };
+
     private static readonly HashSet<string> HighwayPrefixes = new(StringComparer.Ordinal) { "COUNTY", "STATE", "US", "TOWNSHIP", "INTERSTATE", "FARM", "RANCH" };
 
     // Publication 28 sections 232 to 237: predirectional, street name, suffix and postdirectional, parsed from the right.
@@ -904,7 +929,7 @@ internal sealed class StreetLineParser
         // Suffix (234): the last word before the directionals, with a street name before it. COUNTY ROAD, STATE HIGHWAY and the like are names (237).
         int s = hi - 1 - trailing;
         bool hasSuffix = s - lo >= 1 && UsCaRules.UsSuffixes.ContainsKey(w[s].Key) && !IsNumberOnly(w[s].Key)
-            && !(s - lo >= 1 && HighwayPrefixes.Contains(w[s - 1].Key));
+            && !(s - lo >= 1 && HighwayPrefixes.Contains(w[s - 1].Key) && IsRoadWord(w[s].Key));
         if (!hasSuffix && trailing > 0)
         {
             trailing = 1;

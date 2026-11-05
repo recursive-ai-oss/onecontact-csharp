@@ -45,6 +45,20 @@ Every part carries the rule that decided it (`pub28-233.22`, `canada-post-4.4-un
 
 The canonical form of a `PostalAddress` parsed from text is the `Postal` rendering on one line with `, ` between lines; reading it back gives the same canonical form and key.
 
+## Field names and what the rules read with certainty
+
+Field names: `street.house-number`, `street.fraction`, `street.pre-directional`, `street.name`, `street.type`, `street.post-directional`, `street.unit-designator`, `street.unit-number` (the `4` of `4-123 Main St` is a unit number with the hyphen outside it), `street.box-designator` and `street.box-number` (also after a military unit or a rural route: `PSC 3022 BOX 684`, `RR 4 BOX 932`), `street.route-*`, `street.station-*`, `street.military-*`, `street.general-delivery`, `locality`, `admin-area`, `postal-code`, `country`, and `leading-line` for lines kept as written. The words of one street name are one `street.name` field, and the final period of an abbreviation (`R.R.`, `U.S.A.`) is inside its field.
+
+Forms read only when nothing else is possible:
+
+- the street words that run on into the city with no comma (`72 Dewey St Richford, Vermont`): words left after the street's last word, when no other city is given;
+- a unit designator with its number (or a single letter) at the start of the city words belongs to the delivery line above (`..., Unit H Altura, MN`);
+- a French civic number followed by a comma and a street type (`4291, AV Christophe-Colomb`);
+- words in front of a house number on the line above the city (two or more, or one when another line stands above): kept as a leading line when they hold no digit, street word or directional;
+- the United States spelling of a street type in a Canadian address (`LN` is read as Lane and written as Canada Post writes it).
+
+Forms refused with `address.model-required`: a suffix word right after the street's suffix that also starts city names (`1300 Riverside Dr Mount Vernon WA`, `500 Main St Fort Worth TX`), because rules cannot tell the street's end from the city's start.
+
 ## Reason codes (kind address, numbers 110 to 116; 100 and 101 belong to the structural layer)
 
 `model-required`, `country-undetermined`, `unsupported-country`, `country-conflict` (warning), `no-delivery-line`, `no-last-line`, `unplaced-text` (warning).
