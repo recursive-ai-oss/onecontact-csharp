@@ -193,6 +193,33 @@ public class AddressParsingTests
     }
 
     [Fact]
+    public void DisplayWritesTheHashDesignatorWithoutASpaceAndPostalKeepsIt()
+    {
+        ParsedAddress a = Parse("425 Flower Blvd # 72\nLos Angeles CA 90012");
+        Assert.Equal("425 FLOWER BLVD # 72\nLOS ANGELES CA  90012", a.ToString(AddressStyle.Postal));
+        Assert.Equal("425 FLOWER BLVD # 72, LOS ANGELES CA 90012", a.ToString(AddressStyle.Postal, AddressLayout.SingleLine));
+        Assert.Equal("425 Flower Blvd #72\nLos Angeles, CA 90012", a.ToString(AddressStyle.Display));
+        Assert.Equal("425 Flower Blvd #72, Los Angeles, CA 90012", a.ToString(AddressStyle.Display, AddressLayout.SingleLine));
+        Assert.Equal("425 Flower Blvd #72, Los Angeles, CA 90012", Parse("425 flower blvd #72, los angeles, ca 90012").ToString(AddressStyle.Display, AddressLayout.SingleLine));
+    }
+
+    [Theory]
+    [InlineData("N6W23001 Bluemound Rd\nWaukesha WI 53186", "N6W23001 Bluemound Rd\nWaukesha, WI 53186")]
+    [InlineData("123A Main St Apt 4B\nSpringfield VA 22162", "123A Main St Apt 4B\nSpringfield, VA 22162")]
+    [InlineData("123 Main St Apt 4E\nSpringfield VA 22162", "123 Main St Apt 4E\nSpringfield, VA 22162")]
+    [InlineData("123 Main St Apt B12\nSpringfield VA 22162", "123 Main St Apt B12\nSpringfield, VA 22162")]
+    [InlineData("PO Box 12A\nFairview TX 75069", "PO Box 12A\nFairview, TX 75069")]
+    [InlineData("RR 4 Box 87A\nDover OH 44622", "RR 4 Box 87A\nDover, OH 44622")]
+    [InlineData("123 Main St\nCalgary AB T2P 1J9", "123 Main St\nCalgary, AB T2P 1J9")]
+    [InlineData("350 21st Ave\nNew York NY 10001", "350 21st Ave\nNew York, NY 10001")]
+    [InlineData("12 1re Rue\nMontréal QC H3Z 2Y7", "12 1re Rue\nMontréal, QC H3Z 2Y7")]
+    [InlineData("PSC 3022 Box 684\nFPO AE 09397-0007", "PSC 3022 Box 684\nFPO, AE 09397-0007")]
+    public void DisplayKeepsLettersOfIdentifiersWithDigits(string input, string expected)
+    {
+        Assert.Equal(expected, Parse(input).ToString(AddressStyle.Display));
+    }
+
+    [Fact]
     public void DisplayIsTitleCaseWithAuthorityAbbreviations()
     {
         ParsedAddress a = Parse("123 N MAIN ST APT 4, SPRINGFIELD VA 22162");

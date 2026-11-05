@@ -34,6 +34,12 @@ internal static class DisplayCasing
         "AE", "AP", "AA", "CPR", "OPC", "PSC", "UPR", "US", "USA", "II", "III", "IV", "DC", "URB", "COND", "EDIF", "RES", "NUM", "BLQ",
     };
 
+    // A number after one of these names a unit, so its letters are part of the identifier (APT 4E), never an ordinal ending (5E, French for fifth).
+    private static readonly HashSet<string> UnitWords = new(StringComparer.Ordinal)
+    {
+        "APT", "APARTMENT", "UNIT", "STE", "SUITE", "BLDG", "BUILDING", "RM", "ROOM", "FL", "FLOOR", "LOT", "SPC", "SPACE", "TRLR", "SLIP", "DEPT", "HNGR", "KEY", "LBBY", "OFC", "PH", "PIER", "SIDE", "STOP", "UPPR", "LOWR", "REAR", "FRNT", "BSMT", "APP", "BUREAU", "BOX", "UNITE", "#",
+    };
+
     private static readonly HashSet<string> Lowercase = new(StringComparer.Ordinal) { "DE", "DES", "DU", "LA", "LE", "LES", "DEL", "LAS", "LOS", "ET", "AND", "OF", "THE", "SUR", "SOUS", "EN" };
 
     /// <summary>Turns a standardized (upper case) line into natural title case.</summary>
@@ -46,7 +52,8 @@ internal static class DisplayCasing
         string[] words = postal.Split(' ');
         for (int w = 0; w < words.Length; w++)
         {
-            if (w > 0)
+            // Display writes the # designator tight against its number (#72); Postal keeps the space Publication 28 section 213.2 asks for.
+            if (w > 0 && words[w - 1] != "#")
             {
                 sb.Append(' ');
             }
@@ -69,14 +76,21 @@ internal static class DisplayCasing
                 continue;
             }
 
-            AppendTitleWord(sb, word);
+            AppendTitleWord(sb, word, afterUnitWord: w > 0 && UnitWords.Contains(words[w - 1]));
         }
 
         return sb.ToString();
     }
 
-    private static void AppendTitleWord(StringBuilder sb, string word)
+    private static void AppendTitleWord(StringBuilder sb, string word, bool afterUnitWord)
     {
+        // A word with a digit that starts with a letter is an identifier (N6W23001, K1A, R2, B12): its letters stay as the postal style has them.
+        if (!char.IsAsciiDigit(word[0]) && word.AsSpan().ContainsAnyInRange('0', '9'))
+        {
+            sb.Append(word);
+            return;
+        }
+
         // A word that starts with digits keeps them: an ordinal ending is lower case (5TH is 5th), any other letters stay as they are (a letter after a house number is part of the number: 123A).
         if (char.IsAsciiDigit(word[0]))
         {
@@ -88,7 +102,7 @@ internal static class DisplayCasing
 
             string tail = word[d..];
             sb.Append(word, 0, d);
-            sb.Append(IsOrdinalEnd(tail, 0) ? tail.ToLowerInvariant() : tail);
+            sb.Append(!afterUnitWord && IsOrdinalEnd(tail, 0) ? tail.ToLowerInvariant() : tail);
             return;
         }
 
@@ -191,7 +205,7 @@ internal static class AddressRenderer
         }
 
         StringBuilder d = new();
-        Append(d, city.Length == 0 ? string.Empty : DisplayCasing.Title(city, keepCapitals: false), string.Empty);
+        Append(d, city.Length == 0 ? string.Empty : city is "APO" or "FPO" or "DPO" ? city : DisplayCasing.Title(city, keepCapitals: false), string.Empty);
         if (admin.Length > 0)
         {
             if (d.Length > 0)

@@ -72,7 +72,7 @@ Tables are written in ordinal name order, so the same inputs give the same bytes
 </Project>
 ```
 
-The core project imports `Data/*.ingest.props`, so adding a source never edits a shared file. The tool is also added as a project reference with no output reference, so restoring the consuming project restores the tool; a fresh checkout needs no extra step. Before compiling, `build/Ingest.targets` builds the tool, runs it over the fetched files (`$ONECONTACT_UPSTREAM/<source>`, or the `Files` metadata), and embeds `<source>.ocd` as the resource `OneContact.Data.<source>.ocd`. The notice text and the provenance record are packed under `notices/` in the package. In code:
+The core project imports `Data/*.ingest.props`, so adding a source never edits a shared file. The tool is restored and built by the target itself, not referenced as a project (a reference would copy the tool into the output and publish folder of everything that uses the library); a fresh checkout needs no extra step. Before compiling, `build/Ingest.targets` builds the tool, runs it over the fetched files (`$ONECONTACT_UPSTREAM/<source>`, or the `Files` metadata), and embeds `<source>.ocd` as the resource `OneContact.Data.<source>.ocd`. The notice text and the provenance record are packed under `notices/` in the package. In code:
 
 ```csharp
 private static readonly EmbeddedTables Tables = new(typeof(Marker).Assembly, "OneContact.Data.phonenumber.ocd");
