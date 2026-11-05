@@ -139,7 +139,7 @@ public class ValueTypeContractTests
         Assert.Equal(new SourceSpan(0, 14), detail.Issues[0].Span);
 
         PhoneNumber ok = PhoneNumber.Parse("(202) 456-1111", Region.US);
-        Assert.Equal("(202) 456-1111", ok.Canonical);
+        Assert.Equal("+12024561111", ok.Canonical);
         Assert.True(PhoneNumber.TryParse("(202) 456-1111", Region.US, out _));
         Assert.False(PhoneNumber.TryParse("(202) 456-1111", Region.Unknown, out _));
     }
