@@ -52,7 +52,8 @@ internal static class DisplayCasing
         string[] words = postal.Split(' ');
         for (int w = 0; w < words.Length; w++)
         {
-            if (w > 0)
+            // Display writes the # designator tight against its number (#72); Postal keeps the space Publication 28 section 213.2 asks for.
+            if (w > 0 && words[w - 1] != "#")
             {
                 sb.Append(' ');
             }
