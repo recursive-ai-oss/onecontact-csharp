@@ -90,7 +90,9 @@ public class SpanModelTests
         }
 
         var switchable = new Switchable(model);
-        ContactModels.Register("RecursiveAI.OneContact.Models.Tier1.Test", 99, model, model, switchable);
+        // Registration is process-wide and the first registration of a rank wins. Tier1Tests registers rank 99 without a span model, and test classes
+        // run in any order, so this one takes a rank above it; it carries the same address and name models, so both orders give the same behaviour.
+        ContactModels.Register("RecursiveAI.OneContact.Models.Tier1.Test", 100, model, model, switchable);
         ExtractResult rulesOnly = new ContactExtractor { Sources = ExtractionSources.Text, DefaultRegion = Region.US }.ExtractText(Signature);
         switchable.On = true;
         ExtractResult withModel = new ContactExtractor { Sources = ExtractionSources.Text, DefaultRegion = Region.US }.ExtractText(Signature);
