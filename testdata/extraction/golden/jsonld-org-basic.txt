@@ -1,0 +1,7 @@
+unit Bytes
+record 0 Organization src=JsonLd conf=1 span=125+410
+  #0 Name JsonLd raw="Example Widgets Inc." text="Example Widgets Inc." span=201+20 conf=1 => Company:Example Widgets Inc. facts=HasLegalForm|LegalFormAmbiguous
+  #1 Website JsonLd raw="https://www.example.com/" text="https://www.example.com/" span=234+24 conf=1 => Web:https://www.example.com/
+  #2 Phone JsonLd raw="+1-202-555-0143" text="+1-202-555-0143" span=277+15 conf=1 => Phone:+12025550143 facts=Valid|InternationalInput
+  #3 Email JsonLd raw="info@example.com" text="info@example.com" span=307+16 conf=1 => Email:info@example.com facts=RoleAccount
+  #4 Address JsonLd raw="{\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"100 Main Street\",\n    \"addressLocality\": \"Springfield\",\n    \"addressRegion\": \"IL\",\n    \"postalCode\": \"62701\",\n    \"addressCountry\": \"US\"\n  }" text="100 Main Street, Springfield, IL, 62701, US" span=339+194 conf=1 flags=Composed => Address:100 Main Street, Springfield IL 62701

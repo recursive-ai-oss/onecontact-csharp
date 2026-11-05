@@ -1,0 +1,10 @@
+unit Bytes
+record 0 Person src=JsonLd conf=1 span=125+200
+  #0 Name JsonLd raw="Robin Worker" text="Robin Worker" span=183+12 conf=1 => Person:Robin Worker
+  #1 Organization JsonLd raw="Employer Ltd" text="Employer Ltd" span=240+12 conf=1 => Company:Employer Ltd facts=HasLegalForm|LegalFormAmbiguous
+  link WorksFor -> record 1
+record 1 Organization src=JsonLd conf=1 span=208+116
+  #2 Name JsonLd raw="Employer Ltd" text="Employer Ltd" span=240+12 conf=1 => Company:Employer Ltd facts=HasLegalForm|LegalFormAmbiguous
+  #3 Website JsonLd raw="https://employer.example.co.uk" text="https://employer.example.co.uk" span=261+30 conf=1 => Web:https://employer.example.co.uk/
+  #4 Phone JsonLd raw="+44 20 7946 0000" text="+44 20 7946 0000" span=306+16 conf=1 => Phone:+442079460000 facts=Valid|InternationalInput
+  link HasMember -> record 0

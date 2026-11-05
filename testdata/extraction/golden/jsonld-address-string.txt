@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Organization src=JsonLd conf=1 span=125+148
+  #0 Name JsonLd raw="String Address Shop" text="String Address Shop" span=190+19 conf=1 => Company:String Address Shop
+  #1 Address JsonLd raw="1600 Pennsylvania Avenue NW, Washington, DC 20500" text="1600 Pennsylvania Avenue NW, Washington, DC 20500" span=222+49 conf=1 flags=RegionInferred => Address:1600 PENNSYLVANIA AVE NW, WASHINGTON DC 20500 facts=CountryInferred

@@ -1,3 +1,4 @@
 * text=auto eol=lf
 *.ocd binary
 *.png binary
+testdata/extraction/pages/* -text

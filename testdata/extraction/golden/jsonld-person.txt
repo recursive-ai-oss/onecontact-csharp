@@ -1,0 +1,6 @@
+unit Bytes
+record 0 Person src=JsonLd conf=1 span=125+174
+  #0 Name JsonLd raw="Dr. Jane Example" text="Dr. Jane Example" span=183+16 conf=1 => Person:Dr. Jane Example facts=HasPrefix
+  #1 Email JsonLd raw="mailto:jane@example.org" text="jane@example.org" span=210+23 conf=1 => Email:jane@example.org
+  #2 Phone JsonLd raw="+44 20 7946 0958" text="+44 20 7946 0958" span=248+16 conf=1 => Phone:+442079460958 facts=Valid|InternationalInput
+  #3 Website JsonLd raw="https://jane.example.org" text="https://jane.example.org" span=273+24 conf=1 => Web:https://jane.example.org/

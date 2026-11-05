@@ -1,0 +1,6 @@
+unit Bytes
+record 0 Organization src=JsonLd conf=1 span=125+290
+  #0 Name JsonLd raw="Support Corp" text="Support Corp" span=189+12 conf=1 => Company:Support Corp facts=HasLegalForm|LegalFormAmbiguous
+  #1 Phone JsonLd raw="+1-800-555-0100" text="+1-800-555-0100" span=256+15 conf=1 => Phone:+18005550100 facts=Valid|InternationalInput label="customer service"
+  #2 Email JsonLd raw="support@example.com" text="support@example.com" span=315+19 conf=1 => Email:support@example.com facts=RoleAccount label="customer service"
+  #3 Phone JsonLd raw="+1-800-555-0199" text="+1-800-555-0199" span=374+15 conf=1 => Phone:+18005550199 facts=Valid|InternationalInput label="sales"

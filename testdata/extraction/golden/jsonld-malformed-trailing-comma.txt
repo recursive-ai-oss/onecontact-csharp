@@ -1,0 +1,3 @@
+unit Bytes
+ungrouped #0 Email Link raw="mailto:still@example.com" text="still@example.com" span=247+24 conf=0.9 => Email:still@example.com label="us"
+issue MalformedJsonLd JsonLd span=200+0

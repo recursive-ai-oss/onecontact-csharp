@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Organization src=HCard conf=1 span=104+307
+  #0 Name HCard raw="Card Org Ltd" text="Card Org Ltd" span=151+12 conf=1 => Company:Card Org Ltd facts=HasLegalForm|LegalFormAmbiguous
+  #1 Address HCard raw="<div class=\"p-adr h-adr\"><span class=\"p-street-address\">8 Card Way</span> <span class=\"p-locality\">Seattle</span> <span class=\"p-region\">WA</span> <span class=\"p-postal-code\">98101</span> <span class=\"p-country-name\">US</span></div>" text="8 Card Way, Seattle, WA, 98101, US" span=173+232 conf=1 flags=Composed => Address:8 Card Way, Seattle WA 98101

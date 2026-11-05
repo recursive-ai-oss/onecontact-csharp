@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Organization src=Microdata conf=1 span=104+180
+  #0 Name Microdata raw="Consumed Co" text="Consumed Co" span=184+11 conf=1 => Company:Consumed Co facts=HasLegalForm|LegalFormAmbiguous
+  #1 Address Microdata raw="10 Single Read Road<br>Tulsa, OK 74103" text="10 Single Read Road\nTulsa, OK 74103" span=230+38 conf=1 flags=RegionInferred => Address:10 SINGLE READ RD, TULSA OK 74103 facts=CountryInferred

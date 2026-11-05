@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Organization src=HCard conf=1 span=104+110
+  #0 Name HCard raw="Same Name Studio" text="Same Name Studio" span=144+16 conf=1 => Company:Same Name Studio
+  #1 Phone HCard raw="+1 202 555 0109" text="+1 202 555 0109" span=186+15 conf=1 => Phone:+12025550109 facts=Valid|InternationalInput

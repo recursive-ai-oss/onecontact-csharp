@@ -1,0 +1,9 @@
+unit Bytes
+record 0 Person src=HCard conf=1 span=104+215
+  #0 Name HCard raw="Nest Person" text="Nest Person" span=145+11 conf=1 => Person:Nest Person
+  #1 Organization HCard raw="Nested Employer Corp" text="Nested Employer Corp" span=211+20 conf=1 => Company:Nested Employer Corp facts=HasLegalForm|LegalFormAmbiguous
+  link WorksFor -> record 1
+record 1 Organization src=HCard conf=1 span=164+149
+  #2 Name HCard raw="Nested Employer Corp" text="Nested Employer Corp" span=211+20 conf=1 => Company:Nested Employer Corp facts=HasLegalForm|LegalFormAmbiguous
+  #3 Website HCard raw="https://nested-employer.example.com" text="https://nested-employer.example.com" span=262+35 conf=1 => Web:https://nested-employer.example.com/
+  link HasMember -> record 0

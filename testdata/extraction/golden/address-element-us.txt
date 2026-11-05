@@ -1,0 +1,2 @@
+unit Bytes
+ungrouped #0 Address AddressElement raw="Example Corp<br>1600 Pennsylvania Avenue NW<br>Washington, DC 20500" text="Example Corp\n1600 Pennsylvania Avenue NW\nWashington, DC 20500" span=113+67 conf=0.7 flags=RegionInferred => Address:EXAMPLE CORP, 1600 PENNSYLVANIA AVE NW, WASHINGTON DC 20500 facts=CountryInferred block=13

@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Organization src=HCard conf=1 span=104+118
+  #0 Name HCard raw="Acme Holdings Pty Ltd" text="Acme Holdings Pty Ltd" span=145+21 conf=1 => Company:Acme Holdings Pty Ltd facts=HasLegalForm|LegalFormAmbiguous
+  #1 Phone HCard raw="+61 2 5550 0123" text="+61 2 5550 0123" span=194+15 conf=1 => Phone:+61255500123 facts=Valid|InternationalInput

@@ -1,0 +1,4 @@
+unit Bytes
+ungrouped #0 Address AddressElement raw="Reach us at <a href=\"mailto:addr@example.com\">addr@example.com</a> or <a href=\"tel:+12025550111\">202-555-0111</a>" text="Reach us at or" span=113+113 conf=0.35 flags=Unnormalized issue=address.no-last-line block=13
+ungrouped #1 Email Link raw="mailto:addr@example.com" text="addr@example.com" span=134+23 conf=0.9 => Email:addr@example.com block=13
+ungrouped #2 Phone Link raw="tel:+12025550111" text="+12025550111" span=192+16 conf=0.9 => Phone:+12025550111 facts=Valid|InternationalInput label="202-555-0111" block=13

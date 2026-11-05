@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/OneContact/OneContact.csproj" />
+    <ProjectReference Include="../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
   </ItemGroup>
 
 </Project>

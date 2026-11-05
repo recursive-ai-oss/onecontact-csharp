@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Organization src=Microdata conf=1 span=111+160
+  #0 Name Microdata raw="Line\nBreak Co" text="Line Break Co" span=193+14 conf=1 => Company:Line Break Co
+  #1 Phone Microdata raw="+1 202 555 0107" text="+1 202 555 0107" span=243+15 conf=1 => Phone:+12025550107 facts=Valid|InternationalInput

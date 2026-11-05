@@ -1,0 +1,6 @@
+unit Bytes
+record 0 Person src=Microdata conf=1 span=104+297
+  #0 Name Microdata raw="Morgan Micro" text="Morgan Micro" span=181+12 conf=1 => Person:Morgan Micro
+  #1 Email Microdata raw="mailto:morgan@example.com" text="morgan@example.com" span=229+25 conf=1 => Email:morgan@example.com
+  #2 Phone Microdata raw="+1 202 555 0155" text="+1 202 555 0155" span=308+15 conf=1 => Phone:+12025550155 facts=Valid|InternationalInput
+  #3 Website Microdata raw="https://morgan.example.com/" text="https://morgan.example.com/" span=357+27 conf=1 => Web:https://morgan.example.com/

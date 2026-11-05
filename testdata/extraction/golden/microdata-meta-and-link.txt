@@ -1,0 +1,5 @@
+unit Bytes
+record 0 Organization src=Microdata conf=1 span=104+240
+  #0 Name Microdata raw="Meta Named Org" text="Meta Named Org" span=196+14 conf=1 => Company:Meta Named Org
+  #1 Website Microdata raw="https://meta.example.com/" text="https://meta.example.com/" span=242+25 conf=1 => Web:https://meta.example.com/
+  #2 Phone Microdata raw="+1-202-555-0177" text="+1-202-555-0177" span=306+15 conf=1 => Phone:+12025550177 facts=Valid|InternationalInput

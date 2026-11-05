@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Person src=JsonLd conf=1 span=125+138
+  #0 Name JsonLd raw="Prefixed Person" text="Prefixed Person" span=208+15 conf=1 => Person:Prefixed Person
+  #1 Email JsonLd raw="prefixed@example.com" text="prefixed@example.com" span=241+20 conf=1 => Email:prefixed@example.com

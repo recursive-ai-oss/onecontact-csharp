@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Organization src=Rdfa conf=1 span=104+190
+  #0 Name Rdfa raw="Prefix Org" text="Prefix Org" span=203+10 conf=1 => Company:Prefix Org
+  #1 Website Rdfa raw="https://prefix.example.org/" text="https://prefix.example.org/" span=252+27 conf=1 => Web:https://prefix.example.org/

@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Organization src=JsonLd conf=1 span=168+75
+  #0 Name JsonLd raw="Ref Org" text="Ref Org" span=211+7 conf=1 => Company:Ref Org
+  #1 Address JsonLd raw="{\"@type\":\"PostalAddress\",\"@id\":\"#a\",\"streetAddress\":\"2 Reference Way\",\"addressLocality\":\"Boston\",\"addressRegion\":\"MA\",\"postalCode\":\"02110\",\"addressCountry\":\"US\"}" text="2 Reference Way, Boston, MA, 02110, US" span=244+161 conf=1 flags=Composed => Address:2 Reference Way, Boston MA 02110

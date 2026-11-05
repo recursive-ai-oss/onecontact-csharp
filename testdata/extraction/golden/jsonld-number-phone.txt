@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Organization src=JsonLd conf=1 span=125+105
+  #0 Name JsonLd raw="Numeric Phone Co" text="Numeric Phone Co" span=189+16 conf=1 => Company:Numeric Phone Co
+  #1 Phone JsonLd raw="2025550123" text="2025550123" span=219+10 conf=1 flags=RegionInferred => Phone:+12025550123 facts=Valid

@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Organization src=Rdfa conf=1 span=104+170
+  #0 Name Rdfa raw="Content Attr Org" text="Content Attr Org" span=189+16 conf=1 => Company:Content Attr Org
+  #1 Phone Rdfa raw="+12025550122" text="+12025550122" span=243+12 conf=1 => Phone:+12025550122 facts=Valid|InternationalInput

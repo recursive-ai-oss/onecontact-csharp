@@ -1,0 +1,7 @@
+unit Bytes
+record 0 Person src=Microdata conf=1 span=104+97
+  #0 Name Microdata raw="First Item" text="First Item" span=178+10 conf=1 => Person:First Item
+record 1 Person src=Microdata conf=1 span=202+98
+  #1 Name Microdata raw="Second Item" text="Second Item" span=276+11 conf=1 => Person:Second Item
+record 2 Organization src=Microdata conf=1 span=301+107
+  #2 Name Microdata raw="Third Item Ltd" text="Third Item Ltd" span=381+14 conf=1 => Company:Third Item Ltd facts=HasLegalForm|LegalFormAmbiguous

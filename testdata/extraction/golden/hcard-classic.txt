@@ -1,0 +1,7 @@
+unit Bytes
+record 0 Person src=HCard conf=1 span=104+449
+  #0 Name HCard raw="Classic Vee" text="Classic Vee" span=140+11 conf=1 => Person:Classic Vee
+  #1 Organization HCard raw="Classic Employer" text="Classic Employer" span=177+16 conf=1 => Company:Classic Employer
+  #2 Address HCard raw="<div class=\"adr\"><span class=\"street-address\">11 Old Lane</span> <span class=\"locality\">Madison</span> <span class=\"region\">WI</span> <span class=\"postal-code\">53703</span></div>" text="11 Old Lane, Madison, WI, 53703" span=202+178 conf=1 flags=Composed => Address:11 Old Lane, Madison issue=address.country-required
+  #3 Phone HCard raw="+1 202 555 0138" text="+1 202 555 0138" span=451+15 conf=1 => Phone:+12025550138 facts=Valid|InternationalInput
+  #4 Email HCard raw="mailto:vee@example.com" text="vee@example.com" span=504+22 conf=1 => Email:vee@example.com

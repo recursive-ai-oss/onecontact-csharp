@@ -1,0 +1,9 @@
+unit Bytes
+record 0 Organization src=JsonLd conf=1 span=168+83
+  #0 Name JsonLd raw="Cycle A" text="Cycle A" span=211+7 conf=1 => Company:Cycle A
+  link SubOrganization -> record 1
+  link ParentOrganization -> record 1
+record 1 Organization src=JsonLd conf=1 span=252+117
+  #1 Name JsonLd raw="Cycle B" text="Cycle B" span=295+7 conf=1 => Company:Cycle B
+  link ParentOrganization -> record 0
+  link SubOrganization -> record 0
