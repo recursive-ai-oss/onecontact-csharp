@@ -28,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="../../testdata/names/**" Link="testdata/names/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../testdata/ingest-synthetic/**" Link="testdata/ingest-synthetic/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

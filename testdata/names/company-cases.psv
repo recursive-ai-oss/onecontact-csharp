@@ -1,0 +1,62 @@
+# Company-name rule cases, written for this repository. Synthetic names only.
+# lang|hints|input|article|base|form|elf|trading|careof|canonical
+# form: the legal form as written; elf: the ELF code, ? when the form fits several codes, _ when there is no form; * means do not check.
+# ELF codes are from the ISO 20275 list v1.6.
+en|GB|Acme Holdings Ltd|_|Acme Holdings|Ltd|?|_|_|Acme Holdings Ltd
+en|GB|Acme Holdings Limited|_|Acme Holdings|Limited|?|_|_|Acme Holdings Ltd
+en|GB|ACME PLC|_|ACME|PLC|B6ES|_|_|ACME PLC
+en|GB|Acme LLP|_|Acme|LLP|Z0EY|_|_|Acme LLP
+en|US|Acme Inc.|_|Acme|Inc.|?|_|_|Acme Inc.
+en|US|Acme, Inc.|_|Acme|Inc.|?|_|_|Acme Inc.
+en|US|Acme LLC|_|Acme|LLC|?|_|_|*
+en|US|The Coca-Cola Company|The|Coca-Cola|Company|?|_|_|The Coca-Cola Company
+en|-|The Acme Company|The|Acme|Company|?|_|_|The Acme Company
+en|-|Smith & Sons|_|Smith & Sons|_|_|_|_|Smith & Sons
+en|-|Acme Ltd d/b/a Roadrunner|_|Acme|Ltd|?|Roadrunner|_|Acme Ltd d/b/a Roadrunner
+en|-|Acme Ltd dba Roadrunner|_|Acme|Ltd|?|Roadrunner|_|Acme Ltd d/b/a Roadrunner
+en|-|Acme Ltd t/a Acme Pizza|_|Acme|Ltd|?|Acme Pizza|_|Acme Ltd t/a Acme Pizza
+en|-|Acme Ltd trading as Acme Pizza|_|Acme|Ltd|?|Acme Pizza|_|Acme Ltd t/a Acme Pizza
+en|-|Acme doing business as Roadrunner|_|Acme|_|_|Roadrunner|_|Acme d/b/a Roadrunner
+en|-|Acme Corp c/o John Smith|_|Acme|Corp|?|_|John Smith|Acme Corp c/o John Smith
+en|-|Acme Corp care of John Smith|_|Acme|Corp|?|_|John Smith|Acme Corp c/o John Smith
+en|-|c/o Acme Corp|_|Acme|Corp|?|_|_|Acme Corp
+en|AU|Foo Pty Ltd|_|Foo|Pty Ltd|?|_|_|*
+es|MX|Beispiel S.A. de C.V.|_|Beispiel|S.A. de C.V.|JGV1|_|_|*
+de|DE|Muster Aktiengesellschaft|_|Muster|Aktiengesellschaft|6QQB|_|_|Muster AG
+de|DE|Muster AG|_|Muster|AG|6QQB|_|_|Muster AG
+de|DE|Muster GmbH|_|Muster|GmbH|2HBR|_|_|Muster GmbH
+de|DE|Muster GmbH & Co. KG|_|Muster|GmbH & Co. KG|8Z6G|_|_|Muster GmbH & Co. KG
+de|AT|Muster GmbH|_|Muster|GmbH|AXSB|_|_|Muster GmbH
+de|CH|Muster AG|_|Muster|AG|MVII|_|_|Muster AG
+de|-|Muster GmbH|_|Muster|GmbH|?|_|_|Muster GmbH
+fr|FR|Dupont SAS|_|Dupont|SAS|6CHY|_|_|Dupont SAS
+fr|FR|Dupont SA|_|Dupont|SA|QVPB|_|_|Dupont SA
+fr|-|Dupont SA|_|Dupont|SA|?|_|_|Dupont SA
+nl|NL|Jansen B.V.|_|Jansen|B.V.|54M6|_|_|Jansen BV
+nl|NL|Jansen N.V.|_|Jansen|N.V.|B5PM|_|_|Jansen NV
+lv|LV|SIA Rota|_|Rota|SIA|ES2D|_|_|SIA Rota
+lt|LT|UAB Baltas|_|Baltas|UAB|BPLS|_|_|UAB Baltas
+sv|SE|AB Volvo|_|Volvo|AB|XJHM|_|_|AB Volvo
+da|DK|Havn ApS|_|Havn|ApS|H8VP|_|_|Havn ApS
+no|NO|Fjord AS|_|Fjord|AS|YI42|_|_|Fjord AS
+fi|FI|Koivu Oy|_|Koivu|Oy|DKUW|_|_|Koivu Oy
+is|IS|Jökull ehf.|_|Jökull|ehf.|M8SS|_|_|*
+pl|PL|Wisła Sp. z o.o.|_|Wisła|Sp. z o.o.|O7XB|_|_|*
+hu|HU|Duna Kft.|_|Duna|Kft.|P9F2|_|_|*
+ro|RO|Delta S.R.L.|_|Delta|S.R.L.|XHN1|_|_|*
+sl|SI|Soča d.o.o.|_|Soča|d.o.o.|KBKD|_|_|*
+hr|HR|Kvarner d.o.o.|_|Kvarner|d.o.o.|OQWO|_|_|*
+et|EE|Tamm OÜ|_|Tamm|OÜ|JC0Y|_|_|*
+lb|LU|Atelier S.à r.l.|_|Atelier|S.à r.l.|DVXS|_|_|*
+it|IT|Etna S.r.l.|_|Etna|S.r.l.|OV32|_|_|*
+it|IT|Etna S.p.A.|_|Etna|S.p.A.|P418|_|_|*
+es|ES|Levante S.L.|_|Levante|S.L.|DP3Q|_|_|*
+es|ES|Levante S.A.|_|Levante|S.A.|5RDO|_|_|*
+ca|ES|Ebre S.L.|_|Ebre|S.L.|DP3Q|_|_|*
+pt|PT|Tejo Lda|_|Tejo|Lda|USOG|_|_|*
+pt|PT|Tejo S.A.|_|Tejo|S.A.|DFE5|_|_|*
+cs|CZ|Novák s.r.o.|_|Novák|s.r.o.|9HLU|_|_|*
+cs|CZ|Novák a.s.|_|Novák|a.s.|6CQN|_|_|*
+sk|SK|Hron s.r.o.|_|Hron|s.r.o.|VSZS|_|_|*
+ga|IE|Cuan Teoranta|_|Cuan|Teoranta|MNQ7|_|_|*
+ga|IE|Cuan DAC|_|Cuan|DAC|LGWG|_|_|*

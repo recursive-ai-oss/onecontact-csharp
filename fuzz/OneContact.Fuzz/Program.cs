@@ -22,6 +22,11 @@ internal static class Program
 
     private static int Main(string[] args)
     {
+        if (args.Length == 3 && args[0] == "names-smoke")
+        {
+            return NameSmoke.Run(args[1], int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture));
+        }
+
         if (args.Length != 2 || !Targets.TryGetValue(args[0], out Action<string>? target))
         {
             Console.Error.WriteLine("usage: fuzz <" + string.Join('|', Targets.Keys) + "> <file|directory|->");

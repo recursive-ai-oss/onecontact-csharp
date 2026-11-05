@@ -1,0 +1,7 @@
+# GLEIF ISO 20275 Entity Legal Forms (ELF) code list, version 1.6 (published 2026-02-19), as the CSV download.
+source   gleif-elf
+licence  CC0-1.0
+repo     https://www.gleif.org/en/lei-data/code-lists/iso-20275-entity-legal-forms-code-list
+ref      v1.6
+urlbase  https://www.gleif.org/lei-data/code-lists/iso-20275-entity-legal-forms-code-list/
+file     2026-02-19-elf-code-list-v1.6.csv  c55edc421e49ce362457f772d6bfa41f5fc63ecaadea74db5735722625506ef4

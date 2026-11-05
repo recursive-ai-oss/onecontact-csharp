@@ -1,0 +1,54 @@
+# Several-people and undecided cases, written for this repository. Synthetic names only.
+# lang|hints|input|class|canonical forms of the people, separated by " // " (empty for none)
+en|-|Mr & Mrs John Smith|multiple|Mr John Smith // Mrs John Smith
+en|-|John and Jane Smith|multiple|John Smith // Jane Smith
+en|-|John Smith and Jane Doe|multiple|John Smith // Jane Doe
+en|-|Dr. and Mrs. Jones|multiple|Dr. Jones // Mrs. Jones
+en|-|Mr. and Mrs. Smith|multiple|Mr. Smith // Mrs. Smith
+en|-|Mr Smith and Mrs Jones|multiple|Mr Smith // Mrs Jones
+en|-|John Smith; Jane Doe|multiple|John Smith // Jane Doe
+en|-|John Smith, Jane Doe and Bob Lee|multiple|John Smith // Jane Doe // Bob Lee
+en|-|Tom and Jerry|multiple|Tom // Jerry
+en|-|JOHN & JANE SMITH|multiple|John Smith // Jane Smith
+en|-|Johnson & Johnson|unknown|
+en|-|Smith & Wesson|unknown|
+fr|FR|M. et Mme Dupont|multiple|M. Dupont // Mme Dupont
+fr|FR|Pierre et Marie Martin|multiple|Pierre Martin // Marie Martin
+es|ES|Juan y María García|multiple|Juan García // María García
+es|ES|Sr. y Sra. Pérez|multiple|Sr. Pérez // Sra. Pérez
+es|ES|María García y López|person|María García y López
+pt|PT|João e Maria Silva|multiple|João Silva // Maria Silva
+de|DE|Herr und Frau Müller|multiple|Herr Müller // Frau Müller
+de|DE|Hans und Anna Weber|multiple|Hans Weber // Anna Weber
+nl|NL|Jan en Sanne de Vries|multiple|Jan de Vries // Sanne de Vries
+it|IT|Marco e Giulia Rossi|multiple|Marco Rossi // Giulia Rossi
+sv|SE|Erik och Anna Andersson|multiple|Erik Andersson // Anna Andersson
+da|DK|Mads og Freja Jensen|multiple|Mads Jensen // Freja Jensen
+no|NO|Ola og Kari Hansen|multiple|Ola Hansen // Kari Hansen
+fi|FI|Juha ja Aino Virtanen|multiple|Juha Virtanen // Aino Virtanen
+is|IS|Jón og Helga Jónsson|multiple|Jón Jónsson // Helga Jónsson
+pl|PL|Jan i Anna Kowalski|multiple|Jan Kowalski // Anna Kowalski
+cs|CZ|Jan a Tereza Novák|multiple|Jan Novák // Tereza Novák
+sk|SK|Peter a Zuzana Horváth|multiple|Peter Horváth // Zuzana Horváth
+sl|SI|Luka in Maja Novak|multiple|Luka Novak // Maja Novak
+hr|HR|Ivan i Marija Horvat|multiple|Ivan Horvat // Marija Horvat
+hu|HU|Dr. és Prof. Kovács János|multiple|Dr. János Kovács // Prof. János Kovács
+ro|RO|Andrei și Elena Popescu|multiple|Andrei Popescu // Elena Popescu
+lv|LV|Jānis un Anna Bērziņš|multiple|Jānis Bērziņš // Anna Bērziņš
+lt|LT|Jonas ir Ona Kazlauskas|multiple|Jonas Kazlauskas // Ona Kazlauskas
+et|EE|Mart ja Kadri Tamm|multiple|Mart Tamm // Kadri Tamm
+mt|MT|Joseph u Maria Borg|multiple|Joseph Borg // Maria Borg
+lb|LU|Marc an Anne Schmit|multiple|Marc Schmit // Anne Schmit
+ga|IE/ga|Seán agus Aoife Murphy|multiple|Seán Murphy // Aoife Murphy
+ca|ES/ca|Jordi i Núria Puig|multiple|Jordi Puig // Núria Puig
+eu|ES/eu|Iker eta Ainhoa Etxeberria|multiple|Iker Etxeberria // Ainhoa Etxeberria
+gl|ES/gl|Xoán e Uxía Pereira|multiple|Xoán Pereira // Uxía Pereira
+en|-|Madonna|unknown|Madonna
+en|-|3M Company|company|
+en|-|Dr. Ing. h.c. F. Porsche AG|company|
+en|-|Acme Holdings Ltd|company|
+en|-|John Smith Consulting|company|
+de|DE|Müller & Söhne|company|
+en|-|12345|unknown|
+en|-|john@example.com|unknown|
+en|-||unknown|
