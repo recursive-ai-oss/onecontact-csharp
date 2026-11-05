@@ -68,7 +68,7 @@ internal static class Ours
 
     private static string Inv(long v) => v.ToString(CultureInfo.InvariantCulture);
 
-    private static string Parts(PhoneNumber n, bool raw)
+    internal static string Parts(PhoneNumber n, bool raw)
     {
         StringBuilder sb = new();
         sb.Append("cc=").Append(Inv(n.CountryCode));

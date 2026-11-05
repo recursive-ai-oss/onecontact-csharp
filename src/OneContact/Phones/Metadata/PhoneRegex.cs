@@ -424,6 +424,7 @@ internal sealed class PhoneRegex
         private bool _decimalDigit;
         private bool _number;
         private bool _letter;
+        private bool _separator;
 
         internal bool Negated { get; set; }
 
@@ -466,6 +467,9 @@ internal sealed class PhoneRegex
                 case 'n':
                     _number = true;
                     break;
+                case 'z':
+                    _separator = true;
+                    break;
                 default:
                     _letter = true;
                     break;
@@ -504,7 +508,7 @@ internal sealed class PhoneRegex
                 }
             }
 
-            if (_decimalDigit || _number || _letter)
+            if (_decimalDigit || _number || _letter || _separator)
             {
                 if (cp > 0x10FFFF)
                 {
@@ -518,6 +522,12 @@ internal sealed class PhoneRegex
                 }
 
                 if (_number && cat is UnicodeCategory.DecimalDigitNumber or UnicodeCategory.LetterNumber or UnicodeCategory.OtherNumber)
+                {
+                    return true;
+                }
+
+                // \p{Z}: space, line and paragraph separators.
+                if (_separator && cat is UnicodeCategory.SpaceSeparator or UnicodeCategory.LineSeparator or UnicodeCategory.ParagraphSeparator)
                 {
                     return true;
                 }
@@ -852,7 +862,7 @@ internal sealed class PhoneRegex
             }
         }
 
-        // Reads {Nd}, {N} or {L} after \p or \P and returns d, n or l.
+        // Reads {Nd}, {N}, {L} or {Z} after \p or \P and returns d, n or l.
         private char ReadCategory()
         {
             if (_i < _p.Length && _p[_i] == '{')
@@ -867,6 +877,7 @@ internal sealed class PhoneRegex
                         case "Nd": return 'd';
                         case "N": return 'n';
                         case "L": return 'l';
+                        case "Z": return 'z';
                         default: break;
                     }
                 }
