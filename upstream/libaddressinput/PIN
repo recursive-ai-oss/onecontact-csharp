@@ -1,0 +1,8 @@
+# Per-region address data of Google's libaddressinput: the one pure data file of the repository, at a pinned commit.
+source   libaddressinput
+licence  Apache-2.0
+repo     https://github.com/google/libaddressinput
+ref      81eb9628382b07d371d8ea0b11badf7de3857fd5
+urlbase  https://raw.githubusercontent.com/google/libaddressinput/81eb9628382b07d371d8ea0b11badf7de3857fd5/
+file     testdata/countryinfo.txt  51a5da9ac621f3457b96b99de798a47a02004f57e4289c1dd587a95730dad720
+file     LICENSE                   389e6d12ea7853b6e9d797a98d19ddc6ccfaa021f29e21b2ac1ebc68c2607280

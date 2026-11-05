@@ -27,6 +27,7 @@ public readonly partial struct PostalAddress :
     IEqualityOperators<PostalAddress, PostalAddress, bool>
 {
     private readonly string? _canonical;
+    private readonly AddressParts? _parts;
 
     internal PostalAddress(string canonical, SourceSpan source, AddressFacts flags)
     {
