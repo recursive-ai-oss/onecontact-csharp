@@ -1,9 +1,9 @@
 # Examples transcribed from the postal authorities' free public guides, for the first Tier 2 group of countries.
 # id <TAB> citation <TAB> country hint (empty = none) <TAB> country line (1 = the example prints it, so the test renders it) <TAB> input (a backslash-n is a line break) <TAB> expected Postal rendering <TAB> expected Display rendering (= when not pinned)
 # The input is the guide's example as printed. The Postal expectation is the form the guide asks for: La Poste's lines are capitals without accents or punctuation (Guide pratique courrier 2026 p. 19;
-# SP 8855 volume 2, 3.1), the other authorities' lines are kept as written and their locality is in capitals (bpost MassPost 2025 p. 12; UPU sheets; PostNL).
+# SP 8855 volume 2, 3.1), the other authorities' lines are kept as written and their locality is in capitals (bpost MassPost 2025 p. 12; UPU sheets).
 # Sources: UPU country sheets (upu.int, addressing unit): France 09/2011, Belgium 09/2012, Netherlands 05/2016, Luxembourg 06/2013, Germany 01/2015, Austria 04/2014, Switzerland 06/2024, Monaco 05/2004;
-# bpost, Documentation_Belgian_Template.pdf, section 4; bpost MassPost Guide January 2025 section 1 p. 11; La Poste SP 8855 volume 2 version 1.9 pp. 6-8; La Poste Guide pratique courrier January 2026 pp. 18, 22.
+# Deutsche Post, Leitfaden Automationsfähige Briefsendungen 2024 (pp. 17-19, figures 3-6); bpost, Documentation_Belgian_Template.pdf, section 4; bpost MassPost Guide January 2025 section 1 p. 11; La Poste SP 8855 volume 2 version 1.9 pp. 6-8; La Poste Guide pratique courrier January 2026 pp. 18, 22.
 upu-fr-1	UPU France p.1	FR	1	Monsieur Jean DURAND\n25 RUE DES FLEURS\n33500 LIBOURNE\nFRANCE	MONSIEUR JEAN DURAND\n25 RUE DES FLEURS\n33500 LIBOURNE\nFRANCE	Monsieur Jean Durand\n25 Rue des Fleurs\n33500 Libourne\nFrance
 upu-fr-2	UPU France p.2 residence	FR	1	Monsieur Jean DELHOURME\nChez Mireille COPEAU Appartement 2\nEntrée A Bâtiment Jonquille\n25 RUE DE L EGLISE\nCAUDOS\n33380 MIOS\nFRANCE	MONSIEUR JEAN DELHOURME\nCHEZ MIREILLE COPEAU APPARTEMENT 2\nENTREE A BATIMENT JONQUILLE\n25 RUE DE L EGLISE\nCAUDOS\n33380 MIOS\nFRANCE	=
 upu-fr-3	UPU France p.2 hamlet	FR	1	Madame Isabelle RICHARD\nLE VILLAGE\n82500 AUTERIVE\nFRANCE	MADAME ISABELLE RICHARD\nLE VILLAGE\n82500 AUTERIVE\nFRANCE	=
@@ -56,3 +56,8 @@ upu-at-5	UPU Austria diagram	AT	1	Frau\nYvonne Leskovar\nPostgasse 1\n1010 WIEN\
 upu-ch-1	UPU Switzerland street	CH	1	Herrn\nRudolf Weber\nSolothurnerstrasse 28\n2544 BETTLACH\nSWITZERLAND	Herrn\nRudolf Weber\nSolothurnerstrasse 28\n2544 BETTLACH\nSWITZERLAND	=
 upu-ch-2	UPU Switzerland box	CH	1	Sandoz SA\nRue de Bourgogne 5\nCase postale 12\n1211 GENEVA 6\nSWITZERLAND	Sandoz SA\nRue de Bourgogne 5\nCase postale 12\n1211 GENEVA 6\nSWITZERLAND	=
 upu-ch-3	UPU Switzerland canton	CH	1	Monsieur\nFernand Genoud\nRue du Marché 8\n1556 CERNIAZ VD\nSWITZERLAND	Monsieur\nFernand Genoud\nRue du Marché 8\n1556 CERNIAZ VD\nSWITZERLAND	=
+dp-de-1	Deutsche Post Leitfaden 2024 p.17 fig.3	DE	0	Herrn\nAaron Bodden\nPostfach 83 14 65\n52078 Aachen	Herrn\nAaron Bodden\nPostfach 83 14 65\n52078 AACHEN	=
+dp-de-2	Deutsche Post Leitfaden 2024 p.17 fig.4	DE	0	Firma\nLudwig Stein und Söhne GmbH\nAbteilung Einkauf\nPrenzlauer Berg\nFröbelstr. 72\n10405 Berlin	Firma\nLudwig Stein und Söhne GmbH\nAbteilung Einkauf\nPrenzlauer Berg\nFröbelstr. 72\n10405 BERLIN	=
+dp-de-3	Deutsche Post Leitfaden 2024 p.17 fig.5	DE	0	An alle Sparer\nWerner-von-Siemens-Str. 5\n48268 Greven	An alle Sparer\nWerner-von-Siemens-Str. 5\n48268 GREVEN	=
+dp-nl-1	Deutsche Post Leitfaden 2024 p.18 fig.6		1	Mr. J. de Vries\nAdrianastraat 34\n6832 AM ARNHEM\nNETHERLANDS	Mr. J. de Vries\nAdrianastraat 34\n6832 AM  ARNHEM\nNETHERLANDS	=
+dp-de-4	Deutsche Post Leitfaden 2024 p.19 s.2.4 rule (the double slash before the apartment); the address is ours	DE	0	Maria Beispiel\nMusterweg 12 // Treppenhaus B\n10405 Berlin	Maria Beispiel\nMusterweg 12 // Treppenhaus B\n10405 BERLIN	=

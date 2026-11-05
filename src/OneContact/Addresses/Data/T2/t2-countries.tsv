@@ -1,5 +1,5 @@
 # Tier 2 group A countries (France and its overseas departments, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland, Liechtenstein).
-# Columns: code, country line (English; UPU country sheets and PostNL print it so), line style, languages, postcode form, accepted country prefixes before a postcode,
+# Columns: code, country line (English; UPU country sheets and UPU print it so), line style, languages, postcode form, accepted country prefixes before a postcode,
 # printed prefix, house number position, longest address line before abbreviations are used (0 = no limit), spaces between postcode and locality, street type sets.
 # Line style afnor: capitals, no accents, no punctuation (La Poste, Guide pratique courrier 2026, p. 19-21; SP 8855 volume 2, section 3.1). Line style plain: lines as written, locality in capitals.
 # Postcode form: 5d, 4d, or 4d2l (four digits, a space, two letters). House number position: first, last or both.

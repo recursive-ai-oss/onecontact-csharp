@@ -95,6 +95,10 @@ internal static class RuleSample
             {
                 string id = detail.PrimaryReason.Id;
                 refused[id] = refused.GetValueOrDefault(id) + 1;
+                if (hint.IsUnknown is false && Environment.GetEnvironmentVariable("T2_MISSES") is { Length: > 0 } && refused[id] <= int.Parse(Environment.GetEnvironmentVariable("T2_MISSES")!, System.Globalization.CultureInfo.InvariantCulture))
+                {
+                    Console.Error.WriteLine($"MISS {cc} {id}: {text.Replace("\n", " / ", StringComparison.Ordinal)}");
+                }
                 continue;
             }
 

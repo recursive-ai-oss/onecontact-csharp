@@ -83,6 +83,17 @@ Check(parsed.GetKey(KeyVersion.V1) == "us|1 main street unit 4|springfield|va|22
 Check(AddressExpander.Expand("30 W 26th St")[0] == "30 west 26 street", "address expansion");
 Check(parsed.ToString(AddressStyle.Display, AddressLayout.SingleLine) == "1 Main St Apt 4, Springfield, VA 22162" && parsed.Validate().Count == 0 && parsed.StreetDetail.Count == 1, "address rendering and structural check");
 Check(JsonSerializer.Deserialize(JsonSerializer.Serialize(parsed, ContactJsonContext.Default.PostalAddress), ContactJsonContext.Default.PostalAddress) == parsed, "address json round trip");
+
+// First Tier 2 group: a French, a Belgian, a Dutch and a German address, read by rules, written in both styles, and keyed.
+PostalAddress fr = PostalAddress.Parse("Monsieur Jean DURAND\n25 rue des Fleurs\n33500 Libourne\nFrance");
+Check(fr.Country.Code == "FR" && fr.ToString(AddressStyle.Postal, AddressLayout.Label, includeCountry: true) == "MONSIEUR JEAN DURAND\n25 RUE DES FLEURS\n33500 LIBOURNE\nFRANCE", "French address, postal style");
+Check(fr.ToString(AddressStyle.Display, AddressLayout.SingleLine) == "Monsieur Jean Durand, 25 Rue des Fleurs, 33500 Libourne", "French address, display style");
+PostalAddress be = PostalAddress.Parse("Dhr Paul Janssens\nKortijkstraat 37 b 1\n9800 Deinze\nBelgium");
+Check(be.ToString(AddressStyle.Postal, AddressLayout.SingleLine) == "Dhr Paul Janssens, Kortijkstraat 37 bus 1, 9800 DEINZE", "Belgian address");
+Check(PostalAddress.Parse("Adrianastraat 34\n6832 AM Arnhem").Country.Code == "NL", "Dutch address inferred");
+PostalAddress de = ParseIn("Wacholderweg 52a\n26133 Oldenburg", "DE");
+Check(AddressKey.Compute(de, KeyVersion.V1) == AddressKey.Compute(ParseIn("Wacholderweg 52a, 26133 OLDENBURG", "DE"), KeyVersion.V1), "German address key");
+Check(AddressExpander.Expand("Hauptstr", ExpansionLanguages.German).Contains("hauptstrasse"), "German expansion");
 Check(PersonName.Parse("Ada Lovelace").Canonical.Length > 0, "person parse");
 Check(CompanyName.Parse("Acme Ltd").Canonical.Length > 0, "company parse");
 PersonName spanish = PersonName.Parse("DR. MARÍA JOSÉ GARCÍA LÓPEZ", NameHints.ForCountry(Region.Parse("ES")));
@@ -174,6 +185,12 @@ Check(siteResult.Fields.All(f => f.PageId is "index" or "contact"), "site fields
 Check(ContactExtractor.Extract(sitePages).Count == 1, "site happy path");
 SiteExtractResult streamed = await new ContactExtractor().ExtractSiteAsync(Pages(sitePages));
 Check(streamed.Records.Count == 1 && streamed.Fields.Count == siteResult.Fields.Count, "site stream form");
+
+static PostalAddress ParseIn(string text, string country)
+{
+    _ = PostalAddress.TryParse(text, Region.Parse(country), out PostalAddress value, out _);
+    return value;
+}
 
 static async IAsyncEnumerable<ContactPage> Pages(ContactPage[] pages)
 {

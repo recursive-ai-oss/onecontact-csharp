@@ -76,6 +76,7 @@ internal static class Tier2Reader
             address = null;
             detail = _failure;
             bool multiLine = text.Contains('\n', StringComparison.Ordinal);
+            _multiLine = multiLine;
             List<Unit> units = Units(multiLine);
             if (units.Count == 0)
             {
@@ -105,6 +106,8 @@ internal static class Tier2Reader
             return OperationStatus.InvalidData;
         }
 
+        private bool _multiLine;
+
         private ParseDetail _failure = ParseDetail.Failure(ReasonCode.AddressNoLastLine, default);
 
         private bool TryBuild(List<Unit> units, (string Code, SourceSpan Span, string Written)? named, out ParsedAddress? address, out ParseDetail detail)
@@ -115,7 +118,9 @@ internal static class Tier2Reader
             detail = _failure;
 
             // The postcode and the locality after it end the address.
-            if (!FindLastLine(units, out int unitIndex, out int tokenIndex, out PostcodeMatch match))
+            // Two letters after four digits are a Dutch postcode unless the country is known to be another one ("9170 De Klinge" in Belgium); without any hint they must be capitals.
+            string? known = named?.Code ?? (!hint.IsUnknown && T2Rules.Handles(hint) ? hint.Code : null);
+            if (!FindLastLine(units, known, out int unitIndex, out int tokenIndex, out PostcodeMatch match))
             {
                 detail = ParseDetail.Failure(ReasonCode.AddressNoLastLine, new SourceSpan(0, text.Length));
                 return false;
@@ -155,6 +160,13 @@ internal static class Tier2Reader
                     i--;
                 }
             }
+
+            // "Rheinstr., 53, 52306 Hagen" and "8, VIESSE": a house number set apart by commas belongs to the street name next to it.
+            if (!_multiLine)
+            {
+                MergeLoneNumbers(before, country);
+            }
+
 
             // The delivery lines start at the first box or street line that is not a place inside a building.
             int first = -1;
@@ -198,7 +210,7 @@ internal static class Tier2Reader
                 List<Tok> toks = before[i].Toks;
                 string written = Join(toks);
                 string standard = country.Afnor ? T2Text.Afnor(written) : string.Join(' ', toks.Select(t => t.Text));
-                leading.Add(new ParsedAddressText(written, Span(toks), standard));
+                leading.Add(new ParsedAddressText(Slice(Span(toks)), Span(toks), standard));
                 leadingLayout.Add((standard, T2Text.Title(written, capitalsKept: true)));
             }
 
@@ -209,7 +221,7 @@ internal static class Tier2Reader
             {
                 // A line after the first delivery line is another delivery line (a box, a locality name, a village); what the rules cannot place is kept as written.
                 Line line = parsed[i] ?? new Line(StreetLineKind.Street, [OtherPiece(before[i].Toks, country, afterStreet: true)]);
-                delivery.Add(new StreetLine(line.Kind, [.. line.Pieces.Where(p => p.Standard.Length > 0).Select(p => new StreetPart(p.Role, p.Text, p.Standard, p.Span, p.Rule))]));
+                delivery.Add(new StreetLine(line.Kind, [.. line.Pieces.Where(p => p.Standard.Length > 0).Select(p => new StreetPart(p.Role, Slice(p.Span), p.Standard, p.Span, p.Rule))]));
                 deliveryLayout.Add((line.Postal, line.Display));
                 facts |= line.Kind == StreetLineKind.PostOfficeBox ? AddressFacts.PostOfficeBox : AddressFacts.None;
                 facts |= line.Pieces.Any(p => p.Role == StreetPartRole.UnitDesignator) ? AddressFacts.HasUnit : AddressFacts.None;
@@ -247,7 +259,7 @@ internal static class Tier2Reader
                 }
             }
 
-            ParsedAddressField? locality = new("locality", localityWritten, localityPostal, Span(localityToks), 1f, DecisionSource.Rule, "last-line");
+            ParsedAddressField? locality = new("locality", Slice(Span(localityToks)), localityPostal, Span(localityToks), 1f, DecisionSource.Rule, "last-line");
             fields.Add(locality.Value);
             ParsedAddressField? admin = null;
             if (canton is { } cantonTok)
@@ -257,12 +269,12 @@ internal static class Tier2Reader
             }
 
             List<Tok> postcodeToks = lastToks.GetRange(0, match.Length);
-            ParsedAddressField? postal = new("postal-code", Join(postcodeToks), postcodeStd, Span(postcodeToks), 1f, DecisionSource.Rule, "postcode-" + country.Code.ToLowerInvariant());
+            ParsedAddressField? postal = new("postal-code", Slice(Span(postcodeToks)), postcodeStd, Span(postcodeToks), 1f, DecisionSource.Rule, "postcode-" + country.Code.ToLowerInvariant());
             fields.Add(postal.Value);
             ParsedAddressField? countryName = null;
             if (named is { } n)
             {
-                countryName = new ParsedAddressField("country", n.Written, country.CountryLine, n.Span, 1f, DecisionSource.Rule, "country-name");
+                countryName = new ParsedAddressField("country", Slice(n.Span), country.CountryLine, n.Span, 1f, DecisionSource.Rule, "country-name");
                 fields.Add(countryName.Value);
             }
 
@@ -280,6 +292,8 @@ internal static class Tier2Reader
 
         // ---- units -------------------------------------------------------------------------------------------------------------------------------------
 
+        private string Slice(SourceSpan span) => text.Substring(span.Start, span.Length);
+
         private List<Unit> Units(bool multiLine)
         {
             List<Unit> units = [];
@@ -294,9 +308,29 @@ internal static class Tier2Reader
                 }
 
                 List<Tok> toks = Tokenize(lineStart, i);
-                if (toks.Count > 0)
+
+                // On one line a lone slash, bar, dash or bullet between words stands for a line break ("Rue du Vivier 7 / 1000 Bruxelles").
+                List<Tok> piece = [];
+                foreach (Tok t in toks)
                 {
-                    units.Add(new Unit(toks));
+                    if (!multiLine && t.Text is "/" or "|" or "-" or "–" or "—" or "·" or "•")
+                    {
+                        if (piece.Count > 0)
+                        {
+                            units.Add(new Unit(piece));
+                        }
+
+                        piece = [];
+                    }
+                    else
+                    {
+                        piece.Add(t);
+                    }
+                }
+
+                if (piece.Count > 0)
+                {
+                    units.Add(new Unit(piece));
                 }
 
                 lineStart = i + 1;
@@ -368,13 +402,13 @@ internal static class Tier2Reader
 
         // The last postcode that has a locality after it. The postcode forms are in the country sheets: five digits (France, Monaco, Germany), four (Belgium, Austria,
         // Switzerland, Liechtenstein, Luxembourg) and the Dutch four digits and two letters.
-        private static bool FindLastLine(List<Unit> units, out int unitIndex, out int tokenIndex, out PostcodeMatch match)
+        private static bool FindLastLine(List<Unit> units, string? known, out int unitIndex, out int tokenIndex, out PostcodeMatch match)
         {
             int u = units.Count - 1;
             List<Tok> toks = units[u].Toks;
             for (int i = toks.Count - 2; i >= 0; i--)
             {
-                PostcodeMatch? m = MatchAt(toks, i);
+                PostcodeMatch? m = MatchAt(toks, i, known);
                 if (m is not null && i + m.Length < toks.Count)
                 {
                     unitIndex = u;
@@ -389,7 +423,7 @@ internal static class Tier2Reader
             return false;
         }
 
-        private static PostcodeMatch? MatchAt(List<Tok> toks, int i)
+        private static PostcodeMatch? MatchAt(List<Tok> toks, int i, string? known)
         {
             string t = toks[i].Text;
 
@@ -420,13 +454,15 @@ internal static class Tier2Reader
             // The Dutch form: four digits, then two letters in the same word or the next.
             if (digits.Length == 4 && digits.All(char.IsAsciiDigit) && digits[0] != '0')
             {
-                if (i + 1 < toks.Count && toks[i + 1].Text.Length == 2 && toks[i + 1].Text.All(char.IsAsciiLetter) && prefixCountry is null or "NL")
+                if (i + 1 < toks.Count && toks[i + 1].Text.Length == 2 && toks[i + 1].Text.All(char.IsAsciiLetter) && prefixCountry is null or "NL"
+                    && (known == "NL" || known is null && toks[i + 1].Text.All(char.IsAsciiLetterUpper)))
                 {
                     return new PostcodeMatch(2, digits + " " + toks[i + 1].Text.ToUpperInvariant(), ["NL"], "NL");
                 }
             }
 
-            if (digits.Length == 6 && digits[..4].All(char.IsAsciiDigit) && digits[4..].All(char.IsAsciiLetter) && digits[0] != '0' && prefixCountry is null or "NL")
+            if (digits.Length == 6 && digits[..4].All(char.IsAsciiDigit) && digits[4..].All(char.IsAsciiLetter) && digits[0] != '0' && prefixCountry is null or "NL"
+                && (known is null or "NL"))
             {
                 return new PostcodeMatch(1, digits[..4] + " " + digits[4..].ToUpperInvariant(), ["NL"], "NL");
             }
@@ -544,7 +580,39 @@ internal static class Tier2Reader
 
         // ---- delivery lines ----------------------------------------------------------------------------------------------------------------------------
 
+        private static bool IsLoneNumber(Unit u) =>
+            u.Toks.Count is >= 1 and <= 2 && IsHouseNumber(u.Toks[0].Text) && (u.Toks.Count == 1 || IsAddition(u.Toks[1].Text));
+
+        private static void MergeLoneNumbers(List<Unit> before, T2Country country)
+        {
+            for (int i = 0; i < before.Count; i++)
+            {
+                if (!IsLoneNumber(before[i]) || before.Count < 2)
+                {
+                    continue;
+                }
+
+                bool prevHasNumber = i > 0 && before[i - 1].Toks.Any(t => t.Text.Any(char.IsAsciiDigit));
+                if (country.NumberFirst && i + 1 < before.Count && !before[i + 1].Toks.Any(t => t.Text.Any(char.IsAsciiDigit)) && (!country.NumberLast || ParseNumberFirst([.. before[i].Toks, .. before[i + 1].Toks], country) is not null))
+                {
+                    before[i + 1].Toks = [.. before[i].Toks, .. before[i + 1].Toks];
+                    before.RemoveAt(i);
+                    i--;
+                }
+                else if (country.NumberLast && i > 0 && !prevHasNumber)
+                {
+                    before[i - 1].Toks = [.. before[i - 1].Toks, .. before[i].Toks];
+                    before.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+
         private static bool StartsWithSpatial(List<Tok> toks) => toks.Count > 0 && T2Rules.SpatialWords.Contains(toks[0].Key);
+
+        // A short addition after a house number: a letter, two letters, or a letter with digits ("A", "hs", "g9", "b-12"; PostNL writes the addition after the number).
+        private static bool IsAddition(string s) =>
+            s.Length is >= 1 and <= 5 && char.IsLetter(s[0]) && s.Skip(1).All(c => char.IsLetterOrDigit(c) || c == '-') && (s.Length <= 2 || s.Any(char.IsAsciiDigit) || s.All(char.IsLetter) && s.Length <= 3);
 
         private static bool IsBoxNumber(string s) => s.Length is >= 1 and <= 8 && s.Any(char.IsAsciiDigit) && s.All(char.IsLetterOrDigit);
 
@@ -576,7 +644,7 @@ internal static class Tier2Reader
                     i++;
                 }
 
-                if (i - l > 2)
+                if (i - l > 3)
                 {
                     return false;
                 }
@@ -592,6 +660,12 @@ internal static class Tier2Reader
                     if (i == s.Length)
                     {
                         return false;
+                    }
+
+                    // 16-A: a letter after the dash closes the number.
+                    if (s.Length - i <= 2 && s[i..].All(char.IsAsciiLetter))
+                    {
+                        return true;
                     }
                 }
             }
@@ -806,7 +880,7 @@ internal static class Tier2Reader
             int houseStart = h;
             if (!IsHouseNumber(core[h].Text))
             {
-                if (core[h].Text.Length <= 3 && core[h].Text.All(char.IsLetter) && h >= 2 && IsHouseNumber(core[h - 1].Text))
+                if (IsAddition(core[h].Text) && h >= 2 && IsHouseNumber(core[h - 1].Text))
                 {
                     houseStart = h - 1;
                 }

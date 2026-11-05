@@ -31,6 +31,11 @@ internal static class Program
             return Mutate(args[0], timed, args[1], seconds);
         }
 
+        if (args.Length == 3 && args[0] == "address-smoke")
+        {
+            return AddressSmoke.Run(args[1], int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture));
+        }
+
         if (args.Length == 3 && args[0] == "names-smoke")
         {
             return NameSmoke.Run(args[1], int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture));

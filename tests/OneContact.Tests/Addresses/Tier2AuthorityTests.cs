@@ -45,7 +45,7 @@ public class Tier2AuthorityTests
     [Fact]
     public void DutchPostcodeIsFollowedByTwoSpaces()
     {
-        // PostNL, Adressering internationale postzendingen: a double space between the postcode and the locality; UPU Netherlands sheet: two spaces.
+        // UPU Netherlands sheet: two spaces between the postcode and the locality.
         Assert.True(RuleAddressParser.TryParse("Mr. J. de Vries\nAdrianastraat 34\n6832 AM Arnhem", Region.Unknown, out ParsedAddress? a, out _) == OperationStatus.Done);
         Assert.Equal("6832 AM  ARNHEM", a!.ToString(AddressStyle.Postal).Split('\n')[^1]);
         Assert.Equal("6832 AM Arnhem", a.ToString(AddressStyle.Display).Split('\n')[^1]);
