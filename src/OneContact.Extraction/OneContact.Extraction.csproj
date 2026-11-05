@@ -1,9 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- Not packable until the text half of extraction exists: it will also reference OneNLP then. -->
-    <IsPackable>false</IsPackable>
-    <Description>libphonenumber- and libpostal-class contact data for .NET: Contact extraction from web pages and plain text for OneContact: structured markup (JSON-LD, microdata, RDFa, h-card, mailto and tel links, address elements) and visible text read into person and organization records. Not packable yet.</Description>
+    <IsPackable>true</IsPackable>
+    <Description>libphonenumber- and libpostal-class contact data for .NET: contact extraction for OneContact. Reads structured markup (JSON-LD, microdata, RDFa Lite, h-card, mailto and tel links, address elements) and visible text from web pages, plain text and sets of pages from one site into person and organization records, every field with its source, offsets, confidence and normalized value.</Description>
   </PropertyGroup>
 
   <ItemGroup>
