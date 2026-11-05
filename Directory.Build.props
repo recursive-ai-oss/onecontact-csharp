@@ -1,0 +1,100 @@
+<Project>
+
+  <!-- Machine-specific overrides go in this file, which git ignores. -->
+  <Import Project="$(MSBuildThisFileDirectory)Directory.Build.local.props" Condition="Exists('$(MSBuildThisFileDirectory)Directory.Build.local.props')" />
+
+  <PropertyGroup Label="Name">
+    <!-- The one place the project name lives. -->
+    <LibName>OneContact</LibName>
+    <!-- NuGet package IDs carry the publisher prefix; this is the only place it is written. -->
+    <PackagePrefix>RecursiveAI.</PackagePrefix>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Output">
+    <!-- Build output stays out of the source folders. Each checkout (the main clone or a worktree) gets its own folder so they do not
+         collide, named after the checkout folder; the main clone is "main". Where the output goes, first match wins:
+           1. the environment variable ONECONTACT_ARTIFACTS: a directory that collects the output of every checkout;
+           2. a "scratch/onecontact/csharp" folder found a few levels above the checkout (a shared build area some machines have);
+           3. artifacts/ at the repository root, which .gitignore covers (CI and every other machine). -->
+    <_CheckoutName>$([System.IO.Path]::GetFileName($([System.IO.Path]::GetDirectoryName($(MSBuildThisFileDirectory)))))</_CheckoutName>
+    <_CheckoutSlot>$(_CheckoutName)</_CheckoutSlot>
+    <_CheckoutSlot Condition="'$(_CheckoutName)' == 'onecontact-csharp'">main</_CheckoutSlot>
+    <_ProbeNear>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..', '..', '..', '..', 'scratch', 'onecontact', 'csharp'))</_ProbeNear>
+    <_ProbeFar>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..', '..', '..', '..', '..', 'scratch', 'onecontact', 'csharp'))</_ProbeFar>
+    <_ArtifactsRoot Condition="'$(ONECONTACT_ARTIFACTS)' != ''">$([MSBuild]::EnsureTrailingSlash('$(ONECONTACT_ARTIFACTS)'))</_ArtifactsRoot>
+    <_ArtifactsRoot Condition="'$(_ArtifactsRoot)' == '' and Exists('$(_ProbeNear)')">$(_ProbeNear)</_ArtifactsRoot>
+    <_ArtifactsRoot Condition="'$(_ArtifactsRoot)' == '' and Exists('$(_ProbeFar)')">$(_ProbeFar)</_ArtifactsRoot>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath Condition="'$(_ArtifactsRoot)' != ''">$(_ArtifactsRoot)$(_CheckoutSlot)</ArtifactsPath>
+    <ArtifactsPath Condition="'$(_ArtifactsRoot)' == ''">$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Language and analysis">
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <!-- Safe, bounds-checked C# throughout. -->
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <Deterministic>true</Deterministic>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup Label="Usings">
+    <Using Include="System" />
+    <Using Include="System.Collections.Generic" />
+    <Using Include="System.IO" />
+    <Using Include="System.Linq" />
+    <Using Include="System.Threading" />
+    <Using Include="System.Threading.Tasks" />
+  </ItemGroup>
+
+  <PropertyGroup Label="Reproducible packages">
+    <!-- Path mapping is for the packages only (projects under src/). Test projects keep real paths: some tests locate test data from
+         [CallerFilePath], which a mapped path would break on CI. -->
+    <_ProjectDir>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)'))</_ProjectDir>
+    <_SrcDir>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', 'src'))</_SrcDir>
+    <_IsSrcProject Condition="$(_ProjectDir.StartsWith('$(_SrcDir)'))">true</_IsSrcProject>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true' and '$(_IsSrcProject)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Shipped libraries" Condition="'$(_IsSrcProject)' == 'true'">
+    <IsAotCompatible>true</IsAotCompatible>
+    <IsTrimmable>true</IsTrimmable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>$(PackagePrefix)$(MSBuildProjectName)</PackageId>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Names">
+    <!-- Every project is named for its folder, with the publisher prefix on the assembly and namespace. -->
+    <AssemblyName>$(PackagePrefix)$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(PackagePrefix)$(MSBuildProjectName)</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package metadata">
+    <Authors>Recursive AI, LLC</Authors>
+    <Company>Recursive AI, LLC</Company>
+    <Copyright>Copyright (c) Recursive AI, LLC</Copyright>
+    <PackageLicenseExpression>MIT OR Apache-2.0</PackageLicenseExpression>
+    <!-- The one place the package version lives. All packages of this repository share it. -->
+    <Version>0.1.0-preview.1</Version>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/recursive-ai-oss/onecontact-csharp</RepositoryUrl>
+    <PackageProjectUrl>https://recursiveai.org/onecontact/</PackageProjectUrl>
+    <PackageReadmeFile>PACKAGE.md</PackageReadmeFile>
+    <PackageTags>phone;phone-number;address;postal-address;email;url;uri;person-name;company-name;contact;normalization;libphonenumber;libphonenumber-csharp;libpostal;libaddressinput;nameparser;NameParserSharp;publicsuffix;nativeaot;trimmable</PackageTags>
+    <PackageReleaseNotes>See CHANGELOG.md in the repository.</PackageReleaseNotes>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- No baseline until the first release is published; set PackageValidationBaselineVersion after it. -->
+    <EnablePackageValidation>true</EnablePackageValidation>
+  </PropertyGroup>
+
+</Project>

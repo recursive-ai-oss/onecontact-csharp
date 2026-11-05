@@ -1,0 +1,6 @@
+<Project>
+
+  <!-- Compiled-data support for every project that declares IngestSource items. -->
+  <Import Project="$(MSBuildThisFileDirectory)build/Ingest.targets" />
+
+</Project>
