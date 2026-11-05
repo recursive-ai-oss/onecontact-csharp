@@ -3,6 +3,7 @@ using System.Text.Json;
 using RecursiveAI.OneContact;
 using RecursiveAI.OneContact.Addresses;
 using RecursiveAI.OneContact.Phones;
+using RecursiveAI.OneContact.Phones.Geo;
 using RecursiveAI.OneContact.Addresses.Expansion;
 using RecursiveAI.OneContact.Addresses.Standardization;
 using RecursiveAI.OneContact.Keys;
@@ -101,6 +102,14 @@ EmailAddress mailbox = EmailAddress.Parse("\"J. Smith\" <J.Smith+crm@GoogleMail.
 Check(mailbox.Canonical == "J.Smith+crm@googlemail.com" && mailbox.Key == "jsmith@gmail.com" && mailbox.DisplayName == "J. Smith", "email happy path");
 Check(EmailAddress.Parse("info@B\u00fccher.example").Domain == "xn--bcher-kva.example", "email idn domain");
 Check(EmailAddress.Parse("x@mailinator.com").Flags.HasFlag(EmailFacts.Disposable), "email disposable flag");
+
+// Phones.Geo: each mapper reads its embedded table on first use.
+PhoneNumber geoNumber = PhoneNumber.Parse("+1 650 253 0000");
+Check(PhoneGeocoder.Default.GetDescription(geoNumber, "en") == "Mountain View, CA", "geocoder");
+Check(PhoneGeocoder.Default.GetDescription(PhoneNumber.Parse("+49 30 123456"), "en", Region.US) == "Germany", "geocoder country name");
+Check(PhoneTimeZoneMapper.Default.GetTimeZones(geoNumber).Contains("America/Los_Angeles"), "time zones");
+Check(PhoneCarrierMapper.Default.GetSafeDisplayName(geoNumber, "en") == string.Empty, "carrier safe name");
+Check(PhoneCarrierMapper.Default.GetName(PhoneNumber.Parse("+49 30 123456"), "en") == string.Empty, "carrier of a fixed line");
 
 Console.WriteLine(failures == 0 ? "OneContact AOT smoke: ok" : $"OneContact AOT smoke: {failures} failure(s)");
 return failures == 0 ? 0 : 1;
