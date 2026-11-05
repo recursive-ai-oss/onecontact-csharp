@@ -77,22 +77,23 @@ public partial class PatternRow
 [MemoryDiagnoser]
 public class PhoneRow
 {
-    private const string Text = "(202) 456-1111";
+    private readonly string _text = "(202) 456-1111";
+    private readonly string _gb = "020 7946 0958";
 
     /// <summary>Parses a US national number.</summary>
     /// <returns>The number.</returns>
     [Benchmark]
-    public static PhoneNumber Parse() => PhoneNumber.Parse(Text, Region.US);
+    public PhoneNumber Parse() => PhoneNumber.Parse(_text, Region.US);
 
     /// <summary>Parses and formats internationally.</summary>
     /// <returns>The text.</returns>
     [Benchmark]
-    public static string ParseAndFormat() => PhoneNumber.Parse(Text, Region.US).Format(PhoneFormat.International);
+    public string ParseAndFormat() => PhoneNumber.Parse(_text, Region.US).Format(PhoneFormat.International);
 
     /// <summary>Parses and validates a UK number.</summary>
     /// <returns>Whether it is valid.</returns>
     [Benchmark]
-    public static bool ParseAndValidate() => PhoneNumber.Parse("020 7946 0958", Region.Parse("GB")).IsValid;
+    public bool ParseAndValidate() => PhoneNumber.Parse(_gb, Region.Parse("GB")).IsValid;
 }
 
 internal static class Program

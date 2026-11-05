@@ -13,7 +13,9 @@ Normative notes for the phone core. Public API: `PhoneNumber` (value type) and `
 
 ## Pattern matching
 
-Metadata patterns (about 3,000, plus any the user supplies) run on our own backtracking matcher (`Phones/Metadata/PhoneRegex.cs`) over code points, with a step budget so a hostile pattern cannot run unbounded. It supports the subset the metadata uses and the case modes the parsing rules need (exact, ASCII-insensitive, Unicode-folding). `[GeneratedRegex]` cannot serve patterns that arrive at run time, and `new Regex` is not allowed in the library, so one engine serves both. `bench/OneContact.Bench` holds the indicative comparison against source-generated patterns.
+Metadata patterns (about 3,000, plus any the user supplies) run on our own backtracking matcher (`Phones/Metadata/PhoneRegex.cs`) over code points, with a step budget so a hostile pattern cannot run unbounded. It supports the subset the metadata uses and the case modes the parsing rules need (exact, ASCII-insensitive, Unicode-folding). `[GeneratedRegex]` cannot serve patterns that arrive at run time, and `new Regex` is not allowed in the library, so one engine serves both. `bench/OneContact.Bench` holds the comparison against source-generated patterns.
+
+Indicative measurement (BenchmarkDotNet short job, in process, AMD Ryzen 9 7950X3D, 4 cores reserved, machine load 16 to 31 during the run, .NET 10): matching 3 general-description patterns (US, GB, DE) over 5 inputs, 15 whole-input matches per operation, took 994 ns with our matcher and 235 ns with `[GeneratedRegex]`, no allocations in either. Generated patterns are about four times faster per match, so the matcher stays a tuning candidate (a first-character prefilter or a compiled automaton); it is kept because the metadata patterns are data, not source. End to end on the same run: `PhoneNumber.Parse` of a US national number 4.7 µs and 1.1 KB, parse plus international format 5.5 µs and 1.5 KB, parse plus validity of a GB number 5.9 µs and 1.3 KB. These are not publishable rows.
 
 ## Parsing
 
