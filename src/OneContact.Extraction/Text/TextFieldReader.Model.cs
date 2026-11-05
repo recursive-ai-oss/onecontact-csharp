@@ -19,7 +19,8 @@ internal sealed partial class TextFieldReader
     // How sure the model must be, as the mean probability of the words of the span. Chosen on development blocks: the mean is low for
     // correct spans (it is trained with dropout and spans have uncertain edges), and from 0.3 up to 0.45 the scores are within 0.2 points of
     // no cut at all, while 0.6 loses a fifth of company names and 0.75 loses most addresses.
-    private const float MinConfidence = 0.3f;
+    // Settable inside the assembly (and by the evaluation tools) so that a cut can be compared on development blocks; there is no public option.
+    internal static float MinConfidence { get; set; } = 0.3f;
 
     private void RunModel(IContactSpanModel model)
     {

@@ -89,6 +89,34 @@ When a model package that carries a contact-span model is referenced (`ContactMo
 
 Development-block rows (field F1 of `ExtractText` with a US default region, exact span / overlap, 6,000 blocks, rules only → rules + model): address 43.9 → 96.6 / 46.2 → 99.2; company 0 → 93.2 / 0 → 96.8; person 0 → 95.2 / 0 → 97.4; phone 96.6 → 97.0 / 97.9 → 98.4; email 99.3 → 99.3; website 99.7 → 99.7. The rules find no names or companies without a label. The confidence cut was chosen on these blocks: from 0.0 to 0.3 scores are within 0.2 points, 0.6 loses a fifth of the company names and 0.75 most addresses.
 
+## The span model on real pages
+
+Scored once per cut on the private extraction evaluation sets (`extraction-eval-sets.md`: 119 pages, 115 text items; visible-text mentions, value F1, 1000-resample bootstrap 95% interval, aggregates only), by `tools/Eval/extraction/run-model-eval.sh`. The cut is the minimum mean probability of a model span. Cuts 0.3 (shipped) and 0.4 (the highest cut within 0.5 points of no cut on every field of 6,000 development blocks) are the candidates; 0.9 is a diagnostic that was not a candidate (it is where the development scores collapse). No cut was chosen on these sets.
+
+| Set, type | Rules only | Rules + model, cut 0.3 | cut 0.4 | cut 0.9 (diagnostic) | Best reference |
+|---|---|---|---|---|---|
+| web person | 0 | 1.6 [0.6, 2.9], P 0.8 R 60 | 1.8 [0.7, 3.3] | 2.2 [0, 5.6] | spaCy trf 8.4 [3.7, 14.0], R 86.7 |
+| web org | 0 | 4.7 [3.3, 6.1], P 2.5 R 54 | 5.7 [3.8, 7.5] | 19.3 [8.2, 29.6], P 57 R 12 | spaCy 11.0 [8.3, 14.5], R 72.5 |
+| web address | 84.0 [76.6, 90.3] | 42.2 [34.8, 50.6], P 27 R 93 | 59.3 [50.8, 68.0] | 84.0 | none |
+| web phone | 99.0 [97.4, 100] | 99.0 | 99.0 | 99.0 | libphonenumber 99.0 |
+| web email | 98.9 [97.0, 100] | 98.3 [96.2, 100] | 98.3 | 98.9 | Recognizers 92.2 |
+| web website | 58.2 [41.6, 73.3] | 54.2 [38.1, 69.4] | 55.2 | 58.2 | Recognizers 58.2 |
+| web record F1 | 30.3 [20.8, 39.3] | 7.5 [4.7, 10.7] | 9.9 [6.2, 14.1] | 26.7 [18.1, 34.4] | none |
+| text person | 0 | 9.2 [1.9, 17.0], P 5.6 R 25 | 10.1 [2.1, 18.4] | 10.3 [0, 24.5] | spaCy 61.3 [45.8, 75.8], R 95 |
+| text org | 0 | 15.6 [8.1, 23.3], P 10.7 R 29 | 17.4 [8.7, 26.3] | 5.0 [0, 15.8] | spaCy 32.9 [21.3, 46.4], R 60.5 |
+| text address | 46.2 [24.4, 64.0] | 68.9 [52.8, 82.9], P 66 R 72 | 71.2 [55.2, 86.3] | 46.2 | none |
+| text phone, email | 100, 100 | 100, 100 | 100, 100 | 100, 100 | libphonenumber 100; Recognizers 92.0, 96.6 |
+| text website | 34.5 [9.5, 56.0] | 34.5 | 34.5 | 34.5 | Recognizers 34.5 |
+| text record F1 | 22.8 [11.5, 34.8] | 15.6 [7.4, 24.6] | 18.5 [9.2, 27.6] | 19.3 [8.7, 30.6] | none |
+
+What the sets show:
+
+- **On web pages the model is badly off.** It marks ordinary page text as names, companies and addresses (web person: 1,136 predicted for 15 gold; org: 1,503 for 69; address: 249 for 73), because it was trained on blocks that are mostly contact data, with few negatives and none that look like a real page's navigation, product names and prose. Raising the cut does not repair this: at 0.9 the address row only gets back to the rules' score (the model adds nothing), and names and companies stay far below spaCy.
+- **On short free text it helps addresses** (46 → 69 with 95% intervals that overlap, but the recall goes from 31 to 72) and finds some companies; its names are far behind spaCy (recall 25 against 95).
+- **Phones and emails** are the rules' and stay so; the model adds one wrong email on the web set (98.9 → 98.3).
+- **Records:** the model splits and fills groups wrongly on pages, so record F1 falls on both sets.
+- The development scores (98.6 field F1) do not carry to real text, as expected from template-built blocks; the next training step is data with real negatives, not a different cut. The span model should not be treated as ready for web pages.
+
 ## Obfuscation
 
 Each decoded field carries `Deobfuscated`; its offsets span the text as written (the obfuscated form).
