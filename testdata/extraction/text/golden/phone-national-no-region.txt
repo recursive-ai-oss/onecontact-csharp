@@ -1,0 +1,3 @@
+unit Bytes
+ungrouped #0 Phone Text raw="202-555-0127" text="202-555-0127" span=96+12 conf=0.43 flags=Unnormalized issue=phone.region-required label="Call"
+ungrouped #1 Phone Text raw="+1 202 555 0129" text="+1 202 555 0129" span=134+15 conf=0.8 => Phone:+12025550129 facts=Valid|InternationalInput

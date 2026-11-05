@@ -37,7 +37,7 @@ internal sealed class AddressParts
 /// <summary>A value found by a reader, before it is normalized and given an id.</summary>
 internal sealed class FieldDraft
 {
-    public required FieldKind Kind { get; init; }
+    public required FieldKind Kind { get; set; }
 
     public required FieldSource Source { get; init; }
 
@@ -58,6 +58,21 @@ internal sealed class FieldDraft
     public int ElementIndex { get; init; } = -1;
 
     public int BlockId { get; set; } = -1;
+
+    /// <summary>The value was decoded from an obfuscated form (text read by the visible-text reader).</summary>
+    public bool Deobfuscated { get; init; }
+
+    /// <summary>The reader's own confidence; null for the source's default.</summary>
+    public double? Confidence { get; init; }
+
+    /// <summary>A phone number found by its shape: kept only when the core parser accepts it as valid.</summary>
+    public bool RequireValid { get; init; }
+
+    /// <summary>The line of visible text the value is on (text and the links among it); -1 when it has none.</summary>
+    public int Line { get; set; } = -1;
+
+    /// <summary>A name found after a "Company:" style label; it names the organization, and the grouping decides whether that is the record or its employer.</summary>
+    public bool CompanyLabel { get; init; }
 }
 
 /// <summary>A record under construction.</summary>

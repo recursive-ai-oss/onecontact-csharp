@@ -1,0 +1,7 @@
+unit Bytes
+record 0 Unknown src=Text conf=0.5 span=192+199
+  #0 Address Text raw="100 Main Street<br>Springfield, IL 62701" text="100 Main Street\nSpringfield, IL 62701" span=192+40 conf=0.7 flags=RegionInferred => Address:100 MAIN ST, SPRINGFIELD IL 62701 facts=CountryInferred
+  #1 Phone Text raw="(202) 555-0148" text="(202) 555-0148" span=246+14 conf=0.85 flags=RegionInferred => Phone:+12025550148 facts=Valid label="Phone"
+  #2 Email Link raw="mailto:hello@acme.example" text="hello@acme.example" span=283+25 conf=0.9 => Email:hello@acme.example facts=RoleAccount
+    also Text span=310+18
+  #3 Website Text raw="www.acme.example" text="www.acme.example" span=375+16 conf=0.8 => Web:https://www.acme.example/ facts=SchemeAssumed

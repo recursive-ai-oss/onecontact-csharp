@@ -1,0 +1,3 @@
+unit Bytes
+ungrouped #0 Address Text raw="100 Main Street<br>Springfield, IL 62701" text="100 Main Street\nSpringfield, IL 62701" span=104+40 conf=0.7 flags=RegionInferred => Address:100 MAIN ST, SPRINGFIELD IL 62701 facts=CountryInferred
+ungrouped #1 Address Text raw="200 Oak Ave<br>Portland, OR 97201" text="200 Oak Ave\nPortland, OR 97201" span=151+33 conf=0.7 flags=RegionInferred => Address:200 OAK AVE, PORTLAND OR 97201 facts=CountryInferred

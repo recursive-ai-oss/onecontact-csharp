@@ -139,7 +139,7 @@ public sealed class ContactRecord
     /// <summary>The position of the record in <see cref="ExtractResult.Records"/>.</summary>
     public int Id { get; }
 
-    /// <summary>Whether this is a person or an organization.</summary>
+    /// <summary>Whether this is a person or an organization; <see cref="ContactRecordKind.Unknown"/> for fields found together in visible text with nothing that says which.</summary>
     public ContactRecordKind Kind { get; }
 
     /// <summary>The reader that first found the record. Fields can come from other readers.</summary>

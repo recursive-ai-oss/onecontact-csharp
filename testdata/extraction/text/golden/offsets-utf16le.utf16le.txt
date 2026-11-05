@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Unknown src=Text conf=0.5 span=178+74
+  #0 Email Text raw="wide@acme.example" text="wide@acme.example" span=178+34 conf=0.9 => Email:wide@acme.example
+  #1 Phone Text raw="+1 202 555 0148" text="+1 202 555 0148" span=222+30 conf=0.85 => Phone:+12025550148 facts=Valid|InternationalInput label="Tel"

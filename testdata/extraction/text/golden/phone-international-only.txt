@@ -1,0 +1,3 @@
+unit Bytes
+ungrouped #0 Phone Text raw="+49 30 901820" text="+49 30 901820" span=100+13 conf=0.8 => Phone:+4930901820 facts=Valid|InternationalInput
+ungrouped #1 Phone Text raw="+33 1 70 18 99 00" text="+33 1 70 18 99 00" span=128+17 conf=0.8 => Phone:+33170189900 facts=Valid|InternationalInput

@@ -35,6 +35,23 @@ internal sealed class PageContext
         PageRegion = ReadPageRegion(document);
     }
 
+    // A plain string has no markup: the page is an empty document and the text is the string itself, so that offsets are its own.
+    private PageContext(string plainText)
+    {
+        Document = Document.Parse(string.Empty);
+        Text = plainText;
+        HasBytes = false;
+        IsPlainText = true;
+        Elements = [];
+        PageRegion = Region.Unknown;
+    }
+
+    /// <summary>A page that is a plain string (a CRM note, a comment): no elements, offsets are chars of the string.</summary>
+    public static PageContext ForPlainText(string text) => new(text);
+
+    /// <summary>True when the page is a plain string rather than parsed HTML.</summary>
+    public bool IsPlainText { get; }
+
     public Document Document { get; }
 
     /// <summary>The decoded, newline-normalized text every <see cref="TextRange"/> points into.</summary>

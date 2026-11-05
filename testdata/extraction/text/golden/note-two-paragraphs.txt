@@ -1,0 +1,9 @@
+unit Chars
+record 0 Person src=Text conf=0.8 span=6+58
+  #0 Name Text raw="Ada Example" text="Ada Example" span=6+11 conf=0.8 => Person:Ada Example
+  #1 Email Text raw="ada@acme.example" text="ada@acme.example" span=25+16 conf=0.9 => Email:ada@acme.example
+  #2 Phone Text raw="+1 202 555 0171" text="+1 202 555 0171" span=49+15 conf=0.85 => Phone:+12025550171 facts=Valid|InternationalInput label="Phone"
+record 1 Person src=Text conf=0.8 span=72+55
+  #3 Name Text raw="Bo Sample" text="Bo Sample" span=72+9 conf=0.8 => Person:Bo Sample
+  #4 Email Text raw="bo@acme.example" text="bo@acme.example" span=89+15 conf=0.9 => Email:bo@acme.example
+  #5 Phone Text raw="+1 202 555 0172" text="+1 202 555 0172" span=112+15 conf=0.85 => Phone:+12025550172 facts=Valid|InternationalInput label="Phone"

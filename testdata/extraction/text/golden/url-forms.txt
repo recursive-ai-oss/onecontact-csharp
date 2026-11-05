@@ -1,0 +1,5 @@
+unit Bytes
+ungrouped #0 Website Text raw="https://www.example.com/team?x=1" text="https://www.example.com/team?x=1" span=108+32 conf=0.85 => Web:https://www.example.com/team?x=1
+ungrouped #1 Website Text raw="www.acme.example" text="www.acme.example" span=142+16 conf=0.8 => Web:https://www.acme.example/ facts=SchemeAssumed
+ungrouped #2 Website Text raw="acme-example.com/jobs" text="acme-example.com/jobs" span=165+21 conf=0.6 => Web:https://acme-example.com/jobs facts=SchemeAssumed
+ungrouped #3 Website Text raw="shop.acme-example.com" text="shop.acme-example.com" span=191+21 conf=0.6 => Web:https://shop.acme-example.com/ facts=SchemeAssumed

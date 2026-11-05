@@ -62,3 +62,31 @@ Nothing is silently picked. `ContactRecord.Disagreements` lists, per kind, field
 ## Limits
 
 JSON nesting 64; microdata, RDFa and h-card item nesting 32; 200,000 item visits and 100,000 fields per page, after which the result holds what was read and an `ExtractIssue` of kind `LimitExceeded` says so. OneHtml's own parse limits apply (`HtmlLimitExceededException` propagates). The readers use explicit stacks, so deeply nested HTML does not exhaust the call stack. A core parser that throws on a hostile value does not cost the page: the field is kept unnormalized.
+
+## Visible text
+
+`ContactExtractor.Sources` defaults to `Markup | Text`. The text half reads what a reader would see, with rules only; the span model plugs into the same candidate seam later.
+
+**What is read.** Text nodes of the OneHtml document, in order, split into lines at block-level elements, `<br>`, list items and table cells. Each run keeps its landmark (`header`, `footer`/`contentinfo`, `main`, and so on, from the accessibility tree) and its nearest heading, and every character maps back to a byte offset in the original page (a UTF-16 offset when the page was given as a string). Non-text elements (`script`, `style`, `template`, `noscript`, `iframe`, `svg`, `head`, form lists and the like) are never read.
+
+**Cascade.** A node is skipped when its computed `display` is `none`, its `visibility` is `hidden` or `collapse`, it has the `hidden` attribute, a zero font size (also written without a unit), or an ancestor has `aria-hidden="true"` (that prunes the subtree). `visibility` is inherited, so a child that sets `visibility: visible` inside a hidden parent is read. Structured markup is read by the markup readers regardless of visibility, as it is meant for machines.
+
+**Plain text.** `ExtractText` takes a CRM note or comment. Lines are the unit; a blank line or a line of dashes, underscores or equals signs starts a paragraph. Offsets are UTF-16 offsets of the string as given, line ends included.
+
+**Candidates.** Emails (our parser), websites (our parser and the PSL; a bare domain needs an ICANN suffix and must not look like a file name), phones (the core matcher at `Valid` leniency when the page or caller region is known, plus the shape rules for labelled numbers and `+` numbers), US/CA addresses (the rule parser over block-bounded windows) and names only where a label (`Name:`, `Contact person:`) makes them certain. The region is never guessed: an address without a region stays unnormalized with `address.country-required`, and an unlabelled national phone without a region is dropped.
+
+**Confidence** is fixed per rule: emails 0.9 (0.8 when decoded), phones 0.65–0.85, websites 0.6–0.85, addresses 0.7, labelled names 0.8, Cloudflare emails 0.9.
+
+## Obfuscation
+
+Each decoded field carries `Deobfuscated`; its offsets span the text as written (the obfuscated form).
+
+- Token substitution: `[at]`, `(at)`, `{at}`, `-at-`, ` at `, `AT`, and `[dot]`, `(dot)`, ` dot ` for the dot. A bare ` at ` counts only when a dot word also appears, so "meet me at example.com" is not an email. Decoded addresses need a real ICANN suffix.
+- Entity-encoded letters, digits, `@` and `.`.
+- Cloudflare `data-cfemail`: hex, the first byte is the XOR key for the rest.
+- Reversed text: `direction: rtl` with `unicode-bidi: bidi-override` is read in display order (UAX #9).
+- A value split by inline markup (`john<span>@</span>example.com`), hidden junk or zero-width characters.
+
+## Text grouping
+
+Fields group into a record when they share a qualifying container (`tr`, `article` and `address` always; other containers only when they hold two kinds of field), the same landmark and heading, and sit at most four lines apart. A second different email or address starts a new group. A group needs two kinds of field. A group with no certain name has kind `Unknown`; a `Name:` label makes a person, and a lone `Company:` label an organization. Unknown groups merge into a markup record that shares an email (role accounts count for organizations only), a website or an address (organizations only); a lone text field joins the single record that already holds its key. Disagreeing values stay, flagged `Disputed`.

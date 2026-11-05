@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup Label="Recursive AI libraries">
     <PackageVersion Include="RecursiveAI.OneHtml" Version="1.5.1" />
+    <PackageVersion Include="RecursiveAI.OneHtml.Accessibility" Version="1.5.1" />
   </ItemGroup>
   <ItemGroup>
     <!-- Test, benchmark and fuzz projects only. Comparators and oracles are added here when a row needs one. -->

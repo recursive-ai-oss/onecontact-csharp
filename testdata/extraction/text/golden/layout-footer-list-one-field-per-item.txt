@@ -1,0 +1,5 @@
+unit Bytes
+record 0 Unknown src=Text conf=0.5 span=124+78
+  #0 Phone Text raw="+1 202 555 0150" text="+1 202 555 0150" span=124+15 conf=0.85 => Phone:+12025550150 facts=Valid|InternationalInput label="Phone"
+  #1 Email Text raw="team@acme.example" text="team@acme.example" span=155+17 conf=0.9 => Email:team@acme.example facts=RoleAccount
+  #2 Website Text raw="www.acme.example" text="www.acme.example" span=186+16 conf=0.8 => Web:https://www.acme.example/ facts=SchemeAssumed

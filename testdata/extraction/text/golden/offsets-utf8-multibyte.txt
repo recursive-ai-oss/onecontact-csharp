@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Unknown src=Text conf=0.5 span=132+38
+  #0 Email Text raw="zoë@café.example" text="zoë@café.example" span=132+18 conf=0.9 => Email:zoë@xn--caf-dma.example facts=InternationalizedLocalPart|InternationalizedDomain
+  #1 Phone Text raw="+1 202 555 0147" text="+1 202 555 0147" span=155+15 conf=0.8 => Phone:+12025550147 facts=Valid|InternationalInput

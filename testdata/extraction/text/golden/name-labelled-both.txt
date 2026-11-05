@@ -1,0 +1,5 @@
+unit Bytes
+record 0 Person src=Text conf=0.8 span=120+81
+  #0 Name Text raw="Maria van der Berg" text="Maria van der Berg" span=120+18 conf=0.8 => Person:Maria van der Berg facts=HasParticle
+  #1 Organization Text raw="Acme Anvils Ltd" text="Acme Anvils Ltd" span=154+15 conf=0.8 => Company:Acme Anvils Ltd facts=HasLegalForm|LegalFormAmbiguous
+  #2 Email Text raw="maria@acme.example" text="maria@acme.example" span=183+18 conf=0.9 => Email:maria@acme.example

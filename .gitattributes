@@ -2,3 +2,4 @@
 *.ocd binary
 *.png binary
 testdata/extraction/pages/* -text
+testdata/extraction/text/** -text

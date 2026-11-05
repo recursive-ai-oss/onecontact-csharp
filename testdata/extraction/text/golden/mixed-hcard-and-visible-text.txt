@@ -1,0 +1,7 @@
+unit Bytes
+record 0 Person src=HCard conf=1 span=101+182
+  #0 Name HCard raw="Hazel Card" text="Hazel Card" span=142+10 conf=1 => Person:Hazel Card
+  #1 Email HCard raw="mailto:hazel@card.example" text="hazel@card.example" span=185+25 conf=1 => Email:hazel@card.example
+    also Text span=212+18
+  #2 Phone HCard raw="+1 202 555 0142" text="+1 202 555 0142" span=255+15 conf=1 => Phone:+12025550142 facts=Valid|InternationalInput
+    also Text span=255+15

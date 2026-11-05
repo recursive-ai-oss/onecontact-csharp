@@ -1,0 +1,4 @@
+unit Chars
+ungrouped #0 Website Text raw="https://www.example.org/post/1" text="https://www.example.org/post/1" span=16+30 conf=0.85 => Web:https://www.example.org/post/1
+ungrouped #1 Website Text raw="http://blog.example.net" text="http://blog.example.net" span=48+23 conf=0.85 => Web:http://blog.example.net/
+ungrouped #2 Website Text raw="www.example.com" text="www.example.com" span=76+15 conf=0.8 => Web:https://www.example.com/ facts=SchemeAssumed
