@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The fuzz host: runs one target over an input file, or over every file of a directory. A fuzzer (SharpFuzz with libFuzzer or AFL)
+       is attached by instrumenting this assembly's reference to the library; that wiring is added with the first fuzz campaign. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/OneContact/OneContact.csproj" />
+  </ItemGroup>
+
+</Project>
