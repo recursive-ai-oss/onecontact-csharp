@@ -103,7 +103,9 @@ def label_words(text, label):
 
 
 def main():
-    elf_path = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/onecontact/u8/upstream/gleif-elf/2026-02-19-elf-code-list-v1.6.csv")
+    if len(sys.argv) < 2:
+        sys.exit("usage: make-gold.py <path to 2026-02-19-elf-code-list-v1.6.csv>")
+    elf_path = sys.argv[1]
     index = load_elf(elf_path)
     rnd = random.Random(SEED)
     rows = []

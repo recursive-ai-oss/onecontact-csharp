@@ -1,7 +1,5 @@
 <Project>
   <ItemGroup>
     <IngestSource Include="gleif-elf" Tool="../../tools/Ingest.GleifElf/OneContact.Ingest.GleifElf.csproj" Pin="../../upstream/gleif-elf/PIN" />
-    <!-- Only so that restore also covers the converter; nothing of it is referenced or shipped. -->
-    <ProjectReference Include="../../tools/Ingest.GleifElf/OneContact.Ingest.GleifElf.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

@@ -95,7 +95,11 @@ internal static class PersonNameParser
             };
 
             bool single = open is '\'' or '\u2018';
-            if (close == '\0' || (single && i > start && !char.IsWhiteSpace(whole[i - 1])))
+
+            // A quote mark opens a nickname only at the start of a word and closes it only at the end of one; a quote glued to
+            // letters (p"ieter) is a stray mark, and treating it as an opener would swallow the words up to the next quote.
+            bool quoted = open != '(';
+            if (close == '\0' || (quoted && i > start && !char.IsWhiteSpace(whole[i - 1])))
             {
                 i++;
                 continue;
@@ -108,7 +112,7 @@ internal static class PersonNameParser
             }
 
             bool closed = j < end;
-            if (closed && single)
+            if (closed && quoted)
             {
                 // A single quote closes only at the end of a word: O'Brien and l'Heureux are not nicknames.
                 closed = j + 1 >= end || char.IsWhiteSpace(whole[j + 1]) || whole[j + 1] == ',';
@@ -133,9 +137,18 @@ internal static class PersonNameParser
             }
 
             bool hasLetter = false;
+            bool listLike = false;
             for (int k = a; k < b; k++)
             {
                 hasLetter |= char.IsLetter(whole[k]);
+                listLike |= whole[k] is ',' or ';';
+            }
+
+            // A quoted run with a comma in it is a stray quote mark that ran on to the next one, not a nickname.
+            if (listLike)
+            {
+                i++;
+                continue;
             }
 
             if (hasLetter && b - a >= (single ? 2 : 1))
@@ -238,6 +251,13 @@ internal static class PersonNameParser
             // Titles from the start of every segment that still has words.
             while (lo < hi)
             {
+                // A stray dash or ampersand before the titles carries nothing and does not hide them.
+                if (!tokens[lo].HasLetterOrDigit(whole))
+                {
+                    lo++;
+                    continue;
+                }
+
                 int size = TitleSize(whole, tokens, lo, hi, langs);
                 if (size == 0)
                 {

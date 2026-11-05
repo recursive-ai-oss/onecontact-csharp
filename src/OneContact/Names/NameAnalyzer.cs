@@ -238,7 +238,11 @@ internal static class NameAnalyzer
         // "Jansen B.V. & Partners": a part that is itself a company makes the whole text a company.
         foreach ((int from, int to) in expanded)
         {
-            if (LooksLikeCompany(whole, tokens[from].Start, tokens[to - 1].End, hints, langs))
+            // The part is judged as its own text, the way it reads when it is parsed again by itself.
+            int partStart = tokens[from].Start;
+            int partEnd = Math.Max(partStart, tokens[to - 1].End);
+            string partText = whole[partStart..partEnd].ToString();
+            if (LooksLikeCompany(partText, 0, partText.Length, hints, langs))
             {
                 result.Class = NameClass.Company;
                 return;
@@ -267,8 +271,13 @@ internal static class NameAnalyzer
             }
 
             PersonDraft? draft = PersonNameParser.ParseRange(whole, a, b, hints, langs, false, result.Issues);
-            if (draft is null)
+            if (draft is null || !draft.HasCore)
             {
+                if (draft is not null)
+                {
+                    result.Issues.Add(new ParseIssue(ReasonCode.PersonNoName, draft.Source));
+                }
+
                 result.Class = NameClass.Unknown;
                 return;
             }
@@ -324,6 +333,25 @@ internal static class NameAnalyzer
             }
         }
 
+        // Each part must also read as a person when it is parsed again by itself; if it does not, the connector joined something else.
+        for (int i = 0; i < drafts.Count; i++)
+        {
+            if (titleOnly[i])
+            {
+                continue;
+            }
+
+            string partText = whole[drafts[i].Source.Start..drafts[i].Source.End].ToString();
+            Analysis alone = Analyze(partText, hints);
+            if (!(alone.Class == NameClass.Person || (alone.Class == NameClass.Unknown && alone.Persons.Count == 1 && !alone.HasError)))
+            {
+                result.Class = NameClass.Unknown;
+                result.Persons.Clear();
+                result.Issues.Add(new ParseIssue(ReasonCode.PersonAmbiguousConnector, new SourceSpan(start, end - start)));
+                return;
+            }
+        }
+
         foreach (PersonDraft d in drafts)
         {
             if (ReadsAsCompanyInReadingOrder(whole, d, result.RestoreCase, hints, langs))
@@ -341,8 +369,14 @@ internal static class NameAnalyzer
     private static void Single(ReadOnlySpan<char> whole, int start, int end, NameHints hints, string[] langs, Analysis result)
     {
         PersonDraft? draft = PersonNameParser.ParseRange(whole, start, end, hints, langs, false, result.Issues);
-        if (draft is null)
+        if (draft is null || !draft.HasCore)
         {
+            // Titles and suffixes alone name nobody, and their canonical text would not read back as a person.
+            if (draft is not null)
+            {
+                result.Issues.Add(new ParseIssue(ReasonCode.PersonNoName, draft.Source));
+            }
+
             result.Class = NameClass.Unknown;
             return;
         }

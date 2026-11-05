@@ -130,6 +130,14 @@ internal static class CompanyNameParser
         int baseTo = body.Count;
         CompanyFacts flags = CompanyFacts.None;
         LegalFormMatcher.Hit? hit = LegalFormMatcher.Find(input, body, hints);
+
+        // "DBA" and the like are listed as legal forms but are read as trading-as markers everywhere else; a stray character glued to
+        // one must not turn it into a form whose canonical text the marker rule then takes apart.
+        if (hit is { } probe && IsMarkerSpelling(input, body, probe))
+        {
+            hit = null;
+        }
+
         if (hit is { } h)
         {
             form = LegalFormMatcher.Resolve(input, body, h, hints, out bool outside, out bool inactive);
@@ -281,6 +289,20 @@ internal static class CompanyNameParser
 
         (index, count, canonical) = (-1, 0, string.Empty);
         return MarkerKind.None;
+    }
+
+    private static bool IsMarkerSpelling(ReadOnlySpan<char> whole, List<NameToken> body, LegalFormMatcher.Hit hit)
+    {
+        for (int i = hit.FirstToken; i <= hit.LastToken; i++)
+        {
+            string lower = NameFolding.LettersAndDigits(body[i].Text(whole));
+            if (lower == "dba")
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool Is(ReadOnlySpan<char> whole, List<NameToken> tokens, int i, string word) =>
