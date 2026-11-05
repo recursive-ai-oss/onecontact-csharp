@@ -39,8 +39,13 @@ public sealed class Tier1Model : IAddressFieldModel, INameModel, IContactSpanMod
 
     /// <summary>Makes the parsers use this package's models. Safe to call more than once and from any thread. Needed only when the project that
     /// references the package cannot compile the module initializer the package adds (a non-C# project, for example).</summary>
+    /// <remarks>
+    /// The package carries the contact-span head but does not register it: it makes a row worse than rules alone on real web pages, so text
+    /// extraction stays rules and markup (<c>docs/extraction.md</c>). <see cref="Find(string)"/> still works for anyone who calls it, and a caller can
+    /// pass a model as the <c>spans</c> argument of <see cref="ContactModels.Register"/> to try it.
+    /// </remarks>
     public static void Register() =>
-        ContactModels.Register(PackageId, 1, new LazyModel(), new LazyModel(), new LazyModel());
+        ContactModels.Register(PackageId, 1, new LazyModel(), new LazyModel());
 
     /// <summary>Gets the models loaded from the weights in this assembly (loaded once, shared by all callers).</summary>
     /// <exception cref="InvalidOperationException">This assembly was built without its weights (a development build).</exception>

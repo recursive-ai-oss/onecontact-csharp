@@ -29,10 +29,9 @@ public sealed class ExtractionSpanModelTests
     private const string Note = "Spoke with Jane Smith about the renewal.\nShe can be reached on jane.smith@acme.example.";
 
     [Fact]
-    public void WithoutAModelTheResultNamesThePackageThatWouldAddTextSpans()
+    public void WithoutASpanModelExtractionIsRulesOnly()
     {
         ExtractResult r = new ContactExtractor().ExtractText(Note);
-        Assert.Equal("RecursiveAI.OneContact.Models.Tier1", r.TextModelPackage);
         Assert.DoesNotContain(r.Fields, f => f.Decision == DecisionSource.Model);
         Assert.Equal(["jane.smith@acme.example"], r.Of(FieldKind.Email).Select(f => f.Text));
     }
@@ -43,7 +42,6 @@ public sealed class ExtractionSpanModelTests
         var model = new FixedSpanModel([], ("Jane Smith", "person", 0.9f));
         using IDisposable scope = ContactModels.Scope(null, null, model);
         ExtractResult r = new ContactExtractor().ExtractText(Note);
-        Assert.Null(r.TextModelPackage);
         ExtractedField name = Assert.Single(r.Of(FieldKind.Name));
         Assert.Equal("Jane Smith", name.Text);
         Assert.Equal(DecisionSource.Model, name.Decision);
