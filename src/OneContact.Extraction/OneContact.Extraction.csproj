@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Placeholder until its stage: it will reference OneNLP, OneModel or OneHtml then, and is not packed before that. -->
+    <IsPackable>false</IsPackable>
+    <Description>libphonenumber- and libpostal-class contact data for .NET: Contact extraction from web pages and text for OneContact. Not packable yet.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../OneContact/OneContact.csproj" />
+  </ItemGroup>
+
+</Project>

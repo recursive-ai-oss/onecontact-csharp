@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <Description>libphonenumber- and libpostal-class contact data for .NET: phone numbers, email addresses, web addresses, postal addresses, person and company names, with canonical forms, versioned comparison keys and offsets back into the input. Clean-room, no native code, no network, NativeAOT and trim clean. In development.</Description>
+  </PropertyGroup>
+
+  <!-- Compiled data sets: each is declared by a Data/<name>.ingest.props file (see docs/architecture.md); no edit here is needed to add one. -->
+  <Import Project="Data/*.ingest.props" />
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Tests" />
+    <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Fuzz" />
+    <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).AotSmoke" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../PACKAGE.md" Pack="true" PackagePath="/" />
+    <None Include="../../LICENSE-MIT" Pack="true" PackagePath="/" />
+    <None Include="../../LICENSE-APACHE" Pack="true" PackagePath="/" />
+    <None Include="../../THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+</Project>
