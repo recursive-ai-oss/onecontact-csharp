@@ -1,0 +1,26 @@
+# language <TAB> particle (lower case) <TAB> weight. Our own list; a particle is attached to a family name drawn from the surname list, so the
+# strings are plausible in structure, not records of real people.
+en	van	6
+en	von	3
+en	de	5
+en	di	3
+en	da	1
+en	del	2
+en	de la	3
+en	van der	2
+en	van den	1
+en	le	2
+en	la	1
+en	du	1
+en	st.	0
+fr	de	8
+fr	du	4
+fr	des	2
+fr	de la	4
+fr	le	3
+fr	la	2
+fr	de l'	0
+es	de	8
+es	del	4
+es	de la	5
+es	de los	1

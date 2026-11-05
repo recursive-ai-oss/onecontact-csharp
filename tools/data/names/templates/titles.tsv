@@ -1,0 +1,36 @@
+# language <TAB> title <TAB> sex of the sampled given name it is paired with (M, F, -) <TAB> dot-optional abbreviation (1) or fixed spelling (0) <TAB> weight
+# Our own list of forms of address, written from general usage. The pairing with the sampled given name's sex only makes the
+# rendered strings look like real ones; it is never read back as a label.
+en	Mr	M	1	30
+en	Mrs	F	1	8
+en	Ms	F	1	12
+en	Miss	F	0	3
+en	Dr	-	1	14
+en	Prof	-	1	3
+en	Professor	-	0	1
+en	Rev	-	1	1
+en	Reverend	-	0	0.4
+en	Hon	-	1	0.5
+en	Capt	-	1	0.4
+en	Col	M	1	0.3
+en	Sir	M	0	0.3
+en	Mx	-	1	0.3
+en	Father	M	0	0.3
+en	Sister	F	0	0.2
+fr	M.	M	0	30
+fr	Mme	F	0	18
+fr	Mlle	F	0	3
+fr	Dr	-	1	12
+fr	Dre	F	0	3
+fr	Me	-	0	4
+fr	Pr	-	0	2
+fr	Monsieur	M	0	2
+fr	Madame	F	0	2
+es	Sr.	M	0	30
+es	Sra.	F	0	20
+es	Srta.	F	0	4
+es	Don	M	0	3
+es	Doña	F	0	3
+es	Lic.	-	0	5
+es	Dr.	-	0	5
+es	Dra.	F	0	3
