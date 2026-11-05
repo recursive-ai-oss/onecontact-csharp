@@ -1,0 +1,138 @@
+# Person-name rule cases, written for this repository. Synthetic names only.
+# lang|hints|input|class|prefix|given|middle|particle|family|second|suffix|professional|nickname|canonical
+# hints: - (none), a country (US), a language (hu), or both (ES/ca). _ means the part is absent.
+en|-|John Smith|person|_|John|_|_|Smith|_|_|_|_|John Smith
+en|-|Dr. Jane A. Doe|person|Dr.|Jane|A.|_|Doe|_|_|_|_|Dr. Jane A. Doe
+en|-|Smith, John Q.|person|_|John|Q.|_|Smith|_|_|_|_|John Q. Smith
+en|-|John Smith Jr.|person|_|John|_|_|Smith|_|Jr.|_|_|John Smith Jr.
+en|-|Robert "Bob" Smith|person|_|Robert|_|_|Smith|_|_|_|Bob|Robert "Bob" Smith
+en|-|Mary Anne (Annie) O'Brien|person|_|Mary|Anne|_|O'Brien|_|_|_|Annie|Mary Anne "Annie" O'Brien
+en|-|JOHN SMITH|person|_|John|_|_|Smith|_|_|_|_|John Smith
+en|-|john mcdonald|person|_|John|_|_|McDonald|_|_|_|_|John McDonald
+en|-|ANGUS MACDONALD|person|_|Angus|_|_|Macdonald|_|_|_|_|Angus Macdonald
+en|-|SEAN O'BRIEN|person|_|Sean|_|_|O'Brien|_|_|_|_|Sean O'Brien
+en|-|Jane Doe, PhD|person|_|Jane|_|_|Doe|_|_|PhD|_|Jane Doe, PhD
+en|-|Jane Doe, M.D., Ph.D.|person|_|Jane|_|_|Doe|_|_|M.D. Ph.D.|_|Jane Doe, M.D., Ph.D.
+en|-|Prof. Dr. Hans Mueller|person|Prof. Dr.|Hans|_|_|Mueller|_|_|_|_|Prof. Dr. Hans Mueller
+en|-|Ludwig van Beethoven|person|_|Ludwig|_|van|Beethoven|_|_|_|_|Ludwig van Beethoven
+en|-|VAN DER BERG|person|_|_|_|Van Der|Berg|_|_|_|_|Van Der Berg
+en|-|Mr Smith|person|Mr|_|_|_|Smith|_|_|_|_|Mr Smith
+en|-|Madonna|unknown|_|Madonna|_|_|_|_|_|_|_|Madonna
+en|-|Sir Isaac Newton|person|Sir|Isaac|_|_|Newton|_|_|_|_|Sir Isaac Newton
+en|-|Martin Luther King III|person|_|Martin|Luther|_|King|_|III|_|_|Martin Luther King III
+en|-|Dr. Martin Luther King, Jr.|person|Dr.|Martin|Luther|_|King|_|Jr.|_|_|Dr. Martin Luther King Jr.
+en|-|john smith iii|person|_|John|_|_|Smith|_|III|_|_|John Smith III
+en|-|J. R. R. Tolkien|person|_|J.|R. R.|_|Tolkien|_|_|_|_|J. R. R. Tolkien
+en|US|Yo-Yo Ma|person|_|Yo-Yo|_|_|Ma|_|_|_|_|Yo-Yo Ma
+en|-|Robert "Bob"|person|_|Robert|_|_|_|_|_|_|Bob|Robert "Bob"
+fr|FR|M. Pierre Dupont|person|M.|Pierre|_|_|Dupont|_|_|_|_|M. Pierre Dupont
+fr|FR|Mme Élodie de la Fontaine|person|Mme|Élodie|_|de la|Fontaine|_|_|_|_|Mme Élodie de la Fontaine
+fr|FR|DUPONT, Jean-Luc|person|_|Jean-Luc|_|_|DUPONT|_|_|_|_|Jean-Luc DUPONT
+fr|FR|JEAN-LUC DUPONT|person|_|Jean-Luc|_|_|Dupont|_|_|_|_|Jean-Luc Dupont
+fr|FR|Dr Camille Martin|person|Dr|Camille|_|_|Martin|_|_|_|_|Dr Camille Martin
+fr|FR|Jean d'Ormesson|person|_|Jean|_|_|d'Ormesson|_|_|_|_|Jean d'Ormesson
+fr|FR|Jean-Pierre Martin fils|person|_|Jean-Pierre|_|_|Martin|_|fils|_|_|Jean-Pierre Martin fils
+fr|FR|CHLOÉ DU PONT|person|_|Chloé|_|du|Pont|_|_|_|_|Chloé du Pont
+fr|BE|Me Julien Lambert|person|Me|Julien|_|_|Lambert|_|_|_|_|Me Julien Lambert
+es|ES|María José García López|person|_|María|José|_|García|López|_|_|_|María José García López
+es|ES|Dr. Juan Pérez|person|Dr.|Juan|_|_|Pérez|_|_|_|_|Dr. Juan Pérez
+es|ES|Ana María Ruiz|person|_|Ana|María|_|Ruiz|_|_|_|_|Ana María Ruiz
+es|ES|Juan Pérez López|person|_|Juan|_|_|Pérez|López|_|_|_|Juan Pérez López
+es|ES|José Luis Rodríguez de la Torre|person|_|José|Luis|_|Rodríguez|de la Torre|_|_|_|José Luis Rodríguez de la Torre
+es|ES|GARCÍA LÓPEZ, MARÍA|person|_|María|_|_|García|López|_|_|_|María García López
+es|ES|Sr. Pedro Martín y Gil|person|Sr.|Pedro|_|_|Martín|Gil|_|_|_|Sr. Pedro Martín y Gil
+es|MX|Don Alejandro Ortega Molina|person|Don|Alejandro|_|_|Ortega|Molina|_|_|_|Don Alejandro Ortega Molina
+es|ES|Sra. Carmen Navarro|person|Sra.|Carmen|_|_|Navarro|_|_|_|_|Sra. Carmen Navarro
+pt|PT|João da Silva|person|_|João|_|da|Silva|_|_|_|_|João da Silva
+pt|PT|Dra. Maria dos Santos|person|Dra.|Maria|_|dos|Santos|_|_|_|_|Dra. Maria dos Santos
+pt|PT|Eng. Rui Costa|person|Eng.|Rui|_|_|Costa|_|_|_|_|Eng. Rui Costa
+pt|PT|Ana Paula Ferreira Lopes|person|_|Ana|Paula Ferreira|_|Lopes|_|_|_|_|Ana Paula Ferreira Lopes
+pt|BR|Carlos Alberto de Oliveira Júnior|person|_|Carlos|Alberto|de|Oliveira|_|Júnior|_|_|Carlos Alberto de Oliveira Júnior
+de|DE|Herr Dr. Hans Müller|person|Herr Dr.|Hans|_|_|Müller|_|_|_|_|Herr Dr. Hans Müller
+de|DE|Prof. Dr. med. Anna Weber|person|Prof. Dr. med.|Anna|_|_|Weber|_|_|_|_|Prof. Dr. med. Anna Weber
+de|DE|Hans von Trapp|person|_|Hans|_|von|Trapp|_|_|_|_|Hans von Trapp
+de|DE|Müller, Hans|person|_|Hans|_|_|Müller|_|_|_|_|Hans Müller
+de|DE|HANS-JÜRGEN MÜLLER|person|_|Hans-Jürgen|_|_|Müller|_|_|_|_|Hans-Jürgen Müller
+de|DE|Frau Dipl.-Ing. Petra Keller|person|Frau Dipl.-Ing.|Petra|_|_|Keller|_|_|_|_|Frau Dipl.-Ing. Petra Keller
+de|AT|Mag. Felix Wagner|person|Mag.|Felix|_|_|Wagner|_|_|_|_|Mag. Felix Wagner
+de|CH|Anna von der Mühle|person|_|Anna|_|von der|Mühle|_|_|_|_|Anna von der Mühle
+nl|NL|Dhr. Jan de Vries|person|Dhr.|Jan|_|de|Vries|_|_|_|_|Dhr. Jan de Vries
+nl|NL|Mevr. Sanne van der Meer|person|Mevr.|Sanne|_|van der|Meer|_|_|_|_|Mevr. Sanne van der Meer
+nl|NL|Pieter van den Berg|person|_|Pieter|_|van den|Berg|_|_|_|_|Pieter van den Berg
+nl|NL|JAN VAN DER BERG|person|_|Jan|_|van der|Berg|_|_|_|_|Jan van der Berg
+nl|NL|VAN DER BERG|person|_|_|_|van der|Berg|_|_|_|_|van der Berg
+nl|NL|Berg, Jan van den|person|_|Jan|_|van den|Berg|_|_|_|_|Jan van den Berg
+nl|NL|Ir. Bram Mulder|person|Ir.|Bram|_|_|Mulder|_|_|_|_|Ir. Bram Mulder
+nl|BE|Dr. Lotte Janssens|person|Dr.|Lotte|_|_|Janssens|_|_|_|_|Dr. Lotte Janssens
+it|IT|Sig. Marco Rossi|person|Sig.|Marco|_|_|Rossi|_|_|_|_|Sig. Marco Rossi
+it|IT|Dott.ssa Giulia Bianchi|person|Dott.ssa|Giulia|_|_|Bianchi|_|_|_|_|Dott.ssa Giulia Bianchi
+it|IT|Avv. Paolo De Luca|person|Avv.|Paolo|_|De|Luca|_|_|_|_|Avv. Paolo De Luca
+it|IT|Giovanni Battista Greco|person|_|Giovanni|Battista|_|Greco|_|_|_|_|Giovanni Battista Greco
+it|CH|Prof. Elena Conti|person|Prof.|Elena|_|_|Conti|_|_|_|_|Prof. Elena Conti
+sv|SE|Herr Erik Andersson|person|Herr|Erik|_|_|Andersson|_|_|_|_|Herr Erik Andersson
+sv|SE|Fru Maja Lindberg|person|Fru|Maja|_|_|Lindberg|_|_|_|_|Fru Maja Lindberg
+sv|SE|Anna af Ekström|person|_|Anna|_|af|Ekström|_|_|_|_|Anna af Ekström
+sv|SE|PROF. JOHAN NYSTRÖM|person|Prof.|Johan|_|_|Nyström|_|_|_|_|Prof. Johan Nyström
+da|DK|Hr. Mads Jensen|person|Hr.|Mads|_|_|Jensen|_|_|_|_|Hr. Mads Jensen
+da|DK|Fru Freja Nielsen|person|Fru|Freja|_|_|Nielsen|_|_|_|_|Fru Freja Nielsen
+da|DK|Søren Kierkegaard Hansen|person|_|Søren|Kierkegaard|_|Hansen|_|_|_|_|Søren Kierkegaard Hansen
+no|NO|Hr. Ola Hansen|person|Hr.|Ola|_|_|Hansen|_|_|_|_|Hr. Ola Hansen
+no|NO|INGRID HAUGEN|person|_|Ingrid|_|_|Haugen|_|_|_|_|Ingrid Haugen
+no|NO|Frk. Kari Berg|person|Frk.|Kari|_|_|Berg|_|_|_|_|Frk. Kari Berg
+fi|FI|Herra Juha Virtanen|person|Herra|Juha|_|_|Virtanen|_|_|_|_|Herra Juha Virtanen
+fi|FI|MATTI MÄKINEN|person|_|Matti|_|_|Mäkinen|_|_|_|_|Matti Mäkinen
+fi|FI|Rouva Aino Korhonen|person|Rouva|Aino|_|_|Korhonen|_|_|_|_|Rouva Aino Korhonen
+is|IS|Hr. Jón Jónsson|person|Hr.|Jón|_|_|Jónsson|_|_|_|_|Hr. Jón Jónsson
+is|IS|Guðrún Sigurðardóttir|person|_|Guðrún|_|_|Sigurðardóttir|_|_|_|_|Guðrún Sigurðardóttir
+is|IS|Dr. Helga Einarsdóttir|person|Dr.|Helga|_|_|Einarsdóttir|_|_|_|_|Dr. Helga Einarsdóttir
+pl|PL|Pan Jan Kowalski|person|Pan|Jan|_|_|Kowalski|_|_|_|_|Pan Jan Kowalski
+pl|PL|Mgr Anna Nowak|person|Mgr|Anna|_|_|Nowak|_|_|_|_|Mgr Anna Nowak
+pl|PL|Dr hab. Piotr Wiśniewski|person|Dr hab.|Piotr|_|_|Wiśniewski|_|_|_|_|Dr hab. Piotr Wiśniewski
+pl|PL|Katarzyna Nowak-Kowalska|person|_|Katarzyna|_|_|Nowak-Kowalska|_|_|_|_|Katarzyna Nowak-Kowalska
+cs|CZ|Ing. Jan Novák|person|Ing.|Jan|_|_|Novák|_|_|_|_|Ing. Jan Novák
+cs|CZ|MUDr. Tereza Svobodová|person|MUDr.|Tereza|_|_|Svobodová|_|_|_|_|MUDr. Tereza Svobodová
+cs|CZ|Ing. Petr Černý, Ph.D.|person|Ing.|Petr|_|_|Černý|_|_|Ph.D.|_|Ing. Petr Černý, Ph.D.
+cs|CZ|PANÍ ELIŠKA DVOŘÁKOVÁ|person|Paní|Eliška|_|_|Dvořáková|_|_|_|_|Paní Eliška Dvořáková
+sk|SK|Ing. Peter Horváth|person|Ing.|Peter|_|_|Horváth|_|_|_|_|Ing. Peter Horváth
+sk|SK|Mgr. Zuzana Kováčová|person|Mgr.|Zuzana|_|_|Kováčová|_|_|_|_|Mgr. Zuzana Kováčová
+sk|SK|Pan Martin Tóth|person|Pan|Martin|_|_|Tóth|_|_|_|_|Pan Martin Tóth
+sl|SI|dr. Luka Novak|person|dr.|Luka|_|_|Novak|_|_|_|_|dr. Luka Novak
+sl|SI|mag. Maja Horvat|person|mag.|Maja|_|_|Horvat|_|_|_|_|mag. Maja Horvat
+sl|SI|g. Matej Kovačič|person|g.|Matej|_|_|Kovačič|_|_|_|_|g. Matej Kovačič
+hr|HR|dr. sc. Ivan Horvat|person|dr. sc.|Ivan|_|_|Horvat|_|_|_|_|dr. sc. Ivan Horvat
+hr|HR|g. Marko Babić|person|g.|Marko|_|_|Babić|_|_|_|_|g. Marko Babić
+hr|HR|Ing. Ana Marić|person|Ing.|Ana|_|_|Marić|_|_|_|_|Ing. Ana Marić
+hu|HU|Kovács János|person|_|János|_|_|Kovács|_|_|_|_|János Kovács
+hu|HU|Dr. Nagy Katalin|person|Dr.|Katalin|_|_|Nagy|_|_|_|_|Dr. Katalin Nagy
+hu|HU|ifj. Szabó István|person|ifj.|István|_|_|Szabó|_|_|_|_|ifj. István Szabó
+hu|HU|SZABÓ ISTVÁN|person|_|István|_|_|Szabó|_|_|_|_|István Szabó
+hu|-|Kovács János|person|_|Kovács|_|_|János|_|_|_|_|Kovács János
+hu|hu|Tóth Éva Katalin|person|_|Éva|Katalin|_|Tóth|_|_|_|_|Éva Katalin Tóth
+ro|RO|Dl. Andrei Popescu|person|Dl.|Andrei|_|_|Popescu|_|_|_|_|Dl. Andrei Popescu
+ro|RO|Dna Elena Ionescu|person|Dna|Elena|_|_|Ionescu|_|_|_|_|Dna Elena Ionescu
+ro|RO|Dr. Mihai Stan|person|Dr.|Mihai|_|_|Stan|_|_|_|_|Dr. Mihai Stan
+lv|LV|Kgs Jānis Bērziņš|person|Kgs|Jānis|_|_|Bērziņš|_|_|_|_|Kgs Jānis Bērziņš
+lv|LV|Dr. Anna Kalniņa|person|Dr.|Anna|_|_|Kalniņa|_|_|_|_|Dr. Anna Kalniņa
+lv|LV|LIENE OZOLA|person|_|Liene|_|_|Ozola|_|_|_|_|Liene Ozola
+lt|LT|Ponas Jonas Kazlauskas|person|Ponas|Jonas|_|_|Kazlauskas|_|_|_|_|Ponas Jonas Kazlauskas
+lt|LT|Ponia Ona Petrauskienė|person|Ponia|Ona|_|_|Petrauskienė|_|_|_|_|Ponia Ona Petrauskienė
+lt|LT|p. Tomas Jankauskas|person|p.|Tomas|_|_|Jankauskas|_|_|_|_|p. Tomas Jankauskas
+et|EE|Härra Mart Tamm|person|Härra|Mart|_|_|Tamm|_|_|_|_|Härra Mart Tamm
+et|EE|Proua Kadri Saar|person|Proua|Kadri|_|_|Saar|_|_|_|_|Proua Kadri Saar
+et|EE|Dr. Tõnu Sepp|person|Dr.|Tõnu|_|_|Sepp|_|_|_|_|Dr. Tõnu Sepp
+mt|MT|Sur Joseph Borg|person|Sur|Joseph|_|_|Borg|_|_|_|_|Sur Joseph Borg
+mt|MT|Sinjura Maria Camilleri|person|Sinjura|Maria|_|_|Camilleri|_|_|_|_|Sinjura Maria Camilleri
+mt|MT|Perit Mario Vella|person|Perit|Mario|_|_|Vella|_|_|_|_|Perit Mario Vella
+lb|LU|Här Marc Schmit|person|Här|Marc|_|_|Schmit|_|_|_|_|Här Marc Schmit
+lb|LU|Madamm Anne Weber|person|Madamm|Anne|_|_|Weber|_|_|_|_|Madamm Anne Weber
+lb|LU|Paul von Thill|person|_|Paul|_|von|Thill|_|_|_|_|Paul von Thill
+ga|IE/ga|An tUasal Seán Ó Murchú|person|An tUasal|Seán|_|Ó|Murchú|_|_|_|_|An tUasal Seán Ó Murchú
+ga|IE/ga|Niamh Ní Bhriain|person|_|Niamh|_|Ní|Bhriain|_|_|_|_|Niamh Ní Bhriain
+ga|IE/ga|SEÁN Ó MURCHÚ|person|_|Seán|_|Ó|Murchú|_|_|_|_|Seán Ó Murchú
+ca|ES/ca|Sr. Jordi Puig i Serra|person|Sr.|Jordi|_|_|Puig|Serra|_|_|_|Sr. Jordi Puig i Serra
+ca|ES/ca|Núria Pujol Roca|person|_|Núria|_|_|Pujol|Roca|_|_|_|Núria Pujol Roca
+ca|ES/ca|Maria Josep Soler|person|_|Maria|Josep|_|Soler|_|_|_|_|Maria Josep Soler
+eu|ES/eu|Iker Etxeberria Goikoetxea|person|_|Iker|_|_|Etxeberria|Goikoetxea|_|_|_|Iker Etxeberria Goikoetxea
+eu|ES/eu|Jauna Mikel Urrutia|person|Jauna|Mikel|_|_|Urrutia|_|_|_|_|Jauna Mikel Urrutia
+gl|ES/gl|Xoán Pereira Castro|person|_|Xoán|_|_|Pereira|Castro|_|_|_|Xoán Pereira Castro
+gl|ES/gl|Sra. Uxía Varela|person|Sra.|Uxía|_|_|Varela|_|_|_|_|Sra. Uxía Varela

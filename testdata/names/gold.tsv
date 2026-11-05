@@ -1,0 +1,523 @@
+id	language	hint	kind	text	labels	has_form	elf
+0001	en	US	person	Robert Whitaker	G F	0	
+0002	en	US	person	Pemberton, Emily	F G	0	
+0003	en	US	person	Mrs Peter Brooks	T G F	0	
+0004	en	US	person	Robert Laura Thornton	G M F	0	
+0005	en	US	person	ROBERT WHITAKER	G F	0	
+0006	en	US	person	james brooks	G F	0	
+0007	en	US	person	Daniel Thornton PhD	G F S	0	
+0008	en	US	person	James Rowan Jr.	G F S	0	
+0009	en	US	person	Emily "Laura" Whitaker	G N F	0	
+0010	en	US	person	Laura van Pemberton	G F F	0	
+0011	en	US	multiple	Emily and Laura Brooks	G O G F	0	
+0012	en	US	multiple	Peter Harrison and Laura Harrison	G F O G F	0	
+0013	en	US	multiple	Mr and Mrs Laura Rowan	T O T G F	0	
+0014	en	US	company	Oakridge Consulting Inc	B B L	1	?
+0015	en	US	company	Silverline Systems LLC	B B L	1	?
+0016	en	US	company	Blue Harbor Corp.	B B L	1	?
+0017	en	US	company	BLUE HARBOR INC	B B L	1	?
+0018	en	US	company	Northwind Trading	B B	0	
+0019	en	US	company	Blue Harbor Inc t/a Northwind Trading	B B L O B B	1	?
+0020	fr	FR	person	Pierre Bernard	G F	0	
+0021	fr	FR	person	Lambert, Camille	F G	0	
+0022	fr	FR	person	Dr Antoine Lefèvre	T G F	0	
+0023	fr	FR	person	Julien Margaux Garnier	G M F	0	
+0024	fr	FR	person	MATHIEU ROUSSEAU	G F	0	
+0025	fr	FR	person	mathieu lambert	G F	0	
+0026	fr	FR	person	Mathieu Moreau PhD	G F S	0	
+0027	fr	FR	person	Chloé Moreau Jr.	G F S	0	
+0028	fr	FR	person	Camille "Antoine" Lefèvre	G N F	0	
+0029	fr	FR	person	Chloé de la Moreau	G F F F	0	
+0030	fr	FR	multiple	Mathieu et Margaux Rousseau	G O G F	0	
+0031	fr	FR	multiple	Julien Lambert et Mathieu Lefèvre	G F O G F	0	
+0032	fr	FR	multiple	M. et Mme Camille Fontaine	T O T G F	0	
+0033	fr	FR	company	Groupe Horizon SARL	B B L	1	?
+0034	fr	FR	company	Atelier du Port SAS	B B B L	1	6CHY
+0035	fr	FR	company	Atelier du Port SA	B B B L	1	QVPB
+0036	fr	FR	company	MAISON LUMIÈRE SARL	B B L	1	?
+0037	fr	FR	company	Atelier du Port	B B B	0	
+0038	fr	FR	company	Groupe Horizon SARL t/a Maison Lumière	B B L O B B	1	?
+0039	es	ES	person	Sergio Ortega	G F	0	
+0040	es	ES	person	Navarro, Lucía	F G	0	
+0041	es	ES	person	Dña. Sergio Fernández	T G F	0	
+0042	es	ES	person	Javier María Molina	G M F	0	
+0043	es	ES	person	ALEJANDRO VIDAL	G F	0	
+0044	es	ES	person	diego molina	G F	0	
+0045	es	ES	person	Sergio Molina PhD	G F S	0	
+0046	es	ES	person	Marta Vidal Jr.	G F S	0	
+0047	es	ES	person	Sergio "Sergio" Navarro	G N F	0	
+0048	es	ES	person	Marta de Ortega	G F F	0	
+0049	es	ES	person	Lucía García García	G F F	0	
+0050	es	ES	person	Alejandro Castillo y Molina	G F O F	0	
+0051	es	ES	multiple	Paula y Javier Ortega	G O G F	0	
+0052	es	ES	multiple	Carmen Ortega y Diego Molina	G F O G F	0	
+0053	es	ES	multiple	Sr. y Sra. Alejandro García	T O T G F	0	
+0054	es	ES	company	Servicios Atlántico S.L.	B B L	1	DP3Q
+0055	es	ES	company	Construcciones Levante S.A.	B B L	1	5RDO
+0056	es	ES	company	Servicios Atlántico SL	B B L	1	DP3Q
+0057	es	ES	company	CONSTRUCCIONES LEVANTE S.L.	B B L	1	DP3Q
+0058	es	ES	company	Talleres Norte	B B	0	
+0059	es	ES	company	Talleres Norte S.L. t/a Estudio Mediterráneo	B B L O B B	1	DP3Q
+0060	pt	PT	person	Inês Ferreira	G F	0	
+0061	pt	PT	person	Silva, Mariana	F G	0	
+0062	pt	PT	person	Eng. João Martins	T G F	0	
+0063	pt	PT	person	Inês Tiago Costa	G M F	0	
+0064	pt	PT	person	MARIANA COSTA	G F	0	
+0065	pt	PT	person	rui costa	G F	0	
+0066	pt	PT	person	Filipa Oliveira PhD	G F S	0	
+0067	pt	PT	person	Rui Rodrigues Jr.	G F S	0	
+0068	pt	PT	person	Filipa "Beatriz" Oliveira	G N F	0	
+0069	pt	PT	person	Tiago dos Oliveira	G F F	0	
+0070	pt	PT	multiple	Filipa e Tiago Rodrigues	G O G F	0	
+0071	pt	PT	multiple	Beatriz Rodrigues e Tiago Costa	G F O G F	0	
+0072	pt	PT	multiple	Sr. e Sra. Tiago Oliveira	T O T G F	0	
+0073	pt	PT	company	Padaria Central Lda	B B L	1	?
+0074	pt	PT	company	Padaria Central S.A.	B B L	1	?
+0075	pt	PT	company	Padaria Central Lda.	B B L	1	?
+0076	pt	PT	company	SERRA AZUL LDA	B B L	1	?
+0077	pt	PT	company	Padaria Central	B B	0	
+0078	pt	PT	company	Padaria Central Lda t/a Transportes Tejo	B B L O B B	1	?
+0079	de	DE	person	Felix Hoffmann	G F	0	
+0080	de	DE	person	Weber, Felix	F G	0	
+0081	de	DE	person	Dr. Jonas Weber	T G F	0	
+0082	de	DE	person	Katharina Matthias Fischer	G M F	0	
+0083	de	DE	person	ANNA FISCHER	G F	0	
+0084	de	DE	person	felix schneider	G F	0	
+0085	de	DE	person	Katharina Becker PhD	G F S	0	
+0086	de	DE	person	Jonas Keller Jr.	G F S	0	
+0087	de	DE	person	Sabine "Anna" Müller	G N F	0	
+0088	de	DE	person	Jonas von Müller	G F F	0	
+0089	de	DE	multiple	Lukas und Anna Hoffmann	G O G F	0	
+0090	de	DE	multiple	Anna Keller und Lukas Keller	G F O G F	0	
+0091	de	DE	multiple	Herr und Frau Lukas Keller	T O T G F	0	
+0092	de	DE	company	Alpen Technik GmbH	B B L	1	2HBR
+0093	de	DE	company	Rheinblick Bau AG	B B L	1	6QQB
+0094	de	DE	company	Rheinblick Bau GmbH & Co. KG	B B L L L L	1	8Z6G
+0095	de	DE	company	RHEINBLICK BAU GMBH	B B L	1	2HBR
+0096	de	DE	company	Sonnenhof Verlag	B B	0	
+0097	de	DE	company	Alpen Technik GmbH t/a Alpen Technik	B B L O B B	1	2HBR
+0098	nl	NL	person	Joost Visser	G F	0	
+0099	nl	NL	person	Mulder, Noor	F G	0	
+0100	nl	NL	person	Mevr. Jan Smit	T G F	0	
+0101	nl	NL	person	Pieter Sanne Mulder	G M F	0	
+0102	nl	NL	person	JOOST BAKKER	G F	0	
+0103	nl	NL	person	pieter visser	G F	0	
+0104	nl	NL	person	Lotte Bos PhD	G F S	0	
+0105	nl	NL	person	Noor Bakker Jr.	G F S	0	
+0106	nl	NL	person	Sanne "Bram" Meijer	G N F	0	
+0107	nl	NL	person	Fleur van den Bos	G F F F	0	
+0108	nl	NL	multiple	Jan en Lotte Visser	G O G F	0	
+0109	nl	NL	multiple	Lotte Jansen en Pieter Smit	G F O G F	0	
+0110	nl	NL	multiple	Dhr. en Mevr. Noor Visser	T O T G F	0	
+0111	nl	NL	company	Duin Techniek B.V.	B B L	1	54M6
+0112	nl	NL	company	Haven Logistiek N.V.	B B L	1	B5PM
+0113	nl	NL	company	Tulp Design BV	B B L	1	54M6
+0114	nl	NL	company	DUIN TECHNIEK B.V.	B B L	1	54M6
+0115	nl	NL	company	Molen Advies	B B	0	
+0116	nl	NL	company	Tulp Design B.V. t/a Tulp Design	B B L O B B	1	54M6
+0117	it	IT	person	Sara Colombo	G F	0	
+0118	it	IT	person	Marino, Marco	F G	0	
+0119	it	IT	person	Sig. Paolo Colombo	T G F	0	
+0120	it	IT	person	Elena Marco Bianchi	G M F	0	
+0121	it	IT	person	CHIARA GRECO	G F	0	
+0122	it	IT	person	chiara greco	G F	0	
+0123	it	IT	person	Sara Ricci PhD	G F S	0	
+0124	it	IT	person	Sara Romano Jr.	G F S	0	
+0125	it	IT	person	Paolo "Sara" Romano	G N F	0	
+0126	it	IT	person	Giulia del Romano	G F F	0	
+0127	it	IT	multiple	Giulia e Elena Bianchi	G O G F	0	
+0128	it	IT	multiple	Sara Romano e Giulia Colombo	G F O G F	0	
+0129	it	IT	multiple	Sig. e Sig.ra Sara Colombo	T O T G F	0	
+0130	it	IT	company	Pasticceria Aurora S.r.l.	B B L	1	OV32
+0131	it	IT	company	Pasticceria Aurora S.p.A.	B B L	1	P418
+0132	it	IT	company	Officine Adriatico SRL	B B L	1	OV32
+0133	it	IT	company	STUDIO MONTE S.R.L.	B B L	1	OV32
+0134	it	IT	company	Costruzioni Etna	B B	0	
+0135	it	IT	company	Studio Monte S.r.l. t/a Pasticceria Aurora	B B L O B B	1	OV32
+0136	sv	SE	person	Erik Holmgren	G F	0	
+0137	sv	SE	person	Berglund, Johan	F G	0	
+0138	sv	SE	person	Fru Johan Andersson	T G F	0	
+0139	sv	SE	person	Lars Maja Nyström	G M F	0	
+0140	sv	SE	person	LARS NYSTRÖM	G F	0	
+0141	sv	SE	person	ingrid nyström	G F	0	
+0142	sv	SE	person	Johan Lindberg PhD	G F S	0	
+0143	sv	SE	person	Erik Andersson Jr.	G F S	0	
+0144	sv	SE	person	Ingrid "Johan" Holmgren	G N F	0	
+0145	sv	SE	person	Anna af Lindberg	G F F	0	
+0146	sv	SE	multiple	Oskar och Maja Lindberg	G O G F	0	
+0147	sv	SE	multiple	Ingrid Ekström och Ingrid Ekström	G F O G F	0	
+0148	sv	SE	multiple	Herr och Fru Johan Andersson	T O T G F	0	
+0149	sv	SE	company	Sjö Teknik AB	B B L	1	XJHM
+0150	sv	SE	company	Björk Design HB	B B L	1	BEAY
+0151	sv	SE	company	Nordic Bygg Aktiebolag	B B L	1	XJHM
+0152	sv	SE	company	FJORD KONSULT AB	B B L	1	XJHM
+0153	sv	SE	company	Björk Design	B B	0	
+0154	sv	SE	company	Nordic Bygg AB t/a Nordic Bygg	B B L O B B	1	XJHM
+0155	da	DK	person	Signe Sørensen	G F	0	
+0156	da	DK	person	Jensen, Maja	F G	0	
+0157	da	DK	person	Hr. Maja Larsen	T G F	0	
+0158	da	DK	person	Søren Ida Larsen	G M F	0	
+0159	da	DK	person	FREJA JENSEN	G F	0	
+0160	da	DK	person	maja larsen	G F	0	
+0161	da	DK	person	Anders Nielsen PhD	G F S	0	
+0162	da	DK	person	Søren Andersen Jr.	G F S	0	
+0163	da	DK	person	Maja "Maja" Nielsen	G N F	0	
+0164	da	DK	person	Maja de Christensen	G F F	0	
+0165	da	DK	multiple	Ida og Freja Sørensen	G O G F	0	
+0166	da	DK	multiple	Mads Andersen og Søren Andersen	G F O G F	0	
+0167	da	DK	multiple	Hr. og Fru Ida Hansen	T O T G F	0	
+0168	da	DK	company	Bølge Transport ApS	B B L	1	H8VP
+0169	da	DK	company	Fjord Byg A/S	B B L	1	ZRPO
+0170	da	DK	company	Fjord Byg I/S	B B L	1	7WRN
+0171	da	DK	company	FJORD BYG APS	B B L	1	H8VP
+0172	da	DK	company	Bølge Transport	B B	0	
+0173	da	DK	company	Fjord Byg ApS t/a Nordlys Design	B B L O B B	1	H8VP
+0174	no	NO	person	Astrid Eriksen	G F	0	
+0175	no	NO	person	Kristiansen, Tor	F G	0	
+0176	no	NO	person	Dr. Kari Olsen	T G F	0	
+0177	no	NO	person	Henrik Astrid Berg	G M F	0	
+0178	no	NO	person	OLA JOHANSEN	G F	0	
+0179	no	NO	person	ola hansen	G F	0	
+0180	no	NO	person	Tor Berg PhD	G F S	0	
+0181	no	NO	person	Tor Larsen Jr.	G F S	0	
+0182	no	NO	person	Magnus "Tor" Berg	G N F	0	
+0183	no	NO	person	Ola de Hansen	G F F	0	
+0184	no	NO	multiple	Magnus og Henrik Hansen	G O G F	0	
+0185	no	NO	multiple	Tor Johansen og Ingrid Eriksen	G F O G F	0	
+0186	no	NO	multiple	Hr. og Fru Magnus Kristiansen	T O T G F	0	
+0187	no	NO	company	Vik Design AS	B B L	1	YI42
+0188	no	NO	company	Nordkyst Rådgivning ASA	B B L	1	IQGE
+0189	no	NO	company	Nordkyst Rådgivning ANS	B B L	1	326Y
+0190	no	NO	company	VIK DESIGN AS	B B L	1	YI42
+0191	no	NO	company	Fjellheim Bygg	B B	0	
+0192	no	NO	company	Vik Design AS t/a Vik Design	B B L O B B	1	YI42
+0193	fi	FI	person	Helmi Mäkinen	G F	0	
+0194	fi	FI	person	Mäkinen, Aino	F G	0	
+0195	fi	FI	person	Dr. Matti Lehtonen	T G F	0	
+0196	fi	FI	person	Eero Helmi Salo	G M F	0	
+0197	fi	FI	person	JUHA HEIKKINEN	G F	0	
+0198	fi	FI	person	matti laine	G F	0	
+0199	fi	FI	person	Sanna Mäkinen PhD	G F S	0	
+0200	fi	FI	person	Juha Nieminen Jr.	G F S	0	
+0201	fi	FI	person	Sanna "Sanna" Lehtonen	G N F	0	
+0202	fi	FI	multiple	Ville ja Eero Heikkinen	G O G F	0	
+0203	fi	FI	multiple	Aino Virtanen ja Helmi Korhonen	G F O G F	0	
+0204	fi	FI	multiple	Dr. ja Prof. Sanna Lehtonen	T O T G F	0	
+0205	fi	FI	company	Pohjola Tekniikka Oy	B B L	1	DKUW
+0206	fi	FI	company	Pohjola Tekniikka Ky	B B L	1	HEOB
+0207	fi	FI	company	Koivu Konsultointi Oyj	B B L	1	K6VE
+0208	fi	FI	company	AURINKO DESIGN OY	B B L	1	DKUW
+0209	fi	FI	company	Koivu Konsultointi	B B	0	
+0210	fi	FI	company	Pohjola Tekniikka Oy t/a Aurinko Design	B B L O B B	1	DKUW
+0211	is	IS	person	Katrín Guðmundsson	G F	0	
+0212	is	IS	person	Magnússon, Sigurður	F G	0	
+0213	is	IS	person	Frú Katrín Kristjánsson	T G F	0	
+0214	is	IS	person	Helga Jón Sigurðsson	G M F	0	
+0215	is	IS	person	ANNA ÓLAFSSON	G F	0	
+0216	is	IS	person	katrín guðmundsson	G F	0	
+0217	is	IS	person	Sigurður Kristjánsson PhD	G F S	0	
+0218	is	IS	person	Sigurður Einarsson Jr.	G F S	0	
+0219	is	IS	person	Sigurður "Sigurður" Einarsson	G N F	0	
+0220	is	IS	multiple	Helga og Guðrún Kristjánsson	G O G F	0	
+0221	is	IS	multiple	Anna Haraldsson og Gunnar Kristjánsson	G F O G F	0	
+0222	is	IS	multiple	Dr. og Prof. Sigurður Jónsson	T O T G F	0	
+0223	is	IS	company	Hafnar Smíði ehf.	B B L	1	M8SS
+0224	is	IS	company	Fjalla Flutningar hf.	B B L	1	E4KB
+0225	is	IS	company	Jökull Hönnun slf.	B B L	1	8T79
+0226	is	IS	company	JÖKULL HÖNNUN EHF.	B B L	1	M8SS
+0227	is	IS	company	Jökull Hönnun	B B	0	
+0228	is	IS	company	Norðurljós Ráðgjöf ehf. t/a Hafnar Smíði	B B L O B B	1	M8SS
+0229	pl	PL	person	Anna Kowalski	G F	0	
+0230	pl	PL	person	Szymański, Jan	F G	0	
+0231	pl	PL	person	Pani Piotr Kowalski	T G F	0	
+0232	pl	PL	person	Agnieszka Katarzyna Zieliński	G M F	0	
+0233	pl	PL	person	TOMASZ LEWANDOWSKI	G F	0	
+0234	pl	PL	person	paweł wójcik	G F	0	
+0235	pl	PL	person	Piotr Wójcik PhD	G F S	0	
+0236	pl	PL	person	Anna Kowalski Jr.	G F S	0	
+0237	pl	PL	person	Piotr "Piotr" Kowalski	G N F	0	
+0238	pl	PL	multiple	Magdalena i Paweł Wiśniewski	G O G F	0	
+0239	pl	PL	multiple	Agnieszka Zieliński i Agnieszka Szymański	G F O G F	0	
+0240	pl	PL	multiple	Pan i Pani Agnieszka Kamiński	T O T G F	0	
+0241	pl	PL	company	Biuro Wisła Sp. z o.o.	B B L L L	1	O7XB
+0242	pl	PL	company	Biuro Wisła S.A.	B B L	1	FJ0E
+0243	pl	PL	company	Słoneczny Dom sp.j.	B B L	1	629I
+0244	pl	PL	company	NOWA FALA SP. Z O.O.	B B L L L	1	O7XB
+0245	pl	PL	company	Polna Budowa	B B	0	
+0246	pl	PL	company	Biuro Wisła Sp. z o.o. t/a Polna Budowa	B B L L L O B B	1	O7XB
+0247	cs	CZ	person	Jan Veselý	G F	0	
+0248	cs	CZ	person	Dvořák, Jakub	F G	0	
+0249	cs	CZ	person	MUDr. Tereza Dvořák	T G F	0	
+0250	cs	CZ	person	Jakub Tereza Veselý	G M F	0	
+0251	cs	CZ	person	JAN PROCHÁZKA	G F	0	
+0252	cs	CZ	person	jakub veselý	G F	0	
+0253	cs	CZ	person	Eliška Veselý PhD	G F S	0	
+0254	cs	CZ	person	Eliška Černý Jr.	G F S	0	
+0255	cs	CZ	person	Martin "Lucie" Černý	G N F	0	
+0256	cs	CZ	multiple	Eliška a Lucie Černý	G O G F	0	
+0257	cs	CZ	multiple	Lucie Novák a Tereza Černý	G F O G F	0	
+0258	cs	CZ	multiple	Pan a Paní Veronika Veselý	T O T G F	0	
+0259	cs	CZ	company	Technika Sever s.r.o.	B B L	1	?
+0260	cs	CZ	company	Dům Vltava a.s.	B B L	1	?
+0261	cs	CZ	company	Zlatá Hora v.o.s.	B B L	1	?
+0262	cs	CZ	company	TECHNIKA SEVER S.R.O.	B B L	1	?
+0263	cs	CZ	company	Zlatá Hora	B B	0	
+0264	cs	CZ	company	Zlatá Hora s.r.o. t/a Dům Vltava	B B L O B B	1	?
+0265	sk	SK	person	Zuzana Szabó	G F	0	
+0266	sk	SK	person	Varga, Jana	F G	0	
+0267	sk	SK	person	Pani Martin Szabó	T G F	0	
+0268	sk	SK	person	Peter Tomáš Tóth	G M F	0	
+0269	sk	SK	person	PETER HORVÁTH	G F	0	
+0270	sk	SK	person	jana szabó	G F	0	
+0271	sk	SK	person	Jana Horváth PhD	G F S	0	
+0272	sk	SK	person	Katarína Baláž Jr.	G F S	0	
+0273	sk	SK	person	Zuzana "Jana" Nagy	G N F	0	
+0274	sk	SK	multiple	Zuzana a Tomáš Tóth	G O G F	0	
+0275	sk	SK	multiple	Lenka Horváth a Katarína Varga	G F O G F	0	
+0276	sk	SK	multiple	Pan a Pani Lenka Horváth	T O T G F	0	
+0277	sk	SK	company	Dunaj Servis s.r.o.	B B L	1	?
+0278	sk	SK	company	Dunaj Servis a.s.	B B L	1	?
+0279	sk	SK	company	Hron Technika k.s.	B B L	1	?
+0280	sk	SK	company	HRON TECHNIKA S.R.O.	B B L	1	?
+0281	sk	SK	company	Dunaj Servis	B B	0	
+0282	sk	SK	company	Hron Technika s.r.o. t/a Dunaj Servis	B B L O B B	1	?
+0283	sl	SI	person	Eva Kos	G F	0	
+0284	sl	SI	person	Krajnc, Andrej	F G	0	
+0285	sl	SI	person	Dr. Nina Krajnc	T G F	0	
+0286	sl	SI	person	Eva Maja Krajnc	G M F	0	
+0287	sl	SI	person	ANDREJ KOVAČIČ	G F	0	
+0288	sl	SI	person	maja kos	G F	0	
+0289	sl	SI	person	Tomaž Krajnc PhD	G F S	0	
+0290	sl	SI	person	Nina Novak Jr.	G F S	0	
+0291	sl	SI	person	Ana "Tomaž" Potočnik	G N F	0	
+0292	sl	SI	multiple	Andrej in Ana Zupančič	G O G F	0	
+0293	sl	SI	multiple	Eva Novak in Tomaž Krajnc	G F O G F	0	
+0294	sl	SI	multiple	Dr. in Prof. Eva Kovačič	T O T G F	0	
+0295	sl	SI	company	Triglav Gradnja d.o.o.	B B L	1	KBKD
+0296	sl	SI	company	Kras Transport d.d.	B B L	1	1OR3
+0297	sl	SI	company	Triglav Gradnja k.d.	B B L	1	OPDJ
+0298	sl	SI	company	SOČA SVETOVANJE D.O.O.	B B L	1	KBKD
+0299	sl	SI	company	Soča Svetovanje	B B	0	
+0300	sl	SI	company	Soča Svetovanje d.o.o. t/a Triglav Gradnja	B B L O B B	1	KBKD
+0301	hr	HR	person	Luka Horvat	G F	0	
+0302	hr	HR	person	Novak, Marija	F G	0	
+0303	hr	HR	person	Ing. Josip Marić	T G F	0	
+0304	hr	HR	person	Marija Ivan Jurić	G M F	0	
+0305	hr	HR	person	PETRA MARIĆ	G F	0	
+0306	hr	HR	person	ivan babić	G F	0	
+0307	hr	HR	person	Ivana Kovačević PhD	G F S	0	
+0308	hr	HR	person	Josip Vuković Jr.	G F S	0	
+0309	hr	HR	person	Marija "Petra" Jurić	G N F	0	
+0310	hr	HR	multiple	Marija i Luka Jurić	G O G F	0	
+0311	hr	HR	multiple	Luka Knežević i Ivan Babić	G F O G F	0	
+0312	hr	HR	multiple	Dr. i Prof. Josip Novak	T O T G F	0	
+0313	hr	HR	company	Jadran Gradnja d.o.o.	B B L	1	OQWO
+0314	hr	HR	company	Kvarner Promet d.d.	B B L	1	LUMA
+0315	hr	HR	company	Zagorje Servis j.d.o.o.	B B L	1	OQWO
+0316	hr	HR	company	ZAGORJE SERVIS D.O.O.	B B L	1	OQWO
+0317	hr	HR	company	Kvarner Promet	B B	0	
+0318	hr	HR	company	Velebit Savjetovanje d.o.o. t/a Kvarner Promet	B B L O B B	1	OQWO
+0319	hu	HU	person	Nagy Éva	F G	0	
+0320	hu	HU	person	Szabó, Ágnes	F G	0	
+0321	hu	HU	person	id. Molnár Zsuzsanna	T F G	0	
+0322	hu	HU	person	Horváth István Éva	F G M	0	
+0323	hu	HU	person	SZABÓ ISTVÁN	F G	0	
+0324	hu	HU	person	kiss katalin	F G	0	
+0325	hu	HU	person	Nagy Éva PhD	F G S	0	
+0326	hu	HU	person	Horváth Zsuzsanna Jr.	F G S	0	
+0327	hu	HU	person	Nagy Ágnes "István"	F G N	0	
+0328	hu	HU	multiple	Kovács Ágnes és Tóth Gábor	F G O F G	0	
+0329	hu	HU	multiple	Dr. és Prof. Molnár László	T O T F G	0	
+0330	hu	HU	company	Napfény Dizájn Kft.	B B L	1	P9F2
+0331	hu	HU	company	Tisza Tanácsadó Zrt.	B B L	1	BKUX
+0332	hu	HU	company	Tisza Tanácsadó Bt.	B B L	1	S3DA
+0333	hu	HU	company	NAPFÉNY DIZÁJN KFT.	B B L	1	P9F2
+0334	hu	HU	company	Tisza Tanácsadó	B B	0	
+0335	hu	HU	company	Duna Építő Kft. t/a Tisza Tanácsadó	B B L O B B	1	P9F2
+0336	ro	RO	person	Ioana Rusu	G F	0	
+0337	ro	RO	person	Gheorghe, Ana	F G	0	
+0338	ro	RO	person	Dr. Ana Matei	T G F	0	
+0339	ro	RO	person	Radu Ioana Dumitrescu	G M F	0	
+0340	ro	RO	person	ELENA MUNTEANU	G F	0	
+0341	ro	RO	person	ioana ionescu	G F	0	
+0342	ro	RO	person	Elena Gheorghe PhD	G F S	0	
+0343	ro	RO	person	Radu Rusu Jr.	G F S	0	
+0344	ro	RO	person	Ioana "Maria" Gheorghe	G N F	0	
+0345	ro	RO	multiple	Radu și Elena Munteanu	G O G F	0	
+0346	ro	RO	multiple	Mihai Dumitrescu și Ioana Rusu	G F O G F	0	
+0347	ro	RO	multiple	Dl. și Dna Mihai Matei	T O T G F	0	
+0348	ro	RO	company	Dunărea Servicii S.R.L.	B B L	1	XHN1
+0349	ro	RO	company	Soare Design S.A.	B B L	1	ANDT
+0350	ro	RO	company	Soare Design SRL	B B L	1	XHN1
+0351	ro	RO	company	SOARE DESIGN S.R.L.	B B L	1	XHN1
+0352	ro	RO	company	Delta Consultanță	B B	0	
+0353	ro	RO	company	Soare Design S.R.L. t/a Dunărea Servicii	B B L O B B	1	XHN1
+0354	lv	LV	person	Anna Pētersons	G F	0	
+0355	lv	LV	person	Bērziņš, Edgars	F G	0	
+0356	lv	LV	person	Kgs Andris Zariņš	T G F	0	
+0357	lv	LV	person	Jānis Liene Ozols	G M F	0	
+0358	lv	LV	person	EDGARS ZARIŅŠ	G F	0	
+0359	lv	LV	person	mārtiņš kalniņš	G F	0	
+0360	lv	LV	person	Liene Pētersons PhD	G F S	0	
+0361	lv	LV	person	Mārtiņš Kalniņš Jr.	G F S	0	
+0362	lv	LV	person	Edgars "Jānis" Kalniņš	G N F	0	
+0363	lv	LV	multiple	Andris un Laura Liepiņš	G O G F	0	
+0364	lv	LV	multiple	Ieva Eglītis un Ieva Krūmiņš	G F O G F	0	
+0365	lv	LV	multiple	Dr. un Prof. Jānis Pētersons	T O T G F	0	
+0366	lv	LV	company	SIA Daugava Būve	L B B	1	ES2D
+0367	lv	LV	company	Baltijas Konsultācijas AS	B B L	1	VJBO
+0368	lv	LV	company	Rīgas Serviss Sabiedrība ar ierobežotu atbildību	B B L L L L	1	ES2D
+0369	lv	LV	company	DAUGAVA BŪVE SIA	B B L	1	ES2D
+0370	lv	LV	company	Saule Dizains	B B	0	
+0371	lv	LV	company	Baltijas Konsultācijas SIA t/a Saule Dizains	B B L O B B	1	ES2D
+0372	lt	LT	person	Ona Petrauskas	G F	0	
+0373	lt	LT	person	Jankauskas, Gintarė	F G	0	
+0374	lt	LT	person	Prof. Tomas Kazlauskas	T G F	0	
+0375	lt	LT	person	Ona Tomas Petrauskas	G M F	0	
+0376	lt	LT	person	DARIUS KAZLAUSKAS	G F	0	
+0377	lt	LT	person	jonas vasiliauskas	G F	0	
+0378	lt	LT	person	Tomas Petrauskas PhD	G F S	0	
+0379	lt	LT	person	Jonas Vasiliauskas Jr.	G F S	0	
+0380	lt	LT	person	Ona "Rūta" Butkus	G N F	0	
+0381	lt	LT	multiple	Ona ir Mantas Petrauskas	G O G F	0	
+0382	lt	LT	multiple	Lina Stankevičius ir Jonas Petrauskas	G F O G F	0	
+0383	lt	LT	multiple	Dr. ir Prof. Gintarė Paulauskas	T O T G F	0	
+0384	lt	LT	company	UAB Nemuno Statyba	L B B	1	BPLS
+0385	lt	LT	company	AB Baltijos Paslaugos	L B B	1	81KA
+0386	lt	LT	company	Baltijos Paslaugos MB	B B L	1	SFYA
+0387	lt	LT	company	BALTIJOS PASLAUGOS UAB	B B L	1	BPLS
+0388	lt	LT	company	Saulė Transportas	B B	0	
+0389	lt	LT	company	Saulė Transportas UAB t/a Vilnios Dizainas	B B L O B B	1	BPLS
+0390	et	EE	person	Andres Kask	G F	0	
+0391	et	EE	person	Mägi, Priit	F G	0	
+0392	et	EE	person	Proua Andres Kukk	T G F	0	
+0393	et	EE	person	Priit Kadri Ilves	G M F	0	
+0394	et	EE	person	KADRI ILVES	G F	0	
+0395	et	EE	person	liis kask	G F	0	
+0396	et	EE	person	Triin Ilves PhD	G F S	0	
+0397	et	EE	person	Tõnu Sepp Jr.	G F S	0	
+0398	et	EE	person	Tõnu "Maarja" Sepp	G N F	0	
+0399	et	EE	multiple	Liis ja Tõnu Saar	G O G F	0	
+0400	et	EE	multiple	Tõnu Saar ja Andres Tamm	G F O G F	0	
+0401	et	EE	multiple	Dr. ja Prof. Priit Mägi	T O T G F	0	
+0402	et	EE	company	Päike Disain OÜ	B B L	1	JC0Y
+0403	et	EE	company	Päike Disain AS	B B L	1	9LJA
+0404	et	EE	company	Päike Disain TÜ	B B L	1	I1UP
+0405	et	EE	company	TALLINNA NÕUSTAMINE OÜ	B B L	1	JC0Y
+0406	et	EE	company	Läänemere Ehitus	B B	0	
+0407	et	EE	company	Tallinna Nõustamine OÜ t/a Päike Disain	B B L O B B	1	JC0Y
+0408	mt	MT	person	Charles Camilleri	G F	0	
+0409	mt	MT	person	Vella, Karl	F G	0	
+0410	mt	MT	person	Perit Maria Zammit	T G F	0	
+0411	mt	MT	person	Joseph Rita Borg	G M F	0	
+0412	mt	MT	person	MARIO VELLA	G F	0	
+0413	mt	MT	person	karl farrugia	G F	0	
+0414	mt	MT	person	Charles Farrugia PhD	G F S	0	
+0415	mt	MT	person	Doris Borg Jr.	G F S	0	
+0416	mt	MT	person	Karl "Doris" Spiteri	G N F	0	
+0417	mt	MT	multiple	Doris u Karl Borg	G O G F	0	
+0418	mt	MT	multiple	Joseph Attard u Anna Spiteri	G F O G F	0	
+0419	mt	MT	multiple	Sur u Sinjura Maria Galea	T O T G F	0	
+0420	mt	MT	company	Valletta Bini Ltd	B B L	1	V89C
+0421	mt	MT	company	Gozo Konsulenza plc	B B L	1	C061
+0422	mt	MT	company	Marsa Trasport Limited	B B L	1	V89C
+0423	mt	MT	company	MDINA DISINN LTD	B B L	1	V89C
+0424	mt	MT	company	Valletta Bini	B B	0	
+0425	mt	MT	company	Mdina Disinn Ltd t/a Mdina Disinn	B B L O B B	1	V89C
+0426	lb	LU	person	Claire Muller	G F	0	
+0427	lb	LU	person	Weber, Luc	F G	0	
+0428	lb	LU	person	Prof. Claire Klein	T G F	0	
+0429	lb	LU	person	Anne Marc Hoffmann	G M F	0	
+0430	lb	LU	person	PAUL KLEIN	G F	0	
+0431	lb	LU	person	marc thill	G F	0	
+0432	lb	LU	person	Claire Muller PhD	G F S	0	
+0433	lb	LU	person	Luc Wagner Jr.	G F S	0	
+0434	lb	LU	person	Luc "Sophie" Thill	G N F	0	
+0435	lb	LU	person	Paul von Thill	G F F	0	
+0436	lb	LU	multiple	Paul an Anne Reuter	G O G F	0	
+0437	lb	LU	multiple	Jean Klein an Luc Weber	G F O G F	0	
+0438	lb	LU	multiple	Här an Madamm Claire Thill	T O T G F	0	
+0439	lb	LU	company	Atelier Alzette S.à r.l.	B B L L	1	DVXS
+0440	lb	LU	company	Sauer Bau S.A.	B B L	1	5GGB
+0441	lb	LU	company	Moselle Conseil SARL	B B L	1	DVXS
+0442	lb	LU	company	SAUER BAU S.À R.L.	B B L L	1	DVXS
+0443	lb	LU	company	Sauer Bau	B B	0	
+0444	lb	LU	company	Sauer Bau S.à r.l. t/a Eisch Technik	B B L L O B B	1	DVXS
+0445	ga	IE/ga	person	Aoife Walsh	G F	0	
+0446	ga	IE/ga	person	Brennan, Ciarán	F G	0	
+0447	ga	IE/ga	person	Prof. Ciarán Kelly	T G F	0	
+0448	ga	IE/ga	person	Seán Cormac Doyle	G M F	0	
+0449	ga	IE/ga	person	SEÁN DOYLE	G F	0	
+0450	ga	IE/ga	person	aoife walsh	G F	0	
+0451	ga	IE/ga	person	Niamh Murphy PhD	G F S	0	
+0452	ga	IE/ga	person	Orla Walsh Jr.	G F S	0	
+0453	ga	IE/ga	person	Orla "Seán" Kelly	G N F	0	
+0454	ga	IE/ga	multiple	Cormac agus Ciarán Byrne	G O G F	0	
+0455	ga	IE/ga	multiple	Aoife Kelly agus Niamh Brennan	G F O G F	0	
+0456	ga	IE/ga	multiple	Dr. agus Prof. Orla Doyle	T O T G F	0	
+0457	ga	IE/ga	company	Cuan Tógála Teoranta	B B L	1	MNQ7
+0458	ga	IE/ga	company	Sliabh Comhairle Ltd	B B L	1	MNQ7
+0459	ga	IE/ga	company	Gaoth Dearg DAC	B B L	1	?
+0460	ga	IE/ga	company	SLIABH COMHAIRLE TEORANTA	B B L	1	MNQ7
+0461	ga	IE/ga	company	Cuan Tógála	B B	0	
+0462	ga	IE/ga	company	Sliabh Comhairle Teoranta t/a Gaoth Dearg	B B L O B B	1	MNQ7
+0463	ca	ES/ca	person	Mireia Pujol	G F	0	
+0464	ca	ES/ca	person	Puig, Marc	F G	0	
+0465	ca	ES/ca	person	Dr. Jordi Serra	T G F	0	
+0466	ca	ES/ca	person	Pau Maria Ferrer	G M F	0	
+0467	ca	ES/ca	person	NÚRIA VIDAL	G F	0	
+0468	ca	ES/ca	person	mireia puig	G F	0	
+0469	ca	ES/ca	person	Montserrat Vidal PhD	G F S	0	
+0470	ca	ES/ca	person	Oriol Ferrer Jr.	G F S	0	
+0471	ca	ES/ca	person	Montserrat "Mireia" Soler	G N F	0	
+0472	ca	ES/ca	person	Laia de la Puig	G F F F	0	
+0473	ca	ES/ca	person	Núria Pujol Ferrer	G F F	0	
+0474	ca	ES/ca	person	Oriol Serra i Roca	G F O F	0	
+0475	ca	ES/ca	multiple	Marc i Jordi Roca	G O G F	0	
+0476	ca	ES/ca	multiple	Mireia Pujol i Oriol Serra	G F O G F	0	
+0477	ca	ES/ca	multiple	Sr. i Sra. Núria Pujol	T O T G F	0	
+0478	ca	ES/ca	company	Serveis Llevant S.L.	B B L	1	DP3Q
+0479	ca	ES/ca	company	Taller Ebre S.A.	B B L	1	5RDO
+0480	ca	ES/ca	company	Taller Ebre SL	B B L	1	DP3Q
+0481	ca	ES/ca	company	TALLER EBRE S.L.	B B L	1	DP3Q
+0482	ca	ES/ca	company	Serveis Llevant	B B	0	
+0483	ca	ES/ca	company	Obres Montseny S.L. t/a Taller Ebre	B B L O B B	1	DP3Q
+0484	eu	ES/eu	person	Mikel Arregi	G F	0	
+0485	eu	ES/eu	person	Etxeberria, Amaia	F G	0	
+0486	eu	ES/eu	person	Dr. Unai Mendizabal	T G F	0	
+0487	eu	ES/eu	person	Amaia Jose Goikoetxea	G M F	0	
+0488	eu	ES/eu	person	AINHOA MENDIZABAL	G F	0	
+0489	eu	ES/eu	person	ainhoa goikoetxea	G F	0	
+0490	eu	ES/eu	person	Nerea Arregi PhD	G F S	0	
+0491	eu	ES/eu	person	Leire Arregi Jr.	G F S	0	
+0492	eu	ES/eu	person	Leire "Mikel" Zubiaurre	G N F	0	
+0493	eu	ES/eu	person	Leire Olano Urrutia	G F F	0	
+0494	eu	ES/eu	multiple	Mikel eta Leire Zubiaurre	G O G F	0	
+0495	eu	ES/eu	multiple	Unai Etxeberria eta Nerea Mendizabal	G F O G F	0	
+0496	eu	ES/eu	multiple	Dr. eta Prof. Aitor Aguirre	T O T G F	0	
+0497	eu	ES/eu	company	Eguzki Diseinua S.L.	B B L	1	DP3Q
+0498	eu	ES/eu	company	Itsaso Garraioa S.A.	B B L	1	5RDO
+0499	eu	ES/eu	company	Mendi Aholkularitza SL	B B L	1	DP3Q
+0500	eu	ES/eu	company	MENDI AHOLKULARITZA S.L.	B B L	1	DP3Q
+0501	eu	ES/eu	company	Itsaso Garraioa	B B	0	
+0502	eu	ES/eu	company	Eguzki Diseinua S.L. t/a Eguzki Diseinua	B B L O B B	1	DP3Q
+0503	gl	ES/gl	person	Iago Castro	G F	0	
+0504	gl	ES/gl	person	Lorenzo, Sabela	F G	0	
+0505	gl	ES/gl	person	Sra. Carme Varela	T G F	0	
+0506	gl	ES/gl	person	Iago Xosé Pereira	G M F	0	
+0507	gl	ES/gl	person	CARME FREIRE	G F	0	
+0508	gl	ES/gl	person	xoán rodríguez	G F	0	
+0509	gl	ES/gl	person	Uxía Pazos PhD	G F S	0	
+0510	gl	ES/gl	person	Iago Castro Jr.	G F S	0	
+0511	gl	ES/gl	person	Carme "Iago" Lorenzo	G N F	0	
+0512	gl	ES/gl	person	Xoán de Rodríguez	G F F	0	
+0513	gl	ES/gl	person	Xoán Varela Rodríguez	G F F	0	
+0514	gl	ES/gl	multiple	Xoán e Sabela Pazos	G O G F	0	
+0515	gl	ES/gl	multiple	Sabela Lorenzo e Xoán Varela	G F O G F	0	
+0516	gl	ES/gl	multiple	Sr. e Sra. Xoán Rodríguez	T O T G F	0	
+0517	gl	ES/gl	company	Deseño Atlántico S.L.	B B L	1	DP3Q
+0518	gl	ES/gl	company	Deseño Atlántico S.A.	B B L	1	5RDO
+0519	gl	ES/gl	company	Deseño Atlántico SL	B B L	1	DP3Q
+0520	gl	ES/gl	company	OBRAS MIÑO S.L.	B B L	1	DP3Q
+0521	gl	ES/gl	company	Obras Miño	B B	0	
+0522	gl	ES/gl	company	Deseño Atlántico S.L. t/a Servizos Ría	B B L O B B	1	DP3Q

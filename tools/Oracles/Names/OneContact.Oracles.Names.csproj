@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Runs our name parser and NameParserSharp (a released package, run as a black box) over the synthetic gold set and writes one JSON line per item. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NameParserSharp" />
+    <ProjectReference Include="../../../src/OneContact/OneContact.csproj" />
+  </ItemGroup>
+
+</Project>

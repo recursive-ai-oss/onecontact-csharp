@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text.Json.Serialization;
 using RecursiveAI.OneContact.Keys;
+using RecursiveAI.OneContact.Names;
 using RecursiveAI.OneContact.Companies;
 using RecursiveAI.OneContact.Serialization;
 
@@ -27,13 +28,30 @@ public readonly partial struct CompanyName :
     IEqualityOperators<CompanyName, CompanyName, bool>
 {
     private readonly string? _canonical;
+    private readonly CompanyNameParts? _parts;
 
-    internal CompanyName(string canonical, SourceSpan source, CompanyFacts flags)
+    internal CompanyName(string canonical, SourceSpan source, CompanyFacts flags, CompanyNameParts parts)
     {
         _canonical = canonical;
         Source = source;
         Flags = flags;
+        _parts = parts;
     }
+
+    /// <summary>Gets the leading "The", kept apart from the base name. Empty when there is none.</summary>
+    public NamePart LeadingArticle => _parts?.LeadingArticle ?? default;
+
+    /// <summary>Gets the base name: the name without its leading "The", legal form, trading name and care-of part, as written.</summary>
+    public NamePart Base => _parts?.Base ?? default;
+
+    /// <summary>Gets the legal form found at the end (or, for forms such as "AB" or "SIA", the start) of the name, or <see langword="null"/> when there is none.</summary>
+    public CompanyLegalForm? LegalForm => _parts?.LegalForm;
+
+    /// <summary>Gets the trading name after "d/b/a", "dba", "doing business as", "t/a" or "trading as". The base name and legal form are the legal entity's.</summary>
+    public NamePart TradingAs => _parts?.TradingAs ?? default;
+
+    /// <summary>Gets the text after "c/o" or "care of" (usually a person or another company).</summary>
+    public NamePart CareOf => _parts?.CareOf ?? default;
 
     /// <summary>Gets the canonical form: faithful to the standard or the authority's style, never changing where mail goes or what a link points to. Empty for the default value.</summary>
     public string Canonical => _canonical ?? string.Empty;
@@ -109,7 +127,34 @@ public readonly partial struct CompanyName :
     /// <param name="detail">Issues with reason codes, per-field offsets and confidence, and whether a rule or a model decided each field.</param>
     /// <returns><see cref="OperationStatus.Done"/>, or <see cref="OperationStatus.InvalidData"/> with the reason in <paramref name="detail"/>.</returns>
     public static OperationStatus TryParse(ReadOnlySpan<char> s, out CompanyName value, out ParseDetail detail) =>
-        CompanyNameParser.TryParse(s, out value, out detail);
+        CompanyNameParser.TryParse(s, default, out value, out detail);
+
+    /// <summary>Parses a company name read with hints: a country limits the legal forms considered to that jurisdiction's.</summary>
+    /// <param name="s">The text to parse. Surrounding white space is ignored.</param>
+    /// <param name="hints">The country (and language) the name is from; neither is needed.</param>
+    /// <returns>The parsed value.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="s"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ContactParseException">The text is empty.</exception>
+    public static CompanyName Parse(string s, NameHints hints)
+    {
+        ArgumentNullException.ThrowIfNull(s);
+        OperationStatus status = TryParse(s, hints, out CompanyName value, out ParseDetail detail);
+        if (status != OperationStatus.Done)
+        {
+            throw ContactParseException.FromDetail(ContactKind.Company, detail, s.Length);
+        }
+
+        return value;
+    }
+
+    /// <summary>The low-level parse with hints: returns a status and a <see cref="ParseDetail"/> instead of throwing.</summary>
+    /// <param name="s">The text to parse.</param>
+    /// <param name="hints">The country (and language) the name is from.</param>
+    /// <param name="value">The parsed value, or the default value when the status is not <see cref="OperationStatus.Done"/>.</param>
+    /// <param name="detail">Issues, per-part offsets and the rule that decided each part.</param>
+    /// <returns><see cref="OperationStatus.Done"/>, or <see cref="OperationStatus.InvalidData"/> with the reason in <paramref name="detail"/>.</returns>
+    public static OperationStatus TryParse(ReadOnlySpan<char> s, NameHints hints, out CompanyName value, out ParseDetail detail) =>
+        CompanyNameParser.TryParse(s, hints, out value, out detail);
 
     static CompanyName IParsable<CompanyName>.Parse(string s, IFormatProvider? provider) => Parse(s);
 

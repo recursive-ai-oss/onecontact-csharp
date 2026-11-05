@@ -1,0 +1,5 @@
+<Project>
+  <ItemGroup>
+    <IngestSource Include="gleif-elf" Tool="../../tools/Ingest.GleifElf/OneContact.Ingest.GleifElf.csproj" Pin="../../upstream/gleif-elf/PIN" />
+  </ItemGroup>
+</Project>

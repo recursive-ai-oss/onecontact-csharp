@@ -1,0 +1,3 @@
+python-crfsuite==0.9.12
+probableparsing==0.0.1
+doublemetaphone==1.2

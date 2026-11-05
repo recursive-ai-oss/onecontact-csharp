@@ -27,13 +27,45 @@ public readonly partial struct PersonName :
     IEqualityOperators<PersonName, PersonName, bool>
 {
     private readonly string? _canonical;
+    private readonly PersonNameParts? _parts;
 
-    internal PersonName(string canonical, SourceSpan source, NameFacts flags)
+    internal PersonName(string canonical, SourceSpan source, NameFacts flags, PersonNameParts parts)
     {
         _canonical = canonical;
         Source = source;
         Flags = flags;
+        _parts = parts;
     }
+
+    /// <summary>Gets the title or titles before the name ("Dr.", "Prof. Dr.", "Mrs"), as written, with casing restored when the input was all one case. Absent parts are empty; every part carries its offsets into the input.</summary>
+    public NamePart Prefix => _parts?.Prefix ?? default;
+
+    /// <summary>Gets the first given name.</summary>
+    public NamePart Given => _parts?.Given ?? default;
+
+    /// <summary>Gets the other given names between the first given name and the family name ("Anne" in "Mary Anne Smith").</summary>
+    public NamePart Middle => _parts?.Middle ?? default;
+
+    /// <summary>Gets the nickname written in quotes or parentheses ("Bob" in <c>Robert "Bob" Smith</c>), without the delimiters.</summary>
+    public NamePart Nickname => _parts?.Nickname ?? default;
+
+    /// <summary>Gets the particle that belongs to the family name and is kept apart from it ("van der", "de la", "von").</summary>
+    public NamePart Particle => _parts?.Particle ?? default;
+
+    /// <summary>Gets the family name without its particle. For two family names (Spanish, Catalan) this is the first.</summary>
+    public NamePart Family => _parts?.Family ?? default;
+
+    /// <summary>Gets the second family name of a Spanish or Catalan name ("López" in "María García López"), including its own particles.</summary>
+    public NamePart SecondFamily => _parts?.SecondFamily ?? default;
+
+    /// <summary>Gets the generational suffix ("Jr.", "III").</summary>
+    public NamePart Suffix => _parts?.Suffix ?? default;
+
+    /// <summary>Gets the professional suffixes ("PhD", "MD, PhD"), separated by a space in the text.</summary>
+    public NamePart ProfessionalSuffix => _parts?.ProfessionalSuffix ?? default;
+
+    /// <summary>Gets the order the parts were written in. The canonical form is always written given names first.</summary>
+    public NameOrder Order => _parts?.Order ?? NameOrder.GivenFamily;
 
     /// <summary>Gets the canonical form: faithful to the standard or the authority's style, never changing where mail goes or what a link points to. Empty for the default value.</summary>
     public string Canonical => _canonical ?? string.Empty;
@@ -110,6 +142,33 @@ public readonly partial struct PersonName :
     /// <returns><see cref="OperationStatus.Done"/>, or <see cref="OperationStatus.InvalidData"/> with the reason in <paramref name="detail"/>.</returns>
     public static OperationStatus TryParse(ReadOnlySpan<char> s, out PersonName value, out ParseDetail detail) =>
         PersonNameParser.TryParse(s, out value, out detail);
+
+    /// <summary>Parses a person's name read with hints (family-first order for Hungarian, two family names for Spanish, language-specific titles).</summary>
+    /// <param name="s">The text to parse. Surrounding white space is ignored.</param>
+    /// <param name="hints">The country and language the name is written in; neither is needed.</param>
+    /// <returns>The parsed value.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="s"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ContactParseException">The text is empty, is a company name, names several people (use <see cref="NameParsing.Split(string, NameHints)"/>) or has no name.</exception>
+    public static PersonName Parse(string s, NameHints hints)
+    {
+        ArgumentNullException.ThrowIfNull(s);
+        OperationStatus status = TryParse(s, hints, out PersonName value, out ParseDetail detail);
+        if (status != OperationStatus.Done)
+        {
+            throw ContactParseException.FromDetail(ContactKind.Person, detail, s.Length);
+        }
+
+        return value;
+    }
+
+    /// <summary>The low-level parse with hints: returns a status and a <see cref="ParseDetail"/> instead of throwing.</summary>
+    /// <param name="s">The text to parse.</param>
+    /// <param name="hints">The country and language the name is written in.</param>
+    /// <param name="value">The parsed value, or the default value when the status is not <see cref="OperationStatus.Done"/>.</param>
+    /// <param name="detail">Issues, per-part offsets and the rule that decided each part (always a rule at this stage).</param>
+    /// <returns><see cref="OperationStatus.Done"/>, or <see cref="OperationStatus.InvalidData"/> with the reason in <paramref name="detail"/>.</returns>
+    public static OperationStatus TryParse(ReadOnlySpan<char> s, NameHints hints, out PersonName value, out ParseDetail detail) =>
+        PersonNameParser.TryParse(s, hints, out value, out detail);
 
     static PersonName IParsable<PersonName>.Parse(string s, IFormatProvider? provider) => Parse(s);
 

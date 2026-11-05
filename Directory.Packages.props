@@ -9,5 +9,6 @@
     <PackageVersion Include="MimeKit" Version="4.18.2" />
     <PackageVersion Include="AngleSharp" Version="1.9.1" />
     <PackageVersion Include="Nager.PublicSuffix" Version="3.8.0" />
+    <PackageVersion Include="NameParserSharp" Version="1.5.0" />
   </ItemGroup>
 </Project>

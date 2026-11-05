@@ -37,7 +37,10 @@ None packed yet. When packed: `public_suffix_list.dat`, byte for byte as publish
 
 ## GLEIF entity legal forms (CC0 1.0)
 
-None packed yet. When packed: the ISO 20275 Entity Legal Form code list published by GLEIF, dedicated to the public domain under CC0 1.0, with a credit line.
+Packed as compiled tables (`gleif-elf`): the ISO 20275 Entity Legal Forms (ELF) code list, version 1.6 (2026-02-19), published by the Global Legal Entity Identifier
+Foundation (GLEIF) at https://www.gleif.org/en/lei-data/code-lists/iso-20275-entity-legal-forms-code-list, source file SHA-256 `c55edc421e49ce362457f772d6bfa41f5fc63ecaadea74db5735722625506ef4`.
+GLEIF provides this data under the Creative Commons CC0 1.0 Universal public domain dedication (https://creativecommons.org/publicdomain/zero/1.0/).
+Credit: Entity Legal Forms code list, GLEIF (gleif.org). The notice is packed with the library as `notices/gleif-elf.notice.txt` next to a provenance record.
 
 ## disposable-email-domains (CC0 1.0)
 
