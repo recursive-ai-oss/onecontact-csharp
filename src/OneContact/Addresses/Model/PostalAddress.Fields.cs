@@ -60,7 +60,7 @@ public readonly partial struct PostalAddress
     /// <param name="organization">The organization.</param>
     /// <param name="recipient">The recipient.</param>
     /// <param name="streetLines">The street address lines, in order.</param>
-    /// <param name="language">The BCP 47 language tag the address is written in; a tag naming the Latin script (<c>ja-Latn</c>) selects the country's Latin layout, and a tag the country has a data variant for (<c>fr</c> for Canada) selects that variant. <see langword="null"/> for the country's default.</param>
+    /// <param name="language">The BCP 47 language tag the address is written in; a tag naming the Latin script (<c>ja-Latn</c>) selects the country's Latin layout, and a tag the country has a data variant for (<c>fr</c> for Canada) selects that variant. The tag is kept in lower case with <c>-</c> separators. <see langword="null"/> for the country's default.</param>
     /// <returns>The address. Its canonical form is the single-line label in the country's layout.</returns>
     public static PostalAddress Create(
         Region country,
@@ -77,7 +77,7 @@ public readonly partial struct PostalAddress
         string[] lines = streetLines is null ? [] : [.. streetLines.Select(l => l ?? string.Empty)];
         return new PostalAddress(new AddressParts(
             country,
-            language,
+            NormalizeLanguage(language),
             adminArea ?? string.Empty,
             locality ?? string.Empty,
             dependentLocality ?? string.Empty,
@@ -87,6 +87,10 @@ public readonly partial struct PostalAddress
             recipient ?? string.Empty,
             lines));
     }
+
+    // BCP 47 tags are case-insensitive and the data names its language variants in lower case.
+    private static string? NormalizeLanguage(string? language) =>
+        string.IsNullOrWhiteSpace(language) ? null : language.Trim().Replace('_', '-').ToLowerInvariant();
 
     /// <summary>
     /// Checks the address against the structure of its country: required fields, fields the country does not use, subdivision

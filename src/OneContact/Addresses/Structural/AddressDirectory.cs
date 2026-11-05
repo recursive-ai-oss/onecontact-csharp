@@ -51,11 +51,11 @@ internal sealed class CountryStructure
     /// <returns>The compiled pattern, or <see langword="null"/> when it is outside the supported dialect.</returns>
     internal static PostalPattern? Pattern(string pattern) => AddressDirectory.GetPattern(pattern);
 
-    /// <summary>Finds the subdivision of a node that a text names: by key, by name or by Latin name, ignoring case.</summary>
+    /// <summary>Tells whether a text names one of the subdivisions a node lists: by key, by name or by Latin name, ignoring case.</summary>
     /// <param name="parent">The node whose subdivisions are searched.</param>
     /// <param name="text">The text.</param>
-    /// <returns>The subdivision's node, or <see langword="null"/> when the parent has none by that name.</returns>
-    internal AddressNode? FindChild(AddressNode parent, string text)
+    /// <returns><see langword="true"/> when the text names a subdivision.</returns>
+    internal static bool IsKnown(AddressNode parent, string text)
     {
         string[] keys = parent.List(NodeProperty.SubKeys);
         string[] names = parent.List(NodeProperty.SubNames);
@@ -66,11 +66,36 @@ internal sealed class CountryStructure
                 || (i < names.Length && string.Equals(names[i], text, StringComparison.OrdinalIgnoreCase))
                 || (i < latinNames.Length && string.Equals(latinNames[i], text, StringComparison.OrdinalIgnoreCase)))
             {
-                return _data.Find(ChildId(parent, keys[i])) ?? _data.Find(ChildId(parent, keys[i], withLanguage: false));
+                return true;
             }
         }
 
-        return null;
+        return false;
+    }
+
+    /// <summary>
+    /// Finds the data node of the subdivision a text leads on to: the one whose key the text equals exactly (case-sensitively), or
+    /// else the one whose Latin name it equals ignoring case. Local names (<c>sub_names</c>) do not lead on to a node.
+    /// </summary>
+    /// <param name="parent">The node whose subdivisions are searched.</param>
+    /// <param name="text">The text.</param>
+    /// <returns>The subdivision's node, or <see langword="null"/> when the text does not select one or the data has no node for it.</returns>
+    internal AddressNode? FindChildByKey(AddressNode parent, string text)
+    {
+        string[] keys = parent.List(NodeProperty.SubKeys);
+        int index = Array.FindIndex(keys, key => string.Equals(key, text, StringComparison.Ordinal));
+        if (index < 0)
+        {
+            string[] latinNames = parent.List(NodeProperty.SubLnames);
+            index = Array.FindIndex(latinNames, name => string.Equals(name, text, StringComparison.OrdinalIgnoreCase));
+            if (index < 0 || index >= keys.Length)
+            {
+                return null;
+            }
+        }
+
+        string match = keys[index];
+        return _data.Find(ChildId(parent, match)) ?? _data.Find(ChildId(parent, match, withLanguage: false));
     }
 
     /// <summary>Tells whether a node lists subdivisions at all.</summary>
@@ -110,9 +135,9 @@ internal static class AddressDirectory
         string? used = null;
         if (!string.IsNullOrEmpty(language))
         {
-            string tag = LanguageSubtag(language);
-            node = data.Find(key + "--" + tag);
-            used = node is null ? null : tag;
+            // The variant is named exactly as the data names it: a tag is matched as written (the public API lower-cases tags first).
+            node = data.Find(key + "--" + language);
+            used = node is null ? null : language;
         }
 
         node ??= data.Find(key);
@@ -147,9 +172,4 @@ internal static class AddressDirectory
             }
         });
     }
-
-    /// <summary>Takes the language part of a tag: <c>fr-CA</c> gives <c>fr</c>, <c>zh-Hant</c> gives <c>zh-hant</c> (the data writes script variants in lower case).</summary>
-    /// <param name="tag">The tag.</param>
-    /// <returns>The key suffix to try.</returns>
-    internal static string LanguageSubtag(string tag) => tag.Trim().ToLowerInvariant().Replace('_', '-');
 }

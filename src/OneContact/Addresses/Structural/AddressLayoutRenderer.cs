@@ -88,14 +88,14 @@ internal static class AddressLayoutRenderer
     {
         if (field != AddressField.StreetAddress)
         {
-            return address.Get(field).Trim();
+            return AddressText.Trim(address.Get(field));
         }
 
         StringBuilder joined = new();
         int count = 0;
         foreach (string street in address.StreetLines)
         {
-            string trimmed = street.Trim();
+            string trimmed = AddressText.Trim(street);
             if (trimmed.Length == 0)
             {
                 continue;

@@ -19,7 +19,7 @@ internal sealed class AddressParts
         IReadOnlyList<string> streetLines)
     {
         Country = country;
-        Language = string.IsNullOrWhiteSpace(language) ? null : language.Trim();
+        Language = language;
         AdminArea = adminArea;
         Locality = locality;
         DependentLocality = dependentLocality;

@@ -10,7 +10,13 @@ None packed yet. When packed: `PhoneNumberMetadata.xml`, `ShortNumberMetadata.xm
 
 ## libaddressinput address data (Apache-2.0)
 
-None packed yet. When packed: the per-region address data of Google's libaddressinput, under the Apache License 2.0, with the upstream NOTICE.
+Packed in `RecursiveAI.OneContact`: the per-region address data of Google's libaddressinput (`testdata/countryinfo.txt`), compiled into compact tables.
+
+- Source: https://github.com/google/libaddressinput at commit `81eb9628382b07d371d8ea0b11badf7de3857fd5`.
+- File as fetched: `testdata/countryinfo.txt`, SHA-256 `51a5da9ac621f3457b96b99de798a47a02004f57e4289c1dd587a95730dad720`; licence text `LICENSE`, SHA-256 `389e6d12ea7853b6e9d797a98d19ddc6ccfaa021f29e21b2ac1ebc68c2607280`.
+- Licence: Apache License, Version 2.0 (see `LICENSE-APACHE`). The upstream repository has no NOTICE file. Its README also says the data is available under the Creative Commons Attribution 4.0 International licence; the data is credited here under both.
+- Copyright Google LLC and the libaddressinput contributors.
+- The packed notice and the provenance record of the build are `notices/libaddressinput.notice.txt` and `notices/libaddressinput.provenance.json`.
 
 ## libpostal dictionaries (MIT)
 

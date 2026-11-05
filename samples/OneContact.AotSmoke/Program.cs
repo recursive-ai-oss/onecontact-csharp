@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Text.Json;
 using RecursiveAI.OneContact;
+using RecursiveAI.OneContact.Addresses;
 using RecursiveAI.OneContact.Keys;
 using RecursiveAI.OneContact.Serialization;
 
@@ -49,6 +50,17 @@ string json = JsonSerializer.Serialize(email, ContactJsonContext.Default.EmailAd
 Check(json == "\"a@example.com\"", "json write");
 Check(JsonSerializer.Deserialize(json, ContactJsonContext.Default.EmailAddress) == email, "json round trip");
 Check(JsonSerializer.Deserialize("\"US\"", ContactJsonContext.Default.Region) == Region.US, "region json");
+
+// The structural address layer: field model, validation, layout, region data and the postal code pattern matcher.
+PostalAddress address = PostalAddress.Create(Region.US, "CA", "Mountain View", postalCode: "94043", streetLines: ["1600 Amphitheatre Parkway"]);
+Check(address.Validate().Count == 0, "address validates");
+Check(address.GetLabelLines().Count == 2, "address label");
+Check(address.Coverage == AddressCoverage.Full, "address coverage");
+IReadOnlyList<AddressIssue> issues = PostalAddress.Create(Region.US, "CA", "Mountain View", postalCode: "9404", streetLines: ["1 Main"]).Validate();
+Check(issues.Count == 1 && issues[0].Field == AddressField.PostalCode && issues[0].Kind == AddressIssueKind.InvalidFormat, "address issue");
+Check(AddressRegions.TryGet(Region.US, out AddressRegionInfo? usInfo) && usInfo!.Subdivisions.Count > 50, "region data");
+Check(AddressRegions.TryFindByName("united kingdom", out Region uk) && uk.Code == "GB", "region by name");
+Check(PostalAddress.TryParse("1-1 Chiyoda", Region.Parse("JP"), out _, out ParseDetail refused) == OperationStatus.InvalidData && refused.PrimaryReason == ReasonCode.AddressFreeTextRefused, "free text refused");
 
 Console.WriteLine(failures == 0 ? "OneContact AOT smoke: ok" : $"OneContact AOT smoke: {failures} failure(s)");
 return failures == 0 ? 0 : 1;

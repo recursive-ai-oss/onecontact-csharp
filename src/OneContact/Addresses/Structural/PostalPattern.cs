@@ -13,6 +13,7 @@ namespace RecursiveAI.OneContact.Addresses.Structural;
 internal sealed class PostalPattern
 {
     private const int StepBudget = 200_000;
+    private const int MaxDepth = 500;
     private const int MaxProgram = 20_000;
     private const int MaxRepeat = 100;
 
@@ -65,14 +66,15 @@ internal sealed class PostalPattern
     private bool Run(ReadOnlySpan<char> text, bool ignoreCase, bool wholeText)
     {
         int steps = 0;
-        return Step(0, 0, text, ignoreCase, wholeText, ref steps);
+        return Step(0, 0, 0, text, ignoreCase, wholeText, ref steps);
     }
 
-    private bool Step(int pc, int pos, ReadOnlySpan<char> text, bool ignoreCase, bool wholeText, ref int steps)
+    private bool Step(int pc, int pos, int depth, ReadOnlySpan<char> text, bool ignoreCase, bool wholeText, ref int steps)
     {
         while (true)
         {
-            if (++steps > StepBudget)
+            // The depth limit keeps the recursion on the stack small whatever the pattern; the step budget bounds the time.
+            if (++steps > StepBudget || depth > MaxDepth)
             {
                 return false;
             }
@@ -114,7 +116,7 @@ internal sealed class PostalPattern
                     pc = i.X;
                     break;
                 case Op.Split:
-                    if (Step(i.X, pos, text, ignoreCase, wholeText, ref steps))
+                    if (Step(i.X, pos, depth + 1, text, ignoreCase, wholeText, ref steps))
                     {
                         return true;
                     }
