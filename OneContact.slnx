@@ -33,6 +33,7 @@
     <Project Path="tools/Eval/Models/OneContact.Eval.Models.csproj" />
     <Project Path="tools/Eval/Speed/OneContact.Eval.Speed.csproj" />
     <Project Path="tools/Eval/Extraction/OneContact.Eval.Extraction.csproj" />
+    <Project Path="tools/Eval/Extract/OneContact.Eval.Extract.csproj" />
     <Project Path="tools/Ingest.LibAddressInput/OneContact.Ingest.LibAddressInput.csproj" />
     <Project Path="tools/Ingest.DisposableEmail/OneContact.Ingest.DisposableEmail.csproj" />
     <Project Path="tools/EmailCompare/OneContact.EmailCompare.csproj" />
