@@ -151,6 +151,7 @@ internal sealed class FieldNormalizer
             Confidence = (d.Confidence ?? ConfidenceOf(d.Source)) * (ok && !notValidNumber ? 1.0 : 0.5),
         };
         field.BlockId = d.BlockId;
+        field.Decision = d.Model ? DecisionSource.Model : DecisionSource.Rule;
         return field;
     }
 

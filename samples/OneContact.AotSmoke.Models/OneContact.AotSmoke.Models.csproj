@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/OneContact.Models.Tier1/OneContact.Models.Tier1.csproj" />
+    <ProjectReference Include="../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
     <!-- A package reference adds this file to the project by itself; a project reference does not. -->
     <Compile Include="../../src/OneContact.Models.Tier1/contentFiles/OneContactModelsTier1Registration.cs" Link="OneContactModelsTier1Registration.cs" />
   </ItemGroup>

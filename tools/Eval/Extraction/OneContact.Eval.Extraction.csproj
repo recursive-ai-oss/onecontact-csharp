@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Field scores and indicative throughput of text extraction with and without the Tier 1 contact-span model, on rendered training-set dev blocks
+       (never evaluation text), next to Microsoft.Recognizers.Text sequence finding as a black box. Information only. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <NoWarn>$(NoWarn);CA1303;CA1848;CA1031;CA1307;CA1305;CA1310;CA1861</NoWarn>
+    <!-- The comparator package pulls in an old NuGet.CommandLine as a transitive dependency; this tool is never shipped. -->
+    <NuGetAudit>false</NuGetAudit>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Recognizers.Text.Sequence" />
+    <ProjectReference Include="../../../src/OneContact.Models.Tier1/OneContact.Models.Tier1.csproj" />
+    <ProjectReference Include="../../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
+  </ItemGroup>
+
+</Project>

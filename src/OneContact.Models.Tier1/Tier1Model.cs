@@ -13,7 +13,7 @@ namespace RecursiveAI.OneContact.Models.Tier1;
 /// <see cref="Register"/>. Nothing is downloaded and nothing is discovered by reflection. The weights are read on first use. The models only
 /// label words; the parsers decide what to do with the labels, and a rule hit is never overruled by them.
 /// </remarks>
-public sealed class Tier1Model : IAddressFieldModel, INameModel
+public sealed class Tier1Model : IAddressFieldModel, INameModel, IContactSpanModel
 {
     /// <summary>The NuGet package id.</summary>
     public const string PackageId = ContactModels.Tier1PackageId;
@@ -25,6 +25,7 @@ public sealed class Tier1Model : IAddressFieldModel, INameModel
     private readonly IPipelineComponent _address;
     private readonly IPipelineComponent _nameParts;
     private readonly IPipelineComponent _nameClass;
+    private readonly IPipelineComponent? _spans;
 
     internal Tier1Model(Pipeline pipeline)
     {
@@ -32,12 +33,14 @@ public sealed class Tier1Model : IAddressFieldModel, INameModel
         _address = Find(pipeline, Tier1Pipeline.AddressHead);
         _nameParts = Find(pipeline, Tier1Pipeline.NamePartHead);
         _nameClass = Find(pipeline, Tier1Pipeline.NameClassHead);
+        // Weights from before the span heads existed still serve addresses and names; Find on them reports that.
+        _spans = TryFind(pipeline, Tier1Pipeline.SpanHead);
     }
 
     /// <summary>Makes the parsers use this package's models. Safe to call more than once and from any thread. Needed only when the project that
     /// references the package cannot compile the module initializer the package adds (a non-C# project, for example).</summary>
     public static void Register() =>
-        ContactModels.Register(PackageId, 1, new LazyModel(), new LazyModel());
+        ContactModels.Register(PackageId, 1, new LazyModel(), new LazyModel(), new LazyModel());
 
     /// <summary>Gets the models loaded from the weights in this assembly (loaded once, shared by all callers).</summary>
     /// <exception cref="InvalidOperationException">This assembly was built without its weights (a development build).</exception>
@@ -80,6 +83,42 @@ public sealed class Tier1Model : IAddressFieldModel, INameModel
         return new NameModelResult(cls, confidence, Tier1Labels.Spans(doc, TokenColumn.Pos));
     }
 
+    /// <summary>Finds the contact fields of a text and where each contact block begins.</summary>
+    /// <param name="text">Plain text; line breaks tell a signature's lines apart, so keep them.</param>
+    /// <returns>Fields labelled <c>person</c>, <c>company</c>, <c>address</c>, <c>phone</c>, <c>email</c> or <c>website</c> with the mean probability of their words, and block starts, all as offsets into <paramref name="text"/>.</returns>
+    /// <exception cref="InvalidOperationException">The weights predate the contact-span head.</exception>
+    public ContactSpanResult Find(string text)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        if (_spans is null)
+        {
+            throw new InvalidOperationException($"These {PackageId} weights have no contact-span head.");
+        }
+
+        Doc doc = NewDoc(text);
+        if (doc.Length == 0)
+        {
+            return new ContactSpanResult([], []);
+        }
+
+        _spans.Process(doc);
+        List<ModelSpan> spans = [];
+        List<int> starts = [];
+        foreach (RecursiveAI.OneNlp.Span e in doc.Ents)
+        {
+            string label = e.Label;
+            if (label.EndsWith(Tier1Pipeline.StartSuffix, StringComparison.Ordinal))
+            {
+                label = label[..^Tier1Pipeline.StartSuffix.Length];
+                starts.Add(e.StartChar);
+            }
+
+            spans.Add(new ModelSpan(e.StartChar, e.EndChar - e.StartChar, label, e.Confidence));
+        }
+
+        return new ContactSpanResult(spans, starts);
+    }
+
     private Doc NewDoc(string text)
     {
         List<(int Start, int Length)> words = Tier1Tokenizer.Tokenize(text);
@@ -90,6 +129,19 @@ public sealed class Tier1Model : IAddressFieldModel, INameModel
         }
 
         return new Doc(_pipeline.Strings, text, boundaries);
+    }
+
+    private static IPipelineComponent? TryFind(Pipeline pipeline, string name)
+    {
+        foreach (IPipelineComponent component in pipeline.Components)
+        {
+            if (component.Name == name)
+            {
+                return component;
+            }
+        }
+
+        return null;
     }
 
     private static IPipelineComponent Find(Pipeline pipeline, string name)
@@ -113,10 +165,12 @@ public sealed class Tier1Model : IAddressFieldModel, INameModel
     }
 
     // The registry holds these two so that registering costs nothing: the weights are read on the first label request.
-    private sealed class LazyModel : IAddressFieldModel, INameModel
+    private sealed class LazyModel : IAddressFieldModel, INameModel, IContactSpanModel
     {
         public IReadOnlyList<ModelSpan> Tag(string text) => Instance.Tag(text);
 
         public NameModelResult Analyze(string text) => Instance.Analyze(text);
+
+        public ContactSpanResult Find(string text) => Instance.Find(text);
     }
 }

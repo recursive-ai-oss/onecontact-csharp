@@ -1,4 +1,5 @@
 using RecursiveAI.OneContact.Extraction.Records;
+using RecursiveAI.OneContact.Models;
 using RecursiveAI.OneContact.Extraction.Text;
 using RecursiveAI.OneHtml;
 
@@ -118,6 +119,7 @@ internal static class ExtractionPipeline
 
         ExtractResult result = Assemble(page, sources, works, ungroupedFields, issues);
         result.PageRegion = page.PageRegion;
+        result.TextModelPackage = sources.HasFlag(ExtractionSources.Text) && ContactModels.Spans is null ? ContactModels.Tier1PackageId : null;
         result.RegionDrops = normalizer.RegionDrops;
         return result;
     }
@@ -139,7 +141,7 @@ internal static class ExtractionPipeline
             }
         }
 
-        List<FieldDraft> found = TextFieldReader.Read(page, view, (page.PageRegion.IsUnknown ? callerDefault : page.PageRegion) is { IsUnknown: false } textRegion ? new MatcherPhoneFinder(textRegion) : null);
+        List<FieldDraft> found = TextFieldReader.Read(page, view, (page.PageRegion.IsUnknown ? callerDefault : page.PageRegion) is { IsUnknown: false } textRegion ? new MatcherPhoneFinder(textRegion) : null, ContactModels.Spans, out int[] blockLines);
         var pending = new List<FieldDraft>();
         foreach (FieldDraft d in found)
         {
@@ -174,7 +176,7 @@ internal static class ExtractionPipeline
         }
 
         var grouped = new HashSet<FieldDraft>(ReferenceEqualityComparer.Instance);
-        List<RecordDraft> groups = TextGrouper.Group(page, view, [.. pending, .. loose], grouped);
+        List<RecordDraft> groups = TextGrouper.Group(page, view, [.. pending, .. loose], grouped, blockLines);
         builder.Records.AddRange(groups);
         ungrouped.RemoveAll(grouped.Contains);
         foreach (FieldDraft d in pending)

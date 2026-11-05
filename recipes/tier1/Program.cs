@@ -16,6 +16,9 @@ namespace OneContact.Recipe.Tier1;
 //         [--address-count N] [--names-count N] [--seed N] [--epochs N] [--threads N] [--budget-seconds S] [--checkpoint-every N]
 //         trains (or resumes from DIR/last.ckpt) until done or the time budget is used; writes DIR/tier1.onenlp when done.
 //         Run it again with the same arguments to continue: the result is the same as one uninterrupted run.
+//   spans --base tier1.onenlp --blocks DIR_OR_FILES --blocks-dev FILES --out DIR [--blocks-count N] [--seed N] [--epochs N] [--budget-seconds S]
+//         adds the contact-span head to a trained pipeline with the encoder frozen (resumable like train); writes DIR/tier1.onenlp when done.
+//   spans-dev --model tier1.onenlp --blocks-dev FILES      scores the contact-span head on dev blocks.
 //   dev   --model tier1.onenlp --addresses FILES --names FILES
 //         scores a saved model on dev files and prints the numbers.
 internal static class Program
@@ -49,6 +52,8 @@ internal static class Program
                 "train" => Train(o),
                 "dev" => Dev(o),
                 "names-dev" => NamesDev(o),
+                "spans" => SpanRecipe.Train(o, k => Files(o, k), (k, d) => Num(o, k, d)),
+                "spans-dev" => SpanRecipe.Dev(o, k => Files(o, k), (k, d) => Num(o, k, d)),
                 _ => 2,
             };
         }

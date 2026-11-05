@@ -68,6 +68,9 @@ internal sealed class FieldDraft
     /// <summary>A phone number found by its shape: kept only when the core parser accepts it as valid.</summary>
     public bool RequireValid { get; init; }
 
+    /// <summary>A trained model found the value in text where the rules found nothing.</summary>
+    public bool Model { get; init; }
+
     /// <summary>The line of visible text the value is on (text and the links among it); -1 when it has none.</summary>
     public int Line { get; set; } = -1;
 

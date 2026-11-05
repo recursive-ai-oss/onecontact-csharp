@@ -1,6 +1,8 @@
 using System.Buffers;
 using RecursiveAI.OneContact;
 using RecursiveAI.OneContact.Addresses.Parsing;
+using RecursiveAI.OneContact.Extraction;
+using RecursiveAI.OneContact.Extraction.Records;
 using RecursiveAI.OneContact.Models;
 using RecursiveAI.OneContact.Names;
 
@@ -30,6 +32,12 @@ Check(r == OperationStatus.Done && ruled is not null && rd.Fields.All(f => f.Sou
 
 NameModelResult n = ContactModels.Name!.Analyze("Northwind Traders LLC");
 Check(n.Class == NameClass.Company, "name class");
+
+// Text extraction finds the name and the company with the span head; the e-mail address is the rules' and stays theirs.
+ExtractResult x = new ContactExtractor { Sources = ExtractionSources.Text, DefaultRegion = Region.US }.ExtractText("Best regards\nJohn Carter\nAcme Plumbing LLC\nTel: (217) 555-0143\njcarter@acmeplumbing.example");
+Check(x.TextModelPackage is null, "the span model is in use");
+Check(x.Fields.Any(f => f.Decision == DecisionSource.Model && f.Kind == FieldKind.Name || f.Decision == DecisionSource.Model && f.Kind == FieldKind.Organization), "a name or company comes from the model");
+Check(x.Of(FieldKind.Email).All(f => f.Decision == DecisionSource.Rule), "rule fields stay rule fields in extraction");
 
 Console.WriteLine(failures == 0 ? "ok" : "failed");
 return failures == 0 ? 0 : 1;

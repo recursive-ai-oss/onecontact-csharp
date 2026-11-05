@@ -7,8 +7,9 @@ The trained weights in this package (`tier1.onenlp`) and everything that went in
 | | |
 |---|---|
 | File | `tier1.onenlp` (a saved OneNLP pipeline) |
-| Size | 9,843,463 bytes |
-| SHA-256 | `ee73a8957f91114e81b3bf95a16c7ec25b10cb9333cd0bf320ac826d608722f0` |
+| Size | 10,197,617 bytes |
+| SHA-256 | `51a7d1a62abe9fe211615d406ccf9778e691e3964e9eef993a7d6535405297c1` |
+| Earlier weights (without the contact-span head) | 9,843,463 bytes, `ee73a8957f91114e81b3bf95a16c7ec25b10cb9333cd0bf320ac826d608722f0`; the encoder and the three older heads of the current file are these bytes |
 | Training weights hash (OneNLP, checkpoint encoding) | `90161e7031f4e129327b80bb53ea27e491f7825e85dd863cd36f91cbb76ed292` |
 | Shape | one fast-tier encoder (width 128, 3 window layers, embeddings of 64, hash tables of 12,288 / 2,048 / 6,144 / 2,048 / 4,096 rows for the lower-cased text, prefix, suffix, shape and cased text, 2,048-row neighbour tables) shared by three softmax heads: `address-fields`, `name-parts`, `name-class` |
 | Recipe | `recipes/tier1` (`Program.cs`, `run.sh`) with `Tier1Pipeline.cs`, on OneNLP 0.2.0-preview.1 and OneModel 1.0.0 |
@@ -17,6 +18,21 @@ The trained weights in this package (`tier1.onenlp`) and everything that went in
 | Run | 2 chunks on the build machine (CPU only, 8 threads, no GPU): 26 + 20 minutes; 7 epochs (35,748 steps) of 899,984 examples (7.6 million words); the weights of the best dev evaluation (epoch 4, step 20,427) were kept |
 | Dev score by epoch | 0.9877, 0.9912, 0.9901, 0.9921, 0.9916, 0.9918, 0.9908 (mean of address-field span F1, name-part span F1, name-class word accuracy on 17,889 dev examples) |
 | Labels | from the data renderers' templates and the registers; no hosted-model labels, no labels from a parser |
+
+## The contact-span head
+
+| | |
+|---|---|
+| Head | `contact-spans`, a OneNLP entity recognizer (BILUO, 2 words of context, hidden width 128), 12 labels: the six fields, each plain and with `:start` |
+| Recipe | `recipes/tier1` command `spans` (`SpanRecipe.cs`, `BlockData.cs`, `spans.sh`); encoder frozen, older heads untouched |
+| Seed | 1; selection data order fixed by a hash with salt 20261106 |
+| Optimizer | AdamW, learning rate 0.003, 200 warm-up steps, weight decay 0.01, gradient clip 1, dropout 0.1, batches of about 1,500 words |
+| Data | `blocks-us-ca-v1` (generator `tools/data/blocks`, seed 20261106, manifest SHA-256 `4f200f04…b2857f`): 499,878 of 520,771 train blocks (31.2 million words) chosen by a hash of the text; 5,970 dev blocks for selection; 18,191 dev blocks for the reported scores. Role `train` and `dev` only |
+| Run | 3 chunks on the build machine (CPU only, 8 threads, no GPU), 25 + 25 + 16 minutes; 6 epochs (128,963 steps); the weights of the best dev evaluation (epoch 4, step 85,971, dev 0.9666) were kept |
+| Dev score by epoch | 0.9599, 0.9607, 0.9655, 0.9666, 0.9610, 0.9574 (mean of field F1 and block-start F1) |
+| Labels | from the block generator's own templates; no hosted-model label, no label from a parser |
+
+The blocks are rendered from the sets listed below (names, companies, addresses) and from word lists of our own; their provenance is `tools/data/provenance/blocks-us-ca.md`. No evaluation set, no OpenStreetMap, OpenAddresses, Common Crawl or G-NAF data entered the head. The private evaluation sets were used only to confirm that the older heads' predictions are unchanged.
 
 ## Training data
 

@@ -18,22 +18,26 @@ Normative notes on how trained models reach the parsers, what a model package ca
 |---|---|
 | `IAddressFieldModel.Tag(string)` | Labelled spans (`street.name`, `locality`, `recipient`, ...) with offsets into the text and a confidence. |
 | `INameModel.Analyze(string)` | A `NameClass`, its confidence and labelled parts (`Given`, `Family`, `Base`, `LegalForm`, ...). |
-| `ContactModels.Register(packageId, rank, address, name)` | A package makes its models known. The highest rank wins: Tier 1 is 1, the Tier 1+2 superset 2, the accurate tier 3. |
-| `ContactModels.Address`, `.Name`, `.PackageId` | What the parsers use; `null` when no package is referenced. |
+| `IContactSpanModel.Find(string)` | The six contact fields (`person`, `company`, `address`, `phone`, `email`, `website`) as labelled spans, and the offsets where contact blocks begin. |
+| `ContactModels.Register(packageId, rank, address, name, spans)` | A package makes its models known (`spans` is optional). The highest rank wins: Tier 1 is 1, the Tier 1+2 superset 2, the accurate tier 3. |
+| `ContactModels.Address`, `.Name`, `.Spans`, `.PackageId` | What the parsers use; `null` when no package is referenced. |
 
 Registration is not discovered by scanning: each model package ships a one-line source file under `contentFiles/cs/any/` that NuGet adds to the referencing project. It holds a `[ModuleInitializer]` that calls the package's `Register()`, so the trimmer and NativeAOT see the model code and its embedded weights as reachable. `Register()` costs nothing; the weights are read on first use, once, and the model is shared by all callers (it is safe to call from many threads).
 
-The 0.4 extraction span head and the 0.5 superset reuse this: a package registers more interfaces or a higher rank; the parsers do not change.
+Text extraction reaches the span model only through this seam (`docs/extraction.md`), so `.Extraction` does not reference the model package. The 0.5 superset reuses the seam: a package registers more interfaces or a higher rank; the parsers do not change.
 
 ## The Tier 1 model
 
-`RecursiveAI.OneContact.Models.Tier1` holds one saved OneNLP pipeline (`weights/tier1.onenlp`, embedded): a fast-tier encoder (hash embeddings of each word's lower-cased text, case-preserving text, prefix, suffix, shape and its neighbours, then three window layers) shared by three softmax heads:
+`RecursiveAI.OneContact.Models.Tier1` holds one saved OneNLP pipeline (`weights/tier1.onenlp`, embedded): a fast-tier encoder (hash embeddings of each word's lower-cased text, case-preserving text, prefix, suffix, shape and its neighbours, then three window layers) shared by three softmax heads and an entity head:
 
 | Head | Column | Labels |
 |---|---|---|
 | `address-fields` | Tag | `B-`/`I-` plus the field label, or `O` |
 | `name-parts` | Pos | `B-`/`I-` plus the part label, or `O` |
 | `name-class` | Morph | `person`, `company`, `multiple` or `unknown` on every word |
+| `contact-spans` | entities | BILUO tags over the words, six labels, each twice: the plain label and the label with `:start` for the first field of a contact block |
+
+**The span head.** `Tier1Model.Find(text)` runs the head once over the words of a text (the same words as above) and reads the entities it wrote: a span is the field; a span whose label ends in `:start` also puts its offset in `BlockStarts`. A block is what the data calls a record: one person's or one company's entry, and its first field marks where it begins, so one head answers both questions. A span's confidence is the mean probability of its words' tags. The head knows nothing of rules or of the page around the text; the caller decides what to keep.
 
 The encoder shape is written in `src/OneContact.Models.Tier1/Tier1Pipeline.cs`.
 
@@ -53,6 +57,21 @@ The recipe is `recipes/tier1` (a console project over OneNLP's public `pipeline.
 - Name examples are the rendered name and company set (`tools/data/provenance/names-us-ca.md`); a part's edges cut words, the class goes on every word.
 - Examples are chosen from each file by a hash of their text, the same on every run, so a resumed run sees the same examples; dev examples come from the sets' dev files. Selection is on the dev score (the mean of address-field span F1, name-part span F1 and name-class word accuracy). No evaluation set is read by the recipe.
 - A training example for one head has no label for the others; the loss ignores words without a label.
+
+## The span head: how it was added
+
+The head was trained on the shared encoder with the encoder **frozen** (`FreezeEncoder`), after the address and name heads: `recipes/tier1/spans.sh` loads the trained pipeline, trains the new head alone with OneNLP's `Train` on the rendered contact blocks (`tools/data/provenance/blocks-us-ca.md`), and saves the pipeline with the head added. The encoder and the three older heads are the same bytes, so the address and name results cannot change: the model's predictions on the private US and CA sets are byte-identical to those of the weights without the head (SHA-256 of the prediction files equal). Retraining the whole encoder jointly was not tried; the frozen head reaches 98.6 field F1 and 94.6 block-start F1 on 18,191 dev blocks, and the dev score peaked at epoch 4 of 6 (0.9666, mean of field F1 and block-start F1 on 5,970 dev blocks) before falling to 0.957, so the best evaluation was kept.
+
+| Dev blocks (18,191) | precision | recall | F1 |
+|---|---|---|---|
+| address | 98.73 | 98.80 | 98.77 |
+| company | 95.83 | 94.78 | 95.30 |
+| email | 99.93 | 99.94 | 99.94 |
+| person | 97.38 | 96.96 | 97.17 |
+| phone | 99.63 | 99.45 | 99.54 |
+| website | 99.57 | 99.69 | 99.63 |
+
+Block starts: F1 94.61. The dev blocks are rendered from the same templates as the training blocks (with different people, companies and addresses), so these numbers are optimistic for real pages.
 
 ## Measured
 

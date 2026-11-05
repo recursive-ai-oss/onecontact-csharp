@@ -37,6 +37,20 @@ public interface INameModel
     NameModelResult Analyze(string text);
 }
 
+/// <summary>What a span model found in a stretch of text.</summary>
+/// <param name="Spans">The fields, in input order and without overlap. <see cref="ModelSpan.Label"/> is one of <c>person</c>, <c>company</c>, <c>address</c>, <c>phone</c>, <c>email</c> or <c>website</c>.</param>
+/// <param name="BlockStarts">The offsets where the model reads a new contact block (a person's or a company's entry) begin, increasing. A block is what a reader sees as one entry: a signature, a staff-list row, a footer's address block.</param>
+public sealed record ContactSpanResult(IReadOnlyList<ModelSpan> Spans, IReadOnlyList<int> BlockStarts);
+
+/// <summary>A trained model that finds the six contact fields (person, company, address, phone, email, website) in running text and where each contact block begins. Implementations must be safe to call from several threads.</summary>
+public interface IContactSpanModel
+{
+    /// <summary>Finds contact fields in a text.</summary>
+    /// <param name="text">Plain text, one or several lines; a page's visible text is passed in pieces of a few dozen lines.</param>
+    /// <returns>The fields and block starts; offsets index <paramref name="text"/>. Rules are not consulted: the caller decides which spans to keep.</returns>
+    ContactSpanResult Find(string text);
+}
+
 /// <summary>
 /// The place where a model package makes its models known to the parsers. Nothing is found by scanning assemblies or by reflection: the model package
 /// ships one source file that the referencing project compiles, and that file calls <see cref="Register"/> from a module initializer.
@@ -61,6 +75,9 @@ public static class ContactModels
     /// <summary>Gets the registered name model, or <see langword="null"/> when no model package is referenced.</summary>
     public static INameModel? Name => (s_scoped.Value ?? Volatile.Read(ref s_current))?.Name;
 
+    /// <summary>Gets the registered contact-span model, or <see langword="null"/> when no model package that carries one is referenced.</summary>
+    public static IContactSpanModel? Spans => (s_scoped.Value ?? Volatile.Read(ref s_current))?.Spans;
+
     /// <summary>Gets the id of the package whose models are in use, or <see langword="null"/> when none is.</summary>
     public static string? PackageId => (s_scoped.Value ?? Volatile.Read(ref s_current))?.PackageId;
 
@@ -69,8 +86,9 @@ public static class ContactModels
     /// <param name="rank">How specific the package is: 1 for Tier 1, 2 for the Tier 1+2 superset, 3 for the accurate tier.</param>
     /// <param name="address">The address model, or <see langword="null"/>.</param>
     /// <param name="name">The name model, or <see langword="null"/>.</param>
+    /// <param name="spans">The contact-span model, or <see langword="null"/>.</param>
     /// <exception cref="ArgumentException"><paramref name="packageId"/> is empty.</exception>
-    public static void Register(string packageId, int rank, IAddressFieldModel? address, INameModel? name)
+    public static void Register(string packageId, int rank, IAddressFieldModel? address, INameModel? name, IContactSpanModel? spans = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(packageId);
         lock (Gate)
@@ -78,16 +96,16 @@ public static class ContactModels
             Registration? current = s_current;
             if (current is null || rank > current.Rank)
             {
-                Volatile.Write(ref s_current, new Registration(packageId, rank, address, name));
+                Volatile.Write(ref s_current, new Registration(packageId, rank, address, name, spans));
             }
         }
     }
 
     /// <summary>Uses the given models in the current async flow until the returned object is disposed; for tests.</summary>
-    internal static IDisposable Scope(IAddressFieldModel? address, INameModel? name)
+    internal static IDisposable Scope(IAddressFieldModel? address, INameModel? name, IContactSpanModel? spans = null)
     {
         Registration? previous = s_scoped.Value;
-        s_scoped.Value = new Registration("scoped", int.MaxValue, address, name);
+        s_scoped.Value = new Registration("scoped", int.MaxValue, address, name, spans);
         return new Restore(previous);
     }
 
@@ -96,5 +114,5 @@ public static class ContactModels
         public void Dispose() => s_scoped.Value = previous;
     }
 
-    private sealed record Registration(string PackageId, int Rank, IAddressFieldModel? Address, INameModel? Name);
+    private sealed record Registration(string PackageId, int Rank, IAddressFieldModel? Address, INameModel? Name, IContactSpanModel? Spans);
 }

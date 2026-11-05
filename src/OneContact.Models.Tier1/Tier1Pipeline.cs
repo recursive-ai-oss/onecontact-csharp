@@ -19,6 +19,19 @@ internal static class Tier1Pipeline
     /// <summary>Name of the name-class head (labels in the Morph column, one class per word).</summary>
     internal const string NameClassHead = "name-class";
 
+    /// <summary>Name of the head that finds the six contact fields (person, company, address, phone, email, website) as entities.</summary>
+    internal const string SpanHead = "contact-spans";
+
+    /// <summary>
+    /// Added to a field label for the first field of each contact block (<c>person:start</c>). One head reads both: where fields are and where a
+    /// block begins, because a block begins at its first field.
+    /// </summary>
+    internal const string StartSuffix = ":start";
+
+    /// <summary>Makes the untrained contact-span head over an existing encoder: BILUO tags decoded without overlap, two words of context each side.</summary>
+    internal static EntityRecognizer NewSpanHead(IEncoder encoder) =>
+        new(encoder, NerDecoding.Tagging, context: 2, hidden: 128, name: SpanHead) { OwnsEncoder = false };
+
     /// <summary>Makes the untrained encoder. Everything that shapes the model is written here.</summary>
     /// <param name="seed">Seed of the initial weights.</param>
     internal static FastEncoder NewEncoder(ulong seed) =>
