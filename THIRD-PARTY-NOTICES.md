@@ -29,7 +29,7 @@ Packed in `RecursiveAI.OneContact`: the per-region address data of Google's liba
 
 ## libpostal dictionaries (MIT)
 
-The address expansion tables of `RecursiveAI.OneContact` are compiled from dictionary files of libpostal (https://github.com/openvenues/libpostal), tag v1.1.4 (commit ffafa3fcd687631955453df70906c53d5677ce9a), under the MIT licence, Copyright (c) 2015 openvenues. The files used (English, French and the language-independent ambiguous-expansions list), their SHA-256 hashes and the licence text are in `upstream/libpostal-dictionaries/`; the package carries the licence text as `notices/libpostal-dictionaries.notice.txt` and the provenance record as `notices/libpostal-dictionaries.provenance.json`.
+The address expansion tables of `RecursiveAI.OneContact` are compiled from dictionary files of libpostal (https://github.com/openvenues/libpostal), tag v1.1.4 (commit ffafa3fcd687631955453df70906c53d5677ce9a), under the MIT licence, Copyright (c) 2015 openvenues. The files used (English and French; German, Dutch, Italian and Luxembourgish; Spanish, Portuguese, Catalan, Basque, Galician, Maltese and Irish; and the language-independent ambiguous-expansions list), their SHA-256 hashes and the licence text are in `upstream/libpostal-dictionaries/`; the package carries the licence text as `notices/libpostal-dictionaries.notice.txt` and the provenance record as `notices/libpostal-dictionaries.provenance.json`.
 
 ## Public Suffix List (MPL-2.0)
 

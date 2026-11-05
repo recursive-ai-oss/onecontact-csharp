@@ -66,3 +66,93 @@ bpost-de	ALLEE	All.	ALL
 bpost-de	PLATZ	Pl.	PL
 bpost-de	GEWERBEGEBIET	GG.	GG
 bpost-de	RESIDENZ	Res.	RES
+# Group B. Road types that start (or, in Maltese and Irish usage, hold) a street line, so a line that names a street but has no number is still a street line (UPU Italy: "CALLE DEL CRISTO CANNAREGIO 1678", "Piazza San Calisto" on the UPU Vatican sheet; UPU Spain: "Calle Huertas 18"; UPU Portugal: "R LEAL DA CAMARA 31"; UPU Malta: "Triq San Guzepp"; UPU Andorra: "CARRER AIGUETA 19"). The authorities publish no abbreviation table in these sheets, so the abbreviation column is empty and no type is rewritten; the variants are the usual abbreviations, recognized and left as written.
+road-es	CALLE	-	C/;CL;CLL
+road-es	AVENIDA	-	AVDA;AVD;AV
+road-es	PLAZA	-	PZA;PLZA;PL
+road-es	PASEO	-	PSO
+road-es	CARRETERA	-	CTRA;CRA
+road-es	CAMINO	-	CMNO
+road-es	TRAVESIA	-	TRAV;TRV
+road-es	RONDA	-	
+road-es	GLORIETA	-	GTA
+road-es	VIA	-	
+road-es	URBANIZACION	-	URB
+road-es	POLIGONO	-	POL
+road-es	CARRER	-	
+road-es	AVINGUDA	-	AVGDA
+road-es	PLACA	-	
+road-es	PASSEIG	-	PG
+road-es	PLAZUELA	-	
+road-es	CUESTA	-	
+road-es	PASAJE	-	PJE
+road-es	CAMI	-	
+road-es	PARQUE	-	
+road-pt	RUA	-	R
+road-pt	AVENIDA	-	AV;AVDA
+road-pt	TRAVESSA	-	TRAV;TV
+road-pt	PRACA	-	PC;PCA
+road-pt	LARGO	-	LG
+road-pt	ESTRADA	-	EST
+road-pt	CAMINHO	-	CAM
+road-pt	ALAMEDA	-	AL
+road-pt	BECO	-	BC
+road-pt	CALCADA	-	
+road-pt	AZINHAGA	-	
+road-pt	ROTUNDA	-	
+road-pt	URBANIZACAO	-	URB
+road-it	VIA	-	
+road-it	VIALE	-	VLE
+road-it	VICOLO	-	VLO
+road-it	PIAZZA	-	PZA;PIAZ
+road-it	PIAZZALE	-	PLE
+road-it	CORSO	-	CSO
+road-it	LARGO	-	
+road-it	STRADA	-	STR
+road-it	CONTRADA	-	CDA
+road-it	BORGATA	-	
+road-it	FRAZIONE	-	FRAZ
+road-it	LOCALITA	-	LOC
+road-it	SESTIERE	-	
+road-it	CALLE	-	
+road-it	CAMPO	-	
+road-it	FONDAMENTA	-	
+road-it	RIVA	-	
+road-it	SALITA	-	
+road-it	LUNGOTEVERE	-	
+road-it	LUNGARNO	-	
+road-it	STRADELLA	-	
+road-it	TRAVERSA	-	TRAV
+road-it	CALATA	-	
+road-mt	TRIQ	-	
+road-mt	TRIQET	-	
+road-mt	TREJQA	-	
+road-mt	TREJQET	-	
+road-mt	PJAZZA	-	
+road-mt	MISRAH	-	
+road-mt	WESGHA	-	
+road-mt	VJAL	-	
+road-mt	XATT	-	
+road-mt	SQAQ	-	
+road-mt	WIED	-	
+road-mt	DAWRET	-	
+road-mt	TELGHA	-	
+road-mt	TELGHET	-	
+road-mt	STREET	-	ST
+road-mt	ROAD	-	RD
+road-mt	AVENUE	-	AVE
+road-mt	SQUARE	-	SQ
+road-mt	LANE	-	LN
+road-ad	CARRER	-	C/
+road-ad	AVINGUDA	-	AV
+road-ad	PLACA	-	
+road-ad	PASSEIG	-	
+road-ad	CARRETERA	-	CTRA
+road-ad	CAMI	-	
+road-ad	CALLE	-	
+road-ad	AVENIDA	-	
+road-ad	PLAZA	-	
+road-ad	RUE	-	
+road-ad	AVENUE	-	
+road-ad	PLACE	-	
+road-ad	BOULEVARD	-	BD

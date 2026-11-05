@@ -17,3 +17,14 @@ BE	box	PB	PB
 DE	general	POSTLAGERND	Postlagernd
 DE	station	PACKSTATION	Packstation
 BE	station	BPACK	bpack
+# Group B. P.O. Box (UPU Isle of Man, Ireland and Malta examples), Apartado (UPU Spain and Portugal sheets), CCI, the private letter box of CTT (UPU Portugal sheet), Casella postale (UPU Italy sheet), Kaxxa Postali (UPU Malta sheet), BP and AP (UPU Andorra sheet: the French and the Spanish post office).
+GB,JE,GG,IM,IE,MT	box	PO BOX	P.O. Box
+ES	box	APARTADO	Apartado
+ES	box	APDO	Apartado
+PT	box	APARTADO	Apartado
+PT	box	CCI	CCI
+IT,SM,VA	box	CASELLA POSTALE	Casella postale
+MT	box	KAXXA POSTALI	Kaxxa Postali
+AD	box	BP	BP
+AD	box	AP	AP
+AD	box	APARTAT	Apartat
