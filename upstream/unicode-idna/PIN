@@ -1,0 +1,11 @@
+# Unicode Character Database 18.0.0 files behind UTS #46 processing: the IDNA mapping table and the properties its validity criteria need.
+source   unicode-idna
+licence  Unicode-3.0
+repo     https://www.unicode.org/Public/18.0.0/
+ref      18.0.0
+urlbase  https://www.unicode.org/Public/18.0.0/
+file     idna/IdnaMappingTable.txt                a03b1eb38032268c696406a83f0972d6a815acd2c8d4151d42ec0fda70ffced1
+file     ucd/UnicodeData.txt                      0736451de439ae7baf1425136617da495e09ee5afbe6e394374db7009ea08950
+file     ucd/DerivedNormalizationProps.txt        98ac7f67d985fe781e317f6182e885e94cabb0c314769e6dd73e48b226931ccd
+file     ucd/extracted/DerivedBidiClass.txt       d9e23222522551348ea1ccfbb4f62efbf98982afb95840f8959c08ed992c5607
+file     ucd/extracted/DerivedJoiningType.txt     e2408ff2c92b175b0f7bf62c989bbb54c7b077528fe31f8d69b96fa09e7d61ed

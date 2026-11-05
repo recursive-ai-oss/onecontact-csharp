@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Compiles the Unicode files behind UTS #46 (IDNA) into tables; run by the build, see docs/architecture.md. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>RecursiveAI.OneContact.Ingest.Idna</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Ingest/OneContact.Ingest.csproj" />
+  </ItemGroup>
+
+</Project>
