@@ -21,8 +21,21 @@ internal sealed class CountryStructure
         _default = defaults;
         Region = region;
         Language = language;
-        _format = new Lazy<AddressFormat>(() => AddressFormat.Parse(node[NodeProperty.Fmt] ?? defaults[NodeProperty.Fmt] ?? "%N%n%O%n%A%n%C"));
-        _latinFormat = new Lazy<AddressFormat?>(() => node[NodeProperty.Lfmt] is { } text ? AddressFormat.Parse(text) : null);
+        _format = new Lazy<AddressFormat>(() => ParseFormat(node[NodeProperty.Fmt] ?? defaults[NodeProperty.Fmt] ?? "%N%n%O%n%A%n%C"));
+        _latinFormat = new Lazy<AddressFormat?>(() => node[NodeProperty.Lfmt] is { } text ? ParseFormat(text) : null);
+    }
+
+    // A format string comes from the loaded tables, so a malformed one is bad table data, not a caller error.
+    private static AddressFormat ParseFormat(string text)
+    {
+        try
+        {
+            return AddressFormat.Parse(text);
+        }
+        catch (FormatException e)
+        {
+            throw new InvalidDataException("The address tables hold a malformed address format.", e);
+        }
     }
 
     /// <summary>Gets the region.</summary>
