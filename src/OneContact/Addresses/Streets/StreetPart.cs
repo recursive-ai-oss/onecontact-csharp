@@ -161,7 +161,9 @@ public sealed class StreetLine
         bool glue = true;
         foreach (StreetPart part in Parts)
         {
-            if (part.Standard.Length == 0)
+            // A part always has its standard text; falling back to the text as written keeps a rule gap from ever becoming an exception.
+            string standard = part.Standard ?? part.Text ?? string.Empty;
+            if (standard.Length == 0)
             {
                 continue;
             }
@@ -171,8 +173,8 @@ public sealed class StreetLine
                 sb.Append(' ');
             }
 
-            sb.Append(part.Standard);
-            glue = part.Standard[^1] == '-';
+            sb.Append(standard);
+            glue = standard[^1] == '-';
         }
 
         return sb.ToString();
