@@ -22,5 +22,7 @@
   <Folder Name="/tools/">
     <Project Path="tools/Ingest/OneContact.Ingest.csproj" />
     <Project Path="tools/Ingest.Synthetic/OneContact.Ingest.Synthetic.csproj" />
+    <Project Path="tools/Ingest.LibPhoneNumber/OneContact.Ingest.LibPhoneNumber.csproj" />
+    <Project Path="tools/Oracles/Phones/OneContact.Oracles.Phones.csproj" />
   </Folder>
 </Solution>

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Parity harness for phones: generates cases, answers them with OneContact, and compares with the answers a released libphonenumber
+       jar gave (Driver.java runs the jar; it is only executed, see README.md). -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../src/OneContact/OneContact.csproj" />
+    <!-- The XML reader is shared with the library so the generator reads the metadata file exactly as the library does. -->
+    <Compile Include="../../../src/OneContact/Phones/Metadata/TerritoryData.cs" Link="Shared/TerritoryData.cs" />
+    <Compile Include="../../../src/OneContact/Phones/Metadata/PhoneMetadataXml.cs" Link="Shared/PhoneMetadataXml.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Driver.java" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

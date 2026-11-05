@@ -1,0 +1,10 @@
+# Google libphonenumber's data files (not its code), at a tag, by exact path. phonemetadata.proto is read as a format document.
+source   libphonenumber
+licence  Apache-2.0
+repo     https://github.com/google/libphonenumber
+ref      86ea33cee5c22ab7e23b3de368e7cc7fa439a2b7
+urlbase  https://raw.githubusercontent.com/google/libphonenumber/86ea33cee5c22ab7e23b3de368e7cc7fa439a2b7/resources/
+file     PhoneNumberMetadata.xml          5bbfb6f2e63ba1131fc867cd1cf48aa131047772523723a10c230db12fb6e2df
+file     ShortNumberMetadata.xml          11071b42d43f9ea0bab99a77cd7bf48b302bd28223b754e2ad6ae28ac3f371b9
+file     PhoneNumberAlternateFormats.xml  8645e64f568506abee96308c7f7013bfc864a09aeeecfe9845ba0dc27cfa8093
+file     phonemetadata.proto              c7b7e75a7f7944cb6264cc7d96f0a46eed7ec12eecb5aa633a67bc6113821d38

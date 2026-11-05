@@ -1,0 +1,8 @@
+libphonenumber metadata
+Copyright (C) 2009 The Libphonenumber Authors
+
+The phone number metadata of this package (PhoneNumberMetadata.xml, ShortNumberMetadata.xml and
+PhoneNumberAlternateFormats.xml, release v9.0.43 of https://github.com/google/libphonenumber) is
+licensed under the Apache License, Version 2.0 (see LICENSE in this folder). The upstream files carry
+no separate NOTICE file; their copyright headers name "The Libphonenumber Authors".
+OneContact compiles this data into its own table format; it contains no libphonenumber code.
