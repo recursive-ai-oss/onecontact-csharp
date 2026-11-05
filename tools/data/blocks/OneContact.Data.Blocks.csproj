@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Builds synthetic contact blocks (footers, contact sections, staff lists, signatures, notes, free text and look-alike negatives) with exact field offsets for the extraction span head. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>OneContact.Data.Blocks</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <NoWarn>$(NoWarn);CA1303;CA1848;CA1307;CA1305;CA1310;CA1304;CA1311;CA1859;CA1822;CA1002;CA1051;CA1034;CA1307;CA5394;CA2201;CA1031;CA1812;CA1861;CA1865;CA1866;CA1867;CA1845;CA1847;CA1852</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Used only to run the rule parser over rendered examples (the report on what rules alone recover). -->
+    <ProjectReference Include="../../../src/OneContact/OneContact.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The word lists and templates are copied beside the program so the run manifest can record their hashes. -->
+    <None Include="Lexicon.cs;Kinds.cs;Fields.cs" Link="sources/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="RecursiveAI.OneContact" />
+    <Using Include="RecursiveAI.OneContact.Phones" />
+  </ItemGroup>
+
+</Project>
