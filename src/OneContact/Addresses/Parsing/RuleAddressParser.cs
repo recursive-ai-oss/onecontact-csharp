@@ -6,8 +6,8 @@ namespace RecursiveAI.OneContact.Addresses.Parsing;
 
 /// <summary>
 /// Reads free-text addresses of the United States (with Puerto Rico and the territories USPS serves) and Canada by rules, with offsets for every field
-/// and the rule that decided each one. The model fallback for input the rules cannot decide comes in a later release: until then such input returns an issue
-/// whose reason says a trained model would be needed.
+/// and the rule that decided each one. Input the rules cannot decide goes to the address model when a model package is referenced (it labels the
+/// fields, and a field a rule found is never replaced); without one it returns an issue whose reason names the package to add.
 /// </summary>
 /// <remarks>
 /// <para>Input is one line (with commas between the parts, or none) or several lines. The last line is found from the right: a ZIP or ZIP+4 or a Canadian postal
@@ -17,8 +17,8 @@ namespace RecursiveAI.OneContact.Addresses.Parsing;
 /// </remarks>
 public static class RuleAddressParser
 {
-    private static readonly HashSet<string> UsCountryNames = new(StringComparer.Ordinal) { "USA", "US", "UNITED STATES", "UNITED STATES OF AMERICA", "U S A" };
-    private static readonly HashSet<string> CaCountryNames = new(StringComparer.Ordinal) { "CANADA", "CAN" };
+    internal static readonly HashSet<string> UsCountryNames = new(StringComparer.Ordinal) { "USA", "US", "UNITED STATES", "UNITED STATES OF AMERICA", "U S A" };
+    internal static readonly HashSet<string> CaCountryNames = new(StringComparer.Ordinal) { "CANADA", "CAN" };
 
     /// <summary>Reads an address.</summary>
     /// <param name="input">The text: one or several lines. Offsets in the result index this span.</param>
@@ -42,7 +42,33 @@ public static class RuleAddressParser
             return OperationStatus.InvalidData;
         }
 
-        return new Reader(text, hint).Run(out address, out detail);
+        OperationStatus status = new Reader(text, hint).Run(out address, out detail);
+        Models.IAddressFieldModel? model = Models.ContactModels.Address;
+        if (model is null)
+        {
+            return status;
+        }
+
+        // Rules first: a parse the rules made keeps every field they found; the model only labels the lines the rules keep as written.
+        if (status == OperationStatus.Done && address is not null)
+        {
+            address = ModelAddressReader.Refine(model, text, address, detail.Issues, out detail);
+            return status;
+        }
+
+        // Input the rules refused for want of a decision is read from the model's labels.
+        ReasonCode reason = detail.PrimaryReason;
+        if (reason.Equals(ReasonCode.AddressModelRequired) || reason.Equals(ReasonCode.AddressNoLastLine) || reason.Equals(ReasonCode.AddressNoDeliveryLine))
+        {
+            if (ModelAddressReader.TryRead(model, text, hint, out ParsedAddress? read, out ParseDetail modelDetail) == OperationStatus.Done)
+            {
+                address = read;
+                detail = modelDetail;
+                return OperationStatus.Done;
+            }
+        }
+
+        return status;
     }
 
     private sealed record Unit(List<AddressToken> Tokens);

@@ -50,8 +50,11 @@ public static class NameParsing
     /// <param name="text">The text.</param>
     /// <param name="hints">The country and language the text is written in; neither is needed.</param>
     /// <returns>The class.</returns>
-    public static NameClass Classify(ReadOnlySpan<char> text, NameHints hints = default) =>
-        NameAnalyzer.Analyze(text, hints).Class;
+    public static NameClass Classify(ReadOnlySpan<char> text, NameHints hints = default)
+    {
+        Analysis analysis = NameAnalyzer.Analyze(text, hints);
+        return analysis.Class == NameClass.Unknown ? ModelNameReader.Classify(text, analysis) : analysis.Class;
+    }
 
     /// <summary>Reads a name string of unknown kind.</summary>
     /// <param name="text">The text.</param>
@@ -71,6 +74,13 @@ public static class NameParsing
     public static NameParseResult Split(ReadOnlySpan<char> text, NameHints hints = default)
     {
         Analysis analysis = NameAnalyzer.Analyze(text, hints);
+
+        // Rules first: only a string the rules left unknown goes to the name model, when a model package is referenced.
+        if (analysis.Class == NameClass.Unknown && ModelNameReader.TryRead(text, hints, analysis, out NameParseResult? fromModel))
+        {
+            return fromModel;
+        }
+
         if (analysis.Class == NameClass.Company)
         {
             CompanyName.TryParse(text, hints, out CompanyName company, out ParseDetail companyDetail);

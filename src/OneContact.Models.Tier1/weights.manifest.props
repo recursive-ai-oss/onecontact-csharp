@@ -1,0 +1,9 @@
+<Project>
+  <!-- The weights this package packs: name, size, sha256 and where each came from. A pack fails when a file is missing or differs.
+       To use retrained weights, replace the row (and PROVENANCE.md); no code changes. Weights are never committed.
+       The row is filled in when a trained model is accepted. -->
+  <ItemGroup>
+    <Tier1Weight Include="tier1.onenlp" Size="0" Sha256="0000000000000000000000000000000000000000000000000000000000000000"
+                 Recipe="recipes/tier1" Data="see PROVENANCE.md" Contents="shared fast-tier encoder; address-field head; name-part head; name-class head" />
+  </ItemGroup>
+</Project>
