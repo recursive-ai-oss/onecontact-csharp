@@ -1,0 +1,45 @@
+# Cases for the provider key rules, the flags and the typo suggestions (docs/email.md). Written for this library; each rule cites the provider page it follows.
+# Format: id ¦ source ¦ input ¦ expect ¦ canonical ¦ flags ¦ display ¦ key  (see rfc5322.cases)
+key-gmail-1 ¦ DESIGN happy path; Gmail Help 7436150 and 22370 ¦ "J. Smith" <J.Smith+crm@GoogleMail.com> ¦ valid ¦ J.Smith+crm@googlemail.com ¦ HasDisplayName|FreeProvider ¦ J. Smith ¦ jsmith@gmail.com
+key-gmail-2 ¦ Gmail Help 7436150 (dots do not matter) ¦ j.o.h.n.s.m.i.t.h@gmail.com ¦ valid ¦ j.o.h.n.s.m.i.t.h@gmail.com ¦ FreeProvider ¦ - ¦ johnsmith@gmail.com
+key-gmail-3 ¦ Gmail Help 22370 (+alias) ¦ JohnSmith+Shopping@Gmail.COM ¦ valid ¦ JohnSmith+Shopping@gmail.com ¦ FreeProvider ¦ - ¦ johnsmith@gmail.com
+key-gmail-4 ¦ Gmail Help (nothing left after the alias: the part is kept) ¦ +x@gmail.com ¦ valid ¦ +x@gmail.com ¦ FreeProvider ¦ - ¦ +x@gmail.com
+key-gmail-5 ¦ Gmail dots only matter for gmail.com and googlemail.com, not for other domains ¦ j.smith@example.com ¦ valid ¦ j.smith@example.com ¦ - ¦ - ¦ j.smith@example.com
+key-gmail-6 ¦ Gmail Help 22370 (the alias is dropped before the dots are) ¦ a.b+c.d@gmail.com ¦ valid ¦ a.b+c.d@gmail.com ¦ FreeProvider ¦ - ¦ ab@gmail.com
+key-gmail-7 ¦ a quoted local part that is a dot-atom once unquoted gets the provider rules ¦ "a.b+c"@gmail.com ¦ valid ¦ "a.b+c"@gmail.com ¦ QuotedLocalPart|FreeProvider ¦ - ¦ ab@gmail.com
+key-outlook-1 ¦ Microsoft Support, Outlook.com site-specific addresses ¦ Joe.Doe+Shop@Outlook.com ¦ valid ¦ Joe.Doe+Shop@outlook.com ¦ FreeProvider ¦ - ¦ joe.doe@outlook.com
+key-outlook-2 ¦ Microsoft Support, Outlook.com site-specific addresses ¦ joe+x@hotmail.com ¦ valid ¦ joe+x@hotmail.com ¦ FreeProvider ¦ - ¦ joe@hotmail.com
+key-outlook-3 ¦ Microsoft Support, Outlook.com site-specific addresses ¦ joe+x@live.com ¦ valid ¦ joe+x@live.com ¦ FreeProvider ¦ - ¦ joe@live.com
+key-outlook-4 ¦ no rule for domains the page does not name ¦ joe+x@msn.com ¦ valid ¦ joe+x@msn.com ¦ FreeProvider ¦ - ¦ joe+x@msn.com
+key-yahoo-1 ¦ Yahoo Help SLN28338 (basename-keyword) ¦ Maple-Shopping@yahoo.com ¦ valid ¦ Maple-Shopping@yahoo.com ¦ FreeProvider ¦ - ¦ maple@yahoo.com
+key-yahoo-2 ¦ Yahoo Help SLN28338 (the first hyphen separates the keyword) ¦ x-y-z@yahoo.com ¦ valid ¦ x-y-z@yahoo.com ¦ FreeProvider ¦ - ¦ x@yahoo.com
+key-yahoo-3 ¦ no rule for other Yahoo domains ¦ a-b@yahoo.co.uk ¦ valid ¦ a-b@yahoo.co.uk ¦ FreeProvider ¦ - ¦ a-b@yahoo.co.uk
+key-fastmail-1 ¦ Fastmail Help, plus addressing ¦ Me+News@Fastmail.com ¦ valid ¦ Me+News@fastmail.com ¦ FreeProvider ¦ - ¦ me@fastmail.com
+key-fastmail-2 ¦ Fastmail Help, subdomain addressing ¦ news@me.fastmail.com ¦ valid ¦ news@me.fastmail.com ¦ RoleAccount ¦ - ¦ me@fastmail.com
+key-fastmail-3 ¦ Fastmail Help (only one subdomain level) ¦ x@a.b.fastmail.com ¦ valid ¦ x@a.b.fastmail.com ¦ - ¦ - ¦ x@a.b.fastmail.com
+key-default-1 ¦ unknown domains: case-folding only ¦ A.B+Tag@Example.COM ¦ valid ¦ A.B+Tag@example.com ¦ - ¦ - ¦ a.b+tag@example.com
+key-quoted-1 ¦ RFC 5321 4.1.2 (a quoted local part that would be a dot-atom is the same mailbox) ¦ "john"@example.com ¦ valid ¦ "john"@example.com ¦ QuotedLocalPart ¦ - ¦ john@example.com
+key-quoted-2 ¦ RFC 5321 4.1.2 (a quoted-pair is the character it quotes) ¦ "a\.b"@example.com ¦ valid ¦ "a\.b"@example.com ¦ QuotedLocalPart ¦ - ¦ a.b@example.com
+key-quoted-3 ¦ a quoted local part that needs its quotes keeps them ¦ "JOHN\sSMITH"@example.com ¦ valid ¦ "JOHN\sSMITH"@example.com ¦ QuotedLocalPart ¦ - ¦ "john\ssmith"@example.com
+key-quoted-4 ¦ a quoted local part with an unnecessary quoted-pair of a space ¦ "John Smith"@Example.com ¦ valid ¦ "John Smith"@example.com ¦ QuotedLocalPart ¦ - ¦ "john smith"@example.com
+key-unicode-1 ¦ the key lowercases non-ASCII letters ¦ \u00c9COLE@Example.com ¦ valid ¦ \u00c9COLE@example.com ¦ InternationalizedLocalPart ¦ - ¦ \u00e9cole@example.com
+key-unicode-2 ¦ the key composes to NFC ¦ e\u0301cole@example.com ¦ valid ¦ e\u0301cole@example.com ¦ InternationalizedLocalPart ¦ - ¦ \u00e9cole@example.com
+key-idn-1 ¦ the key uses the A-label domain ¦ a@B\u00dcCHER.example ¦ valid ¦ a@xn--bcher-kva.example ¦ InternationalizedDomain ¦ - ¦ a@xn--bcher-kva.example
+key-literal-1 ¦ domain literals are only case-folded in the local part ¦ A@[192.0.2.1] ¦ valid ¦ A@[192.0.2.1] ¦ DomainLiteral ¦ - ¦ a@[192.0.2.1]
+flag-role-1 ¦ RFC 2142 4 ¦ Info@example.com ¦ valid ¦ Info@example.com ¦ RoleAccount
+flag-role-2 ¦ RFC 2142 4 (a +tag does not hide the role) ¦ sales+q1@example.com ¦ valid ¦ sales+q1@example.com ¦ RoleAccount
+flag-role-3 ¦ RFC 2142 5 ¦ postmaster@example.com ¦ valid ¦ postmaster@example.com ¦ RoleAccount
+flag-role-4 ¦ a person is not a role ¦ john.smith@example.com ¦ valid ¦ john.smith@example.com ¦ -
+flag-role-5 ¦ a quoted local part is never a role ¦ "info"@example.com ¦ valid ¦ "info"@example.com ¦ QuotedLocalPart
+flag-free-1 ¦ free provider list ¦ someone@gmail.com ¦ valid ¦ someone@gmail.com ¦ FreeProvider
+flag-free-2 ¦ free provider list ¦ someone@proton.me ¦ valid ¦ someone@proton.me ¦ FreeProvider
+flag-free-3 ¦ a company domain is not free ¦ someone@example.com ¦ valid ¦ someone@example.com ¦ -
+flag-disposable-1 ¦ disposable-email-domains list ¦ x@mailinator.com ¦ valid ¦ x@mailinator.com ¦ Disposable
+flag-disposable-2 ¦ a subdomain of a listed domain ¦ x@box.mailinator.com ¦ valid ¦ x@box.mailinator.com ¦ Disposable
+flag-disposable-3 ¦ the Unicode spelling of a domain is matched by its A-label ¦ x@example.com ¦ valid ¦ x@example.com ¦ -
+flag-typo-1 ¦ provider typo, suggestion only ¦ jane@gmial.com ¦ valid ¦ jane@gmial.com ¦ PossibleTypo|Disposable
+flag-typo-2 ¦ provider typo in the top-level domain ¦ jane@gmail.con ¦ valid ¦ jane@gmail.con ¦ PossibleTypo
+flag-typo-3 ¦ provider typo ¦ jane@hotmial.com ¦ valid ¦ jane@hotmial.com ¦ PossibleTypo|Disposable
+flag-typo-4 ¦ no typo ¦ jane@gmail.com ¦ valid ¦ jane@gmail.com ¦ FreeProvider
+flag-comment-1 ¦ RFC 5322 3.2.2 ¦ a@example.com (x) ¦ valid ¦ a@example.com ¦ HasComment
+flag-single-1 ¦ RFC 5321 2.3.5 ¦ a@intranet ¦ valid ¦ a@intranet ¦ SingleLabelDomain

@@ -1,0 +1,7 @@
+<Project>
+  <ItemGroup>
+    <IngestSource Include="disposable-email-domains" Tool="../../tools/Ingest.DisposableEmail/OneContact.Ingest.DisposableEmail.csproj" Pin="../../upstream/disposable-email-domains/PIN" />
+    <!-- Restores the converter with this project; the compiled output is not referenced. -->
+    <ProjectReference Include="../../tools/Ingest.DisposableEmail/OneContact.Ingest.DisposableEmail.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,119 @@
+# Conformance cases from RFC 5322 (examples in section 3 and Appendix A, plus the grammar productions they illustrate).
+# Format: id ¦ source ¦ input ¦ expect ¦ canonical ¦ flags ¦ display ¦ key
+#   input escapes: \s space, \t tab, \r, \n, \\ and \uXXXX.   expect: valid | invalid | invalid:<reason id>
+#   canonical/display/key: text, - for none, * for not checked.   flags: EmailFacts names joined by |, - for none, * for not checked.
+# The group and list examples of A.1.3 and A.5 are not single mailboxes; they are listed with the reason a single-mailbox read refuses them,
+# and their member mailboxes are listed on their own.
+5322-A.1.1-a ¦ RFC 5322 A.1.1 ¦ John Doe <jdoe@machine.example> ¦ valid ¦ jdoe@machine.example ¦ HasDisplayName ¦ John Doe ¦ jdoe@machine.example
+5322-A.1.1-b ¦ RFC 5322 A.1.1 ¦ Mary Smith <mary@example.net> ¦ valid ¦ mary@example.net ¦ HasDisplayName ¦ Mary Smith ¦ mary@example.net
+5322-A.1.1-c ¦ RFC 5322 A.1.1 ¦ Michael Jones <mjones@machine.example> ¦ valid ¦ mjones@machine.example ¦ HasDisplayName ¦ Michael Jones
+5322-A.1.2-a ¦ RFC 5322 A.1.2 ¦ "Joe Q. Public" <john.q.public@example.com> ¦ valid ¦ john.q.public@example.com ¦ HasDisplayName ¦ Joe Q. Public
+5322-A.1.2-b ¦ RFC 5322 A.1.2 ¦ Mary Smith <mary@x.test> ¦ valid ¦ mary@x.test ¦ HasDisplayName ¦ Mary Smith
+5322-A.1.2-c ¦ RFC 5322 A.1.2 (no display name, no angle brackets) ¦ jdoe@example.org ¦ valid ¦ jdoe@example.org ¦ - ¦ -
+5322-A.1.2-d ¦ RFC 5322 A.1.2 (question mark is atext) ¦ Who? <one@y.test> ¦ valid ¦ one@y.test ¦ HasDisplayName ¦ Who?
+5322-A.1.2-e ¦ RFC 5322 A.1.2 (angle brackets only) ¦ <boss@nil.test> ¦ valid ¦ boss@nil.test ¦ - ¦ -
+5322-A.1.2-f ¦ RFC 5322 A.1.2 (quoted-pair in a quoted display name) ¦ "Giant; \"Big\" Box" <sysservices@example.net> ¦ valid ¦ sysservices@example.net ¦ HasDisplayName ¦ Giant; "Big" Box
+5322-A.1.3-a ¦ RFC 5322 A.1.3 (group member) ¦ Ed Jones <c@a.test> ¦ valid ¦ c@a.test ¦ HasDisplayName ¦ Ed Jones
+5322-A.1.3-b ¦ RFC 5322 A.1.3 (group member) ¦ joe@where.test ¦ valid ¦ joe@where.test ¦ -
+5322-A.1.3-c ¦ RFC 5322 A.1.3 (group member) ¦ John <jdoe@one.test> ¦ valid ¦ jdoe@one.test ¦ HasDisplayName ¦ John
+5322-A.1.3-d ¦ RFC 5322 A.1.3 (a group is not a mailbox: the colon is not allowed in an unquoted phrase) ¦ A Group:Ed Jones <c@a.test>,joe@where.test,John <jdoe@one.test>; ¦ invalid:email.invalid-display-name
+5322-A.1.3-e ¦ RFC 5322 A.1.3 (an empty group has no address) ¦ Undisclosed recipients:; ¦ invalid:email.missing-at
+5322-A.1.3-f ¦ RFC 5322 A.1.3 ¦ Pete <pete@silly.example> ¦ valid ¦ pete@silly.example ¦ HasDisplayName ¦ Pete
+5322-A.2-a ¦ RFC 5322 A.2 (colon inside a quoted phrase) ¦ "Mary Smith: Personal Account" <smith@home.example> ¦ valid ¦ smith@home.example ¦ HasDisplayName ¦ Mary Smith: Personal Account
+5322-A.3-a ¦ RFC 5322 A.3 ¦ Jane Brown <j-brown@other.example> ¦ valid ¦ j-brown@other.example ¦ HasDisplayName ¦ Jane Brown
+5322-A.4-a ¦ RFC 5322 A.4 ¦ John Doe <jdoe@node.example> ¦ valid ¦ jdoe@node.example ¦ HasDisplayName ¦ John Doe
+5322-A.5-a ¦ RFC 5322 A.5 (comments in the phrase, the local part and the domain; quoted-pair in a comment) ¦ Pete(A nice \) chap) <pete(his account)@silly.test(his host)> ¦ valid ¦ pete@silly.test ¦ HasDisplayName|HasComment ¦ Pete
+5322-A.5-b ¦ RFC 5322 A.5 (a comment after the @, with a period inside it) ¦ Chris Jones <c@(Chris's host.)public.example> ¦ valid ¦ c@public.example ¦ HasDisplayName|HasComment ¦ Chris Jones
+5322-A.5-c ¦ RFC 5322 A.5 (folding white space around an address) ¦ \r\n     joe@example.org\r\n ¦ valid ¦ joe@example.org ¦ -
+5322-A.5-d ¦ RFC 5322 A.5 (a comment after the angle address) ¦ John <jdoe@one.test> (my dear friend) ¦ valid ¦ jdoe@one.test ¦ HasDisplayName|HasComment ¦ John
+5322-A.5-e ¦ RFC 5322 A.5 (a group name with a comment and folding white space) ¦ A Group(Some people)\r\n        :Chris Jones <c@(Chris's host.)public.example> ¦ invalid:email.invalid-display-name
+5322-A.5-f ¦ RFC 5322 A.5 (an empty group with comments) ¦ (Empty list)(start)Hidden recipients  :(nobody(that I know))  ; ¦ invalid:email.missing-at
+5322-A.6.1-a ¦ RFC 5322 A.6.1 (obsolete: an unquoted period in the phrase) ¦ Joe Q. Public <john.q.public@example.com> ¦ valid ¦ john.q.public@example.com ¦ HasDisplayName|ObsoleteSyntax ¦ Joe Q. Public
+5322-A.6.1-b ¦ RFC 5322 A.6.1 (obsolete: a route) ¦ Mary Smith <@node.test:mary@example.net> ¦ valid ¦ mary@example.net ¦ HasDisplayName|ObsoleteSyntax ¦ Mary Smith
+5322-A.6.1-c ¦ RFC 5322 A.6.1 (obsolete: white space around the period of the domain) ¦ jdoe@test  . example ¦ valid ¦ jdoe@test.example ¦ ObsoleteSyntax
+5322-A.6.3-a ¦ RFC 5322 A.6.3 (obsolete: a comment and white space around the period) ¦ John Doe <jdoe@machine(comment).  example> ¦ valid ¦ jdoe@machine.example ¦ HasDisplayName|HasComment|ObsoleteSyntax ¦ John Doe
+5322-A.6.3-b ¦ RFC 5322 A.6.3 (obsolete folding: a line of only white space) ¦ Mary Smith\r\n  \r\n          <mary@example.net> ¦ valid ¦ mary@example.net ¦ HasDisplayName|ObsoleteSyntax ¦ Mary Smith
+5322-A.6.3-c ¦ RFC 5322 A.6.3 (the msg-id example, read as an addr-spec: white space and comments around the @ and the periods) ¦ 1234   @   local(blah)  .machine .example ¦ valid ¦ 1234@local.machine.example ¦ HasComment|ObsoleteSyntax
+# 3.2.3 atext and dot-atom
+5322-3.2.3-a ¦ RFC 5322 3.2.3 (every atext special) ¦ !#$%&'*+-/=?^_`{|}~@example.com ¦ valid ¦ !#$%&'*+-/=?^_`{|}~@example.com ¦ -
+5322-3.2.3-b ¦ RFC 5322 3.2.3 dot-atom ¦ first.middle.last@example.com ¦ valid ¦ first.middle.last@example.com ¦ -
+5322-3.2.3-c ¦ RFC 5322 3.2.3 (two periods in a row) ¦ a..b@example.com ¦ invalid:email.invalid-local-part
+5322-3.2.3-d ¦ RFC 5322 3.2.3 (a leading period) ¦ .a@example.com ¦ invalid:email.invalid-local-part
+5322-3.2.3-e ¦ RFC 5322 3.2.3 (a trailing period) ¦ a.@example.com ¦ invalid:email.invalid-local-part
+5322-3.2.3-f ¦ RFC 5322 3.2.3 (a space is not atext) ¦ a b@example.com ¦ invalid:email.invalid-local-part
+5322-3.2.3-g ¦ RFC 5322 3.2.3 (a comma is a special) ¦ a,b@example.com ¦ invalid:email.invalid-local-part
+5322-3.2.3-h ¦ RFC 5322 3.2.3 (angle brackets are specials) ¦ a<b@example.com ¦ invalid
+5322-3.2.3-i ¦ RFC 5322 3.2.3 (a bracket is a special) ¦ a[b]@example.com ¦ invalid:email.invalid-local-part
+# 3.2.4 quoted strings
+5322-3.2.4-a ¦ RFC 5322 3.2.4 ¦ "a b"@example.com ¦ valid ¦ "a b"@example.com ¦ QuotedLocalPart
+5322-3.2.4-b ¦ RFC 5322 3.2.4 (quoted-pair) ¦ "a\"b"@example.com ¦ valid ¦ "a\"b"@example.com ¦ QuotedLocalPart
+5322-3.2.4-c ¦ RFC 5322 3.2.4 (the @ is allowed inside quotes) ¦ "@"@example.com ¦ valid ¦ "@"@example.com ¦ QuotedLocalPart
+5322-3.2.4-d ¦ RFC 5322 3.2.4 (the empty quoted string is a quoted-string) ¦ ""@example.com ¦ valid ¦ ""@example.com ¦ QuotedLocalPart
+5322-3.2.4-e ¦ RFC 5322 3.2.4 (an unclosed quote) ¦ "abc@example.com ¦ invalid:email.invalid-quoted-string
+5322-3.2.4-f ¦ RFC 5322 3.2.4 (comments in front of a quoted local part are allowed) ¦ (c)"a b"(d)@example.com ¦ valid ¦ "a b"@example.com ¦ QuotedLocalPart|HasComment
+5322-3.2.4-g ¦ RFC 5322 3.2.4 (a quoted-string folded with CRLF and white space: the CRLF is removed) ¦ "a\r\n b"@example.com ¦ valid ¦ "a b"@example.com ¦ QuotedLocalPart
+5322-3.2.4-h ¦ RFC 5322 3.2.4 (a raw CR is not allowed) ¦ "a\rb"@example.com ¦ invalid:email.invalid-character
+# 4.4 obsolete addressing
+5322-4.4-a ¦ RFC 5322 4.4 obs-local-part (a quoted and an unquoted word) ¦ "a".b@example.com ¦ valid ¦ "a".b@example.com ¦ QuotedLocalPart|ObsoleteSyntax
+5322-4.4-b ¦ RFC 5322 4.4 obs-local-part ¦ a."b"@example.com ¦ valid ¦ a."b"@example.com ¦ QuotedLocalPart|ObsoleteSyntax
+5322-4.4-c ¦ RFC 5322 4.4 obs-local-part (two quoted words) ¦ "a"."b"@example.com ¦ valid ¦ "a"."b"@example.com ¦ QuotedLocalPart|ObsoleteSyntax
+5322-4.4-d ¦ RFC 5322 4.4 obs-local-part (white space before the period) ¦ a .b@example.com ¦ valid ¦ a.b@example.com ¦ ObsoleteSyntax
+5322-4.4-e ¦ RFC 5322 4.4 obs-route with two hops ¦ <@a.example,@b.example:user@example.com> ¦ valid ¦ user@example.com ¦ ObsoleteSyntax
+5322-4.1-a ¦ RFC 5322 4.1 obs-NO-WS-CTL inside a quoted string ¦ "a\u0001b"@example.com ¦ valid ¦ "a\u0001b"@example.com ¦ QuotedLocalPart|ObsoleteSyntax
+5322-4.1-b ¦ RFC 5322 4.1 obs-qp ¦ "a\\\u0001"@example.com ¦ valid ¦ "a\\\u0001"@example.com ¦ QuotedLocalPart|ObsoleteSyntax
+5322-4.1-c ¦ RFC 5322 4.1 (NUL is not allowed raw) ¦ "a\u0000b"@example.com ¦ invalid:email.invalid-character
+# 3.2.2 comments and folding white space
+5322-3.2.2-a ¦ RFC 5322 3.2.2 (nested comments) ¦ a(b(c)d)@example.com ¦ valid ¦ a@example.com ¦ HasComment
+5322-3.2.2-b ¦ RFC 5322 3.2.2 (an unclosed comment) ¦ a(b@example.com ¦ invalid:email.invalid-comment
+5322-3.2.2-c ¦ RFC 5322 3.2.2 (an unopened comment close) ¦ a)b@example.com ¦ invalid:email.invalid-local-part
+5322-3.2.2-d ¦ RFC 5322 3.2.2 (a quoted-pair keeps a parenthesis inside a comment) ¦ a(\))@example.com ¦ valid ¦ a@example.com ¦ HasComment
+5322-3.2.2-e ¦ RFC 5322 3.2.2 (comments around the whole address) ¦ (x)a@example.com(y) ¦ valid ¦ a@example.com ¦ HasComment
+# 3.4.1 addr-spec: structure
+5322-3.4.1-a ¦ RFC 5322 3.4.1 (no @) ¦ plainaddress ¦ invalid:email.missing-at
+5322-3.4.1-b ¦ RFC 5322 3.4.1 (empty local part) ¦ @example.com ¦ invalid:email.empty-local-part
+5322-3.4.1-c ¦ RFC 5322 3.4.1 (empty domain) ¦ a@ ¦ invalid:email.empty-domain
+5322-3.4.1-d ¦ RFC 5322 3.4.1 (two @) ¦ a@@example.com ¦ invalid:email.invalid-domain
+5322-3.4.1-e ¦ RFC 5322 3.4.1 (a second address after the first) ¦ a@example.com,b@example.com ¦ invalid:email.trailing-text
+5322-3.4.1-f ¦ RFC 5322 3.4.1 (text after the address) ¦ a@example.com b ¦ invalid:email.trailing-text
+5322-3.4.1-g ¦ RFC 5322 3.4.1 (the empty input) ¦ \s\s ¦ invalid:empty
+5322-3.4-a ¦ RFC 5322 3.4 (an unmatched angle bracket) ¦ Name <a@example.com ¦ invalid:email.unbalanced-angle
+5322-3.4-b ¦ RFC 5322 3.4 (text after the closing bracket) ¦ Name <a@example.com> b ¦ invalid:email.trailing-text
+5322-3.4-c ¦ RFC 5322 3.4 (angle brackets with nothing inside) ¦ <> ¦ invalid:empty
+5322-3.4-d ¦ RFC 5322 3.4 (an unquoted comma in the phrase) ¦ Smith, John <a@example.com> ¦ invalid:email.invalid-display-name
+5322-3.4-e ¦ RFC 5322 3.4 (a quoted comma is fine) ¦ "Smith, John" <a@example.com> ¦ valid ¦ a@example.com ¦ HasDisplayName ¦ Smith, John
+5322-3.4-f ¦ RFC 5322 3.4 (the address is not a mailbox if the angle part is empty of an @) ¦ Name <abc> ¦ invalid:email.missing-at
+# 3.4.1 domain literals and 5321 4.1.3 address literals
+5322-3.4.1-L1 ¦ RFC 5322 3.4.1 / RFC 5321 4.1.3 IPv4 literal ¦ a@[192.0.2.1] ¦ valid ¦ a@[192.0.2.1] ¦ DomainLiteral
+5322-3.4.1-L2 ¦ RFC 5321 4.1.3 IPv6 literal (hex lowercased) ¦ a@[IPv6:2001:DB8::1] ¦ valid ¦ a@[IPv6:2001:db8::1] ¦ DomainLiteral
+5322-3.4.1-L3 ¦ RFC 5321 4.1.3 IPv6 literal, the tag in any case ¦ a@[ipv6:::1] ¦ valid ¦ a@[IPv6:::1] ¦ DomainLiteral
+5322-3.4.1-L4 ¦ RFC 5321 4.1.3 IPv6 full form ¦ a@[IPv6:1:2:3:4:5:6:7:8] ¦ valid ¦ a@[IPv6:1:2:3:4:5:6:7:8] ¦ DomainLiteral
+5322-3.4.1-L5 ¦ RFC 5321 4.1.3 IPv6 with an embedded IPv4 ¦ a@[IPv6:::ffff:192.0.2.1] ¦ valid ¦ a@[IPv6:::ffff:192.0.2.1] ¦ DomainLiteral
+5322-3.4.1-L6 ¦ RFC 5321 4.1.3 IPv6, seven groups and no compression ¦ a@[IPv6:1:2:3:4:5:6:7] ¦ invalid:email.invalid-address-literal
+5322-3.4.1-L7 ¦ RFC 5321 4.1.3 IPv6, two compressions ¦ a@[IPv6:1::2::3] ¦ invalid:email.invalid-address-literal
+5322-3.4.1-L8 ¦ RFC 5321 4.1.3 IPv6, a group of five digits ¦ a@[IPv6:12345::1] ¦ invalid:email.invalid-address-literal
+5322-3.4.1-L9 ¦ RFC 5321 4.1.3 IPv4, a part over 255 ¦ a@[256.0.0.1] ¦ invalid:email.invalid-address-literal
+5322-3.4.1-L10 ¦ RFC 5321 4.1.3 IPv4, three parts ¦ a@[1.2.3] ¦ invalid:email.invalid-address-literal
+5322-3.4.1-L11 ¦ RFC 5322 3.4.1 (valid dtext that is not an SMTP address literal: carried, with a warning) ¦ a@[abc] ¦ valid ¦ a@[abc] ¦ DomainLiteral
+5322-3.4.1-L12 ¦ RFC 5322 3.4.1 (white space inside a domain literal is folding white space) ¦ a@[ 192.0.2.1 ] ¦ valid ¦ a@[192.0.2.1] ¦ DomainLiteral
+5322-3.4.1-L13 ¦ RFC 5322 3.4.1 (an unclosed domain literal) ¦ a@[192.0.2.1 ¦ invalid:email.invalid-address-literal
+5322-3.4.1-L14 ¦ RFC 5322 3.4.1 (a bracket inside a domain literal) ¦ a@[1[2] ¦ invalid:email.invalid-address-literal
+5322-4.4-L15 ¦ RFC 5322 4.4 obs-dtext (a quoted-pair in a domain literal) ¦ a@[a\\b] ¦ valid ¦ a@[a\\b] ¦ DomainLiteral|ObsoleteSyntax
+# Domains as RFC 5321 4.1.2 / RFC 1035 / RFC 3696 2
+5322-D-1 ¦ RFC 5321 4.1.2 (a single label) ¦ postmaster@localhost ¦ valid ¦ postmaster@localhost ¦ RoleAccount|SingleLabelDomain
+5322-D-2 ¦ RFC 5321 4.1.2 (a label starts with a hyphen) ¦ a@-b.example ¦ invalid:email.invalid-domain
+5322-D-3 ¦ RFC 5321 4.1.2 (a label ends with a hyphen) ¦ a@b-.example ¦ invalid:email.invalid-domain
+5322-D-4 ¦ RFC 5322 3.4.1 (an empty label) ¦ a@b..example ¦ invalid:email.invalid-domain
+5322-D-5 ¦ RFC 5322 3.4.1 (a trailing period) ¦ a@example.com. ¦ invalid:email.invalid-domain
+5322-D-6 ¦ RFC 5322 3.4.1 (a leading period) ¦ a@.example.com ¦ invalid:email.invalid-domain
+5322-D-7 ¦ RFC 5321 4.1.2 (an underscore is not Let-dig-hyp) ¦ a@ex_ample.com ¦ invalid:email.invalid-domain
+5322-D-8 ¦ RFC 5322 3.4.1 (white space inside the domain is not a dot) ¦ a@exa mple.com ¦ invalid:email.trailing-text
+5322-D-9 ¦ RFC 3696 2 (the top-level domain is not all-numeric) ¦ a@example.123 ¦ invalid:email.numeric-top-level-domain
+5322-D-10 ¦ RFC 3696 2 (a bare IPv4 address is a numeric top-level domain) ¦ a@192.0.2.1 ¦ invalid:email.numeric-top-level-domain
+5322-D-11 ¦ RFC 1123 2.1 (a label may start with a digit) ¦ a@3com.example ¦ valid ¦ a@3com.example ¦ -
+5322-D-12 ¦ RFC 5321 2.3.11 / RFC 1035 (the domain is lowercased) ¦ a@EXAMPLE.Com ¦ valid ¦ a@example.com ¦ - ¦ - ¦ a@example.com
+5322-D-13 ¦ RFC 5322 3.4.1 (the local part keeps its case) ¦ John.Smith@Example.com ¦ valid ¦ John.Smith@example.com ¦ - ¦ - ¦ john.smith@example.com
+# Length limits: RFC 5321 4.5.3.1 and RFC 3696 erratum 1690 (reported as flags, not refused)
+5322-N-1 ¦ RFC 5321 4.5.3.1.1 (64 octets in the local part are allowed) ¦ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com ¦ valid ¦ * ¦ -
+5322-N-2 ¦ RFC 5321 4.5.3.1.1 (65 octets are over the limit) ¦ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com ¦ valid ¦ * ¦ ExceedsLengthLimit
+5322-N-3 ¦ RFC 1035 2.3.4 (a 63-octet label is allowed) ¦ a@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example ¦ valid ¦ * ¦ -
+5322-N-4 ¦ RFC 1035 2.3.4 (a 64-octet label is over the limit) ¦ a@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example ¦ valid ¦ * ¦ ExceedsLengthLimit

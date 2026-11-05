@@ -50,5 +50,11 @@ Check(json == "\"a@example.com\"", "json write");
 Check(JsonSerializer.Deserialize(json, ContactJsonContext.Default.EmailAddress) == email, "json round trip");
 Check(JsonSerializer.Deserialize("\"US\"", ContactJsonContext.Default.Region) == Region.US, "region json");
 
+// Email: display name, key rules, internationalized domain (the IDNA tables are embedded data), disposable list.
+EmailAddress mailbox = EmailAddress.Parse("\"J. Smith\" <J.Smith+crm@GoogleMail.com>");
+Check(mailbox.Canonical == "J.Smith+crm@googlemail.com" && mailbox.Key == "jsmith@gmail.com" && mailbox.DisplayName == "J. Smith", "email happy path");
+Check(EmailAddress.Parse("info@B\u00fccher.example").Domain == "xn--bcher-kva.example", "email idn domain");
+Check(EmailAddress.Parse("x@mailinator.com").Flags.HasFlag(EmailFacts.Disposable), "email disposable flag");
+
 Console.WriteLine(failures == 0 ? "OneContact AOT smoke: ok" : $"OneContact AOT smoke: {failures} failure(s)");
 return failures == 0 ? 0 : 1;

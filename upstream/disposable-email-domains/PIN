@@ -1,0 +1,7 @@
+# The disposable-email-domains block list, CC0 1.0.
+source   disposable-email-domains
+licence  CC0-1.0
+repo     https://github.com/disposable-email-domains/disposable-email-domains
+ref      a72c0cecfcdd940d666265e44c0f661282e2d4aa
+urlbase  https://raw.githubusercontent.com/disposable-email-domains/disposable-email-domains/a72c0cecfcdd940d666265e44c0f661282e2d4aa/
+file     disposable_email_blocklist.conf      e66aa85a1f16d2afa14cbf8a82517091d6df811cf405e29481238c365649c93e
