@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);xUnit1051</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/OneContact.Models.Tier1/OneContact.Models.Tier1.csproj" />
+  </ItemGroup>
+
+</Project>

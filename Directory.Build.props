@@ -10,6 +10,12 @@
     <PackagePrefix>RecursiveAI.</PackagePrefix>
   </PropertyGroup>
 
+  <PropertyGroup Label="Restore">
+    <!-- Preview builds of the Recursive AI libraries are not on nuget.org yet. Name their folder feeds in the environment variable
+         ONECONTACT_LOCAL_FEEDS, separated by semicolons; nothing machine-specific is written here. -->
+    <RestoreAdditionalProjectSources Condition="'$(ONECONTACT_LOCAL_FEEDS)' != ''">$(ONECONTACT_LOCAL_FEEDS)</RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
   <PropertyGroup Label="Output">
     <!-- Build output stays out of the source folders. Each checkout (the main clone or a worktree) gets its own folder so they do not
          collide, named after the checkout folder; the main clone is "main". Where the output goes, first match wins:

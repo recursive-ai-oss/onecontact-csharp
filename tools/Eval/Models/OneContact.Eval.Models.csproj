@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The same prediction writer as the rules tool, with the Tier 1 model registered from the saved pipeline named by ONECONTACT_TIER1_MODEL,
+       so the parsers use rules first and the model where the rules leave a decision open. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <NoWarn>$(NoWarn);CA1303;CA1848;CA2255</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../Rules/Program.cs" Link="Program.cs" />
+    <ProjectReference Include="../../../src/OneContact.Models.Tier1/OneContact.Models.Tier1.csproj" />
+  </ItemGroup>
+
+</Project>

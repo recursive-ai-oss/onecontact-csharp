@@ -87,7 +87,8 @@ public class AddressParsingTests
         Assert.Equal(OperationStatus.InvalidData, s);
         Assert.Null(a);
         Assert.Equal(ReasonCode.AddressModelRequired, d.PrimaryReason);
-        Assert.DoesNotContain("package", ReasonCode.AddressModelRequired.Description, StringComparison.OrdinalIgnoreCase);
+        // Without a model package the reason names the package to add.
+        Assert.Contains("RecursiveAI.OneContact.Models.Tier1", ReasonCode.AddressModelRequired.Description, StringComparison.Ordinal);
 
         // The same address with its commas needs no model.
         Assert.Equal("100 BROADWAY, NEW YORK NY 10001", Parse("100 broadway, new york, ny 10001").ToString());
