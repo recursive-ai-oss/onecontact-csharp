@@ -90,6 +90,11 @@ public sealed class ParsedAddress
     /// <summary>Gets the stretch of the original input the address covers.</summary>
     public SourceSpan Span { get; }
 
+    // The text the address was read from and the country hint it was read with; kept so a stored address can be read again with its original casing.
+    internal string SourceText { get; set; } = string.Empty;
+
+    internal Region Hint { get; set; }
+
     /// <summary>Writes the address.</summary>
     /// <param name="style">Postal (the authority's style, upper case) or display (title case).</param>
     /// <param name="layout">One line per address line, or all on one line.</param>
