@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The machinery every per-source ingest tool shares: read a pin file, verify the fetched files against it, hand them to the
+       source's converter, and write the compiled tables with a provenance record and the notice text. -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+</Project>

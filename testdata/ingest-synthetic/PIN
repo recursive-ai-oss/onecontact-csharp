@@ -1,0 +1,8 @@
+# A made-up source used to test the ingest harness and the way compiled tables reach the library.
+source   synthetic
+licence  CC0-1.0
+repo     https://example.invalid/synthetic
+ref      v1.0.0
+urlbase  https://example.invalid/synthetic/v1.0.0/
+file     colors.txt   9fec8b87d457cdab76088586670cbcc3b6f5f39ef95b320c07f4ec2b539c2be4
+file     numbers.txt  cd0702dae33ef3e94ddab9673185cb7f6d7f2e5bce8fe713014f07d2050d0c8b

@@ -1,0 +1,42 @@
+<Project>
+
+  <!-- Compiled data: runs the ingest tools a project asks for and embeds their tables.
+
+       A project asks for a source with an item (usually in a props file it imports, so the project file itself does not change):
+         <IngestSource Include="phonenumber" Tool="path/to/tool.csproj" Pin="path/to/PIN" Files="optional/dir/of/fetched/files" />
+       Files defaults to $(ONECONTACT_UPSTREAM)/<source> (see tools/fetch). Before the project compiles, each tool is built, run over
+       the verified files, and its tables are embedded as the resource "OneContact.Data.<source>.ocd". Its notice and provenance
+       record are packed under notices/. Nothing is fetched here: a missing or altered file fails the build. See
+       docs/architecture.md. -->
+
+  <!-- Outputs="%(IngestSource.Identity)" runs the whole target once per source, each run seeing only its own item. -->
+  <Target Name="RunIngest" BeforeTargets="AssignTargetPaths;_GetPackageFiles" Condition="'@(IngestSource)' != ''" Outputs="%(IngestSource.Identity)">
+    <PropertyGroup>
+      <_IngestName>%(IngestSource.Identity)</_IngestName>
+      <_IngestOut>$([MSBuild]::NormalizeDirectory($([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)', '$(MSBuildProjectDirectory)')), 'ingest'))</_IngestOut>
+      <_IngestHost>$(DOTNET_HOST_PATH)</_IngestHost>
+      <_IngestHost Condition="'$(_IngestHost)' == ''">dotnet</_IngestHost>
+      <_IngestUpstream>$(ONECONTACT_UPSTREAM)</_IngestUpstream>
+      <_IngestUpstream Condition="'$(_IngestUpstream)' == ''">$(MSBuildThisFileDirectory)../.upstream</_IngestUpstream>
+      <_IngestFiles>%(IngestSource.Files)</_IngestFiles>
+      <_IngestFiles Condition="'$(_IngestFiles)' == ''">$(_IngestUpstream)/$(_IngestName)</_IngestFiles>
+    </PropertyGroup>
+
+    <!-- Build the tool even when the project itself is packed without building (a tool shared by several sources builds once per build) and learn where its assembly is. -->
+    <MSBuild Projects="%(IngestSource.Tool)" Targets="Build" Properties="NoBuild=false">
+      <Output TaskParameter="TargetOutputs" PropertyName="_IngestToolDll" />
+    </MSBuild>
+
+    <MakeDir Directories="$(_IngestOut)" />
+    <Exec Command="&quot;$(_IngestHost)&quot; &quot;$(_IngestToolDll)&quot; --pin &quot;%(IngestSource.Pin)&quot; --files &quot;$(_IngestFiles)&quot; --out &quot;$(_IngestOut)&quot;"
+          StandardOutputImportance="low" />
+
+    <ItemGroup>
+      <EmbeddedResource Include="$(_IngestOut)$(_IngestName).ocd" LogicalName="OneContact.Data.$(_IngestName).ocd" />
+      <None Include="$(_IngestOut)$(_IngestName).notice.txt" Pack="true" PackagePath="notices/" Link="notices/$(_IngestName).notice.txt" />
+      <None Include="$(_IngestOut)$(_IngestName).provenance.json" Pack="true" PackagePath="notices/" Link="notices/$(_IngestName).provenance.json" />
+      <FileWrites Include="$(_IngestOut)$(_IngestName).ocd;$(_IngestOut)$(_IngestName).notice.txt;$(_IngestOut)$(_IngestName).provenance.json" />
+    </ItemGroup>
+  </Target>
+
+</Project>

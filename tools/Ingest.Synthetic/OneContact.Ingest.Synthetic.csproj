@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- A made-up ingest source: the smallest example of a per-source tool, used to test the harness and the embedding path. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Ingest/OneContact.Ingest.csproj" />
+  </ItemGroup>
+
+</Project>
