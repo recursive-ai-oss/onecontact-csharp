@@ -31,7 +31,7 @@ if (args.Length > 1 && args[0] == "--sample")
     foreach (string input in Sample.Inputs)
     {
         n++;
-        if (RuleAddressParser.TryParse(input, Region.Unknown, out ParsedAddress? pa, out ParseDetail pd) != OperationStatus.Done || pa is null)
+        if (PostalAddress.TryParse(input, out PostalAddress pa, out ParseDetail pd) != OperationStatus.Done)
         {
             md.AppendLine($"## {n}. (not read: {pd.PrimaryReason.Id})");
             md.AppendLine();

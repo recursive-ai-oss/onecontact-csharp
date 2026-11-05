@@ -1,0 +1,11 @@
+# web-platform-tests URL test data: the conformance corpus for the WHATWG URL parser, its setters and domain-to-ASCII. Test data only.
+source   wpt-url
+licence  BSD-3-Clause
+repo     https://github.com/web-platform-tests/wpt
+ref      cca6dd743f3017f5389ee8bd8009ddad7d05d2e2
+urlbase  https://raw.githubusercontent.com/web-platform-tests/wpt/cca6dd743f3017f5389ee8bd8009ddad7d05d2e2/
+file     url/resources/urltestdata.json    81e85fd3c199c08ef9c34cf651b3580eeedd080316493bfaf277a6b5ff8cf652
+file     url/resources/setters_tests.json  62e4b14bdaddd66b0f7d99bf066aed1c4a588667f4aa97bf26da212134fc24bf
+file     url/resources/toascii.json        644eba9d5b593df8095cfa307222f3014542ff9cc02d555f8e5660059d80470f
+file     url/resources/IdnaTestV2.json     84de621e5239676e59e5a3e68ef3e2b1acde9da5480a633d2ef446ef03238b76
+file     LICENSE.md  5fac07febb0e2a97fb0d7b0def149ec08b642e1ba4b9c345283ab1cbd2af6570

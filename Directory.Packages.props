@@ -8,5 +8,7 @@
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <!-- Comparator for the address parsing report: a regex parser for United States addresses, run as a black box. -->
     <PackageVersion Include="AddressParser" Version="1.0.3" />
+    <PackageVersion Include="AngleSharp" Version="1.9.1" />
+    <PackageVersion Include="Nager.PublicSuffix" Version="3.8.0" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Generates the cases the structural parity test runs through the reference implementation and through the library. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>CaseGen</RootNamespace>
+  </PropertyGroup>
+
+</Project>

@@ -41,9 +41,11 @@ Every part carries the rule that decided it (`pub28-233.22`, `canada-post-4.4-un
 
 `Display`: the same tokens in natural title case: `123 N Main St Apt 4` and `Springfield, VA 22162`. Directionals, state and province codes and box and route words (`PO`, `RR`, `HC`, `GD`, `STN`) stay in capitals; ordinals take a lower-case ending (`5th`); a number followed by a letter (`123A`) keeps its capital. A leading line the caller wrote in mixed case is left as written. `McDonald`-style capitals are not reconstructed.
 
-The canonical form of a `PostalAddress` is the `Postal` rendering on one line with `, ` between lines; reading it back gives the same canonical form and key.
+`PostalAddress.Parse` and `PostalAddress.TryParse(text, country, ...)` use these rules and fill the field model (country, state or province code, locality, postal code, delivery lines, recipient for lines above them); `StreetDetail` and `RuleDetail` give the street parts and offsets, `ToString(AddressStyle, AddressLayout)` the authority renderings, and `Validate()` the structural checks of the field model (ZIP and state, forward sortation area and province, required fields), which are not repeated here. An address made with `Create` is read again from its label lines for those members. The JSON form of an address with fields is an object holding the canonical form, the fields and the flags, and reads back equal.
 
-## Reason codes (kind address, numbers 100 to 106)
+The canonical form of a `PostalAddress` parsed from text is the `Postal` rendering on one line with `, ` between lines; reading it back gives the same canonical form and key.
+
+## Reason codes (kind address, numbers 110 to 116; 100 and 101 belong to the structural layer)
 
 `model-required`, `country-undetermined`, `unsupported-country`, `country-conflict` (warning), `no-delivery-line`, `no-last-line`, `unplaced-text` (warning).
 

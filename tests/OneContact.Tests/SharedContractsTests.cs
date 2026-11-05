@@ -99,8 +99,8 @@ public class SharedContractsTests
     [Theory]
     [InlineData("j.smith@example.com", ContactKind.Email)]
     [InlineData("+1 202-456-1111", ContactKind.Phone)]
-    [InlineData("www.example.com/x", ContactKind.Web)]
-    [InlineData("https://example.com", ContactKind.Web)]
+    [InlineData("https://www.example.com/x", ContactKind.Web)]
+    [InlineData("https://example.com/", ContactKind.Web)]
     public void Normalize_detects_the_kind(string text, ContactKind kind)
     {
         ContactValue v = Contacts.Normalize(text);

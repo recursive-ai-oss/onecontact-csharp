@@ -1,0 +1,5 @@
+<Project>
+  <ItemGroup>
+    <IngestSource Include="libaddressinput" Tool="../../tools/Ingest.LibAddressInput/OneContact.Ingest.LibAddressInput.csproj" Pin="../../upstream/libaddressinput/PIN" />
+  </ItemGroup>
+</Project>

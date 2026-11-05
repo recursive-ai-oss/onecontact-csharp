@@ -24,5 +24,6 @@
     <Project Path="tools/Ingest.Synthetic/OneContact.Ingest.Synthetic.csproj" />
     <Project Path="tools/Ingest.LibPostalDictionaries/OneContact.Ingest.LibPostalDictionaries.csproj" />
     <Project Path="tools/Eval.AddressGold/OneContact.Eval.AddressGold.csproj" />
+    <Project Path="tools/Ingest.LibAddressInput/OneContact.Ingest.LibAddressInput.csproj" />
   </Folder>
 </Solution>
