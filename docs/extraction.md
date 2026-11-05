@@ -118,7 +118,7 @@ SiteExtraction run = extractor.BeginSite();  run.Add(page);  SiteExtractResult d
 
 **The site's organization.** `SiteExtractResult.Organization` is the organization record found on the most pages (the first on a tie), which is what footer, contact and about pages describe together; markup and text sightings merge into it by the rules above. Other organizations (branches, partners) are records of their own.
 
-**Persons are linked** (`WorksFor` / `HasMember`) where the pages say so: through the markup as on a page; when the person names an employer that is a record's name on any page; or, for a person who names no employer at all, when the person's page describes exactly one organization. Nothing else is inferred.
+**Persons are linked** (`WorksFor` / `HasMember`) only where the pages say so: through the markup or the same text block, as on a page, or when the person names an employer that is a record's name on any page. Sharing a page with an organization links nothing (a quoted customer is not staff); `Pages` still shows where a person came from.
 
 **Region.** `SiteExtractResult.Region` is the one region the site's own content points to: the `lang` regions of its pages and the countries its markup gives for addresses, when they all agree. A page that has values needing a region (a national phone number, a free-text address) and names none is read a second time in that region; its values carry `RegionInferred` and its `SitePage.RegionFromSite` is true. A site with two regions has none; a region is never guessed, and a `DefaultRegion` the caller gave always stands in place of it.
 

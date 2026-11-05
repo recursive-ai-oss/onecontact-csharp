@@ -209,9 +209,10 @@ public sealed class ExtractionSiteTests
 
         Assert.Equal(2, org.Links.Count(l => l.Kind == RecordLinkKind.HasMember));
 
+        // Sharing a page with the only organization is not support: the people stay unlinked.
         SiteExtractResult same = Site("staff-same-page");
-        ContactRecord realty = Assert.Single(same.Records, r => r.Kind == ContactRecordKind.Organization);
-        Assert.Equal(2, same.Records.Count(r => r.Kind == ContactRecordKind.Person && ReferenceEquals(r.Organization, realty)));
+        Assert.Equal(2, same.Records.Count(r => r.Kind == ContactRecordKind.Person));
+        Assert.All(same.Records.Where(r => r.Kind == ContactRecordKind.Person), r => Assert.Null(r.Organization));
 
         // Two people sharing a role account are not one person, and nobody is linked to an organization that no page names.
         SiteExtractResult role = Site("role-account");

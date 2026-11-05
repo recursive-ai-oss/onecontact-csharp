@@ -15,11 +15,9 @@ internal static class SiteMerger
     {
         var works = new List<Work>();
         var workOf = new Dictionary<ContactRecord, Work>(ReferenceEqualityComparer.Instance);
-        var pageOrgCount = new Dictionary<int, int>();
         int sequence = 0;
         foreach (SiteExtraction.Entry page in pages)
         {
-            pageOrgCount[page.Index] = page.Result.Records.Count(r => r.Kind == ContactRecordKind.Organization);
             foreach (ContactRecord r in page.Result.Records)
             {
                 var w = new Work(sequence++, r, page);
@@ -87,7 +85,7 @@ internal static class SiteMerger
             }
         }
 
-        LinkPeopleToOrganizations(survivors, pageOrgCount, workOf);
+        LinkPeopleToOrganizations(survivors);
         foreach (ContactRecord r in records)
         {
             Disagreements.Find(r);
@@ -189,9 +187,9 @@ internal static class SiteMerger
         return best;
     }
 
-    // A person is tied to an organization where the pages say so: an employer named on any page whose name is that organization's, or
-    // (on a page that describes exactly one organization) a person the markup left unattached. Nothing else is inferred.
-    private static void LinkPeopleToOrganizations(List<Work> survivors, Dictionary<int, int> pageOrgCount, Dictionary<ContactRecord, Work> workOf)
+    // A person is tied to an organization where the pages say so: through the markup (already linked), or by an employer named on any
+    // page whose name is that organization's. Sharing a page proves nothing (a quoted customer is not staff), so nothing else is inferred.
+    private static void LinkPeopleToOrganizations(List<Work> survivors)
     {
         var orgByName = new Dictionary<string, ContactRecord>(StringComparer.Ordinal);
         foreach (Work w in survivors.Where(w => w.Kind == ContactRecordKind.Organization))
@@ -216,26 +214,6 @@ internal static class SiteMerger
                 if (orgByName.TryGetValue(employer.DedupKey, out target))
                 {
                     break;
-                }
-            }
-
-            // A person who names some other employer is not tied to the organization that merely shares the page.
-            if (target is null && person.Organizations.Count == 0)
-            {
-                foreach (Work m in w.Members)
-                {
-                    if (pageOrgCount[m.Page.Index] != 1)
-                    {
-                        continue;
-                    }
-
-                    ContactRecord pageOrg = m.Page.Result.Records.First(r => r.Kind == ContactRecordKind.Organization);
-                    ContactRecord? org = workOf.TryGetValue(pageOrg, out Work? home) ? home.Result : null;
-                    if (org is not null)
-                    {
-                        target = org;
-                        break;
-                    }
                 }
             }
 
