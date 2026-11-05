@@ -1,0 +1,313 @@
+# kind	language	value; invented name parts for recipient and organisation lines, written for these templates (no register)
+given	fr	Jean
+given	fr	Marie
+given	fr	Pierre
+given	fr	Michel
+given	fr	Philippe
+given	fr	Alain
+given	fr	Nathalie
+given	fr	Isabelle
+given	fr	Sophie
+given	fr	Catherine
+given	fr	Laurent
+given	fr	Nicolas
+given	fr	Julien
+given	fr	Camille
+given	fr	Claire
+given	fr	Thomas
+given	fr	Antoine
+given	fr	Élodie
+given	fr	Mathieu
+given	fr	Céline
+given	fr	François
+given	fr	Aurélie
+given	fr	Hugo
+given	fr	Léa
+given	fr	Emma
+given	fr	Lucas
+given	fr	Chloé
+given	fr	Paul
+given	fr	Anne
+given	fr	Martine
+family	fr	Martin
+family	fr	Bernard
+family	fr	Dubois
+family	fr	Thomas
+family	fr	Robert
+family	fr	Richard
+family	fr	Petit
+family	fr	Durand
+family	fr	Leroy
+family	fr	Moreau
+family	fr	Simon
+family	fr	Laurent
+family	fr	Lefebvre
+family	fr	Michel
+family	fr	Garcia
+family	fr	David
+family	fr	Bertrand
+family	fr	Roux
+family	fr	Vincent
+family	fr	Fournier
+family	fr	Morel
+family	fr	Girard
+family	fr	André
+family	fr	Mercier
+family	fr	Dupont
+family	fr	Lambert
+family	fr	Bonnet
+family	fr	François
+family	fr	Martinez
+family	fr	Legrand
+family	fr	Garnier
+family	fr	Faure
+family	fr	Rousseau
+family	fr	Blanc
+family	fr	Guerin
+family	fr	Muller
+family	fr	Henry
+family	fr	Roussel
+family	fr	Nicolas
+family	fr	Perrin
+family	fr	Morin
+family	fr	Mathieu
+family	fr	Clément
+family	fr	Gauthier
+family	fr	Dumont
+family	fr	Lopez
+family	fr	Fontaine
+family	fr	Chevalier
+family	fr	Robin
+family	fr	Masson
+given	nl	Jan
+given	nl	Piet
+given	nl	Kees
+given	nl	Henk
+given	nl	Johannes
+given	nl	Willem
+given	nl	Maria
+given	nl	Anna
+given	nl	Johanna
+given	nl	Els
+given	nl	Sanne
+given	nl	Lotte
+given	nl	Daan
+given	nl	Sem
+given	nl	Bram
+given	nl	Lars
+given	nl	Femke
+given	nl	Marieke
+given	nl	Thijs
+given	nl	Joost
+given	nl	Ingrid
+given	nl	Margriet
+given	nl	Pieter
+given	nl	Hans
+given	nl	Annelies
+given	nl	Wouter
+given	nl	Sophie
+given	nl	Lieke
+given	nl	Noah
+given	nl	Julia
+family	nl	de Jong
+family	nl	Jansen
+family	nl	de Vries
+family	nl	van den Berg
+family	nl	van Dijk
+family	nl	Bakker
+family	nl	Janssen
+family	nl	Visser
+family	nl	Smit
+family	nl	Meijer
+family	nl	de Boer
+family	nl	Mulder
+family	nl	de Groot
+family	nl	Bos
+family	nl	Vos
+family	nl	Peters
+family	nl	Hendriks
+family	nl	van Leeuwen
+family	nl	Dekker
+family	nl	Brouwer
+family	nl	de Wit
+family	nl	Dijkstra
+family	nl	Smits
+family	nl	de Graaf
+family	nl	van der Meer
+family	nl	van der Linden
+family	nl	Kok
+family	nl	Jacobs
+family	nl	de Haan
+family	nl	Vermeulen
+family	nl	Peeters
+family	nl	Maes
+family	nl	Claes
+family	nl	Willems
+family	nl	Goossens
+family	nl	Mertens
+family	nl	Wouters
+family	nl	Dubois
+family	nl	Lambert
+family	nl	Dupont
+given	de	Hans
+given	de	Peter
+given	de	Michael
+given	de	Thomas
+given	de	Andreas
+given	de	Wolfgang
+given	de	Klaus
+given	de	Jürgen
+given	de	Stefan
+given	de	Markus
+given	de	Anna
+given	de	Maria
+given	de	Petra
+given	de	Sabine
+given	de	Monika
+given	de	Susanne
+given	de	Claudia
+given	de	Julia
+given	de	Lena
+given	de	Laura
+given	de	Felix
+given	de	Lukas
+given	de	Jonas
+given	de	Tobias
+given	de	Sandra
+given	de	Katrin
+given	de	Heike
+given	de	Martin
+given	de	Christian
+given	de	Ursula
+family	de	Müller
+family	de	Schmidt
+family	de	Schneider
+family	de	Fischer
+family	de	Weber
+family	de	Meyer
+family	de	Wagner
+family	de	Becker
+family	de	Schulz
+family	de	Hoffmann
+family	de	Schäfer
+family	de	Koch
+family	de	Bauer
+family	de	Richter
+family	de	Klein
+family	de	Wolf
+family	de	Schröder
+family	de	Neumann
+family	de	Schwarz
+family	de	Zimmermann
+family	de	Braun
+family	de	Krüger
+family	de	Hofmann
+family	de	Hartmann
+family	de	Lange
+family	de	Schmitt
+family	de	Werner
+family	de	Krause
+family	de	Meier
+family	de	Lehmann
+family	de	Huber
+family	de	Mayer
+family	de	Steiner
+family	de	Gruber
+family	de	Brunner
+family	de	Baumann
+family	de	Frei
+family	de	Keller
+family	de	Berger
+family	de	Moser
+word	fr	Atlas
+word	fr	Orion
+word	fr	Delta
+word	fr	Nova
+word	fr	Alpha
+word	fr	Vita
+word	fr	Terra
+word	fr	Solis
+word	fr	Prima
+word	fr	Optima
+word	fr	Horizon
+word	fr	Lumière
+word	fr	Phénix
+word	fr	Azur
+word	fr	Éclat
+word	fr	Mistral
+word	nl	Atlas
+word	nl	Orion
+word	nl	Delta
+word	nl	Nova
+word	nl	Alpha
+word	nl	Vita
+word	nl	Terra
+word	nl	Prima
+word	nl	Optima
+word	nl	Horizon
+word	nl	Merkur
+word	nl	Triton
+word	nl	Duin
+word	nl	Polder
+word	nl	Haven
+word	nl	Windmolen
+word	de	Atlas
+word	de	Orion
+word	de	Delta
+word	de	Nova
+word	de	Alpha
+word	de	Vita
+word	de	Terra
+word	de	Prima
+word	de	Optima
+word	de	Horizon
+word	de	Phoenix
+word	de	Rhein
+word	de	Alpen
+word	de	Sonne
+word	de	Linde
+word	de	Eiche
+org	fr	{fam} et Fils
+org	fr	SARL {fam}
+org	fr	Boulangerie {fam}
+org	fr	Cabinet {fam}
+org	fr	Garage {fam}
+org	fr	Pharmacie {word}
+org	fr	{word} Conseil SAS
+org	fr	Café {word}
+org	fr	Société {word}
+org	fr	Mairie de {city}
+org	fr	Étude {fam}
+org	fr	{fam} & Associés
+org	fr	SCI {word}
+org	fr	Restaurant {word}
+org	fr	{word} SA
+org	nl	{fam} B.V.
+org	nl	Bakkerij {fam}
+org	nl	Tandartspraktijk {fam}
+org	nl	Huisartsenpraktijk {fam}
+org	nl	{fam} Bouw B.V.
+org	nl	Café {word}
+org	nl	Gemeente {city}
+org	nl	{word} Advies B.V.
+org	nl	Slagerij {fam}
+org	nl	Notariskantoor {fam}
+org	nl	Restaurant {word}
+org	nl	{word} NV
+org	nl	{word} BVBA
+org	nl	Garage {fam}
+org	de	{fam} GmbH
+org	de	Bäckerei {fam}
+org	de	Praxis Dr. {fam}
+org	de	{fam} & Söhne
+org	de	Autohaus {fam}
+org	de	{fam} AG
+org	de	Gemeinde {city}
+org	de	{word} GmbH & Co. KG
+org	de	Metzgerei {fam}
+org	de	Kanzlei {fam}
+org	de	Gasthaus {word}
+org	de	{word} AG
+org	de	Apotheke {word}
+org	de	Stadtverwaltung {city}
+org	de	Hotel {word}

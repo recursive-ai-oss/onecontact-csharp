@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Turns the open address registers of France, Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland and
+       Liechtenstein (and a synthesized Monaco) into labelled free-text training examples through our own templates. It shares the
+       tokenizer, random generator, example type and span rules with the United States and Canada tool. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>OneContact.Data.AddressTier2A</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <NoWarn>$(NoWarn);CA1303;CA1848;CA1307;CA1305;CA1310;CA1304;CA1311;CA1834;CA1861;CA1862;CA1865;CA1866;CA1867;CA1869</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../AddressUsCa/Prng.cs" Link="Shared/Prng.cs" />
+    <Compile Include="../AddressUsCa/Model.cs" Link="Shared/Model.cs" />
+    <Compile Include="../AddressUsCa/Tokenizer.cs" Link="Shared/Tokenizer.cs" />
+    <Compile Include="../AddressUsCa/SpanCheck.cs" Link="Shared/SpanCheck.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Used only to run the rule parser over a sample of rendered examples (what the rules and country inference do with them). -->
+    <ProjectReference Include="../../../src/OneContact/OneContact.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../templates/tier2a-*" Link="templates/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../pins/*.pin" Link="pins/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
