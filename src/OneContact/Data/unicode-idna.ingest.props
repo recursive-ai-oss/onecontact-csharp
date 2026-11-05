@@ -1,0 +1,5 @@
+<Project>
+  <ItemGroup>
+    <IngestSource Include="unicode-idna" Tool="../../tools/Ingest.Idna/OneContact.Ingest.Idna.csproj" Pin="../../upstream/unicode-idna/PIN" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+# The Public Suffix List and its own test file, byte for byte as published. Never modified: our additions live in a separate file of ours.
+source   psl
+licence  MPL-2.0
+repo     https://github.com/publicsuffix/list
+ref      aae37acca5d0f3d09e7c1fe4da9024c514674ac9
+urlbase  https://raw.githubusercontent.com/publicsuffix/list/aae37acca5d0f3d09e7c1fe4da9024c514674ac9/
+file     public_suffix_list.dat  762b6cbdd2dacc597b398fcd7860e2184b684125a58aa177dbdf54916a1f3430
+file     tests/test_psl.txt      8f50ad958916d6a8f79fba2363501475571acce752757f9126fe9d2f17dd920d
+file     LICENSE  66a3107d5ad6a058aab753eaac2047ccb2ed0e39465dd0fe5844da3e300d5172

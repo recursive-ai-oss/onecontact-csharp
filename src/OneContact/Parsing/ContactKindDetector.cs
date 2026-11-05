@@ -12,12 +12,20 @@ internal static class ContactKindDetector
             return ContactKind.Unknown;
         }
 
+        // A scheme with // is a web address even when it carries credentials or an @name path.
+        if (t.Contains("://", StringComparison.Ordinal))
+        {
+            return ContactKind.Web;
+        }
+
         if (t.Contains('@'))
         {
             return ContactKind.Email;
         }
 
-        if (t.Contains("://", StringComparison.Ordinal) || t.StartsWith("www.", StringComparison.OrdinalIgnoreCase))
+        // A scheme with //, a leading www., or a bare domain whose top-level domain is on the Public Suffix List. Mail addresses were
+        // taken above (they hold an @), and the TLD test keeps file names, versions and numbers like 555.1234 out.
+        if (Web.WebAddressParser.LooksLikeWebAddress(t))
         {
             return ContactKind.Web;
         }

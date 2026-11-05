@@ -36,6 +36,11 @@ jobs:
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           global-json-file: global.json
+      - name: Fetch upstream data
+        shell: bash
+        run: |
+          echo "ONECONTACT_UPSTREAM=$RUNNER_TEMP/upstream" >> "$GITHUB_ENV"
+          ONECONTACT_UPSTREAM="$RUNNER_TEMP/upstream" tools/fetch/all.sh
       - name: Build
         run: dotnet build OneContact.slnx -c Release
       - name: Test
@@ -53,6 +58,11 @@ jobs:
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           global-json-file: global.json
+      - name: Fetch upstream data
+        shell: bash
+        run: |
+          echo "ONECONTACT_UPSTREAM=$RUNNER_TEMP/upstream" >> "$GITHUB_ENV"
+          ONECONTACT_UPSTREAM="$RUNNER_TEMP/upstream" tools/fetch/all.sh
       - name: Native AOT toolchain
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang zlib1g-dev
       - name: Publish the smoke app (warnings are errors)
@@ -72,6 +82,11 @@ jobs:
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           global-json-file: global.json
+      - name: Fetch upstream data
+        shell: bash
+        run: |
+          echo "ONECONTACT_UPSTREAM=$RUNNER_TEMP/upstream" >> "$GITHUB_ENV"
+          ONECONTACT_UPSTREAM="$RUNNER_TEMP/upstream" tools/fetch/all.sh
       - name: Pack
         run: dotnet pack OneContact.slnx -c Release -o "$RUNNER_TEMP/packages"
       - name: Packages carry both licences, the notices and the readme
