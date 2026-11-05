@@ -1,0 +1,10 @@
+<Project>
+  <!-- Compiled address data for United States and Canadian addresses: the libpostal expansion dictionaries (ingested from pinned upstream files)
+       and the per-country rule tables transcribed from the postal authorities' guides (plain tab-separated files under Addresses/Data). -->
+  <ItemGroup>
+    <IngestSource Include="libpostal-dictionaries"
+                  Tool="../../tools/Ingest.LibPostalDictionaries/OneContact.Ingest.LibPostalDictionaries.csproj"
+                  Pin="../../upstream/libpostal-dictionaries/PIN" />
+    <EmbeddedResource Include="Addresses/Data/**/*.tsv" LogicalName="OneContact.Addresses.Data.%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

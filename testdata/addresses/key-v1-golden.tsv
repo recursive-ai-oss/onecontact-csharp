@@ -1,0 +1,14 @@
+# Key version 1 golden outputs: address text, key. A backslash-n is a line break. Published versions never change.
+123 North Main Street Apartment 4, Springfield, Virginia 22162-1234	us|123 north main street unit 4|springfield|va|22162
+10-123 Main St, Montreal QC H3Z 2Y7	ca|123 main street unit 10|montreal|qc|h3z2y7
+PO BOX 4001 STN A, Victoria BC V8X 3X4	ca|pobox 4001 stn a|victoria|bc|v8x3x4
+RR 4 Box 87A, Dover OH 44622	us|rr 4 box 87a|dover|oh|44622
+PSC 3022 Box 684\nFPO AE 09397-0007	us|psc 3022 box 684|fpo|ae|09397
+1234 calle aurora, mayaguez, pr 00680	us|1234 calle aurora|mayaguez|pr|00680
+350 5th Ave, New York NY 10118	us|350 5 avenue|new york|ny|10118
+45 Boul. Saint-Laurent Ouest, Québec QC G1R 5R7	ca|45 boulevard saint laurent ouest|quebec|qc|g1r5r7
+Apt 4\n123 Main St\nSpringfield VA 22162	us|unit 4|123 main street|springfield|va|22162
+GENERAL DELIVERY, TAMPA FL 33602-9999	us|general delivery|tampa|fl|33602
+12 Mt Vernon Rd, St Louis MO 63101	us|12 mount vernon road|saint louis|mo|63101
+1401 S. Main St. Apt 4B\nPlummer's Landing, KY 41081-1411	us|1401 south main street unit 4b|plummer's landing|ky|41081
+10-123 1RE RUE\nMONTRÉAL (QUÉBEC) H3Z 2Y7	ca|123 1 rue unit 10|montreal|qc|h3z2y7

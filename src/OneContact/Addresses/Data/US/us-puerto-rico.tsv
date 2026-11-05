@@ -1,0 +1,13 @@
+# USPS Publication 28, section 29 and Appendix I: Puerto Rico address words. variant, standard form, role.
+# role: urbanization = the urbanization name line (URB), building = condominium and residential building words, box = a post office box synonym.
+URBANIZACION	URB	urbanization
+URBANIZATION	URB	urbanization
+URB	URB	urbanization
+CONDOMINIO	COND	building
+COND	COND	building
+RESIDENCIAL	RES	building
+RES	RES	building
+EDIFICIO	EDIF	building
+EDIF	EDIF	building
+APARTADO	PO BOX	box
+TORRE	TORRE	building

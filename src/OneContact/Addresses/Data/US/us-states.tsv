@@ -1,0 +1,63 @@
+# USPS Publication 28, Appendix B: name, two-letter code, kind (state, district, territory, military). Military "states" are the three APO/FPO/DPO codes.
+Alabama	AL	state
+Alaska	AK	state
+American Samoa	AS	territory
+Arizona	AZ	state
+Arkansas	AR	state
+California	CA	state
+Colorado	CO	state
+Connecticut	CT	state
+Delaware	DE	state
+District of Columbia	DC	district
+Federated States of Micronesia	FM	territory
+Florida	FL	state
+Georgia	GA	state
+Guam	GU	territory
+Hawaii	HI	state
+Idaho	ID	state
+Illinois	IL	state
+Indiana	IN	state
+Iowa	IA	state
+Kansas	KS	state
+Kentucky	KY	state
+Louisiana	LA	state
+Maine	ME	state
+Marshall Islands	MH	territory
+Maryland	MD	state
+Massachusetts	MA	state
+Michigan	MI	state
+Minnesota	MN	state
+Mississippi	MS	state
+Missouri	MO	state
+Montana	MT	state
+Nebraska	NE	state
+Nevada	NV	state
+New Hampshire	NH	state
+New Jersey	NJ	state
+New Mexico	NM	state
+New York	NY	state
+North Carolina	NC	state
+North Dakota	ND	state
+Northern Mariana Islands	MP	territory
+Ohio	OH	state
+Oklahoma	OK	state
+Oregon	OR	state
+Palau	PW	territory
+Pennsylvania	PA	state
+Puerto Rico	PR	territory
+Rhode Island	RI	state
+South Carolina	SC	state
+South Dakota	SD	state
+Tennessee	TN	state
+Texas	TX	state
+Utah	UT	state
+Vermont	VT	state
+Virgin Islands	VI	territory
+Virginia	VA	state
+Washington	WA	state
+West Virginia	WV	state
+Wisconsin	WI	state
+Wyoming	WY	state
+Armed Forces Europe, the Middle East, and Canada	AE	military
+Armed Forces Pacific	AP	military
+Armed Forces Americas	AA	military

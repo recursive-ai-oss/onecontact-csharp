@@ -6,5 +6,7 @@
     <!-- Test, benchmark and fuzz projects only. Comparators and oracles are added here when a row needs one. -->
     <PackageVersion Include="xunit.v3" Version="4.0.2" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
+    <!-- Comparator for the address parsing report: a regex parser for United States addresses, run as a black box. -->
+    <PackageVersion Include="AddressParser" Version="1.0.3" />
   </ItemGroup>
 </Project>

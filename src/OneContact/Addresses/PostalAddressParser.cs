@@ -1,28 +1,24 @@
 using System.Buffers;
+using RecursiveAI.OneContact.Addresses.Parsing;
 
 namespace RecursiveAI.OneContact.Addresses;
 
 /// <summary>
-/// The parsing seam for <see cref="PostalAddress"/>. PLACEHOLDER: this body only trims white space and keeps the text as the canonical form,
-/// so the shared contracts (offsets, equality, keys, JSON, <see cref="Contacts"/>) have something to run on. The unit that
-/// implements Address parsing replaces this file's body and keeps the signature.
+/// The parsing seam for <see cref="PostalAddress"/>: reads United States and Canadian addresses by rules (the country comes from the content). The canonical form is the
+/// address in its postal authority's style on one line.
 /// </summary>
 internal static class PostalAddressParser
 {
     internal static OperationStatus TryParse(ReadOnlySpan<char> input, out PostalAddress value, out ParseDetail detail)
     {
-        ReadOnlySpan<char> trimmed = input.Trim();
-        if (trimmed.IsEmpty)
+        OperationStatus status = RuleAddressParser.TryParse(input, Region.Unknown, out ParsedAddress? address, out detail);
+        if (status != OperationStatus.Done || address is null)
         {
             value = default;
-            detail = ParseDetail.Failure(ReasonCode.Empty, new SourceSpan(0, input.Length));
             return OperationStatus.InvalidData;
         }
 
-        int start = input.Length - input.TrimStart().Length;
-
-        value = new PostalAddress(trimmed.ToString(), new SourceSpan(start, trimmed.Length), AddressFacts.None);
-        detail = ParseDetail.Empty;
+        value = new PostalAddress(address.ToString(), address.Span, address.Facts);
         return OperationStatus.Done;
     }
 }

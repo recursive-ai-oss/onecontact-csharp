@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Text.Json;
 using RecursiveAI.OneContact;
+using RecursiveAI.OneContact.Addresses.Expansion;
 using RecursiveAI.OneContact.Keys;
 using RecursiveAI.OneContact.Serialization;
 
@@ -25,7 +26,10 @@ EmailAddress email = EmailAddress.Parse("  a@example.com ");
 Check(email.Source.Start == 2 && email.Source.Length == 13, "email offsets");
 WebAddress web = WebAddress.Parse("https://example.com/");
 Check(web.GetKey(KeyVersion.V1).Length > 0, "web key");
-Check(PostalAddress.Parse("1 Main St").Canonical.Length > 0, "address parse");
+PostalAddress address = PostalAddress.Parse("1 main street apt 4, springfield, va 22162");
+Check(address.Canonical == "1 MAIN ST APT 4, SPRINGFIELD VA 22162", "address canonical form");
+Check(address.GetKey(KeyVersion.V1) == "us|1 main street unit 4|springfield|va|22162", "address key reads the embedded dictionaries");
+Check(AddressExpander.Expand("30 W 26th St")[0] == "30 west 26 street", "address expansion");
 Check(PersonName.Parse("Ada Lovelace").Canonical.Length > 0, "person parse");
 Check(CompanyName.Parse("Acme Ltd").Canonical.Length > 0, "company parse");
 

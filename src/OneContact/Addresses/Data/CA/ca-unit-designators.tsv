@@ -1,0 +1,11 @@
+# Canada Post Addressing Guidelines, section 5 unit designators: variant, abbreviation, language. A unit number must follow.
+APARTMENT	APT	en
+APT	APT	en
+SUITE	SUITE	en
+STE	SUITE	en
+UNIT	UNIT	en
+APPARTEMENT	APP	fr
+APP	APP	fr
+BUREAU	BUREAU	fr
+UNITÉ	UNITÉ	fr
+UNITE	UNITÉ	fr
