@@ -192,6 +192,22 @@ public class AddressParsingTests
         Assert.True(Parse("123 Main St Apt 4, Dover OH 44622").Facts.HasFlag(AddressFacts.HasUnit));
     }
 
+    [Theory]
+    [InlineData("N6W23001 Bluemound Rd\nWaukesha WI 53186", "N6W23001 Bluemound Rd\nWaukesha, WI 53186")]
+    [InlineData("123A Main St Apt 4B\nSpringfield VA 22162", "123A Main St Apt 4B\nSpringfield, VA 22162")]
+    [InlineData("123 Main St Apt 4E\nSpringfield VA 22162", "123 Main St Apt 4E\nSpringfield, VA 22162")]
+    [InlineData("123 Main St Apt B12\nSpringfield VA 22162", "123 Main St Apt B12\nSpringfield, VA 22162")]
+    [InlineData("PO Box 12A\nFairview TX 75069", "PO Box 12A\nFairview, TX 75069")]
+    [InlineData("RR 4 Box 87A\nDover OH 44622", "RR 4 Box 87A\nDover, OH 44622")]
+    [InlineData("123 Main St\nCalgary AB T2P 1J9", "123 Main St\nCalgary, AB T2P 1J9")]
+    [InlineData("350 21st Ave\nNew York NY 10001", "350 21st Ave\nNew York, NY 10001")]
+    [InlineData("12 1re Rue\nMontréal QC H3Z 2Y7", "12 1re Rue\nMontréal, QC H3Z 2Y7")]
+    [InlineData("PSC 3022 Box 684\nFPO AE 09397-0007", "PSC 3022 Box 684\nFPO, AE 09397-0007")]
+    public void DisplayKeepsLettersOfIdentifiersWithDigits(string input, string expected)
+    {
+        Assert.Equal(expected, Parse(input).ToString(AddressStyle.Display));
+    }
+
     [Fact]
     public void DisplayIsTitleCaseWithAuthorityAbbreviations()
     {
