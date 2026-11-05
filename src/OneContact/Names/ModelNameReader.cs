@@ -12,10 +12,38 @@ internal static class ModelNameReader
 {
     private const float MinimumClassConfidence = 0.5f;
 
-    /// <summary>Asks the model for the class of a string the rules could not classify.</summary>
-    /// <returns>The class, or <see cref="NameClass.Unknown"/> when no model is registered or it is not confident.</returns>
+    // How sure the model must be to replace the rules' default reading of a name as a person; chosen on the development names (docs/models.md).
+    internal const float DefaultOverrideConfidence = 0.6f;
+
+    /// <summary>True when the rules took the string as one person only because nothing marked it as a company: no title, suffix, nickname, particle, comma order, initial or known given name proved it (the <c>person.no-evidence</c> issue).</summary>
+    internal static bool IsDefaultPerson(Analysis rules)
+    {
+        if (rules.Class != NameClass.Person || rules.Persons.Count != 1)
+        {
+            return false;
+        }
+
+        foreach (ParseIssue issue in rules.Issues)
+        {
+            if (issue.Reason.Equals(ReasonCode.PersonNoEvidence))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Asks the model for the class of a string the rules could not classify, or whose person reading was only a default.</summary>
+    /// <returns>The class, or the rules' own class when no model is registered or it is not confident enough.</returns>
     internal static NameClass Classify(ReadOnlySpan<char> text, Analysis rules)
     {
+        if (IsDefaultPerson(rules) && ContactModels.Name is { } defaultModel)
+        {
+            NameModelResult m = defaultModel.Analyze(text.ToString());
+            return m.Class != NameClass.Person && m.Class != NameClass.Multiple && m.ClassConfidence >= DefaultOverrideConfidence ? m.Class : rules.Class;
+        }
+
         if (rules.Class != NameClass.Unknown || rules.Persons.Count > 0 || ContactModels.Name is not { } model)
         {
             return rules.Class;
@@ -30,6 +58,26 @@ internal static class ModelNameReader
     internal static bool TryRead(ReadOnlySpan<char> text, NameHints hints, Analysis rules, out NameParseResult result)
     {
         result = null!;
+        if (IsDefaultPerson(rules) && ContactModels.Name is { } defaultModel)
+        {
+            string text0 = text.ToString();
+            NameModelResult m = defaultModel.Analyze(text0);
+            if (m.ClassConfidence >= DefaultOverrideConfidence && m.Class == NameClass.Company)
+            {
+                CompanyName.TryParse(text, hints, out CompanyName c, out ParseDetail cd);
+                result = new NameParseResult(NameClass.Company, [], c, Marked(cd, m.ClassConfidence));
+                return true;
+            }
+
+            if (m.ClassConfidence >= DefaultOverrideConfidence && m.Class == NameClass.Unknown)
+            {
+                result = new NameParseResult(NameClass.Unknown, [], default, new ParseDetail([], []));
+                return true;
+            }
+
+            return false;
+        }
+
         if (rules.Class != NameClass.Unknown || rules.Persons.Count > 0 || ContactModels.Name is not { } model)
         {
             return false;

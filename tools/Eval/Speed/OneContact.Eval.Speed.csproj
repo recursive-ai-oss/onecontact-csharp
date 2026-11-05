@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Indicative timing of address and name parsing with the Tier 1 model, next to the managed comparators, on training dev text (never evaluation text).
+       Information only; the comparators are black boxes called through their documented APIs. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <NoWarn>$(NoWarn);CA1303;CA1848;CA1031</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AddressParser" />
+    <PackageReference Include="NameParserSharp" />
+    <ProjectReference Include="../../../src/OneContact.Models.Tier1/OneContact.Models.Tier1.csproj" />
+  </ItemGroup>
+
+</Project>

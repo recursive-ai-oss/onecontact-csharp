@@ -113,4 +113,24 @@ public class ModelWiringTests
         using IDisposable inner = ContactModels.Scope(null, new FixedNameModel(NameClass.Person, 0.4f, ("jsmith2019", "Given")));
         Assert.Equal(NameClass.Unknown, NameParsing.Split("jsmith2019").Class);
     }
+
+    [Fact]
+    public void APersonTakenOnlyByDefaultYieldsToAConfidentModelButAProvenOneDoesNot()
+    {
+        // Two plain words prove nothing: the rules take them as a person for lack of a sign of a company (issue person.no-evidence).
+        const string plain = "Bestline Imports";
+        Assert.Equal(NameClass.Person, NameParsing.Split(plain).Class);
+        using (ContactModels.Scope(null, new FixedNameModel(NameClass.Company, 0.9f, ("Bestline", "Base"))))
+        {
+            Assert.Equal(NameClass.Company, NameParsing.Split(plain).Class);
+            Assert.Equal(NameClass.Company, NameParsing.Classify(plain));
+            // A title is a sign of a person; the model does not overrule it.
+            Assert.Equal(NameClass.Person, NameParsing.Split("Dr. Bestline Imports").Class);
+        }
+
+        using (ContactModels.Scope(null, new FixedNameModel(NameClass.Company, 0.4f, ("Bestline", "Base"))))
+        {
+            Assert.Equal(NameClass.Person, NameParsing.Split(plain).Class);
+        }
+    }
 }

@@ -90,6 +90,15 @@ public class Tier1Tests
     }
 
     [Fact]
+    public void TheEmbeddedWeightsLoadWhenThePackageWasBuiltWithThem()
+    {
+        Assert.SkipWhen(typeof(Tier1Model).Assembly.GetManifestResourceStream("weights/tier1.onenlp") is null, "built without weights");
+        Tier1Model.Register();
+        Assert.Equal(NameClass.Company, ContactModels.Name!.Analyze("Northwind Traders LLC").Class);
+        Assert.Contains(ContactModels.Address!.Tag("100 Broadway, New York, NY 10001"), s => s.Label == "locality");
+    }
+
+    [Fact]
     public void TheModelIsDeterministic()
     {
         Tier1Model? model = LoadModel();
@@ -106,7 +115,7 @@ public class Tier1Tests
         // Register the loaded copy the way the package does with its embedded weights.
         ContactModels.Register("RecursiveAI.OneContact.Models.Tier1", 99, model, model);
         Assert.Equal(System.Buffers.OperationStatus.Done, RuleAddressParser.TryParse("100 broadway new york ny 10001", default, out ParsedAddress? a, out ParseDetail d));
-        Assert.Equal("NY", a!.AdminArea!.Value.Standard);
+        Assert.True(a!.AdminArea?.Standard == "NY", string.Join("; ", model.Tag("100 broadway new york ny 10001").Select(x => x.Label + "@" + x.Start + "+" + x.Length)));
         Assert.Contains(d.Fields, f => f.Source == DecisionSource.Model && f.Confidence is > 0 and <= 1);
     }
 }

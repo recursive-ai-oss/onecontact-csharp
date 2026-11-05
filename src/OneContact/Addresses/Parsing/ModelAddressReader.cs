@@ -27,12 +27,13 @@ internal static class ModelAddressReader
         ModelSpan? locality = null, admin = null, postal = null, country = null;
         List<ModelSpan> street = [];
         List<ModelSpan> leading = [];
+        List<ModelSpan> adminCandidates = [];
         foreach (ModelSpan s in spans)
         {
             switch (s.Label)
             {
                 case "locality" when locality is null: locality = s; break;
-                case "admin-area" when admin is null: admin = s; break;
+                case "admin-area": adminCandidates.Add(s); break;
                 case "postal-code" when postal is null: postal = s; break;
                 case "country" when country is null: country = s; break;
                 case "recipient" or "organization": leading.Add(s); break;
@@ -43,6 +44,25 @@ internal static class ModelAddressReader
                     }
 
                     break;
+            }
+        }
+
+        // A state or province must be one: of several admin-area spans the model gave, the last one the tables know wins ("new york ny" has a stray
+        // "new"); a stretch the tables reject that stands right before the city is taken as the start of the city.
+        foreach (ModelSpan candidate in adminCandidates)
+        {
+            if (IsKnownAdmin(Key(text, candidate)))
+            {
+                admin = candidate;
+            }
+        }
+
+        admin ??= adminCandidates.Count > 0 ? adminCandidates[^1] : null;
+        foreach (ModelSpan candidate in adminCandidates)
+        {
+            if (admin is { } chosen && candidate != chosen && locality is { } city && candidate.End <= city.Start && text.AsSpan(candidate.End, city.Start - candidate.End).IsWhiteSpace())
+            {
+                locality = new ModelSpan(candidate.Start, city.End - candidate.Start, "locality", Math.Min(candidate.Confidence, city.Confidence));
             }
         }
 
@@ -270,6 +290,8 @@ internal static class ModelAddressReader
         detail = new ParseDetail(issues, fields.Select(f => new ParsedField(f.Name, f.Span, f.Confidence, f.Source)));
         return new ParsedAddress(rules.Country, rules.CountryConfidence, rules.CountryInferred, rules.LeadingLines, rules.DeliveryLines, rules.Locality, rules.AdminArea, rules.PostalCode, rules.CountryName, fields, rules.Facts, rules.Span);
     }
+
+    private static bool IsKnownAdmin(string key) => UsCaRules.CaProvinceNames.ContainsKey(key) || UsCaRules.UsStateNames.ContainsKey(key);
 
     private static string Key(string text, ModelSpan s) =>
         text.AsSpan(s.Start, s.Length).ToString().Replace(".", string.Empty, StringComparison.Ordinal).ToUpperInvariant();

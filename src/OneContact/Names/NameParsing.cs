@@ -53,7 +53,7 @@ public static class NameParsing
     public static NameClass Classify(ReadOnlySpan<char> text, NameHints hints = default)
     {
         Analysis analysis = NameAnalyzer.Analyze(text, hints);
-        return analysis.Class == NameClass.Unknown ? ModelNameReader.Classify(text, analysis) : analysis.Class;
+        return analysis.Class is NameClass.Unknown or NameClass.Person ? ModelNameReader.Classify(text, analysis) : analysis.Class;
     }
 
     /// <summary>Reads a name string of unknown kind.</summary>
@@ -75,8 +75,8 @@ public static class NameParsing
     {
         Analysis analysis = NameAnalyzer.Analyze(text, hints);
 
-        // Rules first: only a string the rules left unknown goes to the name model, when a model package is referenced.
-        if (analysis.Class == NameClass.Unknown && ModelNameReader.TryRead(text, hints, analysis, out NameParseResult? fromModel))
+        // Rules first: only a string the rules left unknown, or took as a person by default, goes to the name model, when a model package is referenced.
+        if (analysis.Class is NameClass.Unknown or NameClass.Person && ModelNameReader.TryRead(text, hints, analysis, out NameParseResult? fromModel))
         {
             return fromModel;
         }

@@ -48,6 +48,7 @@ internal static class Program
             {
                 "train" => Train(o),
                 "dev" => Dev(o),
+                "names-dev" => NamesDev(o),
                 _ => 2,
             };
         }
@@ -158,6 +159,45 @@ internal static class Program
         }
 
         DevScores.Report(dev, Console.Out);
+        return 0;
+    }
+
+    // Chooses how sure the model must be before it replaces the rules' default reading of a name (a person taken for lack of evidence otherwise).
+    // Reads dev names only. For each threshold, prints the class accuracy of the rules alone and of rules plus model on the dev names.
+    private static int NamesDev(Dictionary<string, string> o)
+    {
+        var model = Tier1Model.Load(File.OpenRead(Required(o, "model")));
+        string[] thresholds = ["0.5", "0.6", "0.7", "0.8", "0.9", "0.95", "0.99"];
+        int count = Num(o, "names-dev-count", 20000);
+        var items = new List<(string Text, string Class)>();
+        foreach (string file in Files(o, "names-dev"))
+        {
+            foreach (string line in File.ReadLines(file))
+            {
+                using System.Text.Json.JsonDocument json = System.Text.Json.JsonDocument.Parse(line);
+                items.Add((json.RootElement.GetProperty("text").GetString()!, json.RootElement.GetProperty("class").GetString()!));
+            }
+        }
+
+        int step = Math.Max(1, items.Count / count);
+        var rows = new List<(string Class, bool Default, RecursiveAI.OneContact.Models.NameModelResult M, RecursiveAI.OneContact.Names.NameClass Rules)>();
+        for (int i = 0; i < items.Count; i += step)
+        {
+            RecursiveAI.OneContact.Names.NameParseResult r = RecursiveAI.OneContact.Names.NameParsing.Split(items[i].Text);
+            bool isDefault = r.Class == RecursiveAI.OneContact.Names.NameClass.Person && r.Detail.Issues.Any(x => x.Reason.Equals(RecursiveAI.OneContact.ReasonCode.PersonNoEvidence));
+            rows.Add((items[i].Class, isDefault, model.Analyze(items[i].Text), r.Class));
+        }
+
+        static string Label(RecursiveAI.OneContact.Names.NameClass c) => c switch { RecursiveAI.OneContact.Names.NameClass.Person => "person", RecursiveAI.OneContact.Names.NameClass.Company => "company", RecursiveAI.OneContact.Names.NameClass.Multiple => "multiple", _ => "unknown" };
+        int rulesRight = rows.Count(r => Label(r.Rules) == r.Class);
+        Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"items={rows.Count} defaults={rows.Count(r => r.Default)} rules_class_accuracy={(double)rulesRight / rows.Count:F4}"));
+        foreach (string t in thresholds)
+        {
+            float threshold = float.Parse(t, CultureInfo.InvariantCulture);
+            int right = rows.Count(r => (r.Default && r.M.Class != RecursiveAI.OneContact.Names.NameClass.Person && r.M.ClassConfidence >= threshold ? Label(r.M.Class) : Label(r.Rules)) == r.Class);
+            Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"threshold={t} class_accuracy={(double)right / rows.Count:F4}"));
+        }
+
         return 0;
     }
 
