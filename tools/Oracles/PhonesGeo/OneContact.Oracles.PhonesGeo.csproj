@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Parity harness for the geocoder, carrier and time-zone mappers: generates cases, answers them with OneContact, and compares with
+       the answers released libphonenumber jars gave (GeoDriver.java runs them; they are only executed, see README.md). -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../src/OneContact/OneContact.csproj" />
+    <ProjectReference Include="../../../src/OneContact.Phones.Geo/OneContact.Phones.Geo.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="GeoDriver.java" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="languages.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="locales.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

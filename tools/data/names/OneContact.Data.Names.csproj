@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Turns open name lists and company registers into labelled person-name and company-name training examples through our own templates. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>OneContact.Data.Names</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <NoWarn>$(NoWarn);CA1303;CA1848;CA1307;CA1305;CA1310;CA1304;CA1311;CA1859;CA1822;CA1002;CA1051;CA1034;CA1307;CA5394;CA2201;CA1031;CA1812;CA1861;CA1865;CA1866;CA1867;CA1845;CA1847;CA1852</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Used only to run the rule parser over rendered examples (the report on what rules alone recover). -->
+    <ProjectReference Include="../../../src/OneContact/OneContact.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="templates/*" Link="templates/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="pins/*" Link="pins/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

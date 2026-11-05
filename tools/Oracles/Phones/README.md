@@ -11,3 +11,7 @@ Compares OneContact's phone engine with a released libphonenumber jar, case by c
 `run.sh` does all four steps. Result lines are `id<TAB>operation<TAB>value`; text is escaped as `\\` and `\uXXXX` for everything outside printable ASCII.
 
 The jar is a pinned release downloaded from Maven Central and run on a user-local JDK; see the oracle notes in the repository documentation.
+
+## As-you-type, matcher and short numbers
+
+`run-extra.sh <work dir> [seed]` does the same four steps for the as-you-type formatter, the matcher and short numbers: `generate-extra` writes the cases (kinds `A`, `M`, `S`, `E`), `ExtraDriver.java` answers them with the jar (`PhoneNumberUtil.getAsYouTypeFormatter`, `findNumbers` at every `Leniency` and three `maxTries` bounds, `ShortNumberInfo`), `ours-extra` answers them with OneContact, and `diff` compares. The jar does not expose example short numbers or the list of regions with short-number data, so those are not compared here.

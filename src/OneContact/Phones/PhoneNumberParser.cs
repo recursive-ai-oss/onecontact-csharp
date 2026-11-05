@@ -158,9 +158,10 @@ public sealed partial class PhoneNumberParser
             return defaultRegion.IsUnknown ? ReasonCode.PhoneRegionRequired : ReasonCode.PhoneUnknownRegion;
         }
 
-        bool vanity = PhoneText.ValidAlpha.IsMatch(national);
+        // Letters of the extension label ("ext", ";ext=") are not part of the number, so they do not make it a vanity number.
         string extension = PhoneText.StripExtension(national, out int cut);
         national = national[..cut];
+        bool vanity = PhoneText.ValidAlpha.IsMatch(national);
 
         CountryCodeSource source = CountryCodeSource.FromDefaultCountry;
         ReasonCode reason = MaybeExtractCountryCode(national, regionMetadata, out string nsn, out int countryCode, ref source);
@@ -437,10 +438,10 @@ public sealed partial class PhoneNumberParser
         return 0;
     }
 
-    private static bool MatchesEntirely(Desc desc, string number) =>
+    internal static bool MatchesEntirely(Desc desc, string number) =>
         desc.Pattern is not null && desc.Pattern.Get().IsMatch(number);
 
-    private bool MaybeStripNationalPrefixAndCarrierCode(ref string number, RegionMetadata region, out string? carrierCode)
+    internal bool MaybeStripNationalPrefixAndCarrierCode(ref string number, RegionMetadata region, out string? carrierCode)
     {
         carrierCode = null;
         if (number.Length == 0 || region.NationalPrefixForParsing is null)
@@ -498,7 +499,7 @@ public sealed partial class PhoneNumberParser
     }
 
     // Replacement text with $1..$9 group references and backslash escapes.
-    private static void ExpandReplacement(string template, string input, ReadOnlySpan<int> groups, int groupCount, StringBuilder output)
+    internal static void ExpandReplacement(string template, string input, ReadOnlySpan<int> groups, int groupCount, StringBuilder output)
     {
         for (int i = 0; i < template.Length; i++)
         {

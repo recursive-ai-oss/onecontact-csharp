@@ -87,6 +87,16 @@ internal static class UsCaRules
             (r[2] == "fr" ? t.CaStreetTypesFrench : t.CaStreetTypesEnglish)[r[0]] = new CaStreetType(r[1], r[2] == "fr");
         }
 
+        // Canadian addresses are also written with the United States spellings of a street type (LN for Lane, TRL for Trail). The spelling is a variant of a type
+        // Canada Post lists, so it is read as that type and written in Canada Post's form; a spelling that is also a French type word is left to the French table.
+        foreach (KeyValuePair<string, (string Standard, string Primary)> us in t.UsSuffixes)
+        {
+            if (!t.CaStreetTypesEnglish.ContainsKey(us.Key) && !t.CaStreetTypesFrench.ContainsKey(us.Key) && t.CaStreetTypesEnglish.TryGetValue(us.Value.Primary, out CaStreetType same))
+            {
+                t.CaStreetTypesEnglish[us.Key] = same;
+            }
+        }
+
         foreach (string[] r in RuleFile.Read("ca-directions.tsv"))
         {
             t.CaDirections[r[0]] = r[1];

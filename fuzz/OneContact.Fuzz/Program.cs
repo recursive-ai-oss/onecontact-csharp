@@ -14,6 +14,8 @@ internal static class Program
     {
         ["phone"] = text => { _ = PhoneNumber.TryParse(text, Region.US, out _, out _); _ = PhoneNumber.TryParse(text, Region.Unknown, out _, out _); Expect(() => PhoneNumber.Parse(text, Region.US)); },
         ["phone-metadata"] = LoadMetadata,
+        ["phone-match"] = MatchAll,
+        ["phone-typing"] = TypeAll,
         ["email"] = text => { _ = EmailAddress.TryParse(text, out _, out _); Expect(() => EmailAddress.Parse(text)); },
         ["web"] = text => { _ = WebAddress.TryParse(text, out _, out _); Expect(() => WebAddress.Parse(text)); },
         ["address"] = text => { _ = PostalAddress.TryParse(text, out _, out _); Expect(() => PostalAddress.Parse(text)); },
@@ -59,6 +61,45 @@ internal static class Program
 
         Console.WriteLine($"{args[0]}: {count} input(s), no findings");
         return 0;
+    }
+
+    // The matcher must not throw, and every match must be the text it says it is, inside the input.
+    private static void MatchAll(string text)
+    {
+        foreach (Region region in new[] { Region.US, Region.Parse("GB"), Region.Parse("DE"), Region.Unknown })
+        {
+            foreach (PhoneMatchLeniency leniency in Enum.GetValues<PhoneMatchLeniency>())
+            {
+                int previousEnd = 0;
+                foreach (PhoneNumberMatch m in PhoneNumberMatcher.Default.FindAll(text, region, leniency))
+                {
+                    if (m.Start < previousEnd || m.End > text.Length || !string.Equals(text.Substring(m.Start, m.RawString.Length), m.RawString, StringComparison.Ordinal))
+                    {
+                        throw new InvalidOperationException("a match does not lie in the text");
+                    }
+
+                    previousEnd = m.End;
+                }
+            }
+        }
+    }
+
+    // The formatter takes any key presses; the remembered position stays inside the last output.
+    private static void TypeAll(string text)
+    {
+        foreach (Region region in new[] { Region.US, Region.Parse("GB"), Region.Parse("BR"), Region.Unknown })
+        {
+            AsYouTypeFormatter formatter = new(region);
+            int i = 0;
+            foreach (char c in text)
+            {
+                string output = i++ % 7 == 3 ? formatter.InputDigitAndRememberPosition(c) : formatter.InputDigit(c);
+                if (formatter.RememberedPosition < 0 || formatter.RememberedPosition > output.Length)
+                {
+                    throw new InvalidOperationException("the remembered position is outside the output");
+                }
+            }
+        }
     }
 
     // The metadata loader may refuse with InvalidDataException and nothing else.

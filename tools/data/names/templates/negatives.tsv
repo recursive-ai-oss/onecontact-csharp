@@ -1,0 +1,241 @@
+# Words for the strings that are neither a person nor a company (class unknown), and for the synthesized company names.
+# kind <TAB> language <TAB> text. Our own lists.
+#
+# job title pieces: a title is  [level] [area] role  (join with spaces)
+level	en	Senior
+level	en	Junior
+level	en	Lead
+level	en	Principal
+level	en	Assistant
+level	en	Associate
+level	en	Chief
+level	en	Head of
+level	en	Regional
+level	en	Executive
+level	fr	Directeur
+level	fr	Directrice
+level	fr	Adjoint
+level	fr	Responsable
+area	en	Software
+area	en	Sales
+area	en	Marketing
+area	en	Customer Support
+area	en	Operations
+area	en	Product
+area	en	Data
+area	en	Finance
+area	en	Human Resources
+area	en	IT
+area	en	Quality
+area	en	Procurement
+area	fr	des ventes
+area	fr	du marketing
+area	fr	des opérations
+area	fr	des ressources humaines
+area	fr	de la qualité
+role	en	Engineer
+role	en	Manager
+role	en	Director
+role	en	Analyst
+role	en	Coordinator
+role	en	Specialist
+role	en	Consultant
+role	en	Administrator
+role	en	Officer
+role	en	Developer
+role	en	Representative
+role	en	Executive Officer
+role	en	Technician
+role	en	Supervisor
+role	en	Accountant
+role	en	Receptionist
+role	fr	Ingénieur
+role	fr	Gestionnaire
+role	fr	Conseiller
+role	fr	Technicien
+role	fr	Agent
+role	fr	Analyste
+#
+# departments, mailboxes and functions
+unit	en	Accounts Payable
+unit	en	Accounts Receivable
+unit	en	Human Resources
+unit	en	Customer Service
+unit	en	Customer Support Team
+unit	en	Front Desk
+unit	en	Sales Department
+unit	en	Billing Department
+unit	en	IT Help Desk
+unit	en	Shipping and Receiving
+unit	en	Reception
+unit	en	Marketing Team
+unit	en	Legal Department
+unit	en	Purchasing
+unit	en	Payroll
+unit	en	Technical Support
+unit	en	Executive Assistant
+unit	en	General Inquiries
+unit	en	Office Manager
+unit	en	Warehouse
+unit	fr	Service à la clientèle
+unit	fr	Comptes payables
+unit	fr	Ressources humaines
+unit	fr	Réception
+unit	fr	Service des ventes
+unit	fr	Facturation
+unit	fr	Soutien technique
+unit	fr	Direction générale
+#
+# generic phrases and placeholders
+generic	en	N/A
+generic	en	none
+generic	en	unknown
+generic	en	TBD
+generic	en	To whom it may concern
+generic	en	Current Resident
+generic	en	Current Occupant
+generic	en	Homeowner
+generic	en	Valued Customer
+generic	en	Dear Customer
+generic	en	Sir/Madam
+generic	en	Admin
+generic	en	Info
+generic	en	Sales
+generic	en	Webmaster
+generic	en	Do not reply
+generic	en	See notes
+generic	en	Same as above
+generic	en	Name not provided
+generic	en	Attn: Accounting
+generic	en	Please call back
+generic	en	-
+generic	en	???
+generic	fr	Aucun
+generic	fr	Inconnu
+generic	fr	À l'attention du service
+generic	fr	Cher client
+generic	fr	Résident actuel
+generic	fr	Non disponible
+#
+# words for long free text (more than eight words)
+filler	en	please
+filler	en	contact
+filler	en	the
+filler	en	manager
+filler	en	about
+filler	en	your
+filler	en	invoice
+filler	en	before
+filler	en	the
+filler	en	end
+filler	en	of
+filler	en	month
+filler	en	and
+filler	en	send
+filler	en	a
+filler	en	copy
+filler	en	to
+filler	en	our
+filler	en	office
+filler	en	thanks
+filler	fr	veuillez
+filler	fr	contacter
+filler	fr	le
+filler	fr	responsable
+filler	fr	avant
+filler	fr	la
+filler	fr	fin
+filler	fr	du
+filler	fr	mois
+filler	fr	et
+filler	fr	envoyer
+filler	fr	une
+filler	fr	copie
+filler	fr	à
+filler	fr	notre
+filler	fr	bureau
+#
+# strings with digits or addresses
+digits	en	555-0142
+digits	en	Room 12
+digits	en	Suite 200
+digits	en	PO Box 77
+digits	en	Unit 4B
+digits	en	Ext. 311
+digits	en	Floor 3
+digits	en	Line 2
+digits	en	2nd contact
+digits	en	+1 613 555 0100
+digits	en	user123
+digits	en	#4
+#
+# trade words after a person's name ("John Smith Plumbing"), English and French
+trade	en	Plumbing
+trade	en	Roofing
+trade	en	Photography
+trade	en	Consulting
+trade	en	Landscaping
+trade	en	Construction
+trade	en	Electric
+trade	en	Painting
+trade	en	Heating and Cooling
+trade	en	Insurance Agency
+trade	en	Realty
+trade	en	Accounting
+trade	en	Design Studio
+trade	en	Auto Repair
+trade	en	Excavating
+trade	en	Cleaning Services
+trade	en	Tax Services
+trade	en	Dental
+trade	en	Chiropractic
+trade	en	Law Office
+trade	en	Financial Group
+trade	en	Home Inspections
+trade	en	Moving
+trade	en	Catering
+trade	fr	Plomberie
+trade	fr	Toiture
+trade	fr	Photographie
+trade	fr	Consultation
+trade	fr	Aménagement paysager
+trade	fr	Construction
+trade	fr	Électrique
+trade	fr	Peinture
+trade	fr	Excavation
+trade	fr	Déménagement
+trade	fr	Traiteur
+trade	fr	Comptabilité
+trade	fr	Notaire
+#
+# "<Surname>'s <shop>" and "<Surname> Family <practice>"
+shop	en	Pizza
+shop	en	Hardware
+shop	en	Bakery
+shop	en	Auto Repair
+shop	en	Diner
+shop	en	Flowers
+shop	en	Garage
+shop	en	Barber Shop
+shop	en	Market
+shop	en	Pharmacy
+practice	en	Dentistry
+practice	en	Chiropractic
+practice	en	Veterinary Clinic
+practice	en	Eye Care
+practice	en	Law Group
+practice	en	Orthodontics
+#
+# French prefix words ("Gestion Tremblay inc.", "Les Entreprises Gagnon ltée")
+frprefix	fr	Gestion
+frprefix	fr	Groupe
+frprefix	fr	Les Entreprises
+frprefix	fr	Construction
+frprefix	fr	Les Investissements
+frprefix	fr	Boulangerie
+frprefix	fr	Garage
+frprefix	fr	Transport
+frprefix	fr	Les Immeubles
+frprefix	fr	Services financiers
+frprefix	fr	Excavation
+frprefix	fr	Les Équipements

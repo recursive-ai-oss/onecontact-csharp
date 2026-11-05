@@ -1,0 +1,27 @@
+# kind (gen = generational, pro = professional) <TAB> text <TAB> language (* for all) <TAB> weight
+# Our own list. A dot-optional form is written without its dot and the renderer adds dots in some of the strings.
+gen	Jr	*	30
+gen	Sr	*	10
+gen	II	en	10
+gen	III	en	10
+gen	IV	en	2
+gen	fils	fr	2
+pro	PhD	*	20
+pro	MD	en	14
+pro	DDS	en	3
+pro	DMD	en	1
+pro	DVM	en	2
+pro	Esq	en	6
+pro	JD	en	3
+pro	CPA	*	9
+pro	MBA	*	6
+pro	RN	en	3
+pro	PE	en	1
+pro	P.Eng.	en	2
+pro	CPA, CA	en	0
+pro	LLM	*	1
+pro	MSc	*	3
+pro	MPH	en	1
+pro	DC	en	1
+pro	CFA	*	1
+pro	PMP	*	1

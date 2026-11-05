@@ -144,6 +144,9 @@ public sealed class PhoneMetadata
     /// <returns>The prefix text, or <see langword="null"/> when the region has none or no data.</returns>
     public string? GetInternationalPrefix(Region region) => GetRegionMetadata(region)?.InternationalPrefix;
 
+    /// <summary>Reads one of the other compiled tables (short numbers, alternate formats) from the library's data resource.</summary>
+    internal static List<TerritoryData> ReadEmbedded(string table) => PhoneMetadataCodec.Read(Tables.GetTable(table));
+
     internal bool TryGetRegion(Region region, out RegionMetadata metadata)
     {
         if (_byRegion.TryGetValue(region, out RegionMetadata? r))

@@ -1,0 +1,7 @@
+# ODA data providers left out of training data, with the reason. provider (as in the ODA `provider` column), reason.
+# Every provider in the ODA's Data_Sources.csv names its open data licence. These five name none, or name a disclaimer or a custom licence that was not read as clearly permissive, so their rows are not used.
+City of Fredericton	no licence named in Data_Sources.csv
+Cornwall	no licence named in Data_Sources.csv
+Columbia-Shuswap	"Disclaimer and User Agreement", not a recognised open licence
+City of West Kelowna	GIS data-sharing site disclaimer, not a recognised open licence
+Middlesex County	"Custom License", terms not read as clearly permissive
