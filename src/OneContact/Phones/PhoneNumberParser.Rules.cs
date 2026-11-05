@@ -417,6 +417,15 @@ public sealed partial class PhoneNumberParser
         return md is not null && md.CountryCode == 1;
     }
 
+    /// <summary>Tells whether mobile numbers of a region can move between carriers, so the carrier a number was first assigned to says little about its carrier today.</summary>
+    /// <param name="region">The region.</param>
+    /// <returns><see langword="true"/> when the region's metadata marks its mobile numbers as portable; <see langword="false"/> otherwise, also for a region without data.</returns>
+    public bool IsMobileNumberPortableRegion(Region region)
+    {
+        RegionMetadata? md = _metadata.GetRegionMetadata(region);
+        return md is not null && md.MobileNumberPortableRegion;
+    }
+
     /// <summary>Lists the line types a region's plan has numbers for.</summary>
     /// <param name="region">The region.</param>
     /// <returns>The types in ascending order of <see cref="PhoneNumberType"/>; empty when the region has no data. <see cref="PhoneNumberType.FixedLineOrMobile"/> is never listed.</returns>

@@ -5,6 +5,7 @@ using RecursiveAI.OneContact.Addresses;
 using RecursiveAI.OneContact.Extraction;
 using RecursiveAI.OneContact.Extraction.Records;
 using RecursiveAI.OneContact.Phones;
+using RecursiveAI.OneContact.Phones.Geo;
 using RecursiveAI.OneContact.Addresses.Expansion;
 using RecursiveAI.OneContact.Addresses.Standardization;
 using RecursiveAI.OneContact.Keys;
@@ -116,6 +117,13 @@ Check(extracted.Ungrouped.Count == 1 && extracted.Ungrouped[0].Source == FieldSo
 ExtractedField first = extracted.Records[0].Name!;
 Check(System.Text.Encoding.UTF8.GetString(pageBytes, first.Span.Start, first.Span.Length) == first.Raw, "extraction offsets");
 Check(ContactExtractor.Extract("<script type=\"application/ld+json\">{oops</script>").Count == 0, "extraction rejects malformed json-ld");
+// Phones.Geo: each mapper reads its embedded table on first use.
+PhoneNumber geoNumber = PhoneNumber.Parse("+1 650 253 0000");
+Check(PhoneGeocoder.Default.GetDescription(geoNumber, "en") == "Mountain View, CA", "geocoder");
+Check(PhoneGeocoder.Default.GetDescription(PhoneNumber.Parse("+49 30 123456"), "en", Region.US) == "Germany", "geocoder country name");
+Check(PhoneTimeZoneMapper.Default.GetTimeZones(geoNumber).Contains("America/Los_Angeles"), "time zones");
+Check(PhoneCarrierMapper.Default.GetSafeDisplayName(geoNumber, "en") == string.Empty, "carrier safe name");
+Check(PhoneCarrierMapper.Default.GetName(PhoneNumber.Parse("+49 30 123456"), "en") == string.Empty, "carrier of a fixed line");
 
 Console.WriteLine(failures == 0 ? "OneContact AOT smoke: ok" : $"OneContact AOT smoke: {failures} failure(s)");
 return failures == 0 ? 0 : 1;

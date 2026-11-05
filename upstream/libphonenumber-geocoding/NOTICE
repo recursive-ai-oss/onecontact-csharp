@@ -1,0 +1,7 @@
+libphonenumber geocoding (area description) data
+Copyright (C) The Libphonenumber Authors
+
+The data files of this package (resources/geocoding/ of https://github.com/google/libphonenumber, release v9.0.43) are licensed under the
+Apache License, Version 2.0 (see LICENSE in this folder). The upstream files carry no separate NOTICE file; their headers name
+"The Libphonenumber Authors". The geocoding data derives from public numbering-plan listings.
+OneContact compiles this data into its own table format; it contains no libphonenumber code.

@@ -16,6 +16,8 @@
   <ItemGroup>
     <ProjectReference Include="../../src/OneContact/OneContact.csproj" />
     <ProjectReference Include="../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
+    <!-- Both assemblies carry the same internal table reader; the alias keeps the test project from seeing two. -->
+    <ProjectReference Include="../../src/OneContact.Phones.Geo/OneContact.Phones.Geo.csproj" Aliases="geo" />
     <ProjectReference Include="../../tools/Ingest/OneContact.Ingest.csproj" />
     <ProjectReference Include="../../tools/Ingest.Synthetic/OneContact.Ingest.Synthetic.csproj" />
     <ProjectReference Include="../../tools/Ingest.LibAddressInput/OneContact.Ingest.LibAddressInput.csproj" />

@@ -1,0 +1,15 @@
+<Project>
+  <!-- The compiled data of this package: one table file per source, embedded and read on first use (see docs/phones-geo.md). -->
+  <ItemGroup>
+    <IngestSource Include="libphonenumber-geocoding" Tool="../../tools/Ingest.LibPhoneNumberGeo/OneContact.Ingest.LibPhoneNumberGeo.csproj" Pin="../../upstream/libphonenumber-geocoding/PIN" />
+    <IngestSource Include="libphonenumber-carrier" Tool="../../tools/Ingest.LibPhoneNumberGeo/OneContact.Ingest.LibPhoneNumberGeo.csproj" Pin="../../upstream/libphonenumber-carrier/PIN" />
+    <IngestSource Include="libphonenumber-timezones" Tool="../../tools/Ingest.LibPhoneNumberGeo/OneContact.Ingest.LibPhoneNumberGeo.csproj" Pin="../../upstream/libphonenumber-timezones/PIN" />
+    <IngestSource Include="cldr-territories" Tool="../../tools/Ingest.LibPhoneNumberGeo/OneContact.Ingest.LibPhoneNumberGeo.csproj" Pin="../../upstream/cldr-territories/PIN" />
+  </ItemGroup>
+
+  <!-- Licence texts packed next to the compiled notices. -->
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)../../../upstream/libphonenumber-geocoding/LICENSE" Pack="true" PackagePath="notices/libphonenumber/" Link="notices/libphonenumber/LICENSE" />
+    <None Include="$(MSBuildThisFileDirectory)../../../upstream/cldr-territories/LICENSE" Pack="true" PackagePath="notices/cldr/" Link="notices/cldr/LICENSE" />
+  </ItemGroup>
+</Project>

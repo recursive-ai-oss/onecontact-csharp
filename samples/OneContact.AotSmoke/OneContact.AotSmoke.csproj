@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="../../src/OneContact/OneContact.csproj" />
     <ProjectReference Include="../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
+    <ProjectReference Include="../../src/OneContact.Phones.Geo/OneContact.Phones.Geo.csproj" />
   </ItemGroup>
 
 </Project>
