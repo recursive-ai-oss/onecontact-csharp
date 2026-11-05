@@ -27,6 +27,11 @@
                   Files="../../testdata/ingest-synthetic/files" />
   </ItemGroup>
 
+  <!-- Conformance data for the URL parser and the Public Suffix List (licences beside the files). -->
+  <ItemGroup>
+    <Content Include="testdata/**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <Content Include="../../testdata/ingest-synthetic/**" Link="testdata/ingest-synthetic/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

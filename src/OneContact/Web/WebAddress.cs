@@ -27,13 +27,17 @@ public readonly partial struct WebAddress :
     IEqualityOperators<WebAddress, WebAddress, bool>
 {
     private readonly string? _canonical;
+    private readonly WebParts? _parts;
 
-    internal WebAddress(string canonical, SourceSpan source, WebFacts flags)
+    internal WebAddress(string canonical, SourceSpan source, WebFacts flags, WebParts? parts)
     {
         _canonical = canonical;
         Source = source;
         Flags = flags;
+        _parts = parts;
     }
+
+    internal WebParts? Parts => _parts;
 
     /// <summary>Gets the canonical form: faithful to the standard or the authority's style, never changing where mail goes or what a link points to. Empty for the default value.</summary>
     public string Canonical => _canonical ?? string.Empty;
@@ -43,6 +47,27 @@ public readonly partial struct WebAddress :
 
     /// <summary>Gets the facts found about the value.</summary>
     public WebFacts Flags { get; }
+
+    /// <summary>Gets the scheme, lowercase, such as <c>https</c>. Empty for the default value.</summary>
+    public string Scheme => _parts?.Scheme ?? string.Empty;
+
+    /// <summary>Gets the host as it appears in the canonical form: a lowercase ASCII domain (internationalized names in their <c>xn--</c> form), a dotted IPv4 address, a bracketed IPv6 address, or an opaque host. Empty when the address has no host or for the default value.</summary>
+    public string Host => _parts?.Host ?? string.Empty;
+
+    /// <summary>Gets the explicit port, or <see langword="null"/> when none is written or it is the scheme's default port (the canonical form leaves default ports out).</summary>
+    public int? Port => _parts is { Port: >= 0 } p ? p.Port : null;
+
+    /// <summary>Gets the path as it appears in the canonical form, such as <c>/a/b</c>.</summary>
+    public string Path => _parts?.Path ?? string.Empty;
+
+    /// <summary>Gets the query as it appears in the canonical form (without the <c>?</c>, tracking parameters removed), or <see langword="null"/> when there is none.</summary>
+    public string? Query => _parts?.Query;
+
+    /// <summary>Gets the public suffix of the host according to the Public Suffix List (ICANN and private sections), or <see langword="null"/> when the host is not a domain name.</summary>
+    public string? PublicSuffix => _parts?.PublicSuffix;
+
+    /// <summary>Gets the registrable domain of the host (its public suffix and one more label), or <see langword="null"/> when the host is not a domain name or is itself a public suffix.</summary>
+    public string? RegistrableDomain => _parts?.RegistrableDomain;
 
     /// <summary>Gets the comparison key for the latest <see cref="KeyVersion"/> (<see cref="KeyVersions.Latest"/>).</summary>
     public string Key => GetKey(KeyVersions.Latest);

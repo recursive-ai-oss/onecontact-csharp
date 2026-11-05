@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Runs two released packages as black boxes against the conformance data (information only, no gate): AngleSharp's URL type on
+       the WHATWG URL test data, and Nager.PublicSuffix on the Public Suffix List's test file. Nothing in src/ references them. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>RecursiveAI.OneContact.Oracles.Url</RootNamespace>
+    <!-- Comparator packages are not AOT or trim clean in every path; this tool is never published. -->
+    <NoWarn>$(NoWarn);CA1303</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AngleSharp" />
+    <PackageReference Include="Nager.PublicSuffix" />
+  </ItemGroup>
+
+</Project>

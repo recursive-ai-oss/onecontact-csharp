@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Compiles the Public Suffix List into a rule table; run by the build, see docs/architecture.md. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>RecursiveAI.OneContact.Ingest.Psl</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Ingest/OneContact.Ingest.csproj" />
+    <!-- Rules in the list are Unicode; the table stores their ASCII (ASCII, Punycode) form, made with the library's own Punycode. -->
+    <Compile Include="../../src/OneContact/Text/Idna/Punycode.cs" Link="Punycode.cs" />
+  </ItemGroup>
+
+</Project>

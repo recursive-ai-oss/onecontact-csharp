@@ -25,6 +25,14 @@ EmailAddress email = EmailAddress.Parse("  a@example.com ");
 Check(email.Source.Start == 2 && email.Source.Length == 13, "email offsets");
 WebAddress web = WebAddress.Parse("https://example.com/");
 Check(web.GetKey(KeyVersion.V1).Length > 0, "web key");
+
+// Web addresses: the URL parser, UTS #46 on a non-ASCII host (compiled tables), the Public Suffix List and the tracking-parameter list.
+WebAddress shop = WebAddress.Parse("Shop.Bücher.example.co.uk/Contact?utm_source=x&id=1#top");
+Check(shop.Canonical == "https://shop.xn--bcher-kva.example.co.uk/Contact?id=1", "web canonical form");
+Check(shop.RegistrableDomain == "example.co.uk" && shop.Key == "example.co.uk/contact?id=1", "web registrable domain and key");
+Check(WebAddress.Parse("https://github.com/octocat").Flags.HasFlag(WebFacts.SocialGitHub), "web social flag");
+Check(RecursiveAI.OneContact.Web.PublicSuffixList.GetRegistrableDomain("a.b.github.io") == "b.github.io", "public suffix list");
+Check(Contacts.Normalize("www.example.com/x").Kind == ContactKind.Web, "normalize web");
 Check(PostalAddress.Parse("1 Main St").Canonical.Length > 0, "address parse");
 Check(PersonName.Parse("Ada Lovelace").Canonical.Length > 0, "person parse");
 Check(CompanyName.Parse("Acme Ltd").Canonical.Length > 0, "company parse");
