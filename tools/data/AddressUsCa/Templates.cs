@@ -40,22 +40,30 @@ internal sealed class Templates
     {
         string layoutsPath = Path.Combine(directory, "layouts.tsv");
         string namesPath = Path.Combine(directory, "names.tsv");
-        foreach (string line in File.ReadLines(layoutsPath, Encoding.UTF8))
+        // layouts-pr.tsv (Puerto Rico, with the urbanization line) is read after the base layouts and versioned on its own, so the
+        // base template version of a United States / Canada run does not change.
+        string prPath = Path.Combine(directory, "layouts-pr.tsv");
+        foreach (string path in File.Exists(prPath) ? new[] { layoutsPath, prPath } : new[] { layoutsPath })
         {
-            if (line.Length == 0 || line[0] == '#')
+            foreach (string line in File.ReadLines(path, Encoding.UTF8))
             {
-                continue;
-            }
+                if (line.Length == 0 || line[0] == '#')
+                {
+                    continue;
+                }
 
-            string[] c = line.Split('\t');
-            List<List<LayoutItem>> lines = [];
-            foreach (string raw in c[5].Split("\\n", StringSplitOptions.None))
-            {
-                lines.Add(ParseLine(raw));
-            }
+                string[] c = line.Split('\t');
+                List<List<LayoutItem>> lines = [];
+                foreach (string raw in c[5].Split("\\n", StringSplitOptions.None))
+                {
+                    lines.Add(ParseLine(raw));
+                }
 
-            _layouts.Add(new Layout(c[0], c[1], c[2], c[3] == "label", double.Parse(c[4], System.Globalization.CultureInfo.InvariantCulture), lines));
+                _layouts.Add(new Layout(c[0], c[1], c[2], c[3] == "label", double.Parse(c[4], System.Globalization.CultureInfo.InvariantCulture), lines));
+            }
         }
+
+        PrVersion = File.Exists(prPath) ? Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(prPath))).ToLowerInvariant()[..16] : string.Empty;
 
         foreach (string line in File.ReadLines(namesPath, Encoding.UTF8))
         {
@@ -80,6 +88,9 @@ internal sealed class Templates
 
     /// <summary>The template version: the first 16 hex digits of the SHA-256 over the layout and name files.</summary>
     internal string Version { get; }
+
+    /// <summary>The first 16 hex digits of the SHA-256 of <c>layouts-pr.tsv</c>, or empty when there is none.</summary>
+    internal string PrVersion { get; }
 
     internal IReadOnlyList<string> Names(string kind) => _names[kind];
 

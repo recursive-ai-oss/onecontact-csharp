@@ -19,11 +19,17 @@ internal static class Checker
     {
         string dir = o["out"];
         int sample = int.Parse(o.GetValueOrDefault("sample", "5000"));
+        int perRegion = int.Parse(o.GetValueOrDefault("per-region", "0"));
         int failures = 0;
         StringBuilder report = new();
         foreach (string name in new[] { "us.train.jsonl", "us.dev.jsonl", "ca.train.jsonl", "ca.dev.jsonl" })
         {
             string path = Path.Combine(dir, name);
+            if (!File.Exists(path))
+            {
+                continue;
+            }
+
             long lines = 0;
             long bad = 0;
             List<string> kept = [];
@@ -53,7 +59,12 @@ internal static class Checker
             report.AppendLine($"{name}: {lines} examples, {bad} failed the span checks");
             if (kept.Count > 0)
             {
-                report.Append(RuleReport(name[..2].ToUpperInvariant(), kept));
+                report.Append(RuleReport(name[..2].ToUpperInvariant(), kept, brief: false));
+            }
+
+            if (perRegion > 0 && name.Contains("train", StringComparison.Ordinal))
+            {
+                report.Append(RegionReports(path, perRegion));
             }
         }
 
@@ -125,7 +136,51 @@ internal static class Checker
         return null;
     }
 
-    private static string RuleReport(string country, List<string> lines)
+    /// <summary>The rule parser over an even sample of each region of a training file (the region is the last property of every line).</summary>
+    private static string RegionReports(string path, int perRegion)
+    {
+        Dictionary<string, long> counts = new(StringComparer.Ordinal);
+        foreach (string line in File.ReadLines(path))
+        {
+            string r = RegionOf(line);
+            counts[r] = counts.GetValueOrDefault(r) + 1;
+        }
+
+        Dictionary<string, long> seen = new(StringComparer.Ordinal);
+        Dictionary<string, List<string>> kept = new(StringComparer.Ordinal);
+        foreach (string line in File.ReadLines(path))
+        {
+            string r = RegionOf(line);
+            long step = Math.Max(1, counts[r] / perRegion);
+            long at = seen.GetValueOrDefault(r);
+            seen[r] = at + 1;
+            if (at % step == 0)
+            {
+                if (!kept.TryGetValue(r, out List<string>? l))
+                {
+                    kept[r] = l = [];
+                }
+
+                l.Add(line);
+            }
+        }
+
+        StringBuilder sb = new();
+        foreach (KeyValuePair<string, List<string>> kv in kept.OrderBy(k => k.Key, StringComparer.Ordinal))
+        {
+            sb.Append(RuleReport(kv.Key, kv.Value, brief: true));
+        }
+
+        return sb.ToString();
+    }
+
+    private static string RegionOf(string line)
+    {
+        int at = line.LastIndexOf("\"region\":\"", StringComparison.Ordinal);
+        return at < 0 ? "?" : line.Substring(at + 10, 2);
+    }
+
+    private static string RuleReport(string country, List<string> lines, bool brief)
     {
         Dictionary<string, (long Seen, long Found)> perLabel = new(StringComparer.Ordinal);
         Dictionary<string, long> statuses = new(StringComparer.Ordinal);
@@ -188,6 +243,11 @@ internal static class Checker
         sb.AppendLine($"  rule parser on {examples} sampled {country} training examples:");
         sb.AppendLine($"    every labelled field recovered (same label and span): {allFound} ({100.0 * allFound / examples:0.0}%); with no extra field: {allFoundNoExtra} ({100.0 * allFoundNoExtra / examples:0.0}%)");
         sb.AppendLine($"    fields recovered: {fieldsFound}/{fieldsSeen} ({100.0 * fieldsFound / Math.Max(1, fieldsSeen):0.0}%)");
+        if (brief)
+        {
+            return sb.ToString();
+        }
+
         foreach (KeyValuePair<string, long> kv in statuses.OrderBy(k => k.Key, StringComparer.Ordinal))
         {
             sb.AppendLine($"    {kv.Key}: {kv.Value}");

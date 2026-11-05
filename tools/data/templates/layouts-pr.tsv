@@ -1,0 +1,14 @@
+# Puerto Rico layouts, same format as layouts.tsv: id, country, language, kind, weight, template. The country is `US-PR`, which the
+# renderer picks for Puerto Rico records only. The extra slot `urbanization` is the urbanization line (`URB` and its name).
+#
+# Layout sources: USPS Publication 28 section 292 and appendix I (the urbanization line sits above the delivery address line, and
+# the last line is the city, `PR` and the ZIP Code); the comma and single-line forms are how addresses are written in running text.
+
+pr.label.pub28	US-PR	es	label	40	{recipient}\n{organization}\n{urbanization}\n{street}\n{unit}\n{city}{ |state}{ |zip}\n{country}
+pr.label.comma	US-PR	es	label	20	{recipient}\n{organization}\n{urbanization}\n{street}\n{unit}\n{city}{, |state}{ |zip}\n{country}
+pr.label.urbafter	US-PR	es	label	6	{recipient}\n{organization}\n{street}\n{unit}\n{urbanization}\n{city}{ |state}{ |zip}\n{country}
+pr.label.twospace	US-PR	es	label	4	{recipient}\n{organization}\n{urbanization}\n{street}\n{unit}\n{city}{ |state}{  |zip}\n{country}
+pr.line.comma	US-PR	es	line	40	{recipient}{, |organization}{, |street}{, |unit}{, |urbanization}{, |city}{, |state}{ |zip}{, |country}
+pr.line.urbfirst	US-PR	es	line	16	{recipient}{, |organization}{, |urbanization}{, |street}{, |unit}{, |city}{, |state}{ |zip}{, |country}
+pr.line.space	US-PR	es	line	8	{recipient}{ |organization}{ |street}{ |unit}{ |urbanization}{ |city}{ |state}{ |zip}{ |country}
+pr.line.fused	US-PR	es	line	4	{street}{ |unit}{ |urbanization}{ |city}{, |state}{ |zip}

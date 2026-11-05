@@ -43,13 +43,16 @@ internal sealed class Rec
 
     internal string City { get; init; } = string.Empty;
 
+    /// <summary>Puerto Rico urbanization name (the words after <c>URB</c>), or empty. USPS Publication 28 section 292.</summary>
+    internal string Urbanization { get; init; } = string.Empty;
+
     /// <summary>Five-digit ZIP, or a Canadian postal code without its space, or empty.</summary>
     internal string PostalCode { get; init; } = string.Empty;
 
     /// <summary>The register's ZIP+4 extension, or empty.</summary>
     internal string Plus4 { get; init; } = string.Empty;
 
-    /// <summary>en or fr: the language the civic form is written in.</summary>
+    /// <summary>en, fr or es (Puerto Rico): the language the civic form is written in.</summary>
     internal string Language { get; init; } = "en";
 }
 

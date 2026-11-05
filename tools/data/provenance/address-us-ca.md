@@ -49,7 +49,52 @@ Rows left out and why are counted in `rejects.tsv` (NAD: no five-digit ZIP 7.2 M
 - Every example: spans ordered, non-overlapping, inside the text, on token edges, no leading or trailing space, and every letter and digit of the text inside a span. 1,673,204 examples, 0 failures.
 - A sample of about 5,000 training examples per country through the library's rule parser (information): see `docs/training-data-address-us-ca.md`.
 
+## Regions the National Address Database lacks: Census TIGER/Line (`address-us-tiger`)
+
+The National Address Database text file has no rows for PR, AS, GU, MP, HI, MI, MS, NH and NV and few for VI. Those regions are synthesized from Census TIGER/Line address ranges and street names, rendered by the same tool (`render --tiger <dir> --countries us --dataset address-us-tiger`) through the same templates, label set, tokenization, noise and split method. This is a separate output set (`us.train.jsonl`, `us.dev.jsonl` in its own directory with its own `manifest.json`); the NAD/ODA set above is unchanged.
+
+| Source | Version | Terms (quoted) | Verdict |
+|---|---|---|---|
+| Census **TIGER/Line Shapefiles**, county address range features (`ADDRFEAT`) and, for AS and MP, county edges (`EDGES`) | TIGER2025, files dated 2025-09; 281 county files and the relationship file, pinned by size and SHA-256 in `pins/tiger.pin`; fetched by `tools/data/fetch-tiger.sh` from `https://www2.census.gov/geo/tiger/TIGER2025/ADDRFEAT/` and `.../EDGES/` | Technical documentation chapter 1 (2025): "Copyright protection is not available for any work of the United States Government (Title 17 U.S.C., Section 105). Thus, you are free to reproduce census materials as you see fit. We would ask, however, that you cite the Census Bureau as the source." The same chapter: "No warranty, expressed or implied, is made with regard to the accuracy of the data in the TIGER/Line Shapefiles", and "TIGER/Line cannot be used as or within the proprietary product names of any commercial product" | go: public domain, cite the Census Bureau; the models are not named TIGER/Line |
+| Census 2020 **ZCTA to place relationship file** `tab20_zcta520_place20_natl.txt` (9,811,563 bytes, SHA-256 `698a5dad…285d`) | 2020 | Census Bureau data, same terms (17 U.S.C. 105) | go |
+
+What comes from the data and what is synthetic:
+
+- From TIGER: street names (the Census spelling with its type and directional abbreviations, split with the Publication 28 tables), the ZIP Code of each side of an address range, the house-number range and its parity, and the county (state or territory).
+- Synthetic: the **house number** is drawn at random inside the range, even or odd as the parity column says, from a hash of the range id and a draw index (three draws per range side; 16 in VI, AS and MP, which have few ranges). In AS and MP, which have **no address ranges** in TIGER (the edges files hold road names only, apart from five ranged edges on Saipan), the house number is drawn from 1 to 998 and the ZIP follows the island (USPS: 96799 for American Samoa, 96950 Saipan, 96951 Rota, 96952 Tinian); the records are counted as `source-tigeredge` in the manifest. The **city** is a place from the relationship file that overlaps the ZIP in the same state, drawn with probability proportional to the overlapped land area, so it is a plausible locality for the ZIP and not the postal city of that street. Puerto Rico uses the urban zones (`zona urbana`) as cities and the communities (`comunidad`) of the ZIP as urbanization names. Recipients, organizations, unit numbers, ZIP+4 digits, PO boxes, routes and military lines are invented as for the other sets.
+- Puerto Rico (USPS Publication 28 appendix I, sections 51.1 to 51.4): the street prefix stays in the street name (`CALLE AMAPOLA`, `AVE FD ROOSEVELT`, `CARR 115`), the Census abbreviations `Cll`, `Cam`, `Pso`, `Plz` are written out, `Ave`/`Avenida` and `Carr`/`Carretera` are drawn by hash, and state routes (`Pr- 8177`) are written `PR-8177` or `CARR 8177`. The urbanization line comes before the delivery line and is written in 75 % of examples when the record has one; its whole text (`URB`, `Urbanizacion`, `Urbanización` or none, then the name) is one `urbanization` span, a label the rule parser's field list also names. Layouts: `templates/layouts-pr.tsv`, version `797561056fa22c8b`; the base template version stays `74baca1530eae5f8`.
+- Rows left out and why are counted in `rejects.tsv`: no usable ZIP-to-place link (rural ZIPs outside every place), an address range that does not parse (letters that differ at its two ends), a road class that is not a street (only primary, secondary, local and private roads are kept), and similar.
+
+Seed `20261105`, dev split `hash(record id, split salt) mod 1000 < 20` of the range-draw id (`tiger:<state>:<range id>:<draw>`). The split is by record, as for NAD and ODA: a street can appear in train and dev with different house numbers, so the dev loss measures the head's fit to unseen records, not to unseen streets. Evaluation sets are not drawn from this data.
+
+Run (worker, 2026-11-05): `count --caps PR=80000,VI=24500,*=27000 --per-range *=3,VI=16,AS=16,MP=16`, then `render`; twice with the same seed:
+
+| File | Examples | SHA-256 (both runs) |
+|---|---|---|
+| `us.train.jsonl` | 248,662 | `637dbf7077f09b4db031a76fb4a4acaa86c816abba2e64ec9a91357c5c710f9f` |
+| `us.dev.jsonl` | 4,988 | `439197188103c68b36f4c837a55e55b2f5af32efddcaee9b1926364bd083612e` |
+
+Manifest SHA-256 `fee680bda4fcc109cc6a92657b41e0640bb9c54620ec542b12f3d6350a1a8ceb`; selection file `ab9d4d0088bcdb62867b5ff73be0dfa8c1e216a9ca9875a8d69d5bc6034069b7`. 2,482 repeated addresses were skipped. All 253,650 examples pass the span checks (0 failures).
+
+| Region | Train | Dev | Note |
+|---|---|---|---|
+| PR | 76,691 | 1,539 | cap 80,000 |
+| GU | 26,368 | 506 | |
+| HI | 26,172 | 525 | |
+| MI | 26,351 | 536 | |
+| MS | 26,680 | 541 | |
+| NH | 26,411 | 554 | |
+| NV | 26,296 | 521 | |
+| VI | 4,160 | 81 | the three counties hold few ranges; draws collide on short ranges |
+| MP | 4,938 | 91 | road names only (edges); few distinct names |
+| AS | 4,595 | 94 | road names only (edges); few distinct names |
+
+VI, MP and AS stay far below the 27 k of the other regions because the source has few distinct streets, not because of a cap; more draws only repeat the same addresses. VI also has 2,695 NAD rows in the first set.
+
+What the library's rule parser recovers from about 600 training examples per region (every labelled field, same label and span; information): HI 77.3 %, MI 70.3 %, NH 67.2 %, MP 57.6 %, NV 55.4 %, VI 51.0 %, MS 48.6 %, GU 40.7 %, AS 7.3 %, PR 6.3 %. AS and PR are low, probably because the rules do not read `Rte 114` (a Census route abbreviation), Spanish prefixes or the urbanization line; the rules never return an `urbanization` field (0 of 424 in the first sample). Detail: `check.txt` next to the data.
+
 ## Attribution lines for the model package notices
 
 - Address points: U.S. Department of Transportation, National Address Database (public domain).
+- Street names and address ranges for Puerto Rico, Guam, the U.S. Virgin Islands, the Northern Mariana Islands, American Samoa, Hawaii, Michigan, Mississippi, Nevada and New Hampshire: U.S. Census Bureau, TIGER/Line Shapefiles 2025 and the 2020 ZCTA to place relationship file (public domain).
 - "Contains information licensed under the Open Government Licence – Canada." Source: Statistics Canada, The Open Database of Addresses (ODA), version 1.0, compiled from the open address data of the provincial, regional and municipal governments named in the ODA's `Data_Sources.csv`, each under its own open licence (attribution statements listed there).
