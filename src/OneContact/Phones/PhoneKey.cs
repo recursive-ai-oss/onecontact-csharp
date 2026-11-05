@@ -1,3 +1,5 @@
+using RecursiveAI.OneContact.Phones;
+
 namespace RecursiveAI.OneContact.Keys;
 
 /// <summary>
@@ -15,7 +17,20 @@ public static class PhoneKey
     {
         KeyVersions.ThrowIfUndefined(version);
 
-        // PLACEHOLDER (V1 is not published yet): the key is the canonical form until the Phone rules are written.
-        return value.Canonical;
+        // Key V1: the E.164 digits, and the extension (digits only) after an "x" when there is one. Nothing else varies: the same
+        // line written with different punctuation, prefixes or scripts gets one key. Validity plays no part in the key.
+        if (value.CountryCode == 0)
+        {
+            return string.Empty;
+        }
+
+        string e164 = "+" + value.CountryCode.ToString(System.Globalization.CultureInfo.InvariantCulture) + value.NationalSignificantNumber;
+        if (string.IsNullOrEmpty(value.Extension))
+        {
+            return e164;
+        }
+
+        string ext = PhoneText.NormalizeDigitsOnly(value.Extension);
+        return ext.Length == 0 ? e164 : e164 + "x" + ext;
     }
 }

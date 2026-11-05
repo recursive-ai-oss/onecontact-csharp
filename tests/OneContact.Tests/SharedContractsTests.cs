@@ -105,8 +105,9 @@ public class SharedContractsTests
     {
         ContactValue v = Contacts.Normalize(text);
         Assert.Equal(kind, v.Kind);
-        Assert.Equal(text, v.Canonical);
-        Assert.Equal(text, v.ToString());
+        string expected = kind == ContactKind.Phone ? "+12024561111" : text;
+        Assert.Equal(expected, v.Canonical);
+        Assert.Equal(expected, v.ToString());
     }
 
     [Fact]

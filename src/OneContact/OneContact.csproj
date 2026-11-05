@@ -11,6 +11,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Tests" />
     <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Fuzz" />
+    <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Bench" />
     <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).AotSmoke" />
   </ItemGroup>
 

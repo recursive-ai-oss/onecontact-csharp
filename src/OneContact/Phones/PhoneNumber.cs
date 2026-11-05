@@ -27,12 +27,35 @@ public readonly partial struct PhoneNumber :
     IEqualityOperators<PhoneNumber, PhoneNumber, bool>
 {
     private readonly string? _canonical;
+    private readonly ulong _nationalNumber;
+    private readonly int _countryCode;
+    private readonly byte _leadingZeros;
+    private readonly CountryCodeSource _codeSource;
+    private readonly string? _extension;
+    private readonly string? _rawInput;
+    private readonly string? _carrierCode;
 
-    internal PhoneNumber(string canonical, SourceSpan source, PhoneFacts flags)
+    internal PhoneNumber(
+        int countryCode,
+        ulong nationalNumber,
+        int leadingZeros,
+        string? extension,
+        string? rawInput,
+        CountryCodeSource codeSource,
+        string? carrierCode,
+        SourceSpan source,
+        PhoneFacts flags)
     {
-        _canonical = canonical;
+        _countryCode = countryCode;
+        _nationalNumber = nationalNumber;
+        _leadingZeros = (byte)leadingZeros;
+        _extension = string.IsNullOrEmpty(extension) ? null : extension;
+        _rawInput = rawInput;
+        _codeSource = codeSource;
+        _carrierCode = carrierCode;
         Source = source;
         Flags = flags;
+        _canonical = PhoneFormatter.Canonical(countryCode, nationalNumber, leadingZeros, _extension);
     }
 
     /// <summary>Gets the canonical form: faithful to the standard or the authority's style, never changing where mail goes or what a link points to. Empty for the default value.</summary>
@@ -63,7 +86,7 @@ public readonly partial struct PhoneNumber :
     public static PhoneNumber Parse(string s)
     {
         ArgumentNullException.ThrowIfNull(s);
-        return Parse(s.AsSpan());
+        return Parse(s, Region.Unknown);
     }
 
     /// <summary>Parses a value. Numbers without a leading <c>+</c> are national and need a region: use the overload that takes one.</summary>
@@ -93,7 +116,7 @@ public readonly partial struct PhoneNumber :
             return false;
         }
 
-        return TryParse(s.AsSpan(), out result);
+        return TryParse(s, Region.Unknown, out result);
     }
 
     /// <summary>Tries to parse a value.</summary>
@@ -120,7 +143,13 @@ public readonly partial struct PhoneNumber :
     public static PhoneNumber Parse(string s, Region defaultRegion)
     {
         ArgumentNullException.ThrowIfNull(s);
-        return Parse(s.AsSpan(), defaultRegion);
+        OperationStatus status = PhoneNumberParser.TryParse(s, defaultRegion, out PhoneNumber value, out ParseDetail detail);
+        if (status != OperationStatus.Done)
+        {
+            throw ContactParseException.FromDetail(ContactKind.Phone, detail, s.Length);
+        }
+
+        return value;
     }
 
     /// <summary>Parses a phone number, reading numbers without a leading <c>+</c> as national numbers of <paramref name="defaultRegion"/>.</summary>
@@ -152,7 +181,7 @@ public readonly partial struct PhoneNumber :
             return false;
         }
 
-        return TryParse(s.AsSpan(), defaultRegion, out result);
+        return PhoneNumberParser.TryParse(s, defaultRegion, out result, out _) == OperationStatus.Done;
     }
 
     /// <summary>Tries to parse a phone number, reading numbers without a leading <c>+</c> as national numbers of <paramref name="defaultRegion"/>.</summary>

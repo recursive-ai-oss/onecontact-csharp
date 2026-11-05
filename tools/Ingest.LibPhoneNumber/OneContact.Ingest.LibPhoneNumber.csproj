@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Compiles the pinned libphonenumber metadata files (see upstream/libphonenumber/PIN) into OneContact's tables. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Ingest/OneContact.Ingest.csproj" />
+    <!-- The XML reader and the binary codec are shared with the library so that user-supplied metadata goes through the same reader. -->
+    <Compile Include="../../src/OneContact/Phones/Metadata/TerritoryData.cs" Link="Shared/TerritoryData.cs" />
+    <Compile Include="../../src/OneContact/Phones/Metadata/PhoneMetadataXml.cs" Link="Shared/PhoneMetadataXml.cs" />
+    <Compile Include="../../src/OneContact/Phones/Metadata/PhoneMetadataCodec.cs" Link="Shared/PhoneMetadataCodec.cs" />
+  </ItemGroup>
+
+</Project>

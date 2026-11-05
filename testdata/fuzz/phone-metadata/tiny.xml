@@ -1,0 +1,8 @@
+<phoneNumberMetadata><territories>
+  <territory id="ZA" countryCode="27" internationalPrefix="00" nationalPrefix="0">
+    <availableFormats><numberFormat pattern="(\d{2})(\d{3})(\d{4})"><leadingDigits>[1-9]</leadingDigits><format>$1 $2 $3</format></numberFormat></availableFormats>
+    <generalDesc><nationalNumberPattern>[1-9]\d{8}</nationalNumberPattern></generalDesc>
+    <fixedLine><possibleLengths national="9"/><exampleNumber>101234567</exampleNumber><nationalNumberPattern>1\d{8}</nationalNumberPattern></fixedLine>
+    <mobile><possibleLengths national="9"/><exampleNumber>712345678</exampleNumber><nationalNumberPattern>7\d{8}</nationalNumberPattern></mobile>
+  </territory>
+</territories></phoneNumberMetadata>

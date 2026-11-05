@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Text.Json;
 using RecursiveAI.OneContact;
 using RecursiveAI.OneContact.Addresses;
+using RecursiveAI.OneContact.Phones;
 using RecursiveAI.OneContact.Keys;
 using RecursiveAI.OneContact.Serialization;
 
@@ -21,6 +22,18 @@ PhoneNumber phone = PhoneNumber.Parse("+1 202 456 1111");
 Check(phone.Canonical.Length > 0, "phone parse");
 Check(!PhoneNumber.TryParse("2024561111", out _), "national phone without a region is refused");
 Check(PhoneNumber.TryParse("2024561111", Region.US, out _), "national phone with a region");
+
+PhoneNumber us = PhoneNumber.Parse("(202) 456-1111", Region.US);
+Check(us.E164 == "+12024561111", "phone e164");
+Check(us.Format(PhoneFormat.International) == "+1 202-456-1111", "phone international format");
+Check(us.Format(PhoneFormat.National) == "(202) 456-1111", "phone national format");
+Check(us.Type == PhoneNumberType.FixedLineOrMobile, "phone type");
+Check(us.IsValid && us.Key == "+12024561111", "phone validity and key");
+Check(PhoneNumber.Parse("+44 20 7946 0958").Format(PhoneFormat.Rfc3966) == "tel:+44-20-7946-0958", "phone rfc3966");
+Check(PhoneNumber.Parse("1-800-FLOWERS", Region.US).E164 == "+18003569377", "vanity phone");
+PhoneNumberParser phones = PhoneNumberParser.Default;
+Check(phones.GetExample(Region.Parse("DE"), PhoneNumberType.Mobile) is not null, "phone example");
+Check(phones.TryParse("tel:+1-202-456-1111;ext=5", Region.Unknown, false, out PhoneNumber ext, out _) == OperationStatus.Done && ext.Extension == "5", "phone tel uri");
 
 EmailAddress email = EmailAddress.Parse("  a@example.com ");
 Check(email.Source.Start == 2 && email.Source.Length == 13, "email offsets");
