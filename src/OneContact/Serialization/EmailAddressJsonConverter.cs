@@ -18,7 +18,7 @@ public sealed class EmailAddressJsonConverter : JsonConverter<EmailAddress>
     public override void Write(Utf8JsonWriter writer, EmailAddress value, JsonSerializerOptions options)
     {
         ArgumentNullException.ThrowIfNull(writer);
-        writer.WriteStringValue(value.Canonical);
+        JsonText.WriteString(writer, value.Canonical);
     }
 
     /// <inheritdoc/>
@@ -29,7 +29,7 @@ public sealed class EmailAddressJsonConverter : JsonConverter<EmailAddress>
     public override void WriteAsPropertyName(Utf8JsonWriter writer, [DisallowNull] EmailAddress value, JsonSerializerOptions options)
     {
         ArgumentNullException.ThrowIfNull(writer);
-        writer.WritePropertyName(value.Canonical);
+        JsonText.WritePropertyName(writer, value.Canonical);
     }
 
     private static EmailAddress Parse(string? text)

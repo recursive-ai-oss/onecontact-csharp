@@ -20,31 +20,48 @@ public sealed class PostalAddressJsonConverter : JsonConverter<PostalAddress>
     {
         ArgumentNullException.ThrowIfNull(writer);
         Addresses.AddressParts? parts = value.PartsForJson;
-        if (parts is null || value.IsParsedFromText)
+        if (parts is null)
         {
-            writer.WriteStringValue(value.Canonical);
+            JsonText.WriteString(writer, value.Canonical);
+            return;
+        }
+
+        if (value.ParsedForJson is { } parsed)
+        {
+            // The text the rules read is stored beside the canonical form, so reading it back gives the same renderings in the same casing.
+            writer.WriteStartObject();
+            JsonText.WriteString(writer, "canonical", value.Canonical);
+            JsonText.WriteString(writer, "text", parsed.SourceText.Substring(parsed.Span.Start, parsed.Span.Length));
+            if (!parsed.Hint.IsUnknown)
+            {
+                JsonText.WriteString(writer, "hint", parsed.Hint.Code);
+            }
+
+            writer.WriteNumber("sourceStart", value.Source.Start);
+            writer.WriteNumber("sourceLength", value.Source.Length);
+            writer.WriteEndObject();
             return;
         }
 
         writer.WriteStartObject();
-        writer.WriteString("canonical", value.Canonical);
-        writer.WriteString("country", parts.Country.IsUnknown ? string.Empty : parts.Country.Code);
+        JsonText.WriteString(writer, "canonical", value.Canonical);
+        JsonText.WriteString(writer, "country", parts.Country.IsUnknown ? string.Empty : parts.Country.Code);
         if (parts.Language is not null)
         {
-            writer.WriteString("language", parts.Language);
+            JsonText.WriteString(writer, "language", parts.Language);
         }
 
-        writer.WriteString("adminArea", parts.AdminArea);
-        writer.WriteString("locality", parts.Locality);
-        writer.WriteString("dependentLocality", parts.DependentLocality);
-        writer.WriteString("postalCode", parts.PostalCode);
-        writer.WriteString("sortingCode", parts.SortingCode);
-        writer.WriteString("organization", parts.Organization);
-        writer.WriteString("recipient", parts.Recipient);
+        JsonText.WriteString(writer, "adminArea", parts.AdminArea);
+        JsonText.WriteString(writer, "locality", parts.Locality);
+        JsonText.WriteString(writer, "dependentLocality", parts.DependentLocality);
+        JsonText.WriteString(writer, "postalCode", parts.PostalCode);
+        JsonText.WriteString(writer, "sortingCode", parts.SortingCode);
+        JsonText.WriteString(writer, "organization", parts.Organization);
+        JsonText.WriteString(writer, "recipient", parts.Recipient);
         writer.WriteStartArray("streetLines");
         foreach (string line in parts.StreetLines)
         {
-            writer.WriteStringValue(line);
+            JsonText.WriteString(writer, line);
         }
 
         writer.WriteEndArray();
@@ -62,7 +79,7 @@ public sealed class PostalAddressJsonConverter : JsonConverter<PostalAddress>
     public override void WriteAsPropertyName(Utf8JsonWriter writer, [DisallowNull] PostalAddress value, JsonSerializerOptions options)
     {
         ArgumentNullException.ThrowIfNull(writer);
-        writer.WritePropertyName(value.Canonical);
+        JsonText.WritePropertyName(writer, value.Canonical);
     }
 
     private static PostalAddress Parse(string? text)
@@ -79,7 +96,8 @@ public sealed class PostalAddressJsonConverter : JsonConverter<PostalAddress>
     {
         string canonical = string.Empty, country = string.Empty, admin = string.Empty, locality = string.Empty, dependent = string.Empty;
         string postal = string.Empty, sorting = string.Empty, organization = string.Empty, recipient = string.Empty;
-        string? language = null;
+        string? language = null, text = null;
+        Region hint = default;
         List<string> lines = [];
         uint flags = 0;
         int start = 0, length = 0;
@@ -96,6 +114,8 @@ public sealed class PostalAddressJsonConverter : JsonConverter<PostalAddress>
             {
                 case "canonical": canonical = ReadString(ref reader); break;
                 case "country": country = ReadString(ref reader); break;
+                case "text": text = ReadString(ref reader); break;
+                case "hint": hint = Region.TryParse(ReadString(ref reader), out Region h) ? h : throw new JsonException("The JSON value is not a valid PostalAddress."); break;
                 case "language": language = ReadString(ref reader); break;
                 case "adminArea": admin = ReadString(ref reader); break;
                 case "locality": locality = ReadString(ref reader); break;
@@ -121,6 +141,17 @@ public sealed class PostalAddressJsonConverter : JsonConverter<PostalAddress>
                 case "sourceLength": length = reader.TokenType == JsonTokenType.Number && reader.TryGetInt32(out int ln) ? ln : throw new JsonException("The JSON value is not a valid PostalAddress."); break;
                 default: reader.Skip(); break;
             }
+        }
+
+        if (text is not null)
+        {
+            if (start < 0 || length < 0 || Addresses.Parsing.RuleAddressParser.TryParse(text, hint, out Addresses.Parsing.ParsedAddress? read, out _) != System.Buffers.OperationStatus.Done
+                || read is null || !string.Equals(read.ToString(), canonical, StringComparison.Ordinal))
+            {
+                throw new JsonException("The JSON value is not a valid PostalAddress.");
+            }
+
+            return PostalAddress.RestoreParsed(read, new SourceSpan(start, length));
         }
 
         Region region = default;

@@ -59,7 +59,11 @@ public readonly partial struct PostalAddress
     internal static PostalAddress Restore(string canonical, SourceSpan source, AddressFacts flags, Addresses.AddressParts parts) =>
         new(canonical, parts, null, source, flags);
 
+    // Used by the JSON converter for an address read from text: the rules read the stored text again, so the renderings keep the casing the text had.
+    internal static PostalAddress RestoreParsed(ParsedAddress parsed, SourceSpan source) =>
+        new(parsed.ToString(), Addresses.PostalAddressParser.PartsOf(parsed), parsed, source, parsed.Facts);
+
     internal Addresses.AddressParts? PartsForJson => _parts;
 
-    internal bool IsParsedFromText => _parsed is not null;
+    internal ParsedAddress? ParsedForJson => _parsed;
 }

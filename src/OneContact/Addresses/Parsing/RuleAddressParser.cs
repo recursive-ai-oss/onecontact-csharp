@@ -42,7 +42,14 @@ public static class RuleAddressParser
             return OperationStatus.InvalidData;
         }
 
-        return new Reader(text, hint).Run(out address, out detail);
+        OperationStatus status = new Reader(text, hint).Run(out address, out detail);
+        if (address is not null)
+        {
+            address.SourceText = text;
+            address.Hint = hint;
+        }
+
+        return status;
     }
 
     private sealed record Unit(List<AddressToken> Tokens);

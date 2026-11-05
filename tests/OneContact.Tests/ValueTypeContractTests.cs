@@ -60,6 +60,8 @@ public class ValueTypeContractTests
     [Fact]
     public void Company_contract() => Contract(CompanyName.Parse("Acme Holdings Ltd"), ContactJsonContext.Default.CompanyName);
 
+    private static readonly JsonSerializerOptions RelaxedOptions = new() { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
     private static void Contract<T>(T value, JsonTypeInfo<T> json)
         where T : struct, IContactValue, ISpanParsable<T>, ISpanFormattable, IEquatable<T>, System.Numerics.IEqualityOperators<T, T, bool>
     {
@@ -97,7 +99,12 @@ public class ValueTypeContractTests
 
         // JSON: a string holding the canonical form, through the source-generated context (no reflection).
         string serialized = JsonSerializer.Serialize(value, json);
-        Assert.Equal(JsonSerializer.Serialize(text), serialized);
+        // An address read from text is written as an object that also holds the text (so its renderings keep their casing); the other types are plain strings.
+        if (typeof(T) != typeof(PostalAddress))
+        {
+            Assert.Equal(JsonSerializer.Serialize(text, RelaxedOptions), serialized);
+        }
+
         T back = JsonSerializer.Deserialize(serialized, json);
         Assert.True(back == value);
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize("\"\"", json));
