@@ -20,6 +20,26 @@ if (args.Length > 0 && args[0] == "--key")
     return 0;
 }
 
+if (args.Length > 0 && args[0] == "--explain")
+{
+    // Prints how the rules read each text (\n in an argument is a line break): the status, the reason when refused, and every field with its span and rule.
+    foreach (string a in args.Skip(1))
+    {
+        string text = a.Replace("\\n", "\n", StringComparison.Ordinal);
+        OperationStatus st = RuleAddressParser.TryParse(text, Region.Unknown, out ParsedAddress? pa, out ParseDetail pd);
+        Console.WriteLine(a + "  =>  " + (st == OperationStatus.Done ? "read" : "refused " + pd.PrimaryReason.Id));
+        if (pa is not null)
+        {
+            foreach (ParsedAddressField f in pa.Fields)
+            {
+                Console.WriteLine($"    {f.Name} [{f.Span.Start},{f.Span.End}) '{f.Text}' -> '{f.Standard}' ({f.Rule})");
+            }
+        }
+    }
+
+    return 0;
+}
+
 if (args.Length > 1 && args[0] == "--sample")
 {
     StringBuilder md = new();

@@ -9,8 +9,10 @@ tools/data/fetch-nad.sh        # US DOT National Address Database, text file (8.
 tools/data/fetch-oda.sh        # Statistics Canada Open Database of Addresses, ten files, checked against pins/oda.pin
 AddressUsCa count  --nad <NAD_TXT.zip> --oda <dir of ODA zips> --out <dir>      # usable records per region, sampling rates
 AddressUsCa render --nad <NAD_TXT.zip> --oda <dir of ODA zips> --out <dir> --seed 20261105
-AddressUsCa check  --out <dir> --sample 5000
+AddressUsCa check  --out <dir> --sample 5000 [--offset N --misses <file>]
 ```
+
+`check` with `--offset N` takes line N of every sampling step instead of the first (so a sample used for tuning and a fresh one for measuring share no example), skips the span checks, and with `--misses` writes every example the rules did not fully recover, with the missed and the extra fields.
 
 The registers go to `$ONECONTACT_DATA/train/<register>` (default `~/onecontact/data/train`), never into the repository. `count` reads both registers once and writes `selection.tsv`: for each country and region the number of usable records and a sampling rate, chosen so that every region gets the same number of records (small regions are taken whole) and the total is near the target (1.3 M US, 380 k CA). `render` keeps a record when `hash(record id, selection salt)` is below its region's rate, drops a record whose address repeats one already kept, and writes the examples and `manifest.json`.
 

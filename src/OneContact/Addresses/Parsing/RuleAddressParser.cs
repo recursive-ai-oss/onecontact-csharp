@@ -93,6 +93,12 @@ public static class RuleAddressParser
                     AddressToken first = lastTokens[lastTokens.Count - words];
                     AddressToken last = lastTokens[^1];
                     string written = text.Substring(first.Start, last.Start + last.Length - first.Start);
+                    // The last period of an abbreviation such as U.S.A. belongs to the name; the word reader drops periods at the end of a word.
+                    if (written.Contains('.', StringComparison.Ordinal) && first.Start + written.Length < text.Length && text[first.Start + written.Length] == '.')
+                    {
+                        written += ".";
+                    }
+
                     countryName = new ParsedAddressField("country", written, r == Region.US ? "USA" : "CANADA", new SourceSpan(first.Start, written.Length), 1f, DecisionSource.Rule, "country-name");
                     namedCountry = r;
                     lastTokens.RemoveRange(lastTokens.Count - words, words);
@@ -128,6 +134,18 @@ public static class RuleAddressParser
             {
                 detail = ParseDetail.Failure(ReasonCode.AddressNoLastLine, new SourceSpan(0, text.Length));
                 return OperationStatus.InvalidData;
+            }
+
+            // "RIVERVIEW NB, E1B 4E2": the postal code stands alone after a comma and the province ends the segment before it.
+            if (ll.Admin is null && ll.Postal is not null && units.Count >= 2)
+            {
+                List<AddressToken> withProvince = [.. units[^2].Tokens, .. units[^1].Tokens];
+                LastLine? joined = ParseLastLine(withProvince, hint);
+                if (joined?.Admin is not null && joined.Postal is not null)
+                {
+                    ll = joined;
+                    units.RemoveAt(units.Count - 1);
+                }
             }
 
             units.RemoveAt(units.Count - 1);
@@ -182,10 +200,34 @@ public static class RuleAddressParser
             // The city, and the delivery line when it runs on into the city without a comma (123 MAIN ST SPRINGFIELD).
             List<AddressToken> cityTokens = ll.Locality;
             List<AddressToken> runOn = [];
+
             if (cityTokens.Count == 0 && units.Count > 0 && StreetLineParser.Parse(units[^1].Tokens, canada, pr) is null)
             {
                 cityTokens = units[^1].Tokens;
                 units.RemoveAt(units.Count - 1);
+            }
+            else if (cityTokens.Count == 0 && units.Count > 0)
+            {
+                // "72 Dewey St Richford, Vermont 05476": the state has no city of its own, and words left after the street's last word can only be the city.
+                List<AddressToken> lastUnit = units[^1].Tokens;
+                int deliveryEnd = StreetLineParser.FindDeliveryEnd(lastUnit, canada);
+                if (deliveryEnd > 0 && deliveryEnd < lastUnit.Count && StreetLineParser.Parse(lastUnit.GetRange(0, deliveryEnd), canada, pr) is not null)
+                {
+                    cityTokens = lastUnit.GetRange(deliveryEnd, lastUnit.Count - deliveryEnd);
+                    units[^1] = new Unit(lastUnit.GetRange(0, deliveryEnd));
+                }
+            }
+
+            // "123 Main St, Suite 4 Springfield VA": a unit designator with its number can only be the end of the delivery line, so it is not part of the city.
+            if (units.Count > 0 && cityTokens.Count >= 3 && StreetLineParser.IsUnitDesignator(cityTokens[0].Key, canada, out bool designatorNeedsNumber) && designatorNeedsNumber
+                && ((StreetLineParser.IsNumberLike(cityTokens[1].Key) && cityTokens[1].Text.Any(char.IsAsciiDigit)) || (cityTokens[1].Text.Length == 1 && char.IsAsciiLetter(cityTokens[1].Text[0]))))
+            {
+                List<AddressToken> withUnit = [.. units[^1].Tokens, cityTokens[0], cityTokens[1]];
+                if (StreetLineParser.Parse(withUnit, canada, pr) is not null)
+                {
+                    units[^1] = new Unit(withUnit);
+                    cityTokens = cityTokens.GetRange(2, cityTokens.Count - 2);
+                }
             }
 
             if (units.Count == 0 || (cityTokens.Count >= 3 && (StreetLineParser.IsHouseNumber(cityTokens[0].Text, canada) || StartsBox(cityTokens, canada))))
@@ -234,6 +276,23 @@ public static class RuleAddressParser
             for (; u >= 0; u--)
             {
                 List<AddressToken> tokens = units[u].Tokens;
+
+                // "Raymond Miller 11505 6th Pl NE": words with no digit and no street word in front of a house number are a recipient or organization the caller ran into the line.
+                if (delivery.Count == 0 && pending is null && !pr && tokens.Count >= 3 && !StreetLineParser.IsHouseNumber(tokens[0].Text, canada) && !StreetLineParser.IsUnitDesignator(tokens[0].Key, canada, out _))
+                {
+                    int k = FirstDeliveryToken(tokens, canada);
+                    if (k >= 1 && (k >= 2 || u > 0) && !tokens.Take(k).Any(t => t.Text.Any(char.IsAsciiDigit) || StreetLineParser.IsSuffix(t.Key, canada, out _) || UsCaRules.UsDirectionals.ContainsKey(t.Key)))
+                    {
+                        List<AddressToken> rest = tokens.GetRange(k, tokens.Count - k);
+                        List<StreetLine>? restLines = StreetLineParser.Parse(rest, canada, pr);
+                        if (restLines is not null && restLines.Any(l => l.Kind == StreetLineKind.Street && l.Find(StreetPartRole.HouseNumber) is not null))
+                        {
+                            leading.Add(Lead(tokens.GetRange(0, k)));
+                            tokens = rest;
+                        }
+                    }
+                }
+
                 if (pending is not null)
                 {
                     List<AddressToken> joined = [.. tokens, .. pending];
@@ -248,6 +307,19 @@ public static class RuleAddressParser
                     // The unit did not belong to the line above: it stands on its own line (Publication 28 section 213.3 puts it above the delivery line).
                     delivery.InsertRange(0, StreetLineParser.Parse(pending, canada, pr)!);
                     pending = null;
+                }
+
+                // Canada Post section 4.4, French addresses: the civic number may be followed by a comma, then the street type and name.
+                if (canada && u > 0 && pending is null && tokens.Count >= 2 && UsCaRules.CaStreetTypesFrench.ContainsKey(tokens[0].Key)
+                    && units[u - 1].Tokens.Count == 1 && StreetLineParser.IsHouseNumber(units[u - 1].Tokens[0].Text, canada))
+                {
+                    List<StreetLine>? civic = StreetLineParser.Parse([units[u - 1].Tokens[0], .. tokens], canada, pr);
+                    if (civic is not null && civic.Any(l => l.Kind == StreetLineKind.Street))
+                    {
+                        delivery.InsertRange(0, civic);
+                        u--;
+                        continue;
+                    }
                 }
 
                 // The line just above the city is the delivery line even without a house number (Publication 28 figures show "BAY DR W" alone).
@@ -344,12 +416,18 @@ public static class RuleAddressParser
         {
             string k0 = tokens[0].Key;
             string k1 = tokens.Count > 1 ? tokens[1].Key : string.Empty;
-            return (k0 == "PO" && k1 == "BOX") || k0 == "POBOX" || k0 == "RR" || k0 == "HC" || (k0 == "RURAL" && k1 == "ROUTE") || (canada && k0 is "CP" or "GD");
+            return StreetLineParser.BoxPhraseEnd(tokens, 0, canada) > 0 || (k0 == "PO" && k1 == "BOX") || k0 == "POBOX" || k0 == "RR" || k0 == "HC" || (k0 == "RURAL" && k1 == "ROUTE") || (canada && k0 is "CP" or "GD");
         }
 
         // Words in front of the first house number or box word, with no digit among them, are a recipient the caller ran into the address.
         private static int FirstDeliveryToken(List<AddressToken> t, bool canada)
         {
+            // PSC 3022 BOX 684 (Publication 28 section 238.1): the unit words belong to the delivery line.
+            if (!canada && t.Count >= 4 && t[0].Key is "CPR" or "OPC" or "PSC" or "UPR" or "UNIT" && StreetLineParser.IsNumberLike(t[1].Key) && t[2].Key == "BOX")
+            {
+                return 0;
+            }
+
             for (int i = 0; i < t.Count; i++)
             {
                 if (t[i].Text.Any(char.IsAsciiDigit) && (StreetLineParser.IsHouseNumber(t[i].Text, canada) || StartsBox(t.GetRange(i, t.Count - i), canada)))
@@ -464,6 +542,7 @@ public static class RuleAddressParser
                     StreetLineKind.Military => AddressFacts.Military,
                     _ => AddressFacts.None,
                 };
+                int lastName = -1;
                 foreach (StreetPart part in line.Parts)
                 {
                     if (part.Role == StreetPartRole.UnitDesignator)
@@ -471,7 +550,29 @@ public static class RuleAddressParser
                         facts |= AddressFacts.HasUnit;
                     }
 
-                    fields.Add(new ParsedAddressField("street." + RoleName(part.Role), part.Text, part.Standard, part.Span, 1f, DecisionSource.Rule, part.Rule));
+                    SourceSpan partSpan = part.Span;
+                    string partText = part.Text;
+
+                    // The abbreviation R.R. is one word whose last period belongs to it; the word reader drops periods at the end of a word.
+                    if (part.Role == StreetPartRole.RouteDesignator && partText == "R.R" && partSpan.End < text.Length && text[partSpan.End] == '.')
+                    {
+                        partSpan = new SourceSpan(partSpan.Start, partSpan.Length + 1);
+                        partText += ".";
+                    }
+
+                    // The words of a street name are one field: a name such as "Deer Park" or "County Road 12" is a single span of the line.
+                    if (part.Role == StreetPartRole.StreetName && lastName >= 0 && fields[lastName].Span.End <= partSpan.Start
+                        && text.AsSpan(fields[lastName].Span.End, partSpan.Start - fields[lastName].Span.End).IsWhiteSpace()
+                        && text.AsSpan(fields[lastName].Span.End, partSpan.Start - fields[lastName].Span.End).IndexOf('\n') < 0)
+                    {
+                        ParsedAddressField previous = fields[lastName];
+                        int mergedLength = partSpan.End - previous.Span.Start;
+                        fields[lastName] = previous with { Text = text.Substring(previous.Span.Start, mergedLength), Standard = previous.Standard + " " + part.Standard, Span = new SourceSpan(previous.Span.Start, mergedLength) };
+                        continue;
+                    }
+
+                    fields.Add(new ParsedAddressField("street." + RoleName(part.Role), partText, part.Standard, partSpan, 1f, DecisionSource.Rule, part.Rule));
+                    lastName = part.Role == StreetPartRole.StreetName ? fields.Count - 1 : -1;
                     if (part.Role == StreetPartRole.Other)
                     {
                         _issues.Add(new ParseIssue(ReasonCode.AddressUnplacedText, part.Span, IssueSeverity.Warning));
@@ -546,7 +647,8 @@ public static class RuleAddressParser
         private static string RoleName(StreetPartRole role) => role switch
         {
             StreetPartRole.HouseNumber => "house-number",
-            StreetPartRole.UnitPrefix => "unit-prefix",
+            // The 4 of "4-123 Main St" is the unit number, with the hyphen outside it.
+            StreetPartRole.UnitPrefix => "unit-number",
             StreetPartRole.Fraction => "fraction",
             StreetPartRole.PreDirectional => "pre-directional",
             StreetPartRole.StreetName => "name",

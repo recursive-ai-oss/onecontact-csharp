@@ -13,12 +13,22 @@ namespace OneContact.Data.AddressUsCa;
 /// </summary>
 internal static class Checker
 {
+    private static string? missesPath;
+
     private static readonly HashSet<string> LeadingLabels = new(StringComparer.Ordinal) { "recipient", "organization" };
 
     internal static int Run(Dictionary<string, string> o)
     {
         string dir = o["out"];
         int sample = int.Parse(o.GetValueOrDefault("sample", "5000"));
+        // --offset picks which line of every step the sample takes, so a sample used for tuning and a fresh one for measuring never share an example.
+        int offset = int.Parse(o.GetValueOrDefault("offset", "0"));
+        missesPath = o.GetValueOrDefault("misses");
+        if (missesPath is not null)
+        {
+            File.WriteAllText(missesPath, string.Empty);
+        }
+
         int failures = 0;
         StringBuilder report = new();
         foreach (string name in new[] { "us.train.jsonl", "us.dev.jsonl", "ca.train.jsonl", "ca.dev.jsonl" })
@@ -31,7 +41,7 @@ internal static class Checker
             long step = Math.Max(1, total / Math.Max(1, name.Contains("train", StringComparison.Ordinal) ? sample : sample / 10));
             foreach (string line in File.ReadLines(path))
             {
-                string? problem = Validate(line);
+                string? problem = o.ContainsKey("offset") ? null : Validate(line); // a sample run for measuring skips the span checks of the whole file
                 if (problem is not null)
                 {
                     bad++;
@@ -41,7 +51,7 @@ internal static class Checker
                     }
                 }
 
-                if (lines % step == 0 && name.Contains("train", StringComparison.Ordinal))
+                if (lines % step == offset % step && name.Contains("train", StringComparison.Ordinal))
                 {
                     kept.Add(line);
                 }
@@ -58,7 +68,11 @@ internal static class Checker
         }
 
         Console.Write(report.ToString());
-        File.WriteAllText(Path.Combine(dir, "check.txt"), report.ToString(), new UTF8Encoding(false));
+        if (!o.ContainsKey("offset"))
+        {
+            File.WriteAllText(Path.Combine(dir, "check.txt"), report.ToString(), new UTF8Encoding(false));
+        }
+
         return failures == 0 ? 0 : 1;
     }
 
@@ -144,6 +158,11 @@ internal static class Checker
             if (status != OperationStatus.Done || parsed is null)
             {
                 string key = "failed: " + detail.PrimaryReason.Id;
+                if (missesPath is not null)
+                {
+                    File.AppendAllText(missesPath, country + "\t" + text.Replace("\n", "\\n", StringComparison.Ordinal) + "\tREFUSED " + detail.PrimaryReason.Id + "\t\n");
+                }
+
                 statuses[key] = statuses.GetValueOrDefault(key) + 1;
                 foreach ((int _, int _, string l) in gold)
                 {
@@ -171,6 +190,14 @@ internal static class Checker
                 {
                     all = false;
                 }
+            }
+
+            if (!all && missesPath is not null)
+            {
+                string Lab(string l) => LeadingLabels.Contains(l) ? "leading-line" : l;
+                string missed = string.Join(" | ", gold.Where(g => !got.Contains((Lab(g.L), g.S, g.E))).Select(g => string.Concat(g.L, "=", text.AsSpan(g.S, g.E - g.S))));
+                string extra = string.Join(" | ", parsed.Fields.Where(f => !gold.Any(g => Lab(g.L) == f.Name && g.S == f.Span.Start && g.E == f.Span.End)).Select(f => f.Name + "=" + f.Text));
+                File.AppendAllText(missesPath, country + "\t" + text.Replace("\n", "\\n", StringComparison.Ordinal) + "\tMISSED " + missed + "\tEXTRA " + extra + "\n");
             }
 
             if (all)
