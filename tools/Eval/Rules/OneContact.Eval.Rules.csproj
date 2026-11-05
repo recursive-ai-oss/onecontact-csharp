@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Runs the rule-based address parser and name splitter over an evaluation set and writes predictions in the scorer's format. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <NoWarn>$(NoWarn);CA1303;CA1848</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../src/OneContact/OneContact.csproj" />
+  </ItemGroup>
+
+</Project>
