@@ -192,6 +192,17 @@ public class AddressParsingTests
         Assert.True(Parse("123 Main St Apt 4, Dover OH 44622").Facts.HasFlag(AddressFacts.HasUnit));
     }
 
+    [Fact]
+    public void DisplayWritesTheHashDesignatorWithoutASpaceAndPostalKeepsIt()
+    {
+        ParsedAddress a = Parse("425 Flower Blvd # 72\nLos Angeles CA 90012");
+        Assert.Equal("425 FLOWER BLVD # 72\nLOS ANGELES CA  90012", a.ToString(AddressStyle.Postal));
+        Assert.Equal("425 FLOWER BLVD # 72, LOS ANGELES CA 90012", a.ToString(AddressStyle.Postal, AddressLayout.SingleLine));
+        Assert.Equal("425 Flower Blvd #72\nLos Angeles, CA 90012", a.ToString(AddressStyle.Display));
+        Assert.Equal("425 Flower Blvd #72, Los Angeles, CA 90012", a.ToString(AddressStyle.Display, AddressLayout.SingleLine));
+        Assert.Equal("425 Flower Blvd #72, Los Angeles, CA 90012", Parse("425 flower blvd #72, los angeles, ca 90012").ToString(AddressStyle.Display, AddressLayout.SingleLine));
+    }
+
     [Theory]
     [InlineData("N6W23001 Bluemound Rd\nWaukesha WI 53186", "N6W23001 Bluemound Rd\nWaukesha, WI 53186")]
     [InlineData("123A Main St Apt 4B\nSpringfield VA 22162", "123A Main St Apt 4B\nSpringfield, VA 22162")]
