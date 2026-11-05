@@ -65,7 +65,7 @@ JSON nesting 64; microdata, RDFa and h-card item nesting 32; 200,000 item visits
 
 ## Visible text
 
-`ContactExtractor.Sources` defaults to `Markup | Text`. The text half reads what a reader would see, with rules only; the span model plugs into the same candidate seam later.
+`ContactExtractor.Sources` defaults to `Markup | Text`. The text half reads what a reader would see with rules, and with a model package referenced it adds what the rules left (below).
 
 **What is read.** Text nodes of the OneHtml document, in order, split into lines at block-level elements, `<br>`, list items and table cells. Each run keeps its landmark (`header`, `footer`/`contentinfo`, `main`, and so on, from the accessibility tree) and its nearest heading, and every character maps back to a byte offset in the original page (a UTF-16 offset when the page was given as a string). Non-text elements (`script`, `style`, `template`, `noscript`, `iframe`, `svg`, `head`, form lists and the like) are never read.
 
@@ -76,6 +76,18 @@ JSON nesting 64; microdata, RDFa and h-card item nesting 32; 200,000 item visits
 **Candidates.** Emails (our parser), websites (our parser and the PSL; a bare domain needs an ICANN suffix and must not look like a file name), phones (the core matcher at `Valid` leniency when the page or caller region is known, plus the shape rules for labelled numbers and `+` numbers), US/CA addresses (the rule parser over block-bounded windows) and names only where a label (`Name:`, `Contact person:`) makes them certain. The region is never guessed: an address without a region stays unnormalized with `address.country-required`, and an unlabelled national phone without a region is dropped.
 
 **Confidence** is fixed per rule: emails 0.9 (0.8 when decoded), phones 0.65–0.85, websites 0.6–0.85, addresses 0.7, labelled names 0.8, Cloudflare emails 0.9.
+
+## The span model
+
+When a model package that carries a contact-span model is referenced (`ContactModels.Spans`, `docs/models.md`), the text half also runs it over the visible text, in pieces of up to 40 lines or 3,000 characters. Rules first: the model's spans are considered only after every rule candidate has been taken, and a span that touches any character a rule took is dropped, so a rule's field is never replaced, shortened or split.
+
+- A model span becomes a field of the same kinds the rules make: `person` a name, `company` an organization (the grouping decides whether it names the record or its employer, as for a `Company:` label), `address`, `phone`, `email`, `website`. It must have a mean probability of at least 0.3 (chosen on development blocks, see below).
+- The core parsers still decide: a model email or website that does not parse (a website needs a registrable domain) is not a field, and a model phone is kept only when the numbering plan accepts it (and a region is known). A model address is parsed by the rules and then the address model like any other free-text address; nothing is invented.
+- Such a field has `Decision` = `DecisionSource.Model` and `Confidence` = the model's (halved when the value could not be normalized, as for every field); every other field says `Rule`. Its `Source` is `Text`.
+- **Blocks.** The model also says where a contact block begins. Grouping treats a block start as a hard edge: fields on or after the start line are not put in a group with fields before it. The layout rules (containers, landmarks, headings, four lines, a second email or address) still apply as before, so the model can only split a group, never join two.
+- **Without a model package** extraction is rules and markup as before, and `ExtractResult.TextModelPackage` names `RecursiveAI.OneContact.Models.Tier1` when the text half ran, so a caller can see what would add text spans. Nothing is downloaded.
+
+Development-block rows (field F1 of `ExtractText` with a US default region, exact span / overlap, 6,000 blocks, rules only → rules + model): address 43.9 → 96.6 / 46.2 → 99.2; company 0 → 93.2 / 0 → 96.8; person 0 → 95.2 / 0 → 97.4; phone 96.6 → 97.0 / 97.9 → 98.4; email 99.3 → 99.3; website 99.7 → 99.7. The rules find no names or companies without a label. The confidence cut was chosen on these blocks: from 0.0 to 0.3 scores are within 0.2 points, 0.6 loses a fifth of the company names and 0.75 most addresses.
 
 ## Obfuscation
 

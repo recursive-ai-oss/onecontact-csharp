@@ -1,6 +1,7 @@
 using RecursiveAI.OneContact.Extraction.Markup;
 using RecursiveAI.OneContact.Extraction.Obfuscation;
 using RecursiveAI.OneContact.Extraction.Records;
+using RecursiveAI.OneContact.Models;
 using RecursiveAI.OneHtml;
 using RecursiveAI.OneHtml.Parsing;
 
@@ -12,7 +13,7 @@ namespace RecursiveAI.OneContact.Extraction.Text;
 /// <see cref="FieldSource.Text"/> whose raw range is the text as written in the original input. Nothing here chooses a region: the
 /// core parsers are given one later, by the same rule the markup fields follow.
 /// </summary>
-internal sealed class TextFieldReader
+internal sealed partial class TextFieldReader
 {
     private const int MaxCandidates = 50_000;
 
@@ -21,6 +22,8 @@ internal sealed class TextFieldReader
     private readonly IPhoneCandidateFinder _phones;
     private readonly bool[] _taken;
     private readonly List<FieldDraft> _drafts = [];
+
+    private int[] _blockLines = [];
 
     private TextFieldReader(PageContext page, TextView view, IPhoneCandidateFinder phones)
     {
@@ -36,9 +39,25 @@ internal sealed class TextFieldReader
     /// <param name="phones">The phone candidate finder; null for the shape rules.</param>
     /// <returns>The fields, in order of position.</returns>
     public static List<FieldDraft> Read(PageContext page, TextView view, IPhoneCandidateFinder? phones = null)
+        => Read(page, view, phones, null, out _);
+
+    /// <summary>Reads the fields of a view of the text, then lets a contact-span model add what the rules found nothing for.</summary>
+    /// <param name="page">The page (for source slices and elements).</param>
+    /// <param name="view">The visible text.</param>
+    /// <param name="phones">The phone candidate finder; null for the shape rules.</param>
+    /// <param name="model">The model, or null for rules only.</param>
+    /// <param name="blockLines">The lines where the model sees a contact block begin, increasing; empty without a model.</param>
+    /// <returns>The fields, in order of position.</returns>
+    public static List<FieldDraft> Read(PageContext page, TextView view, IPhoneCandidateFinder? phones, IContactSpanModel? model, out int[] blockLines)
     {
         var reader = new TextFieldReader(page, view, phones ?? ShapePhoneFinder.Instance);
         reader.Run();
+        if (model is not null)
+        {
+            reader.RunModel(model);
+        }
+
+        blockLines = reader._blockLines;
         if (!view.IsPlain)
         {
             reader.ReadCloudflare();
@@ -151,7 +170,7 @@ internal sealed class TextFieldReader
         }
     }
 
-    private void Add(FieldKind kind, int start, int end, string value, int line, bool decoded, double confidence, bool requireValid, string? label, bool companyLabel)
+    private void Add(FieldKind kind, int start, int end, string value, int line, bool decoded, double confidence, bool requireValid, string? label, bool companyLabel, bool model = false)
     {
         TextRange raw = _view.RangeOf(start, end, out bool gap, out bool reversed);
         bool obfuscated = decoded || reversed || (kind is FieldKind.Email or FieldKind.Website && gap);
@@ -175,6 +194,7 @@ internal sealed class TextFieldReader
             RequireValid = requireValid,
             Line = line,
             CompanyLabel = companyLabel,
+            Model = model,
         });
     }
 

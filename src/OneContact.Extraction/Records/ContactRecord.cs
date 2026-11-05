@@ -90,6 +90,13 @@ public sealed class ExtractedField
     /// <summary>For a field outside every record: the id of the nearest <c>address</c> element it sits in (the index of that element in the document), or -1. Later grouping can use it. -1 for fields in records.</summary>
     public int BlockId { get; internal set; } = -1;
 
+    /// <summary>
+    /// Whether a rule or a trained model found the value in the text: <see cref="DecisionSource.Model"/> for a field the contact-span model
+    /// found where the rules had found nothing (its <see cref="Confidence"/> is the model's), <see cref="DecisionSource.Rule"/> for everything
+    /// else, markup included.
+    /// </summary>
+    public DecisionSource Decision { get; internal set; }
+
     /// <summary>The other places the same value was read for the same record, each as its own field. Empty when it was read once.</summary>
     public IReadOnlyList<ExtractedField> Duplicates { get; internal set; } = [];
 
@@ -113,6 +120,7 @@ public sealed class ExtractedField
             Facts = Facts,
             RecordId = RecordId,
             BlockId = BlockId,
+            Decision = Decision,
             PageId = pageId,
             PageIndex = pageIndex,
         };

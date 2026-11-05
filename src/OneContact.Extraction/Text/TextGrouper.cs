@@ -26,8 +26,9 @@ internal static class TextGrouper
     /// <param name="view">The visible text the fields were read from.</param>
     /// <param name="items">Fields with a line (<see cref="FieldDraft.Line"/> at least 0), in any order.</param>
     /// <param name="grouped">Receives the fields that were put in a record.</param>
+    /// <param name="blockLines">Lines (increasing) where the contact-span model sees a new contact block begin; a group never runs across one. Null or empty without a model.</param>
     /// <returns>The records, with their fields.</returns>
-    public static List<RecordDraft> Group(PageContext page, TextView view, List<FieldDraft> items, HashSet<FieldDraft> grouped)
+    public static List<RecordDraft> Group(PageContext page, TextView view, List<FieldDraft> items, HashSet<FieldDraft> grouped, int[]? blockLines = null)
     {
         var records = new List<RecordDraft>();
         if (items.Count == 0)
@@ -73,7 +74,7 @@ internal static class TextGrouper
             TextLine line = view.Lines[d.Line];
             int container = view.IsPlain ? line.Container : Qualifying(page, line.Container, chains, kindsIn);
             var key = (container, line.Landmark, line.Heading);
-            bool split = current is null || key != previousKey || d.Line - previousLine > MaxGapLines || Repeats(seen, d);
+            bool split = current is null || key != previousKey || d.Line - previousLine > MaxGapLines || Repeats(seen, d) || StartsBlockBetween(blockLines, previousLine, d.Line);
             if (split)
             {
                 current = [];
@@ -118,6 +119,23 @@ internal static class TextGrouper
         }
 
         return records;
+    }
+
+    // True when a block start lies on a line after `previous` up to and including `line`: the field on `line` belongs to a later block.
+    private static bool StartsBlockBetween(int[]? blockLines, int previous, int line)
+    {
+        if (blockLines is null || blockLines.Length == 0 || previous < 0 || line <= previous)
+        {
+            return false;
+        }
+
+        int at = Array.BinarySearch(blockLines, previous + 1);
+        if (at < 0)
+        {
+            at = ~at;
+        }
+
+        return at < blockLines.Length && blockLines[at] <= line;
     }
 
     // The same value on another line is a second sighting of it, and an address inside an address element that the text rules also read

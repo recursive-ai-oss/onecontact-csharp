@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <IsPackable>true</IsPackable>
-    <Description>libphonenumber- and libpostal-class contact data for .NET: the trained models for addresses and names in the United States and Canada. One small shared encoder with an address-field head and a name head, from weights packed inside this assembly. No downloads. An early preview.</Description>
+    <Description>libphonenumber- and libpostal-class contact data for .NET: the trained models for addresses and names in the United States and Canada. One small shared encoder with an address-field head, a name head and a contact-span head for extraction, from weights packed inside this assembly. No downloads. An early preview.</Description>
     <PackageTags>$(PackageTags);address;names;model</PackageTags>
     <!-- The weights are embedded as resources, so a NativeAOT or trimmed application carries them with no file to copy. -->
     <Tier1WeightsDir Condition="'$(Tier1WeightsDir)' == ''">$(ONECONTACT_TIER1_WEIGHTS)</Tier1WeightsDir>

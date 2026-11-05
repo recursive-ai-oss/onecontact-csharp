@@ -17,6 +17,10 @@ The code of this package is licensed `MIT OR Apache-2.0`, Copyright (c) Recursiv
 - Contains public sector information from Companies House (Free Company Data Product, 2026-11-01), licensed under the Open Government Licence v3.0 (Creative Commons Attribution).
 - U.S. Securities and Exchange Commission, EDGAR company names (`cik-lookup-data.txt`), public information.
 
+## Contact blocks
+
+The contact-span head trained on text assembled by our own templates from the address, name and company sets credited above, plus word lists of our own. No further source.
+
 ## Runtime libraries
 
 This package depends on `RecursiveAI.OneNlp.Neural` and `RecursiveAI.OneModel`, which carry their own notices.

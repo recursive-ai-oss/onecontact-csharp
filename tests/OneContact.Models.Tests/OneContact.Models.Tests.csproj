@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/OneContact.Models.Tier1/OneContact.Models.Tier1.csproj" />
+    <ProjectReference Include="../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
   </ItemGroup>
 
 </Project>

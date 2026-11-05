@@ -10,7 +10,7 @@ namespace OneContact.Recipe.Tier1;
 /// Reads the rendered training sets (JSON Lines) into OneNLP examples. A set is read in file order and every line whose id hashes into the
 /// wanted share is kept, so the same arguments always give the same examples, which is what makes a resumed run continue the same training.
 /// </summary>
-internal static class Data
+internal static partial class Data
 {
     // The labels of the address head. The data sets use these names for fields; "O" is no field.
     internal const string Outside = "O";
