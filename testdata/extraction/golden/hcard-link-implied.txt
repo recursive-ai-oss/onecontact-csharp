@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Person src=HCard conf=1 span=104+70
+  #0 Website HCard raw="https://implied.example.com/" text="https://implied.example.com/" span=128+28 conf=1 => Web:https://implied.example.com/
+  #1 Name HCard raw="Implied Name" text="Implied Name" span=158+12 conf=1 => Person:Implied Name

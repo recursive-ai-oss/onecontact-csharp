@@ -1,0 +1,3 @@
+unit Bytes
+ungrouped #0 Address AddressElement raw="1 One Street<br>Salem, OR 97301" text="1 One Street\nSalem, OR 97301" span=113+31 conf=0.7 flags=RegionInferred => Address:1 ONE ST, SALEM OR 97301 facts=CountryInferred block=13
+ungrouped #1 Address AddressElement raw="2 Two Street<br>Salem, OR 97302" text="2 Two Street\nSalem, OR 97302" span=163+31 conf=0.7 flags=RegionInferred => Address:2 TWO ST, SALEM OR 97302 facts=CountryInferred block=17

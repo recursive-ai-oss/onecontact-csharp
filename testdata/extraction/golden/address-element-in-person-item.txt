@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Person src=Microdata conf=1 span=104+155
+  #0 Name Microdata raw="Addr Holder" text="Addr Holder" span=178+11 conf=1 => Person:Addr Holder
+  #1 Address AddressElement raw="77 Unlabelled Street<br>Reno, NV 89501" text="77 Unlabelled Street\nReno, NV 89501" span=205+38 conf=0.7 flags=RegionInferred => Address:77 UNLABELLED ST, RENO NV 89501 facts=CountryInferred

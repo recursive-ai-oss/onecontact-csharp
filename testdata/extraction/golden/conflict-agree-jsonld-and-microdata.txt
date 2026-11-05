@@ -1,0 +1,7 @@
+unit Bytes
+record 0 Organization src=JsonLd conf=1 span=125+138
+  #0 Name JsonLd raw="Agreeing Org" text="Agreeing Org" span=189+12 conf=1 => Company:Agreeing Org
+    also Microdata span=369+12
+  #1 Phone JsonLd raw="+1 (202) 555-0103" text="+1 (202) 555-0103" span=216+17 conf=1 => Phone:+12025550103 facts=Valid|InternationalInput
+    also Microdata span=415+15
+  #2 Email JsonLd raw="agree@example.com" text="agree@example.com" span=244+17 conf=1 => Email:agree@example.com

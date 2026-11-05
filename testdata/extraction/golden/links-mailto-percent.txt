@@ -1,0 +1,2 @@
+unit Bytes
+ungrouped #0 Email Link raw="mailto:j%C3%B6rg@example.com" text="jörg@example.com" span=116+28 conf=0.9 => Email:jörg@example.com facts=InternationalizedLocalPart label="Jörg"

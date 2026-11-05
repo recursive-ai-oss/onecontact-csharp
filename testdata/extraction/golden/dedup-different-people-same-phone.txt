@@ -1,0 +1,7 @@
+unit Bytes
+record 0 Person src=JsonLd conf=1 span=168+67
+  #0 Name JsonLd raw="Ann Alpha" text="Ann Alpha" span=194+9 conf=1 => Person:Ann Alpha
+  #1 Phone JsonLd raw="+1 202 555 0150" text="+1 202 555 0150" span=218+15 conf=1 => Phone:+12025550150 facts=Valid|InternationalInput
+record 1 Person src=JsonLd conf=1 span=236+66
+  #2 Name JsonLd raw="Bob Beta" text="Bob Beta" span=262+8 conf=1 => Person:Bob Beta
+  #3 Phone JsonLd raw="+1 202 555 0150" text="+1 202 555 0150" span=285+15 conf=1 => Phone:+12025550150 facts=Valid|InternationalInput

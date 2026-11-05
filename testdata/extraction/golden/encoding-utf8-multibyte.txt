@@ -1,0 +1,7 @@
+unit Bytes
+record 0 Person src=Microdata conf=1 span=104+155
+  #0 Name Microdata raw="José Müller 田中" text="José Müller 田中" span=178+20 conf=1 => Person:José Müller 田中
+  #1 Email Microdata raw="josé@example.com" text="josé@example.com" span=229+17 conf=1 => Email:josé@example.com facts=InternationalizedLocalPart
+record 1 Organization src=JsonLd conf=1 span=295+125
+  #2 Name JsonLd raw="Zoë’s Café — Ünïcode" text="Zoë’s Café — Ünïcode" span=359+28 conf=1 => Company:Zoë’s Café — Ünïcode
+  #3 Website JsonLd raw="https://example.com/ü" text="https://example.com/ü" span=396+22 conf=1 => Web:https://example.com/%C3%BC

@@ -1,0 +1,6 @@
+unit Bytes
+record 0 Organization src=JsonLd conf=1 span=125+316
+  #0 Name JsonLd raw="Sample Bistro" text="Sample Bistro" span=187+13 conf=1 => Company:Sample Bistro
+  #1 Phone JsonLd raw="(202) 555-0101" text="(202) 555-0101" span=215+14 conf=1 flags=RegionInferred => Phone:+12025550101 facts=Valid
+  #2 Website JsonLd raw="http://bistro.example.org/menu?utm_source=x" text="http://bistro.example.org/menu?utm_source=x" span=238+43 conf=1 => Web:http://bistro.example.org/menu facts=TrackingParametersRemoved
+  #3 Address JsonLd raw="{\"@type\":\"PostalAddress\",\"streetAddress\":\"5 Elm Road\",\"addressLocality\":\"Ottawa\",\"addressRegion\":\"ON\",\"postalCode\":\"K1A 0B1\",\"addressCountry\":\"CA\"}" text="5 Elm Road, Ottawa, ON, K1A 0B1, CA" span=293+147 conf=1 flags=Composed => Address:5 Elm Road, Ottawa ON K1A 0B1

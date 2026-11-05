@@ -44,17 +44,35 @@ public readonly struct ContactValue : IEquatable<ContactValue>, IContactValue
         _ => string.Empty,
     };
 
-    internal static ContactValue From(PhoneNumber value) => new(ContactKind.Phone, value);
+    /// <summary>Wraps a <see cref="PhoneNumber"/> that was parsed already, so a result can carry values of any kind.</summary>
+    /// <param name="value">The value.</param>
+    /// <returns>A <see cref="ContactValue"/> of kind <see cref="Kind"/> for it.</returns>
+    public static ContactValue From(PhoneNumber value) => new(ContactKind.Phone, value);
 
-    internal static ContactValue From(EmailAddress value) => new(ContactKind.Email, value);
+    /// <summary>Wraps a <see cref="EmailAddress"/> that was parsed already, so a result can carry values of any kind.</summary>
+    /// <param name="value">The value.</param>
+    /// <returns>A <see cref="ContactValue"/> of kind <see cref="Kind"/> for it.</returns>
+    public static ContactValue From(EmailAddress value) => new(ContactKind.Email, value);
 
-    internal static ContactValue From(WebAddress value) => new(ContactKind.Web, value);
+    /// <summary>Wraps a <see cref="WebAddress"/> that was parsed already, so a result can carry values of any kind.</summary>
+    /// <param name="value">The value.</param>
+    /// <returns>A <see cref="ContactValue"/> of kind <see cref="Kind"/> for it.</returns>
+    public static ContactValue From(WebAddress value) => new(ContactKind.Web, value);
 
-    internal static ContactValue From(PostalAddress value) => new(ContactKind.Address, value);
+    /// <summary>Wraps a <see cref="PostalAddress"/> that was parsed already, so a result can carry values of any kind.</summary>
+    /// <param name="value">The value.</param>
+    /// <returns>A <see cref="ContactValue"/> of kind <see cref="Kind"/> for it.</returns>
+    public static ContactValue From(PostalAddress value) => new(ContactKind.Address, value);
 
-    internal static ContactValue From(PersonName value) => new(ContactKind.Person, value);
+    /// <summary>Wraps a <see cref="PersonName"/> that was parsed already, so a result can carry values of any kind.</summary>
+    /// <param name="value">The value.</param>
+    /// <returns>A <see cref="ContactValue"/> of kind <see cref="Kind"/> for it.</returns>
+    public static ContactValue From(PersonName value) => new(ContactKind.Person, value);
 
-    internal static ContactValue From(CompanyName value) => new(ContactKind.Company, value);
+    /// <summary>Wraps a <see cref="CompanyName"/> that was parsed already, so a result can carry values of any kind.</summary>
+    /// <param name="value">The value.</param>
+    /// <returns>A <see cref="ContactValue"/> of kind <see cref="Kind"/> for it.</returns>
+    public static ContactValue From(CompanyName value) => new(ContactKind.Company, value);
 
     /// <summary>Gets the held phone number.</summary>
     /// <param name="value">The number, when <see cref="Kind"/> is <see cref="ContactKind.Phone"/>.</param>

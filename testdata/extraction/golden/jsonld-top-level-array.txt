@@ -1,0 +1,5 @@
+unit Bytes
+record 0 Person src=JsonLd conf=1 span=126+71
+  #0 Name JsonLd raw="First Array" text="First Array" span=184+11 conf=1 => Person:First Array
+record 1 Person src=JsonLd conf=1 span=198+72
+  #1 Name JsonLd raw="Second Array" text="Second Array" span=256+12 conf=1 => Person:Second Array

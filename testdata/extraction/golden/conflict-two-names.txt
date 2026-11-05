@@ -1,0 +1,7 @@
+unit Bytes
+record 0 Person src=JsonLd conf=1 span=125+101
+  #0 Name JsonLd raw="First Spelling" text="First Spelling" span=183+14 conf=1 flags=Disputed => Person:First Spelling
+  #1 Email JsonLd raw="same@example.com" text="same@example.com" span=208+16 conf=1 => Email:same@example.com
+    also Microdata span=356+16
+  #2 Name Microdata raw="Second Spelling" text="Second Spelling" span=311+15 conf=1 flags=Disputed => Person:Second Spelling
+  disagreement Name: #0, #2

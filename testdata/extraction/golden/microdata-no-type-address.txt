@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Person src=Microdata conf=1 span=104+325
+  #0 Name Microdata raw="Untyped Address" text="Untyped Address" span=181+15 conf=1 => Person:Untyped Address
+  #1 Address Microdata raw="<p itemprop=\"address\" itemscope><span itemprop=\"streetAddress\">9 Bare Street</span> <span itemprop=\"addressLocality\">Austin</span> <span itemprop=\"addressRegion\">TX</span> <span itemprop=\"postalCode\">73301</span></p>" text="9 Bare Street, Austin, TX, 73301" span=206+216 conf=1 flags=Composed => Address:9 Bare Street, Austin issue=address.country-required

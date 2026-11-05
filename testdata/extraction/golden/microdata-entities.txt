@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Organization src=Microdata conf=1 span=104+172
+  #0 Name Microdata raw="Tom &amp; Jerry&#39;s Pty Ltd" text="Tom & Jerry's Pty Ltd" span=184+29 conf=1 => Company:Tom & Jerry's Pty Ltd facts=HasLegalForm|LegalFormAmbiguous
+  #1 Email Microdata raw="tom&#64;example.com" text="tom@example.com" span=244+19 conf=1 => Email:tom@example.com

@@ -1,0 +1,4 @@
+unit Bytes
+record 0 Person src=JsonLd conf=1 span=125+118
+  #0 Name JsonLd raw="Alex\",\"familyName\":\"Sample" text="Alex Sample" span=188+26 conf=1 flags=Composed => Person:Alex Sample
+  #1 Email JsonLd raw="alex@example.net" text="alex@example.net" span=225+16 conf=1 => Email:alex@example.net

@@ -1,0 +1,5 @@
+unit Bytes
+record 0 Person src=Rdfa conf=1 span=104+203
+  #0 Name Rdfa raw="Rita Rdfa" text="Rita Rdfa" span=175+9 conf=1 => Person:Rita Rdfa
+  #1 Email Rdfa raw="mailto:rita@example.com" text="rita@example.com" span=218+23 conf=1 => Email:rita@example.com
+  #2 Phone Rdfa raw="+1 202 555 0144" text="+1 202 555 0144" span=279+15 conf=1 => Phone:+12025550144 facts=Valid|InternationalInput
