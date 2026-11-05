@@ -9,6 +9,12 @@
        record are packed under notices/. Nothing is fetched here: a missing or altered file fails the build. See
        docs/architecture.md. -->
 
+  <!-- Referencing each tool as a project makes a plain restore of the consumer restore the tool too (a fresh checkout needs no extra
+       step) and orders the tool's build first. Nothing from the tool is referenced or packed. -->
+  <ItemGroup Condition="'@(IngestSource)' != ''">
+    <ProjectReference Include="@(IngestSource->'%(Tool)')" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
   <!-- Outputs="%(IngestSource.Identity)" runs the whole target once per source, each run seeing only its own item. -->
   <Target Name="RunIngest" BeforeTargets="AssignTargetPaths;_GetPackageFiles" Condition="'@(IngestSource)' != ''" Outputs="%(IngestSource.Identity)">
     <PropertyGroup>
