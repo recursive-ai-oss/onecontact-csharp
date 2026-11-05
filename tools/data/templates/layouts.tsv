@@ -1,0 +1,41 @@
+# Address layouts: id, country, language, kind, weight, template.
+#
+# kind `label` is a mailing label with one line per `\n`; kind `line` is a single line. A template is literal text and slots written
+# `{slot}`, `{before|slot}` or `{before|slot|after}`; `before` and `after` are written only when the slot has content, and `before`
+# is dropped when nothing precedes it on its line, so a missing ZIP or state removes its punctuation with it. A label line with no
+# content is left out. Slots: recipient, organization, street, unit (a unit on its own line), city, state, zip, country.
+#
+# Layout sources: USPS Publication 28 sections 221 to 227 (a label's last line is the city, state and ZIP, no commas required) and
+# the Canada Post Addressing Guidelines section 4 (city, province and postal code on one line, two spaces before the code; French
+# addresses may put the province in parentheses). The single-line forms and the comma variants are how addresses are written in
+# running text and forms.
+
+us.label.pub28	US	en	label	26	{recipient}\n{organization}\n{street}\n{unit}\n{city}{ |state}{ |zip}\n{country}
+us.label.comma	US	en	label	22	{recipient}\n{organization}\n{street}\n{unit}\n{city}{, |state}{ |zip}\n{country}
+us.label.twospace	US	en	label	4	{recipient}\n{organization}\n{street}\n{unit}\n{city}{ |state}{  |zip}\n{country}
+us.label.orgfirst	US	en	label	5	{organization}\n{recipient}\n{street}\n{unit}\n{city}{, |state}{ |zip}\n{country}
+us.label.unitabove	US	en	label	3	{recipient}\n{organization}\n{unit}\n{street}\n{city}{ |state}{ |zip}\n{country}
+us.label.statelong	US	en	label	3	{recipient}\n{organization}\n{street}\n{unit}\n{city}\n{state}{ |zip}\n{country}
+us.line.comma	US	en	line	36	{recipient}{, |organization}{, |street}{, |unit}{, |city}{, |state}{ |zip}{, |country}
+us.line.citycomma	US	en	line	22	{recipient}{, |organization}{ |street}{ |unit}{, |city}{ |state}{ |zip}{ |country}
+us.line.space	US	en	line	8	{recipient}{ |organization}{ |street}{ |unit}{ |city}{ |state}{ |zip}{ |country}
+us.line.fused	US	en	line	5	{street}{ |unit}{ |city}{, |state}{ |zip}
+us.line.semicolon	US	en	line	2	{recipient}{; |organization}{; |street}{; |unit}{; |city}{; |state}{ |zip}
+
+ca.label.cp	CA	en	label	38	{recipient}\n{organization}\n{street}\n{unit}\n{city}{ |state}{  |zip}\n{country}
+ca.label.comma	CA	en	label	18	{recipient}\n{organization}\n{street}\n{unit}\n{city}{, |state}{  |zip}\n{country}
+ca.label.onespace	CA	en	label	10	{recipient}\n{organization}\n{street}\n{unit}\n{city}{ |state}{ |zip}\n{country}
+ca.label.commas	CA	en	label	4	{recipient}\n{organization}\n{street}\n{unit}\n{city}{, |state}{, |zip}\n{country}
+ca.label.unitabove	CA	en	label	3	{recipient}\n{organization}\n{unit}\n{street}\n{city}{ |state}{  |zip}\n{country}
+ca.line.comma	CA	en	line	34	{recipient}{, |organization}{, |street}{, |unit}{, |city}{, |state}{ |zip}{, |country}
+ca.line.citycomma	CA	en	line	20	{recipient}{, |organization}{ |street}{ |unit}{, |city}{ |state}{ |zip}{ |country}
+ca.line.space	CA	en	line	6	{recipient}{ |organization}{ |street}{ |unit}{ |city}{ |state}{ |zip}{ |country}
+ca.line.postalcomma	CA	en	line	4	{street}{, |unit}{, |city}{ |state}{, |zip}
+
+cafr.label.paren	CA	fr	label	24	{recipient}\n{organization}\n{street}\n{unit}\n{city}{ (|state|)}{  |zip}\n{country}
+cafr.label.cp	CA	fr	label	30	{recipient}\n{organization}\n{street}\n{unit}\n{city}{ |state}{  |zip}\n{country}
+cafr.label.comma	CA	fr	label	10	{recipient}\n{organization}\n{street}\n{unit}\n{city}{, |state}{  |zip}\n{country}
+cafr.label.unitabove	CA	fr	label	3	{recipient}\n{organization}\n{unit}\n{street}\n{city}{ (|state|)}{  |zip}\n{country}
+cafr.line.comma	CA	fr	line	34	{recipient}{, |organization}{, |street}{, |unit}{, |city}{, |state}{ |zip}{, |country}
+cafr.line.paren	CA	fr	line	18	{recipient}{, |organization}{, |street}{, |unit}{, |city}{ (|state|)}{ |zip}{, |country}
+cafr.line.space	CA	fr	line	6	{recipient}{ |organization}{ |street}{ |unit}{ |city}{ |state}{ |zip}{ |country}
