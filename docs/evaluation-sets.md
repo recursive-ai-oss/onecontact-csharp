@@ -24,8 +24,16 @@ Common Crawl, one pinned crawl (`CC-MAIN-2026-43`), through the public index and
      a copyright-line name, a JSON-LD organisation name or the `og:site_name` value.
    - The sample is stratified by the rarest of: PO box or rural route, unit, multi-line, single line, upper case, directional, hyphenated
      number, French (Canada); persons by plain, titled, French; companies by legal form or none. At most two candidates per host.
+   A second, smaller draw (`select-pages.py ... balanced`) tops up the United States pages, drawing blocks evenly across the host TLDs.
+   `freeze-sets.py` then writes each gold file in canonical form (lines sorted by id, sorted keys, compact JSON) and a manifest with
+   each file's role (`eval`), item count and SHA-256; training code must load only `train` and `dev` files.
 4. The reviewer reads every drafted item, with the rules' pre-label beside it, and corrects it (`tools/Eval/labeling.py`). Items that are
    not an address or a name are dropped. No hosted model labels anything.
+
+Because the rules' pre-label is the starting point of the adjudication, the rules' own scores on these sets are optimistic: items the
+reviewer accepted unchanged count as agreement. Scores of the reference systems are not affected, since they never saw the pre-label.
+Strings that turned out not to be addresses or names, glued page text, near-duplicates of another item and ambiguous layouts were dropped.
+No several-people string survived the review in the United States and Canadian samples, so that class is not measured here.
 
 Each gold item keeps the WARC filename, offset and length of its page, who labelled it, and whether the rules' pre-label was accepted
 unchanged (`rules_agreed`).

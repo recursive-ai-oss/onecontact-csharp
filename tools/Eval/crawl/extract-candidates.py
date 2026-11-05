@@ -271,6 +271,12 @@ for cc in ("US", "CA"):
 
 for cc in ("US", "CA"):
     for kind, items, n in (("person", person_items[cc], n_person), ("company", company_items[cc], n_company)):
+        if kind == "person":
+            # Several-people strings are rare and the loose pattern is noisy: keep a random 25 of them.
+            multi = [i for i in items if "multi" in i["strata"]]
+            rng.shuffle(multi)
+            keep = {id(x) for x in multi[:25]}
+            items = [i for i in items if "multi" not in i["strata"] or id(i) in keep]
         counts = defaultdict(int)
         for it in items:
             for s in it["strata"]:
