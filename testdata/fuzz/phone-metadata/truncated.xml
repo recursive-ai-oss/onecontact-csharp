@@ -1,0 +1,4 @@
+<phoneNumberMetadata><territories>
+  <territory id="ZA" countryCode="27" internationalPrefix="00" nationalPrefix="0">
+    <availableFormats><numberFormat pattern="(\d{2})(\d{3})(\d{4})"><leadingDigits>[1-9]</leadingDigits><format>$1 $2 $3</format></numberFormat></availableFormats>
+    <generalDesc><
