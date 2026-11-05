@@ -430,4 +430,31 @@ public sealed class ExtractionTextTests
         Assert.Single(r.Emails);
         Assert.Single(r.Phones);
     }
+
+    /// <summary>Long hostile inputs finish and stay inside the field budget; there is no wall-clock bound, only completion.</summary>
+    [Theory]
+    [InlineData("a@", 200_000)]
+    [InlineData(" [at] ", 50_000)]
+    [InlineData("1", 500_000)]
+    [InlineData("1-", 100_000)]
+    [InlineData(" [dot] ", 100_000)]
+    [InlineData(" at ", 100_000)]
+    [InlineData("(+", 100_000)]
+    [InlineData("a.", 200_000)]
+    public void Hostile_repetitions_finish(string unit, int count)
+    {
+        string text = string.Concat(Enumerable.Repeat(unit, count));
+        ExtractResult r = new ContactExtractor { DefaultRegion = Region.US }.ExtractText(text);
+        Assert.NotNull(r);
+    }
+
+    [Fact]
+    public void Hostile_markup_finishes()
+    {
+        // Nesting deeper than OneHtml allows is refused by the parser with its own documented exception; just under it must work.
+        string deep = string.Concat(Enumerable.Repeat("<div>", 4_000)) + "a@example.com" + string.Concat(Enumerable.Repeat("</div>", 4_000));
+        string longLocal = "<p>" + new string('a', 500_000) + "@example.com</p>";
+        Assert.NotNull(new ContactExtractor().ExtractHtml(Encoding.UTF8.GetBytes(deep)));
+        Assert.NotNull(new ContactExtractor().ExtractHtml(Encoding.UTF8.GetBytes(longLocal)));
+    }
 }

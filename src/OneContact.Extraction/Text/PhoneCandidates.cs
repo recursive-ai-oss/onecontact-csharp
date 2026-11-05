@@ -1,3 +1,5 @@
+using RecursiveAI.OneContact.Phones;
+
 namespace RecursiveAI.OneContact.Extraction.Text;
 
 /// <summary>A stretch of text that may be a telephone number.</summary>
@@ -197,7 +199,7 @@ internal sealed class ShapePhoneFinder : IPhoneCandidateFinder
         return groups.Count == 4 && groups.TrueForAll(g => g <= 3);
     }
 
-    private static string? FindLabel(string text, int start, int p)
+    internal static string? FindLabel(string text, int start, int p)
     {
         int i = p - 1;
         while (i >= start && text[i] is ' ' or ':' or '\u00A0' or '-' or '\u2013')
@@ -235,5 +237,61 @@ internal sealed class ShapePhoneFinder : IPhoneCandidateFinder
         }
 
         return null;
+    }
+}
+
+/// <summary>
+/// Finds phone candidates with the core matcher when the region of the page is known: the matcher accepts only numbers that are
+/// valid for that region (or carry a country code), so grouping and date-like runs need no rules of ours. Runs that the matcher
+/// refuses but the shape rules keep (labelled numbers of another region, for example) are added after it, so nothing found by the
+/// shape rules alone is lost. At most 1000 matches are taken from a line.
+/// </summary>
+internal sealed class MatcherPhoneFinder : IPhoneCandidateFinder
+{
+    private const int MaxMatchesPerLine = 1_000;
+
+    private readonly Region _region;
+
+    /// <summary>Creates a finder for numbers written without a country code in <paramref name="region"/>.</summary>
+    /// <param name="region">The region; it must be known.</param>
+    public MatcherPhoneFinder(Region region) => _region = region;
+
+    public void Find(string text, int start, int end, List<PhoneHit> sink)
+    {
+        var shape = new List<PhoneHit>();
+        ShapePhoneFinder.Instance.Find(text, start, end, shape);
+
+        string line = text.Substring(start, end - start);
+        var merged = new List<PhoneHit>();
+        foreach (PhoneNumberMatch m in PhoneNumber.FindAll(line, _region, PhoneMatchLeniency.Valid))
+        {
+            int s = start + m.Start;
+            merged.Add(new PhoneHit(s, s + m.RawString.Length, ShapePhoneFinder.FindLabel(text, start, s)));
+            if (merged.Count >= MaxMatchesPerLine)
+            {
+                break;
+            }
+        }
+
+        foreach (PhoneHit h in shape)
+        {
+            bool overlaps = false;
+            foreach (PhoneHit m in merged)
+            {
+                if (h.Start < m.End && m.Start < h.End)
+                {
+                    overlaps = true;
+                    break;
+                }
+            }
+
+            if (!overlaps)
+            {
+                merged.Add(h);
+            }
+        }
+
+        merged.Sort((a, b) => a.Start.CompareTo(b.Start));
+        sink.AddRange(merged);
     }
 }

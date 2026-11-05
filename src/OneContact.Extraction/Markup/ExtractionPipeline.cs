@@ -87,7 +87,7 @@ internal static class ExtractionPipeline
 
         if (sources.HasFlag(ExtractionSources.Text))
         {
-            ReadText(page, builder, byElement, ungrouped, issues);
+            ReadText(page, builder, byElement, ungrouped, issues, callerDefault);
         }
 
         // Records come in the order their text begins, whichever reader found them (the sort is stable).
@@ -120,7 +120,7 @@ internal static class ExtractionPipeline
     }
 
     // The visible-text half: fields found in the text join the record whose element holds them, or are grouped with their neighbours.
-    private static void ReadText(PageContext page, RecordBuilder builder, Dictionary<int, RecordDraft> byElement, List<FieldDraft> ungrouped, List<ExtractIssue> issues)
+    private static void ReadText(PageContext page, RecordBuilder builder, Dictionary<int, RecordDraft> byElement, List<FieldDraft> ungrouped, List<ExtractIssue> issues, Region callerDefault)
     {
         TextView view;
         if (page.IsPlainText)
@@ -136,7 +136,7 @@ internal static class ExtractionPipeline
             }
         }
 
-        List<FieldDraft> found = TextFieldReader.Read(page, view);
+        List<FieldDraft> found = TextFieldReader.Read(page, view, (page.PageRegion.IsUnknown ? callerDefault : page.PageRegion) is { IsUnknown: false } textRegion ? new MatcherPhoneFinder(textRegion) : null);
         var pending = new List<FieldDraft>();
         foreach (FieldDraft d in found)
         {
