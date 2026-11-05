@@ -83,7 +83,7 @@
     <Copyright>Copyright (c) Recursive AI, LLC</Copyright>
     <PackageLicenseExpression>MIT OR Apache-2.0</PackageLicenseExpression>
     <!-- The one place the package version lives. All packages of this repository share it. -->
-    <Version>0.3.0-preview.1</Version>
+    <Version>0.4.0-preview.1</Version>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/recursive-ai-oss/onecontact-csharp</RepositoryUrl>
     <PackageProjectUrl>https://recursiveai.org/onecontact/</PackageProjectUrl>
