@@ -7,9 +7,13 @@ How the examples for the address-field head are made, what a line looks like, an
 ```
 tools/data/fetch-nad.sh        # US DOT National Address Database, text file (8.5 GB), checked against pins/nad.pin
 tools/data/fetch-oda.sh        # Statistics Canada Open Database of Addresses, ten files, checked against pins/oda.pin
+tools/data/fetch-tiger.sh      # Census TIGER/Line 2025 address ranges for the regions NAD lacks, checked against pins/tiger.pin
 AddressUsCa count  --nad <NAD_TXT.zip> --oda <dir of ODA zips> --out <dir>      # usable records per region, sampling rates
 AddressUsCa render --nad <NAD_TXT.zip> --oda <dir of ODA zips> --out <dir> --seed 20261105
 AddressUsCa check  --out <dir> --sample 5000 [--offset N --misses <file>]
+AddressUsCa count  --tiger <dir> --out <dir> --caps PR=80000,VI=24500,*=27000 --per-range '*=3,VI=16,AS=16,MP=16'
+AddressUsCa render --tiger <dir> --out <dir> --countries us --dataset address-us-tiger --seed 20261105
+AddressUsCa check  --out <dir> --sample 3000 --per-region 600     # rule-parser recovery per region
 ```
 
 `check` with `--offset N` takes line N of every sampling step instead of the first (so a sample used for tuning and a fresh one for measuring share no example), skips the span checks, and with `--misses` writes every example the rules did not fully recover, with the missed and the extra fields.
@@ -48,6 +52,7 @@ The names are the ones the rule parser emits, so rule output and training labels
 | `street.station-designator`, `street.station-name` | Canada Post `STN A`, `SUCC B`, `RPO`. |
 | `street.military-designator`, `street.military-number` | `PSC 1234`, `UNIT 8672`, `CMR`. |
 | `street.general-delivery` | `General Delivery`, `GD`, `Poste restante`. |
+| `urbanization` | Puerto Rico: the urbanization line (`URB LAS GLADIOLAS`, `Urbanización X`, or the bare name), one span. |
 | `locality` | The city, or `APO`, `FPO`, `DPO`. |
 | `admin-area` | State, province or territory, as a code or a name (`QC`, `Québec`, `Quebec`). |
 | `postal-code` | ZIP, ZIP+4, or a Canadian postal code with or without its space. |
@@ -69,3 +74,7 @@ The library's rule parser run over about 5,000 sampled training examples per cou
 | Parse refused (`address.no-last-line`) | 59 | 464 |
 
 Weakest labels (fields recovered / seen): US `street.name` 76.5 %, `street.military-*` 66.7 %, `street.route-designator` 67.9 %, `organization` 69.5 %; CA `street.unit-number` 48.6 %, `street.name` 62.3 %, `street.route-designator` 57.8 %, `organization` 68.4 %. Recipient and organisation lines are expected misses in single-line text: the rules cannot tell a name from the rest without line breaks. The numbers include the deliberate typing and OCR noise (6 % of examples), spacing damage, and layouts the rules decline to read, so they are a floor for what the model must add, not a score of the parser.
+
+## Regions the National Address Database lacks
+
+Puerto Rico, the territories and five states have no (or few) rows in NAD. `--tiger` reads Census TIGER/Line county address-range tables (the `.dbf` inside each `*_addrfeat.zip`; `*_edges.zip` for American Samoa and the Northern Mariana Islands, which have no ranges) and the ZCTA to place relationship file, and makes one record per house number drawn inside an address range. Street names come from the Census with their abbreviations, split with the Publication 28 tables; the house number and the city are synthetic (see `tools/data/provenance/address-us-ca.md`). Puerto Rico uses `templates/layouts-pr.tsv`: Spanish street prefixes stay in the street name (Publication 28 appendix I section 51.1), and the urbanization line comes before the delivery line. Option `--caps` replaces the shared per-region cap of `count` with fixed caps, `--per-range` sets how many numbers are drawn from each range, `--countries` and `--dataset` name the output files and the manifest.

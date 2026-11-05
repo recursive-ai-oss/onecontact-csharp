@@ -47,10 +47,13 @@ internal sealed class Rates
 
     internal double AbbreviatedSaint { get; init; } = 0.05;
 
+    // Puerto Rico: how often the urbanization line is written when the record has one (Publication 28 section 292 asks for it; informal writing drops it).
+    internal double Urbanization { get; init; } = 0.75;
+
     public override string ToString() =>
         $"case={string.Join('/', CaseWeights)} usDelivery={string.Join('/', UsDelivery)} caDelivery={string.Join('/', CaDelivery)} syntheticUnit={SyntheticUnit} " +
         $"recipient={RecipientLabel}/{RecipientLine} organization={OrganizationLabel}/{OrganizationLine} country={CountryLabel}/{CountryLine} missingPostal={MissingPostalCode} " +
-        $"missingRegion={MissingRegion} missingCity={MissingCity} zipPlusFour={ZipPlusFour} period={Period} typo={TypoExample} glue={GlueExample} doubleSpace={DoubleSpaceExample} abbreviatedSaint={AbbreviatedSaint}";
+        $"missingRegion={MissingRegion} missingCity={MissingCity} zipPlusFour={ZipPlusFour} period={Period} typo={TypoExample} glue={GlueExample} doubleSpace={DoubleSpaceExample} abbreviatedSaint={AbbreviatedSaint} urbanization={Urbanization}";
 }
 
 /// <summary>Renders register records into labelled free-text addresses through the committed layouts.</summary>
@@ -104,6 +107,7 @@ internal sealed class Renderer
         private int _delivery;
         private string _state = string.Empty;
         private string _city = string.Empty;
+        private string _urbanization = string.Empty;
         private string _zip = string.Empty;
         private bool _stateLong;
 
@@ -120,7 +124,8 @@ internal sealed class Renderer
         internal Example Run()
         {
             bool us = _rec.Country == "US";
-            Layout layout = _o._templates.Pick(_rec.Country, _lang, _r);
+            // Puerto Rico has its own layouts: the urbanization line comes before the street line (Publication 28 section 292).
+            Layout layout = _o._templates.Pick(us && _rec.Region == "PR" ? "US-PR" : _rec.Country, _lang, _r);
             _mode = _r.Weighted(Rt.CaseWeights);
             bool label = layout.IsLabel;
             _hasRecipient = _r.Chance(label ? Rt.RecipientLabel : Rt.RecipientLine);
@@ -152,6 +157,18 @@ internal sealed class Renderer
             {
                 _city = string.Empty;
                 _events.Add("missing-city");
+            }
+
+            if (_rec.Urbanization.Length > 0 && _delivery == 0)
+            {
+                if (_r.Chance(Rt.Urbanization))
+                {
+                    _urbanization = _rec.Urbanization;
+                }
+                else
+                {
+                    _events.Add("missing-urbanization");
+                }
             }
 
             _stateLong = _state.Length > 0 && _delivery != 4 && _r.Chance(us ? 0.28 : 0.30);
@@ -221,6 +238,7 @@ internal sealed class Renderer
             "organization" => _hasOrganization ? Organization() : [],
             "street" => Street(),
             "unit" => UnitLine(),
+            "urbanization" => _urbanization.Length == 0 ? [] : UrbanizationLine(),
             "city" => _city.Length == 0 ? [] : [new Piece(Fmt(_city, false), "locality")],
             "state" => _state.Length == 0 ? [] : [new Piece(StateText(), "admin-area")],
             "zip" => _zip.Length == 0 ? [] : [new Piece(PostalText(), "postal-code")],
@@ -252,6 +270,15 @@ internal sealed class Renderer
             string text = sb.ToString();
             // The whole line is the recipient span, "Attn:" and "c/o" included: they only introduce the name.
             return [new Piece(FmtFree(text), "recipient")];
+        }
+
+        /// <summary>The urbanization line: <c>URB</c> (or its spellings) and the name, one span; a few names stand alone without the word (section 292).</summary>
+        private List<Piece> UrbanizationLine()
+        {
+            string word = _r.Weighted([55, 10, 20, 15, 12]) switch { 0 => "URB", 1 => "Urb.", 2 => "Urbanización", 3 => "Urbanizacion", _ => string.Empty };
+            string text = (word.Length == 0 ? string.Empty : Fmt(word, false) + " ") + Fmt(_urbanization, false);
+            _events.Add(word.Length == 0 ? "urbanization-bare" : "urbanization");
+            return [new Piece(text, "urbanization")];
         }
 
         private List<Piece> Organization()

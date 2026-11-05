@@ -9,7 +9,9 @@ namespace OneContact.Data.AddressUsCa;
 // usage:
 //   AddressUsCa count  --nad <NAD_TXT.zip> --oda <dir with ODA_*_v1.zip> --out <dir> [--us-target N] [--ca-target N]
 //   AddressUsCa render --nad <zip> --oda <dir> --out <dir> [--seed N] [--dev-per-mille N] [--selection <file>]
-//   AddressUsCa sample --nad <zip> | --oda <zip> [--n 12] [--seed N]
+//   AddressUsCa sample --nad <zip> | --oda <zip> | --tiger <dir> [--n 12] [--seed N]
+//   AddressUsCa count  --tiger <dir with tl_*_addrfeat.zip, tl_*_edges.zip and zcta-place.txt> --out <dir> --caps "PR=80000,*=27000" [--per-range "*=3,AS=12"]
+//   render with --tiger takes the same options, plus --countries us --dataset address-us-tiger
 //   AddressUsCa check  --out <dir> [--sample N]
 internal static class Program
 {
@@ -52,6 +54,19 @@ internal static class Program
         return o;
     }
 
+    /// <summary>The <c>--per-range</c> option: how many house numbers are drawn from each address range, <c>*=3,AS=12</c>.</summary>
+    internal static Dictionary<string, int> PerRange(Dictionary<string, string> o)
+    {
+        Dictionary<string, int> d = new(StringComparer.Ordinal) { ["*"] = 3 };
+        foreach (string part in o.GetValueOrDefault("per-range", string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries))
+        {
+            string[] kv = part.Split('=');
+            d[kv[0].Trim()] = int.Parse(kv[1], System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        return d;
+    }
+
     internal static string Sha256File(string path)
     {
         using FileStream f = File.OpenRead(path);
@@ -67,6 +82,14 @@ internal static class Program
         if (o.TryGetValue("nad", out string? nad))
         {
             foreach (Rec r in NadReader.Read(nad, rules, nadRejects))
+            {
+                yield return r;
+            }
+        }
+
+        if (o.TryGetValue("tiger", out string? tiger))
+        {
+            foreach (Rec r in TigerReader.Read(tiger, rules, nadRejects, PerRange(o)))
             {
                 yield return r;
             }
@@ -95,6 +118,10 @@ internal static class Counter
         long caTarget = long.Parse(o.GetValueOrDefault("ca-target", "380000"));
         string outDir = o["out"];
         Directory.CreateDirectory(outDir);
+        // --caps "PR=80000,*=27000": a fixed cap per region instead of one shared cap that meets the country target.
+        Dictionary<string, long>? caps = o.TryGetValue("caps", out string? capText)
+            ? capText.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(p => p.Split('=')).ToDictionary(p => p[0].Trim(), p => long.Parse(p[1], System.Globalization.CultureInfo.InvariantCulture), StringComparer.Ordinal)
+            : null;
         Rejects nad = new();
         Rejects oda = new();
         SortedDictionary<string, long> counts = new(StringComparer.Ordinal);
@@ -113,6 +140,12 @@ internal static class Counter
             long cap = SolveCap(mine.Select(k => k.Value).ToList(), target);
             foreach (KeyValuePair<string, long> kv in mine)
             {
+                if (caps is not null)
+                {
+                    string region = kv.Key[(kv.Key.IndexOf('\t', StringComparison.Ordinal) + 1)..];
+                    cap = caps.TryGetValue(region, out long own) ? own : caps.GetValueOrDefault("*", kv.Value);
+                }
+
                 double rate = Math.Min(1.0, (double)cap / kv.Value);
                 sb.Append(kv.Key).Append('\t').Append(kv.Value).Append('\t').Append(rate.ToString("0.000000000", System.Globalization.CultureInfo.InvariantCulture)).Append('\n');
             }
@@ -194,7 +227,7 @@ internal static class Generator
         Renderer renderer = new(rules, templates, rates, seed);
         Stats stats = new();
         Dictionary<string, StreamWriter> writers = new(StringComparer.Ordinal);
-        foreach (string country in new[] { "us", "ca" })
+        foreach (string country in o.GetValueOrDefault("countries", "us,ca").Split(','))
         {
             foreach (string role in new[] { "train", "dev" })
             {
@@ -334,10 +367,15 @@ internal static class Generator
         using FileStream fs = File.Create(path);
         using Utf8JsonWriter w = new(fs, new JsonWriterOptions { Indented = true, Encoder = Encoder });
         w.WriteStartObject();
-        w.WriteString("dataset", "address-us-ca");
+        w.WriteString("dataset", o.GetValueOrDefault("dataset", "address-us-ca"));
         w.WriteString("generator", "OneContact.Data.AddressUsCa");
         w.WriteNumber("seed", seed);
         w.WriteString("templateVersion", templates.Version);
+        if (templates.PrVersion.Length > 0)
+        {
+            w.WriteString("templateVersionPuertoRico", templates.PrVersion);
+        }
+
         w.WriteString("rates", rates.ToString());
         w.WriteString("split", $"dev when hash(record id, split salt) mod 1000 < {devPerMille}; the rest is train. Fixed before rendering, from the register record id only.");
         w.WriteString("selectionFile", Path.GetFileName(selectionPath));
@@ -350,6 +388,14 @@ internal static class Generator
         if (o.TryGetValue("nad", out string? nad))
         {
             WriteRegister(w, nad, "US DOT National Address Database (NAD), text file, compiled 2026-09-30", "public domain (17 U.S.C. 105)");
+        }
+
+        if (o.TryGetValue("tiger", out string? tiger))
+        {
+            foreach (string f in Directory.GetFiles(tiger).Where(f => f.EndsWith(".zip", StringComparison.Ordinal) || f.EndsWith(".txt", StringComparison.Ordinal)).OrderBy(f => f, StringComparer.Ordinal))
+            {
+                WriteRegister(w, f, Path.GetFileName(f) == "zcta-place.txt" ? "Census 2020 ZCTA to place relationship file (ZIP Code to place names)" : "Census TIGER/Line 2025 county shapefile, address ranges or edges (attribute table only)", "public domain (17 U.S.C. 105)");
+            }
         }
 
         if (o.TryGetValue("oda", out string? oda))
@@ -435,6 +481,9 @@ internal static class Generator
             {
                 Bump(Events, $"{rec.Country}.{e}");
             }
+
+            // where the record came from (nad, oda, tiger, tigeredge): tigeredge records have a random house number.
+            Bump(Events, $"{rec.Country}.source-{rec.Id[..rec.Id.IndexOf(':', StringComparison.Ordinal)]}");
         }
 
         private static void Bump(SortedDictionary<string, long> d, string k) => d[k] = d.GetValueOrDefault(k) + 1;
