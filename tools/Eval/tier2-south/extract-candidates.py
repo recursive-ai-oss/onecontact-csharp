@@ -26,11 +26,23 @@ for _f in filter(None, os.environ.get("EXCLUDE", "").split(",")):
 
 L = r"[^\W\d_]"
 UP = "A-ZÀ-ÖØ-ÞĀĂĄĆČĎĐĒĘĚĞİŁŃŇŐŒŘŚŞŠŤŮŰŹŻŽȘȚ"
-LANG = {"PL": "pl", "CZ": "cs", "SK": "sk", "SI": "sl", "HR": "hr", "HU": "hu", "RO": "ro", "MX": "es", "AU": "en"}
+LANG = {"PL": "pl", "CZ": "cs", "SK": "sk", "SI": "sl", "HR": "hr", "HU": "hu", "RO": "ro", "MX": "es", "AU": "en", "GB": "en", "JE": "en", "GG": "en", "IM": "en", "IE": "en", "ES": "es", "PT": "pt", "IT": "it", "MT": "en", "SM": "it", "VA": "it", "AD": "ca"}
 
 # Postcode shapes. Each is searched in a line; the text after it up to the next comma is the locality for the countries that write
 # the postcode first.
 PC = {
+    "GB": re.compile(r"\b(?!(?:JE|GY|IM)\d)[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}\b"),
+    "JE": re.compile(r"\bJE\d[A-Z\d]?\s?\d[A-Z]{2}\b"),
+    "GG": re.compile(r"\bGY\d[A-Z\d]?\s?\d[A-Z]{2}\b"),
+    "IM": re.compile(r"\bIM\d[A-Z\d]?\s?\d[A-Z]{2}\b"),
+    "IE": re.compile(r"\b(?:D6W|[ACDEFHKNPRTVWXY]\d{2})\s?[0-9ACDEFHKNPRTVWXY]{4}\b|\bDublin\s?\d{1,2}W?\b|\b(?:Co\.?|County)\s+[A-Z][a-z]+"),
+    "ES": re.compile(rf"\b(?:0[1-9]|[1-4]\d|5[0-2])\d{{3}}\s+[{UP}]{L}+"),
+    "PT": re.compile(r"\b[1-9]\d{3}\s?-\s?\d{3}\b"),
+    "IT": re.compile(rf"\b(?:0\d|[1-9]\d)\d{{3}}\s+[{UP}]{L}+"),
+    "MT": re.compile(r"\b[A-Z]{3}\s?\d{2,4}\b"),
+    "SM": re.compile(r"\b4789\d\b"),
+    "VA": re.compile(r"\b00120\b"),
+    "AD": re.compile(r"\bAD\s?[1-7]\d{2}\b"),
     "PL": re.compile(rf"\b\d{{2}}\s?-\s?\d{{3}}\s+[{UP}]{L}+"),
     "CZ": re.compile(rf"\b(?:CZ[- ])?\d{{3}}\s?\d{{2}}\s+[{UP}]{L}+"),
     "SK": re.compile(rf"\b(?:SK[- ])?\d{{3}}\s?\d{{2}}\s+[{UP}]{L}+"),
@@ -42,6 +54,9 @@ PC = {
     "AU": re.compile(r"\b(?:NSW|VIC|QLD|SA|WA|TAS|NT|ACT)\.?\s+\d{4}\b|\b(?:New South Wales|Victoria|Queensland|South Australia|Western Australia|Tasmania|Northern Territory)\s+\d{4}\b"),
 }
 COUNTRY_LINE = {
+    "GB": r"United Kingdom|UK|U\.K\.|England|Scotland|Wales|Northern Ireland|Great Britain", "JE": r"Jersey|Channel Islands|C\.I\.", "GG": r"Guernsey|Channel Islands|C\.I\.",
+    "IM": r"Isle of Man|British Isles", "IE": r"Ireland|[ÉE]ire|Republic of Ireland", "ES": r"Espa[ñn]a|Spain", "PT": r"Portugal", "IT": r"Italia|Italy",
+    "MT": r"Malta", "SM": r"San Marino|Repubblica di San Marino", "VA": r"Citt[àa] del Vaticano|Vatican City|Vaticano", "AD": r"Andorra|Andorre",
     "PL": r"Polska|Poland", "CZ": r"[ČC]esk[áa] republika|Czech Republic|Czechia|[ČC]esko", "SK": r"Slovensko|Slovensk[áa] republika|Slovakia",
     "SI": r"Slovenija|Slovenia", "HR": r"Hrvatska|Croatia", "HU": r"Magyarorsz[áa]g|Hungary", "RO": r"Rom[âa]nia|Romania",
     "MX": r"M[ée]xico|Mexico|M[ée]x\.?", "AU": r"Australia",
@@ -51,12 +66,12 @@ LABEL = re.compile(r"^(?:adres(?:a)?(?: siedziby| korespondencyjny| do korespond
                    r"naslov(?: sedeža)?|sjedište|sjediste|adresa tvrtke|cím|székhely|telephely|levelezési cím|sediul(?: social)?|sediu|adres[aă]|punct de lucru|"
                    r"direcci[oó]n|domicilio(?: fiscal)?|ubicaci[oó]n|oficinas?|matriz|sucursal|address|postal address|street address|mailing address|physical address|"
                    r"our address|visit us|find us|location|office|head ?office|registered office|principal place of business|kde n[aá]s najdete|gdzie jeste[sś]my|jak dojecha[cć])\s*[:\-–]\s*", re.I)
-BOX = re.compile(r"\b(?:skr\.?\s*poczt(?:owa)?\.?|skrytka\s+pocztowa|p\.?\s?o\.?\s*box|po\s+box|gpo\s+box|locked\s+bag|private\s+bag|rmb|rmd|reply\s+paid|poštovní\s+přihrádka|"
+BOX = re.compile(r"\b(?:apartado(?:\s+de\s+correos)?\s*\d|apdo\.?\s*\d|casella\s+postale|caixa\s+postal|private\s+bag|poste\s+restante|skr\.?\s*poczt(?:owa)?\.?|skrytka\s+pocztowa|p\.?\s?o\.?\s*box|po\s+box|gpo\s+box|locked\s+bag|private\s+bag|rmb|rmd|reply\s+paid|poštovní\s+přihrádka|"
                  r"p\.?\s?p\.?\s*\d|pošt\.?\s*schr[aá]nka|po[sš]tov[aá]\s+schr[aá]nka|poštni\s+predal|pp\s+\d|poštanski\s+pretinac|pf\.?\s*\d|postafi[oó]k|c\.?p\.?\s*\d+\s*,?\s*of|"
                  r"oficiul\s+po[sş]tal|apartado\s+postal|ap(?:do)?\.?\s*postal|a\.?\s?p\.?\s*\d)\b", re.I)
-UNIT = re.compile(r"\b(?:lok\.?|m\.|suite|ste\.?|unit|level|lvl|shop|floor|fl\.?|bldg|building|tower|p[řr]\.?|pat[rř]o|poschodie|posch\.?|nadst\.?|[eé]p\.?|em\.?|ajt[oó]|fszt\.?|"
+UNIT = re.compile(r"\b(?:flat|apartment|apt\.?|planta|escalera|esc\.?|puerta|bajo|piano|scala|interno|andar|esq\.?|dto\.?|loja|sala|lok\.?|m\.|suite|ste\.?|unit|level|lvl|shop|floor|fl\.?|bldg|building|tower|p[řr]\.?|pat[rř]o|poschodie|posch\.?|nadst\.?|[eé]p\.?|em\.?|ajt[oó]|fszt\.?|"
                   r"bl\.?|sc\.?|ap\.?|et\.?|etaj|int\.?|interior|piso|depto\.?|dpto\.?|local|oficina|ofic\.?|despacho|torre|col\.?|colonia|nadstropje|pritli[cč]je|kat|kat\.?|zgrada)\s*[\d#A-Za-z]|#\s?\d", re.I)
-RURAL = re.compile(r"\b(?:wie[sś]|osiedle|os\.|č\.\s?p\.|[čc]\.p\.|obec|dedina|selo|naselje|puszta|major|tanya|sat\b|com\.|comuna|jud\.|carretera|carr\.|km\.?\s?\d|rancho|ejido|"
+RURAL = re.compile(r"\b(?:pol[ií]gono|urbanizaci[oó]n|urb\.|localit[àa]|loc\.|frazione|fraz\.|contrada|quinta|aldeia|lugar|estrada|townland|industrial estate|business park|farm|cottage|wie[sś]|osiedle|os\.|č\.\s?p\.|[čc]\.p\.|obec|dedina|selo|naselje|puszta|major|tanya|sat\b|com\.|comuna|jud\.|carretera|carr\.|km\.?\s?\d|rancho|ejido|"
                    r"highway|hwy|rd\b|road|lot\s+\d|rmb|rmd|mail\s+service|pmb|station)\b", re.I)
 DIGITS_OUTSIDE = re.compile(r"\d+\s*[A-Za-z]?(?:\s*[/\-]\s*\d+[A-Za-z]?)?")
 
@@ -177,6 +192,18 @@ stats["address"] = (len(addr_items), len(chosen), dict(counts))
 
 # ---------- names ----------
 TITLES = {
+    "GB": r"Dr\.?|Mr\.?|Mrs\.?|Ms\.?|Miss|Mx|Prof\.?|Professor|Rev\.?|Reverend|Sir|Dame|Lord|Lady|Cllr|Councillor|Hon\.?|Fr\.?|Canon|Judge|Capt\.?|Col\.?|Maj\.?",
+    "JE": r"Dr\.?|Mr\.?|Mrs\.?|Ms\.?|Miss|Prof\.?|Rev\.?|Sir|Dame|Deputy|Connétable|Constable|Senator|Hon\.?|Canon",
+    "GG": r"Dr\.?|Mr\.?|Mrs\.?|Ms\.?|Miss|Prof\.?|Rev\.?|Sir|Dame|Deputy|Hon\.?|Canon",
+    "IM": r"Dr\.?|Mr\.?|Mrs\.?|Ms\.?|Miss|Prof\.?|Rev\.?|Sir|Dame|Hon\.?|Canon|MHK|MLC",
+    "IE": r"Dr\.?|Mr\.?|Mrs\.?|Ms\.?|Miss|Prof\.?|Rev\.?|Fr\.?|Sr\.?|Cllr|Councillor|Judge|Senator|Deputy|Canon|Captain|Hon\.?",
+    "ES": r"Don|Do[ñn]a|D\.|D[ñn]a\.?|Sr\.?|Sra\.?|Srta\.?|Dr\.?|Dra\.?|Lic\.?|Ing\.?|Arq\.?|Prof\.?|Profa\.?|Abg\.?|Excmo\.?|Ilmo\.?|Fr\.?|P\.",
+    "PT": r"Dr\.?|Dra\.?|Eng\.?|Eng\.?[ªa]\.?|Arq\.?|Arq\.?[ªa]\.?|Prof\.?|Prof\.?[ªa]\.?|Sr\.?|Sra\.?|Sr\.?[ªa]\.?|Mestre|Dom|D\.|Padre|Cons\.?",
+    "IT": r"Dott\.?|Dott\.?\s?ssa\.?|Dr\.?|Dr\.?\s?ssa\.?|Avv\.?|Ing\.?|Arch\.?|Geom\.?|Rag\.?|Prof\.?|Prof\.?\s?ssa\.?|Sig\.?|Sig\.?\s?ra\.?|Sig\.?\s?na\.?|Notaio|Don|Mons\.?|Cav\.?|On\.?|P\.",
+    "MT": r"Dr\.?|Mr\.?|Mrs\.?|Ms\.?|Miss|Prof\.?|Perit|Av\.?|Avv\.?|Rev\.?|Mons\.?|Fr\.?|Hon\.?|Sir|Ing\.?|Kav\.?|Dun|Dr",
+    "SM": r"Dott\.?|Dott\.?\s?ssa\.?|Dr\.?|Avv\.?|Ing\.?|Arch\.?|Geom\.?|Rag\.?|Prof\.?|Sig\.?|Sig\.?\s?ra\.?|Notaio",
+    "VA": r"Dott\.?|Dr\.?|Avv\.?|Ing\.?|Prof\.?|Mons\.?|Don|Card\.?|S\.E\.|Em\.?mo|P\.|Fr\.?|Sig\.?|Suor|Sr\.?",
+    "AD": r"Sr\.?|Sra\.?|Srta\.?|Dr\.?|Dra\.?|Don|Do[ñn]a|Ing\.?|Arq\.?|Lic\.?|Prof\.?|Hble\.?|Il·lm\.?|Excm\.?|Mn\.?|Mossèn",
     "PL": r"dr(?:\s+hab\.?)?|mgr(?:\s+in[zż]\.?)?|in[zż]\.?|prof\.?(?:\s+(?:dr\s+hab\.?|zw\.?|nadzw\.?|UW|UJ))?|lek\.?(?:\s+med\.?)?|adw\.?|r\.?\s?pr\.?|rad\.?\s+pr\.?|ks\.?|lic\.?|dr\s+n\.\s?med\.?|arch\.?|techn\.?",
     "CZ": r"Ing\.?(?:\s+arch\.?)?|Mgr\.?|Bc\.?|JUDr\.?|MUDr\.?|MVDr\.?|RNDr\.?|PhDr\.?|PaedDr\.?|MgA\.?|doc\.?|prof\.?|Dr\.?|DiS\.?|Ing\.\s?arch\.?|arch\.?",
     "SK": r"Ing\.?(?:\s+arch\.?)?|Mgr\.?|Bc\.?|JUDr\.?|MUDr\.?|MVDr\.?|RNDr\.?|PhDr\.?|PaedDr\.?|MgA\.?|doc\.?|prof\.?|Dr\.?|PharmDr\.?",
@@ -189,7 +216,7 @@ TITLES = {
 }
 CREDS = r"(?:MBA|PhD|Ph\.D\.|CSc\.?|DrSc\.?|DiS\.?|MBA|MSc|BSc|LL\.M\.?|MD|CPA|FCA|OAM|AM|AO|QC|SC|JP|FRACP|FRACS|FRANZCOG|MBBS|BDS|B\.?Sc|M\.?Sc|CFP|Jr\.?|Sr\.?|PMP|CCSP|MPH|FRACGP|Esq\.?|CA|ACCA|ing\.?|inż\.|M\.?D\.?|DDS|Dipl\.?\s?Ing\.?|DrPH|CPA)"
 ROLE = re.compile(
-    r"\b(?:prezes|dyrektor|kierownik|w[łl]a[sś]ciciel|adwokat|radca|lekarz|specjalista|doradca|zast[eę]pca|ksi[eę]gow|pe[łl]nomocnik|za[łl]o[zż]yciel|mened[zż]er|handlowiec|"
+    r"\b(?:administrador[a]?|gerente|abogad[oa]|notari[oa]|arquitect[oa]|ingenier[oa]|gestor[a]?|titular|propietari[oa]|resp(?:onsable)?|amministratore|titolare|avvocato|avvocata|dottore|dottoressa|commercialista|architetto|ingegnere|notaio|geometra|consulente|responsabile|direttore|direttrice|diretor[a]?|advogad[oa]|s[óo]cio|s[óo]cia|engenheir[oa]|solicitador[a]?|contabilista|t[ée]cnic[oa]|councillor|mayor|headteacher|solicitor|therapist|surgeon|vet|prezes|dyrektor|kierownik|w[łl]a[sś]ciciel|adwokat|radca|lekarz|specjalista|doradca|zast[eę]pca|ksi[eę]gow|pe[łl]nomocnik|za[łl]o[zż]yciel|mened[zż]er|handlowiec|"
     r"jednatel|[řr]editel|majitel|vedouc[ií]|lék[aá][řr]|advok[aá]t|obchodn[ií]|[uú][čc]etn[ií]|jednate[ľl]|riadite[ľl]|vedúci|majite[ľl]|lek[aá]r|"
     r"direktor|direktorica|vodja|lastnik|odvetnik|zdravnik|svetovalec|zaposlen|ravnatelj|vlasnik|voditelj|odvjetnik|lije[cč]nik|savjetnik|"
     r"igazgat[oó]|[uü]gyvezet[oő]|tulajdonos|vezet[oő]|[uü]gyv[eé]d|orvos|tan[aá]csad[oó]|[uü]gyf[eé]lszolg|munkat[aá]rs|"
@@ -206,7 +233,7 @@ kezdőlap kapcsolat rólunk szolgáltatások hírek adatvédelem akciók termék
 acasă despre noi servicii noutăți confidențialitate termeni condiții echipa echipă produse
 inicio nosotros contacto servicios noticias privacidad aviso legal productos nuestro equipo ubicación sucursales
 read more our team meet staff careers join shop cart privacy policy terms conditions click here sign register faq gallery resources events locations hours
-monday tuesday wednesday thursday friday saturday sunday australia mexico polska česká slovensko slovenija hrvatska magyarország românia méxico""".split())
+inicio servicios noticias privacidad cookies aviso legal quienes somos chi siamo azienda servizi notizie sedi pagina página produtos serviços empresa contactos equipa contatti home ireland england scotland wales jersey guernsey malta portugal españa italia andorra marino vaticano monday tuesday wednesday thursday friday saturday sunday australia mexico polska česká slovensko slovenija hrvatska magyarország românia méxico""".split())
 
 
 def person_ok(line, cc):
@@ -235,6 +262,18 @@ def has_title(line, cc):
 
 
 FORMS = {
+    "GB": r"Ltd\.?|Limited|plc|LLP|L\.?L\.?P\.?|LP|CIC|Limited Partnership|Community Interest Company|Co\.?\s+Ltd\.?|Trust|Foundation|Charity",
+    "JE": r"Ltd\.?|Limited|plc|LLP|LP|Limited Partnership|Trust|Foundation|Association",
+    "GG": r"Ltd\.?|Limited|plc|LLP|LP|Limited Partnership|Trust|Foundation|Association",
+    "IM": r"Ltd\.?|Limited|plc|LLP|LP|Limited Partnership|Trust|Foundation|Association",
+    "IE": r"Ltd\.?|Limited|DAC|CLG|UC|plc|Unlimited Company|Teoranta|Teo\.?|Designated Activity Company|Company Limited by Guarantee|LLP|Trust|Foundation",
+    "ES": r"S\.?\s?L\.?\s?U?\.?|S\.?\s?A\.?\s?U?\.?|S\.?\s?L\.?\s?L\.?|S\.?\s?Coop\.?|S\.?\s?C\.?\s?P\.?|C\.?\s?B\.?|S\.?\s?A\.?\s?L\.?|S\.?\s?Com\.?|Sociedad\s+Limitada|Sociedad\s+An[oó]nima|Fundaci[oó]n|Asociaci[oó]n",
+    "PT": r"Lda\.?|Limitada|Unipessoal|S\.?\s?A\.?|S\.?\s?G\.?\s?P\.?\s?S\.?|E\.?\s?I\.?\s?R\.?\s?L\.?|Cooperativa|CRL|Associa[cç][aã]o|Funda[cç][aã]o|Sociedade\s+An[oó]nima",
+    "IT": r"S\.?\s?r\.?\s?l\.?\s?s?\.?|S\.?\s?p\.?\s?A\.?|S\.?\s?n\.?\s?c\.?|S\.?\s?a\.?\s?s\.?|S\.?\s?s\.?|S\.?\s?c\.?\s?a\.?\s?r\.?\s?l\.?|Soc\.?\s?Coop\.?|Societ[àa]|Fondazione|Associazione|Cooperativa|Onlus|ETS|APS|ASD|S\.?\s?r\.?\s?l\.?\s?unipersonale",
+    "MT": r"Ltd\.?|Limited|plc|LLP|Co\.?\s+Ltd|Foundation|Association|Trust",
+    "SM": r"S\.?\s?r\.?\s?l\.?|S\.?\s?p\.?\s?A\.?|S\.?\s?A\.?|S\.?\s?n\.?\s?c\.?|S\.?\s?a\.?\s?s\.?|Societ[àa]|Fondazione|Associazione",
+    "VA": r"Fondazione|Associazione|Governatorato|Congregazione|Pontificio|Pontificia|Societ[àa]",
+    "AD": r"S\.?\s?A\.?\s?U?\.?|S\.?\s?L\.?\s?U?\.?|S\.?\s?L\.?\s?P\.?|S\.?\s?C\.?|Societat|Fundaci[oó]|Associaci[oó]",
     "PL": r"sp\.?\s?z\s?o\.?\s?o\.?(?:\s+sp\.?\s?(?:k|j|p)\.?)?|S\.?A\.?|sp\.?\s?j\.?|sp\.?\s?k\.?|sp\.?\s?k\.?\s?a\.?|sp[óo][łl]ka\s+(?:z\s+ograniczon[aą]|akcyjna|jawna|komandytowa)[\w\s]*|P\.?P\.?H\.?U\.?|P\.?H\.?U\.?|Fundacja|Stowarzyszenie",
     "CZ": r"s\.?\s?r\.?\s?o\.?|a\.?\s?s\.?|spol\.?\s+s\s+r\.?\s?o\.?|v\.?\s?o\.?\s?s\.?|k\.?\s?s\.?|z\.?\s?s\.?|o\.?\s?p\.?\s?s\.?|z\.?\s?ú\.?|s\.?\s?p\.?",
     "SK": r"s\.?\s?r\.?\s?o\.?|a\.?\s?s\.?|spol\.?\s+s\s+r\.?\s?o\.?|v\.?\s?o\.?\s?s\.?|k\.?\s?s\.?|n\.?\s?o\.?|o\.?\s?z\.?",
@@ -246,8 +285,8 @@ FORMS = {
     "AU": r"Pty\.?\s+Ltd\.?|Pty\.?\s+Limited|Pty\.?|Ltd\.?|Limited|Inc\.?|Incorporated|Trust|Co-operative|Cooperative|Foundation|Association|Partnership|Group|Holdings|Services|Pty",
 }
 LEGAL = re.compile(rf"(?:^|[\s,])(?:{FORMS[cc_code]})(?=$|[\s,.;)])", re.I)
-COPY = re.compile(r"(?:©|\(c\)|&copy;|Copyright|Prawa autorskie|Autorsk[eé] pr[aá]va|Všechna práva|Szerzői jog|Drepturi de autor|Derechos reservados|Todos los derechos)\s*(?:\d{4}(?:\s*[-–]\s*\d{4})?)?[\s,:.\-–]*(.+)", re.I)
-REGISTERED = re.compile(rf"(?:Operator|Wydawca|Prowadz[aą]cy|Sprzedawca|Firma|Obchodn[ií] firma|Provozovatel|Prevádzkovate[ľl]|Podjetje|Naziv|Tvrtka|Szolgáltató|Üzemeltető|Cégnév|Denumire|Societatea|Raz[oó]n social|Nombre|Operated by|Trading as|ABN|Registered)\s*[:\-–]\s*(.+)", re.I)
+COPY = re.compile(r"(?:©|\(c\)|&copy;|Copyright|Prawa autorskie|Autorsk[eé] pr[aá]va|Všechna práva|Szerzői jog|Drepturi de autor|Derechos reservados|Todos los derechos|Todos os direitos|Tutti i diritti|Diritti riservati)\s*(?:\d{4}(?:\s*[-–]\s*\d{4})?)?[\s,:.\-–]*(.+)", re.I)
+REGISTERED = re.compile(rf"(?:Titular|Raz[oó]n social|Denominaci[oó]n social|Denomina[cç][aã]o social|Ragione sociale|Denominazione sociale|Company name|Registered name|Registered company|Registered in|Operator|Wydawca|Prowadz[aą]cy|Sprzedawca|Firma|Obchodn[ií] firma|Provozovatel|Prevádzkovate[ľl]|Podjetje|Naziv|Tvrtka|Szolgáltató|Üzemeltető|Cégnév|Denumire|Societatea|Raz[oó]n social|Nombre|Operated by|Trading as|ABN|Registered)\s*[:\-–]\s*(.+)", re.I)
 
 
 def clean_company(s):
