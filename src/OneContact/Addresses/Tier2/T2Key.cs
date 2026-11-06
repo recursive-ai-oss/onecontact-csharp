@@ -20,6 +20,11 @@ internal static class T2Key
         ["pb"] = "postbus",
         ["bus"] = "box",
         ["bte"] = "box",
+        ["skr. poczt."] = "skrytka pocztowa",
+        ["skr. poczt. nr"] = "skrytka pocztowa",
+        ["skrytka pocztowa nr"] = "skrytka pocztowa",
+        ["skr poczt"] = "skrytka pocztowa",
+        ["skr poczt nr"] = "skrytka pocztowa",
     };
 
     internal static string Compute(ParsedAddress a)
@@ -59,6 +64,9 @@ internal static class T2Key
                 case StreetPartRole.BoxDesignator:
                 case StreetPartRole.UnitDesignator:
                     w.Add(p.Standard == "//" ? string.Empty : BoxWords.TryGetValue(lower, out string? mapped) ? mapped : Words(p.Standard, codes));
+                    break;
+                case StreetPartRole.Other when p.Rule == "t2-number-marker":
+                    // "nr.", "No." and "#" before a house number only say that a number follows.
                     break;
                 default:
                     w.Add(Words(p.Standard, codes));

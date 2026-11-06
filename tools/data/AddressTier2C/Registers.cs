@@ -71,7 +71,8 @@ internal static partial class Registers
         "SI" => Derived("SI", "sl", Path.Combine(Directory(dataRoot, "si-rpe"), "derived", "si-addresses.tsv.gz"), rejects),
         "SK" => Derived("SK", "sk", Path.Combine(Directory(dataRoot, "sk-ra"), "derived", "sk-addresses.tsv.gz"), rejects),
         "LT" => Lithuania(Directory(dataRoot, "lt-ar"), rejects),
-        _ => throw new ArgumentException("unknown country " + country),
+        "DK" or "SE" or "FI" or "IS" => NordicRaw(country, dataRoot, rejects),
+        _ => GroupC3(country, dataRoot, rejects),
     };
 
     // Matrikkelen Adresse CSV (Kartverket, CC BY 4.0): only road addresses (vegadresse) have a street name and number; farm and cadastral

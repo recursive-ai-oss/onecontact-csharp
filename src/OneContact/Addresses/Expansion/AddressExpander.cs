@@ -25,6 +25,21 @@ public static class AddressExpander
         (ExpansionLanguages.Galician, "gl"),
         (ExpansionLanguages.Maltese, "mt"),
         (ExpansionLanguages.Irish, "ga"),
+        (ExpansionLanguages.Danish, "da"),
+        (ExpansionLanguages.Swedish, "sv"),
+        (ExpansionLanguages.Finnish, "fi"),
+        (ExpansionLanguages.Norwegian, "nb"),
+        (ExpansionLanguages.Icelandic, "is"),
+        (ExpansionLanguages.Estonian, "et"),
+        (ExpansionLanguages.Latvian, "lv"),
+        (ExpansionLanguages.Lithuanian, "lt"),
+        (ExpansionLanguages.Polish, "pl"),
+        (ExpansionLanguages.Czech, "cs"),
+        (ExpansionLanguages.Slovak, "sk"),
+        (ExpansionLanguages.Slovenian, "sl"),
+        (ExpansionLanguages.Croatian, "hr"),
+        (ExpansionLanguages.Hungarian, "hu"),
+        (ExpansionLanguages.Romanian, "ro"),
     ];
 
     /// <summary>Expands an address.</summary>
@@ -271,7 +286,7 @@ public static class AddressExpander
         {
             case PhraseKind.StreetType:
                 // A street type is not the first word of an English address ("st marys church" is a saint); French, Italian, Iberian and Maltese types lead the name.
-                return i > 0 || entry.Language is "fr" or "it" or "es" or "pt" or "ca" or "eu" or "gl" or "mt" && words.Count > length;
+                return i > 0 || entry.Language is "fr" or "it" or "es" or "pt" or "ca" or "eu" or "gl" or "mt" or "pl" or "cs" or "sk" or "sl" or "hr" or "ro" && words.Count > length;
             case PhraseKind.NumberedUnit:
             case PhraseKind.NumberWord:
                 return nextLooksNumeric;
@@ -370,8 +385,8 @@ public static class AddressExpander
         return word;
     }
 
-    private const string FoldFrom = "àáâãäåçèéêëìíîïñòóôõöøùúûüýÿāăąćĉċčďđēĕėęěĝğġģĥħĩīĭįıĵķĸĺļľŀłńņňŉōŏőŕŗřśŝşšţťŧũūŭůűųŵŷźżžſ";
-    private const string FoldTo = "aaaaaaceeeeiiiinoooooouuuuyyaaaccccddeeeeegggghhiiiiijkklllllnnnnooorrrsssstttuuuuuuwyzzzs";
+    private const string FoldFrom = "àáâãäåçèéêëìíîïñòóôõöøùúûüýÿāăąćĉċčďđēĕėęěĝğġģĥħĩīĭįıĵķĸĺļľŀłńņňŉōŏőŕŗřśŝşšţťŧũūŭůűųŵŷźżžſșț";
+    private const string FoldTo = "aaaaaaceeeeiiiinoooooouuuuyyaaaccccddeeeeegggghhiiiiijkklllllnnnnooorrrsssstttuuuuuuwyzzzsst";
 
     /// <summary>
     /// Folds case with the invariant culture and removes diacritics from Latin letters: the accented letters of the tier languages (and their decomposed
