@@ -73,6 +73,25 @@ internal static partial class Tier2Reader
                 units.RemoveAt(u);
                 u--;
             }
+            else if (units.Count >= 2 && units[u].Toks.Count == 1 && IsAustralianPostcode(units[u].Toks[0].Text) && !units[u - 1].Toks.Any(t => IsAustralianPostcode(t.Text)))
+            {
+                // Commas on both sides of the state ("Sydney NSW, 2000", "Sydney, NSW, 2000", the way web forms print it) set the state and the postcode in units of their own.
+                // Each belongs to the locality before it; the state must stand alone or end the unit before the postcode, so a street line is never taken for a locality.
+                List<Tok> two = [.. units[u - 1].Toks, .. units[u].Toks];
+                List<Tok>? three = units.Count >= 3 && !units[u - 2].Toks.Any(t => IsAustralianPostcode(t.Text)) ? [.. units[u - 2].Toks, .. two] : null;
+                if (AustralianState(two, two.Count - 1, known, out _, out _) >= 1)
+                {
+                    units[u - 1] = new Unit(two);
+                    units.RemoveAt(u);
+                    u--;
+                }
+                else if (three is not null && AustralianState(three, three.Count - 1, known, out _, out _) is var at && at >= units[u - 2].Toks.Count)
+                {
+                    units[u - 2] = new Unit(three);
+                    units.RemoveRange(u - 1, 2);
+                    u -= 2;
+                }
+            }
 
             List<Tok> toks = units[u].Toks;
             if (toks.Count < 3 || !IsAustralianPostcode(toks[^1].Text))
@@ -172,6 +191,33 @@ internal static partial class Tier2Reader
 
         private static bool IsRomanianPostcode(string s) => s.Length == 6 && s.All(char.IsAsciiDigit) || s.Length == 9 && s.StartsWith("RO-", StringComparison.OrdinalIgnoreCase) && s[3..].All(char.IsAsciiDigit);
 
+        // Romanian pages label the postcode ("cod poștal 400001", "cod 400001", "Cod: 400001"). The label is not part of the address, so it is left out of every field and the
+        // postcode is read as it is without the label; a label that is not followed by a postcode stays where it is.
+        private static void DropRomanianPostcodeLabels(List<Unit> units)
+        {
+            foreach (Unit u in units)
+            {
+                for (int i = 0; i < u.Toks.Count - 1; i++)
+                {
+                    if (T2Rules.Key(u.Toks[i].Text.TrimEnd(':')) is not ("COD" or "CODUL"))
+                    {
+                        continue;
+                    }
+
+                    int next = i + 1;
+                    if (next < u.Toks.Count - 1 && T2Rules.Key(u.Toks[next].Text.TrimEnd(':')) is "POSTAL" or "POSTALA")
+                    {
+                        next++;
+                    }
+
+                    if (next < u.Toks.Count && IsRomanianPostcode(u.Toks[next].Text))
+                    {
+                        u.Toks = [.. u.Toks.Take(i), .. u.Toks.Skip(next)];
+                    }
+                }
+            }
+        }
+
         // UPU Romania sheet: "200716 CRAIOVA", the postcode of six digits left of the locality. Romanians also write the sector of Bucharest or the county after the locality
         // ("011371 Bucureşti, Sector 1", which on one line is a unit of its own after the postcode) and put the postcode last ("Pitești, 110040"; "București, Sector 3, 032391").
         // A sector or county unit after a unit with the postcode is joined to it; a postcode that ends the text is moved in front of the locality before it.
@@ -182,6 +228,16 @@ internal static partial class Tier2Reader
             if (known is not null and not "RO" || units.Count == 0)
             {
                 return false;
+            }
+
+            DropRomanianPostcodeLabels(units);
+
+            // A postcode written before the locality but after the street ("Str. X nr. 5, cod poștal 400001, Cluj-Napoca") is the postcode line of the UPU sheet, in one piece.
+            if (units.Count >= 2 && units[^2].Toks.Count == 1 && IsRomanianPostcode(units[^2].Toks[0].Text) && units[^1].Toks.Count <= 3
+                && units[^1].Toks.All(t => !t.Text.Any(char.IsAsciiDigit)) && !IsRomanianSectorWord(units[^1].Toks[0].Key))
+            {
+                units[^2] = new Unit([.. units[^2].Toks, .. units[^1].Toks]);
+                units.RemoveAt(units.Count - 1);
             }
 
             while (units.Count >= 2 && units[^1].Toks.Count > 0 && IsRomanianSectorWord(units[^1].Toks[0].Key) && units[^2].Toks.Any(t => IsRomanianPostcode(t.Text)))
@@ -331,6 +387,69 @@ internal static partial class Tier2Reader
             return false;
         }
 
+        // Postcode, locality and street on one line without a comma ("1068 Budapest Király utca 80."). The locality is the word after the postcode, with a district number if one
+        // follows (Magyar Posta: "BUDAPEST XIII."); words before the postcode are a line of their own. What is left must read as a street line with a Hungarian street type or a box
+        // (or the text is known to be Hungarian); a locality of several words is not guessed. This runs before the general last-line search, which would take every word after
+        // the postcode for the locality.
+        private bool FindHungarianOneLine(List<Unit> units, string? known, out int unitIndex, out int tokenIndex, out PostcodeMatch match)
+        {
+            unitIndex = tokenIndex = 0;
+            match = null!;
+            if (known is not null and not "HU")
+            {
+                return false;
+            }
+
+            T2Country hu = T2Rules.Countries["HU"];
+            int n = units.Count;
+            for (int p = 0; p < n; p++)
+            {
+                List<Tok> t = units[p].Toks;
+                int q = t.FindIndex(x => HungarianPostcode(x.Text, out _, out _));
+                if (q < 0 || t.Count - q < 4 || t.Take(q).Any(x => x.Text.Any(char.IsAsciiDigit)))
+                {
+                    continue;
+                }
+
+                HungarianPostcode(t[q].Text, out string digits, out string? prefix);
+                int k = q + 2;
+                if (IsRoman(t[k].Text) && t[k].Text.EndsWith('.') && k + 2 < t.Count)
+                {
+                    k++;
+                    if (t[k].Key == "KER" && k + 2 < t.Count)
+                    {
+                        k++;
+                    }
+                }
+
+                if (t[q + 1].Text.Any(char.IsAsciiDigit) || !HungarianLocality(t.GetRange(q + 1, k - q - 1)))
+                {
+                    continue;
+                }
+
+                List<Line?> after = [ParseDeliveryLine(t.GetRange(k, t.Count - k), "HU", hu, allowStreet: true), .. units.GetRange(p + 1, n - p - 1).Select(u => ParseDeliveryLine(u.Toks, "HU", hu, allowStreet: true))];
+                if (!after.All(l => l is not null) || known != "HU" && !after.Any(l => HungarianWordEvidence(l!)))
+                {
+                    continue;
+                }
+
+                Unit localityUnit = new(t.GetRange(q, k - q));
+                units[p] = new Unit(t.GetRange(k, t.Count - k));
+                if (q > 0)
+                {
+                    units.Insert(p, new Unit(t.GetRange(0, q)));
+                }
+
+                units.Add(localityUnit);
+                _huLocalityIndex = q > 0 ? p + 1 : p;
+                unitIndex = units.Count - 1;
+                match = new PostcodeMatch(1, digits, ["HU"], prefix);
+                return true;
+            }
+
+            return false;
+        }
+
         private static bool HungarianPostcode(string text, out string digits, out string? prefix)
         {
             digits = text;
@@ -371,6 +490,10 @@ internal static partial class Tier2Reader
             return true;
         }
 
+        // "Pf." is also how German-speaking countries abbreviate Postfach, so only a street type or the full word "postafiók" tells Hungarian text without a hint.
+        private static bool HungarianWordEvidence(Line street) =>
+            street.Pieces.Any(p => p.Role == StreetPartRole.StreetType || p.Role == StreetPartRole.BoxDesignator && T2Rules.Key(p.Text) == "POSTAFIOK");
+
         private static bool HungarianEvidence(Line street) =>
             street.Pieces.Any(p => p.Role is StreetPartRole.StreetType or StreetPartRole.BoxDesignator or StreetPartRole.GeneralDelivery);
 
@@ -399,6 +522,12 @@ internal static partial class Tier2Reader
                 {
                     found.Add(code);
                 }
+            }
+
+            // Magyar Posta: "utca" (street) and "postafiók" (box) are Hungarian words that no other country of the shared four-digit form writes.
+            if (match.Candidates.Contains("HU") && all.Any(t => t.Key is "UTCA" or "POSTAFIOK"))
+            {
+                found.Add("HU");
             }
 
             return found.Count == 1 ? found[0] : null;
@@ -591,6 +720,12 @@ internal static partial class Tier2Reader
 
         private static readonly HashSet<string> AuDirectionals = new(StringComparer.Ordinal) { "N", "S", "E", "W", "NE", "NW", "SE", "SW", "NORTH", "SOUTH", "EAST", "WEST" };
 
+        private static bool IsUnitSlashNumber(string s)
+        {
+            int slash = s.IndexOf('/', StringComparison.Ordinal);
+            return slash > 0 && slash == s.LastIndexOf('/') && IsUnitId(s[..slash]) && IsHouseNumber(s[(slash + 1)..]);
+        }
+
         private static bool IsUnitId(string s) => s.Length is >= 1 and <= 5 && (s.Any(char.IsAsciiDigit) || s.Length == 1 && char.IsLetter(s[0])) && s.All(char.IsLetterOrDigit);
 
         // Australia Post (Address Presentation Standards p. 14-20): sub-unit, then floor or level, then the house number and the street name and type, all on one line;
@@ -611,7 +746,13 @@ internal static partial class Tier2Reader
                 pieces.Add(new Piece(role, t.Text, standard, abbreviation ? standard : T2Text.TitleWord(AuText(t.Text), first: pieces.Count == 0), t.Span, rule));
             }
 
-            if (i + 1 < toks.Count && AuSubUnits.Contains(toks[i].Key) && IsUnitId(toks[i + 1].Text))
+            // "Unit 3/12 Smith St", "Shop 4/100 George St": the designator, then the unit number and the street number in one word (Address Presentation Standards p. 15).
+            if (i + 2 < toks.Count && AuSubUnits.Contains(toks[i].Key) && IsUnitSlashNumber(toks[i + 1].Text))
+            {
+                Add(StreetPartRole.UnitDesignator, toks[i], "australia-post-sub-unit");
+                i++;
+            }
+            else if (i + 1 < toks.Count && AuSubUnits.Contains(toks[i].Key) && IsUnitId(toks[i + 1].Text))
             {
                 Add(StreetPartRole.UnitDesignator, toks[i], "australia-post-sub-unit");
                 Add(StreetPartRole.UnitNumber, toks[i + 1], "australia-post-sub-unit");

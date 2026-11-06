@@ -162,6 +162,7 @@ internal static partial class Tier2Reader
             PostcodeMatch match;
             if (!FindAustralian(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindRomanian(units, known, out unitIndex, out tokenIndex, out match)
+                && !FindHungarianOneLine(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindLastLine(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindPostcodeLast(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindProvinceLine(units, known, out unitIndex, out tokenIndex, out match)
@@ -1465,7 +1466,9 @@ internal static partial class Tier2Reader
                 // Poland writes "skr. poczt. Nr 115" (Poczta Polska); Mexico and the Czech Republic print box numbers like "70-123" and "B/52" (UPU Mexico sheet, Czech Post).
                 int first = words + (country.IsCentral && words < toks.Count - 1 && toks[words].Key is "NR" or "NO" ? 1 : 0);
                 int n = first;
-                while (n < toks.Count && (IsBoxNumber(toks[n].Text) || country.IsCentral && IsCentralBoxNumber(toks[n].Text)) && (n == first || toks[n].Text.All(char.IsAsciiDigit)))
+                // Hungarians close the number with a period like a house number ("Pf. 12."); the period is not part of the number.
+                string BoxWord(Tok t) => country.Profile == "hu" ? t.Text.TrimEnd('.') : t.Text;
+                while (n < toks.Count && (IsBoxNumber(BoxWord(toks[n])) || country.IsCentral && IsCentralBoxNumber(BoxWord(toks[n]))) && (n == first || BoxWord(toks[n]).All(char.IsAsciiDigit)))
                 {
                     n++;
                 }
@@ -1496,7 +1499,7 @@ internal static partial class Tier2Reader
                 }
 
                 List<Tok> number = toks.GetRange(words, n - words);
-                string numberStandard = country.Code == "BE" ? string.Concat(number.Select(t => t.Text)) : Fmt(country, string.Join(' ', number.Select(t => t.Text)));
+                string numberStandard = country.Code == "BE" ? string.Concat(number.Select(t => t.Text)) : Fmt(country, string.Join(' ', number.Select(BoxWord)));
                 pieces.Add(new Piece(StreetPartRole.BoxDesignator, Join(toks.Take(words)), printed, displayPrinted, Span(toks.Take(words)), "t2-box-designator"));
                 pieces.Add(new Piece(StreetPartRole.BoxNumber, Join(number), numberStandard, numberStandard, Span(number), "t2-box-number"));
                 if (n < toks.Count)
