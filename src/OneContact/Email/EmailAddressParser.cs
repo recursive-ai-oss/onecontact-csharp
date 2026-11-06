@@ -13,9 +13,13 @@ internal static class EmailAddressParser
     private const string AtextSpecials = "!#$%&'*+-/=?^_`{|}~";
     private const int MaxCommentDepth = 64;
 
-    internal static OperationStatus TryParse(ReadOnlySpan<char> input, out EmailAddress value, out ParseDetail detail)
+    internal static OperationStatus TryParse(ReadOnlySpan<char> input, out EmailAddress value, out ParseDetail detail) =>
+        TryParse(input, allowPlainShortcut: true, out value, out detail);
+
+    // The same parse with or without the shortcut for plain addresses, so a test can hold the shortcut to the full grammar.
+    internal static OperationStatus TryParse(ReadOnlySpan<char> input, bool allowPlainShortcut, out EmailAddress value, out ParseDetail detail)
     {
-        Scanner scanner = new(input, wantDetail: true);
+        Scanner scanner = new(input, wantDetail: true, allowPlainShortcut);
         if (scanner.Run())
         {
             value = scanner.Result();
@@ -30,7 +34,7 @@ internal static class EmailAddressParser
 
     internal static bool TryParseValue(ReadOnlySpan<char> input, out EmailAddress value)
     {
-        Scanner scanner = new(input, wantDetail: false);
+        Scanner scanner = new(input, wantDetail: false, allowPlainShortcut: true);
         if (scanner.Run())
         {
             value = scanner.Result();
@@ -51,6 +55,7 @@ internal static class EmailAddressParser
     {
         private readonly ReadOnlySpan<char> _s;
         private readonly bool _wantDetail;
+        private readonly bool _allowPlainShortcut;
         private EmailFacts _facts;
         private List<ParseIssue>? _issues;
         private SourceSpan _sourceSpan;
@@ -61,10 +66,11 @@ internal static class EmailAddressParser
         private string _local;
         private string _domain;
 
-        internal Scanner(ReadOnlySpan<char> s, bool wantDetail)
+        internal Scanner(ReadOnlySpan<char> s, bool wantDetail, bool allowPlainShortcut)
         {
             _s = s;
             _wantDetail = wantDetail;
+            _allowPlainShortcut = allowPlainShortcut;
             _local = string.Empty;
             _domain = string.Empty;
         }
@@ -137,7 +143,7 @@ internal static class EmailAddressParser
             }
 
             _sourceSpan = new SourceSpan(start, end - start);
-            if (TryReadPlainAddrSpec(start, end))
+            if (_allowPlainShortcut && TryReadPlainAddrSpec(start, end))
             {
                 Classify();
                 return true;
