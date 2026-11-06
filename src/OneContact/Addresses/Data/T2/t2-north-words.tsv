@@ -34,3 +34,14 @@ legal	HF
 legal	SLF
 unit	KORTER
 unit	BUTAS
+# Floor and entrance words that follow a house number: sal (Danmarks Adresser: "3. sal tv"), etage, krs (kerros, the Finnish floor), etasje and inngang (Posten Norge: entrance B, floor), bygning (Danish building, "Bygning N").
+unit	SAL
+unit	ETAGE
+unit	ETG
+unit	KRS
+unit	ETASJE
+unit	INNGANG
+unit	BYGNING
+unit	BYG
+unit	LEIL
+unit	LEILIGHET

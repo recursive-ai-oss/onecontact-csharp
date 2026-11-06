@@ -103,11 +103,12 @@ public class Tier2GroupCNorthTests
     }
 
     [Theory]
-    [InlineData("Narva mnt 7\n10117 Tallinn")]
-    [InlineData("Storgata 15\n0161 Oslo")]
-    [InlineData("Hiomotie 10a\n00380 Helsinki")]
+    [InlineData("Kase 7\n10117 Tallinn")]
+    [InlineData("Skogen 15\n0161 Oslo")]
+    [InlineData("Hiomo 10a\n00380 Helsinki")]
     public void SharedPostcodeFormsWithoutAnyEvidenceAreNotGuessed(string text)
     {
+        // No street ending, abbreviation or letter of the text belongs to one country; with one (Narva mnt, Storgata, Hiomotie) the country is inferred (Tier2NordicBalticFormsTests).
         Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse(text, Region.Unknown, out _, out ParseDetail detail));
         Assert.True(detail.PrimaryReason.Equals(ReasonCode.AddressCountryUndetermined) || detail.PrimaryReason.Equals(ReasonCode.AddressNoLastLine), detail.PrimaryReason.ToString());
     }

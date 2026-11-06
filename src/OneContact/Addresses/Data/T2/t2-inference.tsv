@@ -1,0 +1,211 @@
+# Evidence for a country when the text names none and several countries share its postcode form (country inference without a hint).
+# Columns: kind, country, value. A country is chosen only when exactly one of the countries that can read the text has evidence, so every row here has to be
+# something the other candidates do not write. Words are in the form T2Rules.Key gives (upper case, no accents, periods dropped).
+#
+# letters: the letters of the country's language that lie outside Latin-1 (and the German sharp s). Latin-1 letters (a with acute, o with diaeresis, o with stroke, ...) are
+#   never evidence: names of every origin carry them. A letter counts for a country only when no other candidate uses it, and a country whose letters do not hold every
+#   such letter of the text is not chosen. Sources: the alphabets of the languages, as the UPU sheets and the posts' guides print their example addresses.
+# word: a whole word that is a street type or a place word of the language (UPU sheets and the posts' guides: Posten Norge Adressering, Danmarks Adresser Gengivelse af adresse,
+#   PostNord Adressering, Omniva, Lietuvos pastas, Magyar Posta, Ceska posta, Poczta Polska, bpost).
+# suffix: the end of a street name written as one word (Storgata, Nørregade, Mannerheimintie); the name must be longer than the ending by two letters.
+# marked: an abbreviation that is evidence only when a house number of up to four digits follows it directly (Verslo g. 5, Pargi tn 24, Top 5), because alone it could be an initial or a word
+#   of another language. after: the same for a word that follows a floor number (3. sal).
+# place: a locality that is the whole of a small country's division (the municipalities of Liechtenstein); the Swiss cantons and the UK areas are in their own tables.
+letters	EE	šž
+letters	FI	šž
+letters	LV	āčēģīķļņšūž
+letters	LT	ąčęėįšųūž
+letters	PL	ąćęłńśźż
+letters	CZ	čďěňřšťůž
+letters	SK	čďĺľňŕšťž
+letters	SI	čšžćđ
+letters	HR	čćđšž
+letters	HU	őű
+letters	RO	ășțşţ
+letters	DE	ß
+letters	BE	ß
+letters	LU	ß
+letters	AT	ß
+letters	FR	œ
+letters	MC	œ
+letters	MT	ċġħż
+# Denmark: vej, gade, allé, stræde, plads, torv (Danmarks Adresser, Gengivelse af adresse); sal for the floor ("3. sal tv").
+suffix	DK	VEJ
+suffix	DK	GADE
+suffix	DK	VAENGET
+suffix	DK	VAENGE
+suffix	DK	STRAEDE
+suffix	DK	PLADS
+suffix	DK	TORV
+word	DK	VEJ
+word	DK	GADE
+word	DK	ALLE
+word	DK	STRAEDE
+word	DK	PLADS
+word	DK	TORV
+after	DK	SAL
+# Norway: gate, gata, vei, veien, vegen, plass (Posten Norge, Adressering); etasje and inngang for the floor and entrance.
+suffix	NO	GATE
+suffix	NO	GATA
+suffix	NO	VEI
+suffix	NO	VEIEN
+suffix	NO	VEGEN
+suffix	NO	PLASS
+suffix	NO	VEG
+word	NO	GATE
+word	NO	GATA
+word	NO	VEI
+word	NO	VEG
+word	NO	VEGEN
+word	NO	VEIEN
+word	NO	PLASS
+word	NO	ALLE
+word	NO	ETASJE
+word	NO	INNGANG
+word	NO	LEILIGHET
+# Sweden: gatan, vägen, gränd, stigen, torg, backen (PostNord, Adressering); lgh is the apartment.
+suffix	SE	GATAN
+suffix	SE	VAGEN
+suffix	SE	GRAND
+suffix	SE	STIGEN
+suffix	SE	BACKEN
+suffix	SE	TORGET
+word	SE	GATAN
+word	SE	VAGEN
+word	SE	STIGEN
+word	SE	BACKEN
+word	SE	TORG
+word	SE	LGH
+# Finland: katu, tie, kuja, polku, tori, kaari, rinne, puisto (UPU Finland sheet and Posti's examples); krs is the floor (kerros), as. the apartment.
+suffix	FI	KATU
+suffix	FI	TIE
+suffix	FI	KUJA
+suffix	FI	POLKU
+suffix	FI	KAARI
+suffix	FI	RINNE
+suffix	FI	PUISTO
+suffix	FI	KATU
+word	FI	KATU
+word	FI	TIE
+word	FI	KUJA
+word	FI	POLKU
+word	FI	KRS
+word	FI	POSTILOKERO
+# Estonia: tänav, maantee, puiestee, tee, and the county, rural municipality and village words (UPU Estonia sheet, Omniva).
+suffix	EE	TANAV
+suffix	EE	MAANTEE
+suffix	EE	PUIESTEE
+word	EE	TANAV
+word	EE	MAANTEE
+word	EE	PUIESTEE
+word	EE	TEE
+word	EE	KULA
+word	EE	ALEVIK
+word	EE	ALEV
+word	EE	VALD
+word	EE	MAAKOND
+word	EE	LINNAOSA
+word	EE	KORTER
+marked	EE	TN
+marked	EE	MNT
+marked	EE	PST
+# Latvia: iela, prospekts, bulvaris, novads, pagasts (the Latvian rules for unified postal addresses).
+suffix	LV	IELA
+suffix	LV	IELAS
+word	LV	IELA
+word	LV	PROSPEKTS
+word	LV	BULVARIS
+word	LV	NOVADS
+word	LV	PAGASTS
+marked	LV	DZ
+# Lithuania: gatvė (g.), prospektas (pr.), alėja (al.), kaimas (k.), savivaldybė (sav.) (UPU Lithuania sheet, Lietuvos paštas).
+word	LT	GATVE
+word	LT	PROSPEKTAS
+word	LT	ALEJA
+word	LT	KAIMAS
+word	LT	SAV
+suffix	LT	GATVE
+marked	LT	G
+marked	LT	PR
+marked	LT	AL
+# Poland, Czech Republic, Slovakia, Slovenia, Croatia, Hungary (Poczta Polska, Ceska posta, UPU sheets, Magyar Posta).
+word	CZ	ULICE
+word	CZ	NAMESTI
+word	CZ	TRIDA
+word	SK	NAMESTIE
+word	SK	TRIEDA
+word	HU	UTCA
+word	HU	KORUT
+word	HU	POSTAFIOK
+suffix	HU	UTCA
+word	HR	PUT
+word	HR	OBALA
+word	SI	ULICA
+word	PL	ULICA
+word	PL	ALEJA
+word	PL	OSIEDLE
+# zone: the digits a postcode of the country may start with, where that tells it from a neighbour sharing the form: the first digit of a Czechoslovak postcode names the region of the
+#   former federation, 1 to 7 for the Czech lands and 0, 8 and 9 for Slovakia (Wikipedia, Postal codes in the Czech Republic and in Slovakia, retrieved 2026-11-06). zoneonly: the digits
+#   that no other country of the shared form starts a postcode with (Sweden's start at 1), so they are evidence.
+zone	CZ	1234567
+zone	SK	089
+zoneonly	SK	0
+# The Netherlands writes the Belgian Dutch endings alike, so they are evidence for neither alone.
+suffix	NL	STRAAT
+suffix	NL	LAAN
+suffix	NL	STEENWEG
+suffix	NL	PLEIN
+word	NL	STRAAT
+word	NL	LAAN
+word	NL	STEENWEG
+word	NL	PLEIN
+# German-speaking and neighbouring countries: spellings that belong to one of them (bpost Belgian template, UPU sheets).
+suffix	BE	STRAAT
+suffix	BE	LAAN
+suffix	BE	STEENWEG
+suffix	BE	PLEIN
+word	BE	STRAAT
+word	BE	LAAN
+word	BE	STEENWEG
+word	BE	PLEIN
+suffix	LU	STROOSS
+word	LU	STROOSS
+suffix	DE	STRASSE
+suffix	DE	STR
+suffix	DE	GASSE
+suffix	DE	PLATZ
+suffix	DE	ALLEE
+suffix	DE	UFER
+suffix	DE	CHAUSSEE
+word	DE	POSTFACH
+word	DE	PACKSTATION
+word	AT	STIEGE
+marked	AT	TOP
+# Liechtenstein's eleven municipalities (Gemeinden): the whole of the country's division, so a locality that is one of them is Liechtenstein's.
+place	LI	VADUZ
+place	LI	SCHAAN
+place	LI	TRIESEN
+place	LI	BALZERS
+place	LI	ESCHEN
+place	LI	MAUREN
+place	LI	TRIESENBERG
+place	LI	RUGGELL
+place	LI	GAMPRIN
+place	LI	SCHELLENBERG
+place	LI	PLANKEN
+# Italy and Spain: road words that only one of the countries sharing the five-digit form writes (UPU Italy and Spain sheets, Poste Italiane Standard di composizione indirizzi). Via and
+# Calle are not listed: Via is also Spanish and Calle also Mexican, and both are in any American address as well.
+word	IT	VIALE
+word	IT	PIAZZA
+word	IT	CORSO
+word	IT	VICOLO
+word	IT	LUNGOMARE
+word	IT	LOCALITA
+word	IT	FRAZIONE
+word	IT	CONTRADA
+word	ES	CARRER
+word	ES	AVINGUDA
+word	ES	RONDA
+word	ES	TRAVESIA
+word	ES	URBANIZACION
+word	ES	POLIGONO
