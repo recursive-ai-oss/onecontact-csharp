@@ -385,8 +385,8 @@ public static class AddressExpander
         return word;
     }
 
-    private const string FoldFrom = "àáâãäåçèéêëìíîïñòóôõöøùúûüýÿāăąćĉċčďđēĕėęěĝğġģĥħĩīĭįıĵķĸĺļľŀłńņňŉōŏőŕŗřśŝşšţťŧũūŭůűųŵŷźżžſ";
-    private const string FoldTo = "aaaaaaceeeeiiiinoooooouuuuyyaaaccccddeeeeegggghhiiiiijkklllllnnnnooorrrsssstttuuuuuuwyzzzs";
+    private const string FoldFrom = "àáâãäåçèéêëìíîïñòóôõöøùúûüýÿāăąćĉċčďđēĕėęěĝğġģĥħĩīĭįıĵķĸĺļľŀłńņňŉōŏőŕŗřśŝşšţťŧũūŭůűųŵŷźżžſșț";
+    private const string FoldTo = "aaaaaaceeeeiiiinoooooouuuuyyaaaccccddeeeeegggghhiiiiijkklllllnnnnooorrrsssstttuuuuuuwyzzzsst";
 
     /// <summary>
     /// Folds case with the invariant culture and removes diacritics from Latin letters: the accented letters of the tier languages (and their decomposed
