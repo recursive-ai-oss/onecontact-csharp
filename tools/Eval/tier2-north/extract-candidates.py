@@ -43,7 +43,7 @@ PC = {
     "is": r"(?:IS[- ]?)?\b\d{3}\b",
     "ee": r"(?:EE[- ]?)?\b\d{5}\b",
     "lv": r"\bLV[- –]?\d{4}\b",
-    "lt": r"\bLT[- –]?\d{5}\b",
+    "lt": r"(?:LT[- –]?)?\b\d{5}\b",
 }[tld]
 # For these countries the postcode comes before the locality in the national style; the others may put it after.
 LOC_AFTER = rf"\s+{LOC}"
