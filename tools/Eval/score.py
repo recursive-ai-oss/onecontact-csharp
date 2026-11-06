@@ -52,6 +52,9 @@ def address_item(gold, pred, fine):
             v = src.get(k)
             if v:
                 out[k] = norm(v)
+                if k == "postcode":
+                    # A country letter prefix (L-1234, CH-8953, A-6020, FL-9490) is not part of the postcode.
+                    out[k] = re.sub(r"^[a-z]{1,2}(?=\d{4,5}$)", "", out[k])
         return {k: v for k, v in out.items() if v}
     g = collect(gold, fine)
     p = collect(pred, fine) if pred else {}

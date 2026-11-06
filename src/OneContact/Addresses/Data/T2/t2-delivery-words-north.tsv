@@ -24,3 +24,5 @@ FI	box	POSTILOKERO	Postilokero
 EE	box	POSTKAST	Postkast
 EE	box	PK	PK
 LV	box	P/K	p/k
+# "P.O. Box" and "PO Box" in English, which pages of every country of the group use for a post office box.
+DK,SE,FI,IS,EE,LV,LT	box	PO BOX	PO Box

@@ -57,6 +57,59 @@ internal static partial class Tier2Reader
             return null;
         }
 
+        // Omniva writes the postcode before the town ("10145 Tallinn"), but pages also put it after ("Tallinn 10145", "Pärnu mnt 12, Tartu 51010"). Estonian postcodes are five digits,
+        // never starting with 0 (UPU Estonia sheet). The unit is rearranged to read postcode first, as for the postcode-last countries; the spans still point at the words in the input.
+        // Only for text known to be Estonian: a trailing five-digit number is a ZIP code in the United States.
+        private static bool FindEstonianPostcodeLast(List<Unit> units, string? known, out int unitIndex, out int tokenIndex, out PostcodeMatch match)
+        {
+            unitIndex = tokenIndex = 0;
+            match = null!;
+            if (known != "EE" || units.Count == 0)
+            {
+                return false;
+            }
+
+            static bool IsCode(string s) => s.Length == 5 && s[0] != '0' && s.All(char.IsAsciiDigit);
+            static bool Plain(List<Tok> toks) => toks.Count is >= 1 and <= 3 && !toks.Any(t => t.Text.Any(char.IsAsciiDigit)) && !StartsWithSpatial(toks);
+            int u = units.Count - 1;
+            List<Tok> toks = units[u].Toks;
+            PostcodeMatch code = new(1, toks[^1].Text, ["EE"], null);
+            if (toks.Count == 1 && IsCode(toks[0].Text) && u >= 1 && Plain(units[u - 1].Toks))
+            {
+                // "Pärnu mnt 12, Tallinn, 10145": the postcode stands alone after a comma.
+                units[u - 1] = new Unit([toks[0], .. units[u - 1].Toks]);
+                units.RemoveAt(u);
+                unitIndex = u - 1;
+                match = code;
+                return true;
+            }
+
+            if (toks.Count < 2 || !IsCode(toks[^1].Text))
+            {
+                return false;
+            }
+
+            // The locality is the plain words after the last number of the line; a line without a number is a locality whole.
+            int number = toks.FindLastIndex(t => t.Text.Any(char.IsAsciiDigit) && t.Start != toks[^1].Start);
+            List<Tok> locality = toks.GetRange(number + 1, toks.Count - number - 2);
+            List<Tok> head = toks.GetRange(0, number + 1);
+            if (locality.Count == 0 || !Plain(locality))
+            {
+                return false;
+            }
+
+            units[u] = new Unit([toks[^1], .. locality]);
+            if (head.Count > 0)
+            {
+                units.Insert(u, new Unit(head));
+                u++;
+            }
+
+            unitIndex = u;
+            match = code;
+            return true;
+        }
+
         private bool CommaBetween(Tok previous, Tok next) =>
             next.Start > previous.End && text.AsSpan(previous.End, next.Start - previous.End).Contains(',');
 
@@ -192,7 +245,7 @@ internal static partial class Tier2Reader
                         segment = segment.GetRange(1, segment.Count - 1);
                     }
 
-                    if (segment.Count >= 2 && (segment[0].Key is "LGH" or "DZ" or "KORP" or "KORTER" || country.Profile == "lt" && segment[0].Key is "BUTAS" or "B"))
+                    if (segment.Count >= 2 && (segment[0].Key is "LGH" or "DZ" or "KORP" or "KORTER" or "BYGNING" or "INNGANG" or "LEIL" or "LEILIGHET" || country.Profile == "lt" && segment[0].Key is "BUTAS" or "B"))
                     {
                         // lgh (PostNord), dz. (Latvian rules), korp.: the word is the designator, what follows it the number.
                         List<Tok> number = segment.GetRange(1, segment.Count - 1);
@@ -246,6 +299,46 @@ internal static partial class Tier2Reader
             return new Line(StreetLineKind.Street, pieces);
         }
 
+        // Swedish company registration numbers (organisationsnummer, six digits, a hyphen, four digits: 556123-4567) stand on pages next to the address, often with a label
+        // ("org.nr"). They are not house numbers, floors or apartments, so they are taken out of the line they stand in and kept as a line of their own, first.
+        private static void SplitOrganizationNumber(List<Unit> before)
+        {
+            static bool IsNumber(string s) => s.Length == 11 && s[6] == '-' && s[..6].All(char.IsAsciiDigit) && s[7..].All(char.IsAsciiDigit);
+            static bool IsLabel(Tok t) => t.Key is "ORGNR" or "ORG" or "NR" or "NUMMER" or "ORGNUMMER" or "ORGANISATIONSNUMMER" or "ORGANISATIONSNR" or "REG" or "REGNR";
+            List<Unit> numbers = [];
+            List<Unit> rest = [];
+            foreach (Unit unit in before)
+            {
+                List<Tok> toks = unit.Toks;
+                int at = toks.FindIndex(t => IsNumber(t.Text));
+                if (at < 0)
+                {
+                    rest.Add(unit);
+                    continue;
+                }
+
+                int from = at;
+                while (from > 0 && IsLabel(toks[from - 1]))
+                {
+                    from--;
+                }
+
+                numbers.Add(new Unit(toks.GetRange(from, at - from + 1)) { Leading = true });
+                toks.RemoveRange(from, at - from + 1);
+                if (toks.Count > 0)
+                {
+                    rest.Add(unit);
+                }
+            }
+
+            if (numbers.Count > 0)
+            {
+                before.Clear();
+                before.AddRange(numbers);
+                before.AddRange(rest);
+            }
+        }
+
         // On one line a company name that runs into the street ("Nielsen Byg ApS Amagerbrogade 21") is split after its legal form (ApS, A/S, AB, Oy, AS, ehf), when the rest is a street line.
         private void SplitCompanyPrefix(List<Unit> before, T2Country country)
         {
@@ -281,6 +374,31 @@ internal static partial class Tier2Reader
             houseName = null;
             if (country.Profile == "ee")
             {
+                // "Tallinn 10111 Harju maakond" and "Tartu 51003 Tartumaa": the town stands before the postcode and the county (maakond, or one word ending in maa) after it.
+                bool county = localityToks.Count == 2 && localityToks[^1].Key == "MAAKOND" || localityToks.Count == 1 && localityToks[0].Key.Length > 5 && localityToks[0].Key.EndsWith("MAA", StringComparison.Ordinal);
+                if (county && _headSplit && before.Count > 0 && before[^1].Toks.Count <= 3
+                    && !before[^1].Toks.Any(t => t.Text.Any(char.IsAsciiDigit)) && !StartsWithSpatial(before[^1].Toks))
+                {
+                    admin = localityToks;
+                    localityToks = before[^1].Toks;
+                    before.RemoveAt(before.Count - 1);
+                    return;
+                }
+
+                // "Kodu küla, Rae vald, 75301 Harju maakond": a county alone after the postcode, with a village line before it, is the county of that village (Omniva: village and
+                // rural municipality, the postcode, the town or county).
+                if (localityToks.Count == 2 && localityToks[^1].Key == "MAAKOND" && !_headSplit)
+                {
+                    int village = before.FindLastIndex(u => u.Toks.Count is >= 2 and <= 3 && u.Toks[^1].Key is "KULA" or "ALEVIK" or "ALEV" or "ASULA" && !u.Toks.Any(t => t.Text.Any(char.IsAsciiDigit)));
+                    if (village >= 0 && village >= before.Count - 2)
+                    {
+                        admin = localityToks;
+                        localityToks = before[village].Toks;
+                        before.RemoveAt(village);
+                        return;
+                    }
+                }
+
                 if (localityToks.Count >= 3 && localityToks[^1].Key == "MAAKOND")
                 {
                     admin = localityToks.GetRange(localityToks.Count - 2, 2);

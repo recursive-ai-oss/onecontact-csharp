@@ -21,6 +21,7 @@ string? misses = args.Length > 3 ? args[3] : null;
 if (misses is not null)
 {
     File.WriteAllText(misses, string.Empty);
+    File.WriteAllText(misses + ".nohint", string.Empty);
 }
 
 HashSet<string> leading = new(StringComparer.Ordinal) { "recipient", "organization" };
@@ -65,9 +66,9 @@ foreach (string country in args[2].Split(','))
                     perLabel[l] = (perLabel.GetValueOrDefault(l).Seen + 1, perLabel.GetValueOrDefault(l).Found);
                 }
 
-                if (misses is not null && withHint)
+                if (misses is not null)
                 {
-                    File.AppendAllText(misses, country + "\t" + text.Replace("\n", "\\n", StringComparison.Ordinal) + "\tREFUSED " + reason + "\n");
+                    File.AppendAllText(withHint ? misses : misses + ".nohint", country + "\t" + text.Replace("\n", "\\n", StringComparison.Ordinal) + "\tREFUSED " + reason + "\n");
                 }
 
                 continue;
@@ -76,9 +77,9 @@ foreach (string country in args[2].Split(','))
             if (parsed.Country != Region.Parse(country))
             {
                 wrongCountry++;
-                if (misses is not null && withHint)
+                if (misses is not null)
                 {
-                    File.AppendAllText(misses, country + "\t" + text.Replace("\n", "\\n", StringComparison.Ordinal) + "\tWRONGCOUNTRY " + parsed.Country + "\n");
+                    File.AppendAllText(withHint ? misses : misses + ".nohint", country + "\t" + text.Replace("\n", "\\n", StringComparison.Ordinal) + "\tWRONGCOUNTRY " + parsed.Country + "\n");
                 }
             }
 

@@ -70,6 +70,9 @@ def work(c):
         return
     rec = {"url": c["url"], "host": c["host"], "tld": c["tld"], "languages": c["languages"], "warc": [c["filename"], c["offset"], c["length"]],
            "lines": p.lines[:1500], "meta": p.meta, "ld": ld_names(p.ldjson)}
+    for k in ("country", "territory"):  # set by the Tier 2 selection
+        if k in c:
+            rec[k] = c[k]
     with lock:
         fo.write(json.dumps(rec, ensure_ascii=False) + "\n")
         fo.flush()
