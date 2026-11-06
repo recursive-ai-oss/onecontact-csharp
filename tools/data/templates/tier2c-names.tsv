@@ -1,0 +1,141 @@
+# kind	language	value; invented name parts for recipient and organisation lines, written for these templates (no register)
+given	no	Ola
+given	no	Kari
+given	no	Nils
+given	no	Ingrid
+given	no	Lars
+given	no	Marit
+given	no	Per
+given	no	Hanne
+given	no	Eirik
+given	no	Silje
+given	no	Håkon
+given	no	Astrid
+family	no	Hansen
+family	no	Johansen
+family	no	Olsen
+family	no	Larsen
+family	no	Andersen
+family	no	Nilsen
+family	no	Pedersen
+family	no	Kristiansen
+family	no	Bakken
+family	no	Moe
+family	no	Haugen
+family	no	Dahl
+org	no	{fam} Bygg AS
+org	no	{word} & {fam} AS
+org	no	{city} {word} AS
+org	no	{fam} Eiendom ANS
+org	no	{word}tjenester AS
+word	no	Nordic
+word	no	Fjord
+word	no	Vest
+word	no	Data
+word	no	Regnskap
+word	no	Transport
+given	cs	Jan
+given	cs	Jana
+given	cs	Petr
+given	cs	Eva
+given	cs	Martin
+given	cs	Lenka
+given	cs	Tomáš
+given	cs	Veronika
+given	cs	Jiří
+given	cs	Marie
+given	cs	Ondřej
+given	cs	Hana
+family	cs	Novák
+family	cs	Svobodová
+family	cs	Dvořák
+family	cs	Černá
+family	cs	Procházka
+family	cs	Kučera
+family	cs	Veselý
+family	cs	Horáková
+family	cs	Němec
+family	cs	Marek
+family	cs	Pospíšil
+family	cs	Král
+org	cs	{fam} s.r.o.
+org	cs	{word} {city} a.s.
+org	cs	{fam} a spol.
+org	cs	{word} servis s.r.o.
+org	cs	Autodoprava {fam}
+word	cs	Moravia
+word	cs	Alfa
+word	cs	Techno
+word	cs	Stavby
+word	cs	Obchod
+word	cs	Elektro
+given	lv	Jānis
+given	lv	Anna
+given	lv	Andris
+given	lv	Inese
+given	lv	Mārtiņš
+given	lv	Līga
+given	lv	Edgars
+given	lv	Dace
+given	lv	Aigars
+given	lv	Zane
+given	lv	Kristaps
+given	lv	Ilze
+family	lv	Bērziņš
+family	lv	Kalniņa
+family	lv	Ozoliņš
+family	lv	Liepiņa
+family	lv	Krūmiņš
+family	lv	Balodis
+family	lv	Sproģis
+family	lv	Vītola
+family	lv	Jansons
+family	lv	Eglīte
+family	lv	Zariņš
+family	lv	Priede
+org	lv	SIA "{word}"
+org	lv	SIA "{fam} un {word}"
+org	lv	{word} {city}, AS
+org	lv	Z/S "{word}"
+org	lv	IK "{fam}"
+word	lv	Baltija
+word	lv	Daugava
+word	lv	Mežs
+word	lv	Latvijas
+word	lv	Tehno
+word	lv	Rīgas
+given	et	Mart
+given	et	Kati
+given	et	Toomas
+given	et	Liis
+given	et	Andres
+given	et	Maria
+given	et	Jüri
+given	et	Piret
+given	et	Priit
+given	et	Triin
+given	et	Rein
+given	et	Anneli
+family	et	Tamm
+family	et	Saar
+family	et	Sepp
+family	et	Mägi
+family	et	Kask
+family	et	Kukk
+family	et	Rebane
+family	et	Ilves
+family	et	Pärn
+family	et	Oja
+family	et	Lepik
+family	et	Kivi
+org	et	{fam} OÜ
+org	et	{word} {city} AS
+org	et	{word} OÜ
+org	et	{fam} & {word} OÜ
+org	et	Tulundusühistu {word}
+word	et	Eesti
+word	et	Põhja
+word	et	Balti
+word	et	Metsa
+word	et	Ehitus
+word	et	Tehnika
