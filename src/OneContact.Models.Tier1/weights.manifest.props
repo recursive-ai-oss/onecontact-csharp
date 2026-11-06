@@ -3,7 +3,7 @@
        To use retrained weights, replace the row (and PROVENANCE.md); no code changes. Weights are never committed.
  -->
   <ItemGroup>
-    <Tier1Weight Include="tier1.onenlp" Size="10197617" Sha256="51a7d1a62abe9fe211615d406ccf9778e691e3964e9eef993a7d6535405297c1"
+    <Tier1Weight Include="tier1.onenlp" Size="10197617" Sha256="ac7b695a72bca08188524278f8fcbfa8bc1b0865610fcbad45487e40ce0853ef"
                  Recipe="recipes/tier1" Data="see PROVENANCE.md" Contents="shared fast-tier encoder; address-field head; name-part head; name-class head; contact-span head" />
   </ItemGroup>
 </Project>

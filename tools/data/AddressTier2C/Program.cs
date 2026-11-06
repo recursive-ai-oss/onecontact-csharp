@@ -7,18 +7,21 @@ using OneContact.Data.AddressUsCa;
 
 namespace OneContact.Data.AddressTier2C;
 
-// AddressTier2C: register addresses of Norway, the Czech Republic, Latvia and Estonia rendered as labelled free-text training examples.
+// AddressTier2C: register addresses of Norway, the Czech Republic, Latvia, Estonia, Mexico, Poland, Slovenia, Slovakia and Lithuania rendered as labelled free-text training examples.
 //
 //   AddressTier2C count  --data <train dir> --out <dir> [--countries no,cz,...] [--targets NO=250000,...]
 //   AddressTier2C render --data <train dir> --out <dir> [--countries no,cz,...] [--seed 20261105] [--dev-per-mille 20]
 //   AddressTier2C check  --out <dir>
+//   AddressTier2C convert --data <train dir> --countries pl,sk,si   (one-off plain tables of the large or awkward registers)
 internal static class Program
 {
-    private static readonly string[] AllCountries = ["NO", "CZ", "LV", "EE"];
+    private static readonly string[] AllCountries = ["NO", "CZ", "LV", "EE", "DK", "SE", "FI", "IS", "MX", "PL", "SI", "SK", "LT", "HR", "HU", "RO", "AU"];
 
     private static readonly Dictionary<string, long> DefaultTargets = new(StringComparer.Ordinal)
     {
         ["NO"] = 250_000, ["CZ"] = 250_000, ["LV"] = 150_000, ["EE"] = 150_000,
+        ["MX"] = 330_000, ["PL"] = 250_000, ["SI"] = 250_000, ["SK"] = 250_000, ["LT"] = 250_000,
+        ["DK"] = 150_000, ["SE"] = 150_000, ["FI"] = 250_000, ["IS"] = 150_000,
     };
 
     internal const ulong SelectSalt = 0x53454C45435433UL;
@@ -38,6 +41,7 @@ internal static class Program
             "count" => Count(o),
             "render" => Render(o),
             "check" => Check(o),
+            "convert" => Derivation.Run(o),
             _ => 2,
         };
     }
@@ -64,6 +68,11 @@ internal static class Program
         string outDir = o["out"];
         Directory.CreateDirectory(outDir);
         Dictionary<string, long> targets = new(DefaultTargets, StringComparer.Ordinal);
+        foreach (KeyValuePair<string, long> kv in Registers.TargetsC3)
+        {
+            targets.TryAdd(kv.Key, kv.Value);
+        }
+
         if (o.TryGetValue("targets", out string? t))
         {
             foreach (string kv in t.Split(',', StringSplitOptions.RemoveEmptyEntries))
@@ -163,6 +172,7 @@ internal static class Program
         }
 
         Renderer renderer = new(Path.Combine(AppContext.BaseDirectory, "templates"), new Rates(), seed);
+        RendererC3 rendererC3 = new(Path.Combine(AppContext.BaseDirectory, "templates"), new Rates(), seed);
         Stats stats = new();
         Rejects rejects = new();
         long duplicates = 0;
@@ -192,7 +202,7 @@ internal static class Program
                 }
 
                 bool dev = Prng.Hash(a.Id, SplitSalt) % 1000 < (ulong)devPerMille;
-                Example ex = renderer.Render(a);
+                Example ex = RendererC3.Handles(country) ? rendererC3.Render(a) : renderer.Render(a);
                 string role = dev ? "dev" : "train";
                 buffer.ResetWrittenCount();
                 WriteJson(buffer, ex, a);

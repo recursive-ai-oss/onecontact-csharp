@@ -61,6 +61,24 @@ Each applies the country's own postcode or name form, a post's own written rule,
 
 Keys use the same segments as the earlier groups with each country's dictionaries applied: Polish, Czech, Slovak, Slovenian, Croatian, Hungarian and Romanian from libpostal's `pl`, `cs`, `sk`, `sl`, `hr`, `hu` and `ro`; Spanish for Mexico, English for Australia. `AddressExpander` takes the seven new languages (`ExpansionLanguages.Polish` … `Romanian`); a leading street type expands in first position in Polish, Czech, Slovak, Slovenian, Croatian and Romanian. House-number markers (`Nr`, `nr.`, `č. p.`) are skipped in the key and the Polish box words are normalized. The keys of US/CA and the first two Tier 2 groups do not change.
 
+## Reading real-world text (recovery fixes)
+
+Measured on the register dev examples (2000 per country, rules alone, with the country as hint; every labelled field recovered):
+
+- **Romania.** The postcode may come last (`Pitești, 110040`; `București, Sector 3, 032391`; `Brașov, RO-500483`), and a sector or county after the locality (`011371 București, Sector 1`; `400241 Cluj-Napoca, județul Cluj`), which on one line is a unit of its own after the postcode, is joined to it. A county (`jud.`, `județ`, `județul` and a name) is the admin area, kept as written and printed after the locality, `400241 CLUJ-NAPOCA, JUDEȚUL CLUJ`. A sector stays part of the locality. The comma-below letters `ș` and `ț` now fold to `s` and `t` like the cedilla forms (the fold missed them, so Romanian words never matched their keys).
+- **Australia.** The state in full is read and standardized to its abbreviation (`Camira Queensland 4300` is `CAMIRA QLD 4300`); a comma before the state (`Downer, ACT 2602`) is read on one line; a lowercase state abbreviation is read once the country is known to be Australian (without a hint `Sydney nsw 2000` is still refused). On one line without separators the locality starts after the only street type that can end a street name; where two could, the text is refused. `4/12 Smith St` is a unit number and a street number that print as written, in two parts.
+- Not changed: a line between the street and the postcode line (a settlement or part of a municipality: `Hodolany`, `Bakovčica`, `Sector 1`) stays an additional delivery line, because Postal and Display print it where the writer put it; the registers label it a dependent locality, and the rules do not yet produce that field. Slash numbers in Croatia and the Czech Republic (`7/6`, `320/62`) stay house numbers: the slash is not always a unit.
+
+| Country | Rules alone, with hint: before | after | Refused to the model |
+|---|---|---|---|
+| CZ | 71.2 | 71.2 | no-last-line 104 (no postcode or no locality), model-required 17 |
+| HR | 61.5 | 61.5 | no-last-line 102, model-required 50 |
+| RO | 16.0 | 50.2 | no-last-line 435, model-required 21 |
+| HU | 92.6 | 92.6 | no-last-line 128 |
+| AU | 56.8 | 90.6 | no-last-line 160, model-required 24, country-conflict 4 |
+
+Without a hint the Czech, Croatian and Hungarian forms are shared with other countries, so most text is refused as `address.country-undetermined` by design (CZ 1594, HR 1181, HU 955 of 2000); Romania and Australia read without a hint as well as with it.
+
 ## Sources
 
 UPU country sheets (`upu.int/UPU/media/upu/PostalEntitiesFiles/addressingUnit/<iso3>En.pdf`, retrieved 2026-11-05): Poland 08/2018, Czech Republic 02/2018, Slovakia 01/2013, Slovenia 05/2016, Croatia 05/2014, Hungary 01/2012, Romania 10/2007 (`rouEn`), Mexico 03/2017, Australia 07/2017. Own guides: Poczta Polska "Zasady poprawnego adresowania i oznakowania przesyłek listowych"; Česká pošta "How to correctly label the consignment" (about 19 recommended formats); Magyar Posta "Tájékoztató a levélküldemények helyes címzéséről"; Australia Post "Correct addressing" (November 2022) and "Address Presentation Standards" (1999). No licence is stated on the guides; facts and short examples only, cited by page. The examples used as tests are the 89 rows of `testdata/addresses/authority-examples-tier2c-south.tsv`: UPU Poland 4, Czech Republic 9, Slovakia 8, Slovenia 3, Croatia 3, Hungary 2, Romania 3, Mexico 2, Australia 6; Česká pošta 19; Australia Post 30 (1999 standards and 2022 brochure, element examples included). The libpostal dictionaries of `pl`, `cs`, `sk`, `sl`, `hr`, `hu` and `ro` at the pinned tag, through the ingest tool.

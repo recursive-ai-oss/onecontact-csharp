@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <!-- The word lists and templates are copied beside the program so the run manifest can record their hashes. -->
-    <None Include="Lexicon.cs;Kinds.cs;Fields.cs" Link="sources/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Lexicon.cs;Kinds.cs;Fields.cs;Chrome.cs" Link="sources/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,665 @@
+# country	name|type; street names for the countries rendered over place and postcode lists instead of a street register (Hungary, Australia), written for these templates from common naming patterns (no register, no copied list)
+HU	Kossuth Lajos|utca
+HU	Kossuth Lajos|utca
+HU	Kossuth Lajos|út
+HU	Kossuth Lajos|tér
+HU	Petőfi Sándor|utca
+HU	Petőfi Sándor|utca
+HU	Petőfi Sándor|út
+HU	Ady Endre|utca
+HU	Ady Endre|utca
+HU	Ady Endre|út
+HU	Rákóczi Ferenc|utca
+HU	Rákóczi Ferenc|utca
+HU	Rákóczi Ferenc|út
+HU	Rákóczi Ferenc|tér
+HU	Széchenyi István|utca
+HU	Széchenyi István|utca
+HU	Széchenyi István|út
+HU	Dózsa György|utca
+HU	Dózsa György|utca
+HU	Dózsa György|út
+HU	Arany János|utca
+HU	Arany János|utca
+HU	Arany János|út
+HU	Arany János|tér
+HU	Jókai Mór|utca
+HU	Jókai Mór|utca
+HU	Jókai Mór|út
+HU	József Attila|utca
+HU	József Attila|utca
+HU	József Attila|út
+HU	Vörösmarty Mihály|utca
+HU	Vörösmarty Mihály|utca
+HU	Vörösmarty Mihály|út
+HU	Vörösmarty Mihály|tér
+HU	Deák Ferenc|utca
+HU	Deák Ferenc|utca
+HU	Deák Ferenc|út
+HU	Bem József|utca
+HU	Bem József|utca
+HU	Bem József|út
+HU	Zrínyi Miklós|utca
+HU	Zrínyi Miklós|utca
+HU	Zrínyi Miklós|út
+HU	Zrínyi Miklós|tér
+HU	Hunyadi János|utca
+HU	Hunyadi János|utca
+HU	Hunyadi János|út
+HU	Szent István|utca
+HU	Szent István|utca
+HU	Szent István|út
+HU	Mátyás király|utca
+HU	Mátyás király|utca
+HU	Mátyás király|út
+HU	Mátyás király|tér
+HU	Bartók Béla|utca
+HU	Bartók Béla|utca
+HU	Bartók Béla|út
+HU	Kodály Zoltán|utca
+HU	Kodály Zoltán|utca
+HU	Kodály Zoltán|út
+HU	Liszt Ferenc|utca
+HU	Liszt Ferenc|utca
+HU	Liszt Ferenc|út
+HU	Liszt Ferenc|tér
+HU	Madách Imre|utca
+HU	Madách Imre|utca
+HU	Madách Imre|út
+HU	Mikszáth Kálmán|utca
+HU	Mikszáth Kálmán|utca
+HU	Mikszáth Kálmán|út
+HU	Táncsics Mihály|utca
+HU	Táncsics Mihály|utca
+HU	Táncsics Mihály|út
+HU	Táncsics Mihály|tér
+HU	Munkácsy Mihály|utca
+HU	Munkácsy Mihály|utca
+HU	Munkácsy Mihály|út
+HU	Tompa Mihály|utca
+HU	Tompa Mihály|utca
+HU	Tompa Mihály|út
+HU	Kölcsey Ferenc|utca
+HU	Kölcsey Ferenc|utca
+HU	Kölcsey Ferenc|út
+HU	Kölcsey Ferenc|tér
+HU	Katona József|utca
+HU	Katona József|utca
+HU	Katona József|út
+HU	Móricz Zsigmond|utca
+HU	Móricz Zsigmond|utca
+HU	Móricz Zsigmond|út
+HU	Damjanich János|utca
+HU	Damjanich János|utca
+HU	Damjanich János|út
+HU	Damjanich János|tér
+HU	Klapka György|utca
+HU	Klapka György|utca
+HU	Klapka György|út
+HU	Batthyány Lajos|utca
+HU	Batthyány Lajos|utca
+HU	Batthyány Lajos|út
+HU	Wesselényi Miklós|utca
+HU	Wesselényi Miklós|utca
+HU	Wesselényi Miklós|út
+HU	Wesselényi Miklós|tér
+HU	Thököly Imre|utca
+HU	Thököly Imre|utca
+HU	Thököly Imre|út
+HU	Bethlen Gábor|utca
+HU	Bethlen Gábor|utca
+HU	Bethlen Gábor|út
+HU	Szent László|utca
+HU	Szent László|utca
+HU	Szent László|út
+HU	Szent László|tér
+HU	Szent Imre|utca
+HU	Szent Imre|utca
+HU	Szent Imre|út
+HU	Kazinczy Ferenc|utca
+HU	Kazinczy Ferenc|utca
+HU	Kazinczy Ferenc|út
+HU	Csokonai Vitéz Mihály|utca
+HU	Csokonai Vitéz Mihály|utca
+HU	Csokonai Vitéz Mihály|út
+HU	Csokonai Vitéz Mihály|tér
+HU	Berzsenyi Dániel|utca
+HU	Berzsenyi Dániel|utca
+HU	Berzsenyi Dániel|út
+HU	Radnóti Miklós|utca
+HU	Radnóti Miklós|utca
+HU	Radnóti Miklós|út
+HU	Garay János|utca
+HU	Garay János|utca
+HU	Garay János|út
+HU	Garay János|tér
+HU	Fő|utca
+HU	Fő|utca
+HU	Fő|köz
+HU	Fő|tér
+HU	Fő|sétány
+HU	Fő|út
+HU	Béke|utca
+HU	Béke|utca
+HU	Béke|köz
+HU	Szabadság|utca
+HU	Szabadság|utca
+HU	Szabadság|köz
+HU	Templom|utca
+HU	Templom|utca
+HU	Templom|köz
+HU	Iskola|utca
+HU	Iskola|utca
+HU	Iskola|köz
+HU	Iskola|tér
+HU	Kert|utca
+HU	Kert|utca
+HU	Kert|köz
+HU	Kert|út
+HU	Rózsa|utca
+HU	Rózsa|utca
+HU	Rózsa|köz
+HU	Petőfi|utca
+HU	Petőfi|utca
+HU	Petőfi|köz
+HU	Árpád|utca
+HU	Árpád|utca
+HU	Árpád|köz
+HU	Árpád|tér
+HU	Rákóczi|utca
+HU	Rákóczi|utca
+HU	Rákóczi|köz
+HU	Rákóczi|sétány
+HU	Kossuth|utca
+HU	Kossuth|utca
+HU	Kossuth|köz
+HU	Kossuth|út
+HU	Széchenyi|utca
+HU	Széchenyi|utca
+HU	Széchenyi|köz
+HU	Dózsa|utca
+HU	Dózsa|utca
+HU	Dózsa|köz
+HU	Dózsa|tér
+HU	Ady|utca
+HU	Ady|utca
+HU	Ady|köz
+HU	Tavasz|utca
+HU	Tavasz|utca
+HU	Tavasz|köz
+HU	Hegy|utca
+HU	Hegy|utca
+HU	Hegy|köz
+HU	Hegy|út
+HU	Virág|utca
+HU	Virág|utca
+HU	Virág|köz
+HU	Virág|tér
+HU	Akácfa|utca
+HU	Akácfa|utca
+HU	Akácfa|köz
+HU	Bem|utca
+HU	Bem|utca
+HU	Bem|köz
+HU	Bem|sétány
+HU	Jókai|utca
+HU	Jókai|utca
+HU	Jókai|köz
+HU	Vásár|utca
+HU	Vásár|utca
+HU	Vásár|köz
+HU	Vásár|tér
+HU	Vásár|út
+HU	Malom|utca
+HU	Malom|utca
+HU	Malom|köz
+HU	Temető|utca
+HU	Temető|utca
+HU	Temető|köz
+HU	Szőlő|utca
+HU	Szőlő|utca
+HU	Szőlő|köz
+HU	Gyár|utca
+HU	Gyár|utca
+HU	Gyár|köz
+HU	Gyár|tér
+HU	Vasút|utca
+HU	Vasút|utca
+HU	Vasút|köz
+HU	Vasút|út
+HU	Park|utca
+HU	Park|utca
+HU	Park|köz
+HU	Tó|utca
+HU	Tó|utca
+HU	Tó|köz
+HU	Tó|sétány
+HU	Kis|utca
+HU	Kis|utca
+HU	Kis|köz
+HU	Kis|tér
+HU	Nagy|utca
+HU	Nagy|utca
+HU	Nagy|köz
+HU	Hősök|utca
+HU	Hősök|utca
+HU	Hősök|köz
+HU	Hősök|út
+HU	Arany|utca
+HU	Arany|utca
+HU	Arany|köz
+HU	Liget|utca
+HU	Liget|utca
+HU	Liget|köz
+HU	Liget|tér
+HU	Határ|utca
+HU	Határ|utca
+HU	Határ|köz
+HU	Dob|utca
+HU	Dob|utca
+HU	Dob|köz
+HU	Mező|utca
+HU	Mező|utca
+HU	Mező|köz
+HU	Mező|út
+HU	Erdő|utca
+HU	Erdő|utca
+HU	Erdő|köz
+HU	Erdő|tér
+HU	Erdő|sétány
+HU	Bokor|utca
+HU	Bokor|utca
+HU	Bokor|köz
+HU	Fenyő|utca
+HU	Fenyő|utca
+HU	Fenyő|köz
+HU	Napsugár|utca
+HU	Napsugár|utca
+HU	Napsugár|köz
+HU	Tulipán|utca
+HU	Tulipán|utca
+HU	Tulipán|köz
+HU	Tulipán|tér
+HU	Tulipán|út
+HU	Hársfa|utca
+HU	Hársfa|utca
+HU	Hársfa|köz
+HU	Kiss|utca
+HU	Kiss|utca
+HU	Kiss|köz
+HU	Rét|utca
+HU	Rét|utca
+HU	Rét|köz
+HU	Dália|utca
+HU	Dália|utca
+HU	Dália|köz
+HU	Dália|tér
+HU	Szeder|utca
+HU	Szeder|utca
+HU	Szeder|köz
+HU	Szeder|sétány
+HU	Szeder|út
+HU	Cseresznye|utca
+HU	Cseresznye|utca
+HU	Cseresznye|köz
+HU	Diófa|utca
+HU	Diófa|utca
+HU	Diófa|köz
+HU	Bocskai|utca
+HU	Bocskai|utca
+HU	Bocskai|köz
+HU	Bocskai|tér
+HU	Zöldfa|utca
+HU	Zöldfa|utca
+HU	Zöldfa|köz
+AU	Smith|Street
+AU	Smith|Avenue
+AU	Smith|Lane
+AU	Jones|Court
+AU	Jones|Boulevard
+AU	Jones|Grove
+AU	Williams|Highway
+AU	Williams|Way
+AU	Williams|Road
+AU	Brown|Street
+AU	Brown|Drive
+AU	Brown|Terrace
+AU	Wilson|Place
+AU	Wilson|Parade
+AU	Wilson|Esplanade
+AU	Taylor|Close
+AU	Taylor|Street
+AU	Taylor|Avenue
+AU	Johnson|Street
+AU	Johnson|Court
+AU	Johnson|Boulevard
+AU	White|Crescent
+AU	White|Highway
+AU	White|Way
+AU	Martin|Circuit
+AU	Martin|Street
+AU	Martin|Drive
+AU	Anderson|Road
+AU	Anderson|Place
+AU	Anderson|Parade
+AU	Thompson|Lane
+AU	Thompson|Close
+AU	Thompson|Street
+AU	Thomas|Grove
+AU	Thomas|Street
+AU	Thomas|Court
+AU	Walker|Road
+AU	Walker|Crescent
+AU	Walker|Highway
+AU	Harris|Terrace
+AU	Harris|Circuit
+AU	Harris|Street
+AU	Lee|Esplanade
+AU	Lee|Road
+AU	Lee|Place
+AU	Ryan|Avenue
+AU	Ryan|Lane
+AU	Ryan|Close
+AU	Robinson|Boulevard
+AU	Robinson|Grove
+AU	Robinson|Street
+AU	Kelly|Way
+AU	Kelly|Road
+AU	Kelly|Crescent
+AU	King|Drive
+AU	King|Terrace
+AU	King|Circuit
+AU	Queen|Parade
+AU	Queen|Esplanade
+AU	Queen|Road
+AU	Victoria|Street
+AU	Victoria|Avenue
+AU	Victoria|Lane
+AU	Elizabeth|Court
+AU	Elizabeth|Boulevard
+AU	Elizabeth|Grove
+AU	George|Highway
+AU	George|Way
+AU	George|Road
+AU	William|Street
+AU	William|Drive
+AU	William|Terrace
+AU	Albert|Place
+AU	Albert|Parade
+AU	Albert|Esplanade
+AU	Edward|Close
+AU	Edward|Street
+AU	Edward|Avenue
+AU	Charles|Street
+AU	Charles|Court
+AU	Charles|Boulevard
+AU	Henry|Crescent
+AU	Henry|Highway
+AU	Henry|Way
+AU	Alexandra|Circuit
+AU	Alexandra|Street
+AU	Alexandra|Drive
+AU	Margaret|Road
+AU	Margaret|Place
+AU	Margaret|Parade
+AU	Mary|Lane
+AU	Mary|Close
+AU	Mary|Street
+AU	Anne|Grove
+AU	Anne|Street
+AU	Anne|Court
+AU	Jane|Road
+AU	Jane|Crescent
+AU	Jane|Highway
+AU	Catherine|Terrace
+AU	Catherine|Circuit
+AU	Catherine|Street
+AU	High|Esplanade
+AU	High|Road
+AU	High|Place
+AU	Main|Avenue
+AU	Main|Lane
+AU	Main|Close
+AU	Church|Boulevard
+AU	Church|Grove
+AU	Church|Street
+AU	Station|Way
+AU	Station|Road
+AU	Station|Crescent
+AU	Park|Drive
+AU	Park|Terrace
+AU	Park|Circuit
+AU	Railway|Parade
+AU	Railway|Esplanade
+AU	Railway|Road
+AU	Bridge|Street
+AU	Bridge|Avenue
+AU	Bridge|Lane
+AU	River|Court
+AU	River|Boulevard
+AU	River|Grove
+AU	Beach|Highway
+AU	Beach|Way
+AU	Beach|Road
+AU	Ocean|Street
+AU	Ocean|Drive
+AU	Ocean|Terrace
+AU	Lake|Place
+AU	Lake|Parade
+AU	Lake|Esplanade
+AU	Hill|Close
+AU	Hill|Street
+AU	Hill|Avenue
+AU	Forest|Street
+AU	Forest|Court
+AU	Forest|Boulevard
+AU	Garden|Crescent
+AU	Garden|Highway
+AU	Garden|Way
+AU	School|Circuit
+AU	School|Street
+AU	School|Drive
+AU	Market|Road
+AU	Market|Place
+AU	Market|Parade
+AU	Mill|Lane
+AU	Mill|Close
+AU	Mill|Street
+AU	Spring|Grove
+AU	Spring|Street
+AU	Spring|Court
+AU	Oak|Road
+AU	Oak|Crescent
+AU	Oak|Highway
+AU	Elm|Terrace
+AU	Elm|Circuit
+AU	Elm|Street
+AU	Wattle|Esplanade
+AU	Wattle|Road
+AU	Wattle|Place
+AU	Banksia|Avenue
+AU	Banksia|Lane
+AU	Banksia|Close
+AU	Acacia|Boulevard
+AU	Acacia|Grove
+AU	Acacia|Street
+AU	Eucalyptus|Way
+AU	Eucalyptus|Road
+AU	Eucalyptus|Crescent
+AU	Jacaranda|Drive
+AU	Jacaranda|Terrace
+AU	Jacaranda|Circuit
+AU	Waratah|Parade
+AU	Waratah|Esplanade
+AU	Waratah|Road
+AU	Bottlebrush|Street
+AU	Bottlebrush|Avenue
+AU	Bottlebrush|Lane
+AU	Kangaroo|Court
+AU	Kangaroo|Boulevard
+AU	Kangaroo|Grove
+AU	Koala|Highway
+AU	Koala|Way
+AU	Koala|Road
+AU	Cockatoo|Street
+AU	Cockatoo|Drive
+AU	Cockatoo|Terrace
+AU	Kookaburra|Place
+AU	Kookaburra|Parade
+AU	Kookaburra|Esplanade
+AU	Lyrebird|Close
+AU	Lyrebird|Street
+AU	Lyrebird|Avenue
+AU	Emu|Street
+AU	Emu|Court
+AU	Emu|Boulevard
+AU	Pelican|Crescent
+AU	Pelican|Highway
+AU	Pelican|Way
+AU	Cooper|Circuit
+AU	Cooper|Street
+AU	Cooper|Drive
+AU	Mitchell|Road
+AU	Mitchell|Place
+AU	Mitchell|Parade
+AU	Murray|Lane
+AU	Murray|Close
+AU	Murray|Street
+AU	Darling|Grove
+AU	Darling|Street
+AU	Darling|Court
+AU	Flinders|Road
+AU	Flinders|Crescent
+AU	Flinders|Highway
+AU	Cook|Terrace
+AU	Cook|Circuit
+AU	Cook|Street
+AU	Sturt|Esplanade
+AU	Sturt|Road
+AU	Sturt|Place
+AU	Burke|Avenue
+AU	Burke|Lane
+AU	Burke|Close
+AU	Wills|Boulevard
+AU	Wills|Grove
+AU	Wills|Street
+AU	Macquarie|Way
+AU	Macquarie|Road
+AU	Macquarie|Crescent
+AU	Phillip|Drive
+AU	Phillip|Terrace
+AU	Phillip|Circuit
+AU	Hunter|Parade
+AU	Hunter|Esplanade
+AU	Hunter|Road
+AU	Franklin|Street
+AU	Franklin|Avenue
+AU	Franklin|Lane
+AU	Collins|Court
+AU	Collins|Boulevard
+AU	Collins|Grove
+AU	Bourke|Highway
+AU	Bourke|Way
+AU	Bourke|Road
+AU	Swanston|Street
+AU	Swanston|Drive
+AU	Swanston|Terrace
+AU	Lonsdale|Close
+AU	Lonsdale|Street
+AU	Lonsdale|Avenue
+AU	Grey|Street
+AU	Grey|Court
+AU	Grey|Boulevard
+AU	Hay|Crescent
+AU	Hay|Highway
+AU	Hay|Way
+AU	Wellington|Road
+AU	Wellington|Place
+AU	Wellington|Parade
+AU	Nelson|Lane
+AU	Nelson|Close
+AU	Nelson|Street
+AU	Gladstone|Grove
+AU	Gladstone|Street
+AU	Gladstone|Court
+AU	Disraeli|Road
+AU	Disraeli|Crescent
+AU	Disraeli|Highway
+AU	Churchill|Terrace
+AU	Churchill|Circuit
+AU	Churchill|Street
+AU	Anzac|Esplanade
+AU	Anzac|Road
+AU	Anzac|Place
+AU	Federation|Avenue
+AU	Federation|Lane
+AU	Federation|Close
+AU	Centenary|Boulevard
+AU	Centenary|Grove
+AU	Centenary|Street
+AU	Kennedy|Way
+AU	Kennedy|Road
+AU	Kennedy|Crescent
+AU	Sunset|Drive
+AU	Sunset|Terrace
+AU	Sunset|Circuit
+AU	Sunrise|Parade
+AU	Sunrise|Esplanade
+AU	Sunrise|Road
+AU	Highland|Street
+AU	Highland|Avenue
+AU	Highland|Lane
+AU	Valley|Court
+AU	Valley|Boulevard
+AU	Valley|Grove
+AU	Panorama|Highway
+AU	Panorama|Way
+AU	Panorama|Road
+AU	Heritage|Street
+AU	Heritage|Drive
+AU	Heritage|Terrace
+AU	Pioneer|Place
+AU	Pioneer|Parade
+AU	Pioneer|Esplanade
+AU	Settlers|Close
+AU	Settlers|Street
+AU	Settlers|Avenue
+AU	Cameron|Street
+AU	Cameron|Court
+AU	Cameron|Boulevard
+AU	Campbell|Crescent
+AU	Campbell|Highway
+AU	Campbell|Way
+AU	Stewart|Circuit
+AU	Stewart|Street
+AU	Stewart|Drive
+AU	Murphy|Road
+AU	Murphy|Place
+AU	Murphy|Parade
+AU	Hughes|Lane
+AU	Hughes|Close
+AU	Hughes|Street
+AU	Clarke|Grove
+AU	Clarke|Street
+AU	Clarke|Court
+AU	Hall|Road
+AU	Hall|Crescent
+AU	Hall|Highway
+AU	Allen|Terrace
+AU	Allen|Circuit
+AU	Allen|Street
+AU	Scott|Esplanade
+AU	Scott|Road
+AU	Scott|Place
+AU	Baker|Avenue
+AU	Baker|Lane
+AU	Baker|Close
+AU	Wright|Boulevard
+AU	Wright|Grove
+AU	Wright|Street
+AU	Evans|Way
+AU	Evans|Road
+AU	Evans|Crescent
+AU	Roberts|Drive
+AU	Roberts|Terrace
+AU	Roberts|Circuit

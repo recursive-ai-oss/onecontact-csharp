@@ -57,7 +57,9 @@ internal static class RuleSample
 
             string street = text[fields.Current[0].GetInt32()..fields.Current[1].GetInt32()];
             checkedCount++;
-            PostalAddress address = PostalAddress.Create(country, locality: locality, postalCode: postal, streetLines: [street]);
+            // The labelled state or county goes with the address, as a caller who read the label would pass it; some countries (Australia) require it.
+            string admin = Get("admin-area");
+            PostalAddress address = PostalAddress.Create(country, adminArea: admin.Length == 0 ? null : admin, locality: locality, postalCode: postal, streetLines: [street]);
             IReadOnlyList<AddressIssue> found = address.Validate();
             if (found.Count == 0)
             {
