@@ -7,6 +7,7 @@ usage:
 
 Corrections (one JSON object per line, only for items the rules got wrong or that must go):
   {"id": ..., "drop": true}
+  {"keep": ["p000", "c012", ...]}       keeps only the items whose id ends with one of these suffixes
   address: {"id": ..., "no": "12", "rd": "N Main St", "pt": "p=N;n=Main;t=St", "un": ..., "box": ..., "rcp": ..., "ct": ..., "st": ..., "pc": ..., "cy": ...}
            replaces the pre-label with exactly these fields (pt = fine street parts p, n, t, d: pre-directional, name, type, post-directional);
            with "+": true the given keys edit the pre-label instead, and "-": ["un"] removes fields.
@@ -51,12 +52,15 @@ def view(kind, draft, pred, start, count):
 
 def apply(kind, draft, pred, corr, out, labeler):
     items, preds = read(draft), {p["id"]: p for p in read(pred)}
-    fixes = {c["id"]: c for c in read(corr)} if os.path.exists(corr) else {}
+    rows = read(corr) if os.path.exists(corr) else []
+    fixes = {c["id"]: c for c in rows if "id" in c}
+    # {"keep": [id suffix, ...]} keeps only the listed items (the others are dropped); handy for name drafts that are mostly page furniture.
+    keep = [k for c in rows for k in c.get("keep", [])]
     agreed = corrected = dropped = 0
     with open(out, "w", encoding="utf-8") as f:
         for it in items:
             c = fixes.get(it["id"], {})
-            if c.get("drop"):
+            if c.get("drop") or (keep and not any(it["id"].endswith("-" + k) or it["id"].endswith(k) for k in keep)):
                 dropped += 1
                 continue
             p = preds.get(it["id"], {})
