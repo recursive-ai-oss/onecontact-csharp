@@ -97,6 +97,10 @@ PostalAddress gb = PostalAddress.Parse("10B Barry Jackson Tower, Estone Walk, Bi
 Check(gb.Country.Code == "GB" && gb.ToString(AddressStyle.Postal, AddressLayout.Label) == "10B Barry Jackson Tower\nEstone Walk\nBIRMINGHAM\nB6 5BA", "British address, postal style");
 PostalAddress de = ParseIn("Wacholderweg 52a\n26133 Oldenburg", "DE");
 Check(AddressKey.Compute(de, KeyVersion.V1) == AddressKey.Compute(ParseIn("Wacholderweg 52a, 26133 OLDENBURG", "DE"), KeyVersion.V1), "German address key");
+PostalAddress cz = ParseIn("Stavbařů 4211\n190 16 PRAHA 916", "CZ");
+Check(cz.Country.Code == "CZ" && cz.ToString(AddressStyle.Postal, AddressLayout.Label, includeCountry: true) == "Stavbařů 4211\n190 16  PRAHA 916\nCZECH REPUBLIC", "Czech address, postal style");
+PostalAddress au = ParseIn("Unit 4, 12 Smith St\nRICHMOND VIC 3121", "AU");
+Check(au.Country.Code == "AU" && au.ToString(AddressStyle.Display, AddressLayout.SingleLine).Contains("Smith St", StringComparison.Ordinal), "Australian address, display style");
 Check(AddressExpander.Expand("Hauptstr", ExpansionLanguages.German).Contains("hauptstrasse"), "German expansion");
 Check(PersonName.Parse("Ada Lovelace").Canonical.Length > 0, "person parse");
 Check(CompanyName.Parse("Acme Ltd").Canonical.Length > 0, "company parse");
