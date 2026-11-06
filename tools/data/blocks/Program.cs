@@ -8,12 +8,12 @@ namespace OneContact.Data.Blocks;
 
 /// <summary>
 /// Synthetic contact-block generator.
-///   render --names DIR --addr DIR --tiger DIR --out DIR [--seed N] [--count N]
+///   render --names DIR --addr DIR --tiger DIR --out DIR [--crawl DIR] [--seed N] [--count N]
 ///   report --out DIR [--sample N]
 /// </summary>
 internal static class Program
 {
-    internal const string ToolVersion = "blocks-1";
+    internal const string ToolVersion = "blocks-3";
     private const ulong SplitSalt = 0x626C6F636B303031UL; // "block001"
     private const int ChunkSize = 1000;
     private const int ShardLines = 100_000;
@@ -22,7 +22,7 @@ internal static class Program
     {
         if (args.Length == 0)
         {
-            Console.Error.WriteLine("usage: render --names DIR --addr DIR --tiger DIR --out DIR [--seed N] [--count N] | report --out DIR [--sample N]");
+            Console.Error.WriteLine("usage: render --names DIR --addr DIR --tiger DIR --out DIR [--crawl DIR] [--seed N] [--count N] | report --out DIR [--sample N]");
             return 2;
         }
 
@@ -38,7 +38,7 @@ internal static class Program
         switch (args[0])
         {
             case "render":
-                return Render(Opt("names"), Opt("addr"), Opt("tiger"), Opt("out"),
+                return Render(Opt("names"), Opt("addr"), Opt("tiger"), Opt("out"), opts.GetValueOrDefault("crawl"),
                     ulong.Parse(Opt("seed", "20261106"), CultureInfo.InvariantCulture),
                     int.Parse(Opt("count", "560000"), CultureInfo.InvariantCulture));
             case "report":
@@ -63,7 +63,7 @@ internal static class Program
         internal string Line = "";
     }
 
-    private static int Render(string namesDir, string addrDir, string tigerDir, string outDir, ulong seed, int count)
+    private static int Render(string namesDir, string addrDir, string tigerDir, string outDir, string? crawlDir, ulong seed, int count)
     {
         Directory.CreateDirectory(outDir);
         Console.WriteLine("loading pools");
@@ -71,6 +71,11 @@ internal static class Program
         Console.WriteLine(pools.Summary());
         FieldGen fg = new();
         Renderer renderer = new(pools, fg);
+        Chrome chrome = new(pools, crawlDir);
+        if (crawlDir is not null)
+        {
+            Console.WriteLine($"crawl pages: {chrome.CrawlPages}");
+        }
         Stats total = new();
 
         Dictionary<string, ShardWriter> writers = new() { ["train"] = new ShardWriter(Path.Combine(outDir, "train")), ["dev"] = new ShardWriter(Path.Combine(outDir, "dev")) };
@@ -84,7 +89,7 @@ internal static class Program
             {
                 int first = (b0 + k) * ChunkSize;
                 int last = Math.Min(count, first + ChunkSize);
-                results[k] = RenderChunk(renderer, seed, first, last);
+                results[k] = RenderChunk(renderer, chrome, seed, first, last);
             });
             foreach ((List<Rendered> lines, Stats st) in results)
             {
@@ -108,12 +113,12 @@ internal static class Program
             }
         }
 
-        WriteManifest(outDir, seed, count, pools, total, files);
+        WriteManifest(outDir, seed, count, pools, total, files, crawlDir);
         Console.WriteLine($"span failures: {total.SpanFailures}");
         return total.SpanFailures == 0 ? 0 : 1;
     }
 
-    private static (List<Rendered>, Stats) RenderChunk(Renderer renderer, ulong seed, int first, int last)
+    private static (List<Rendered>, Stats) RenderChunk(Renderer renderer, Chrome chrome, ulong seed, int first, int last)
     {
         List<Rendered> lines = [];
         Stats st = new();
@@ -144,6 +149,12 @@ internal static class Program
                 Doc d = new() { Page = view == 0, R = Prng.For(seed, id + "/" + viewName) };
                 d.Upper = d.R.Chance(0.05);
                 d.Sep = view == 0 ? "\n" : d.R.Pick(new[] { "\n", "\n", "\n", "; ", " | ", ", ", " - ", "  ", " / " });
+                bool wrap = Kind.Wrapped(kind) && (view == 0 ? d.R.Chance(0.75) : d.Sep == "\n" && d.R.Chance(0.3));
+                if (wrap)
+                {
+                    if (view == 0) { chrome.Fill(d, split, loc, d.R.Int(1700)); } else { chrome.NegativeTalk(d, split, loc, 1 + d.R.Int(2)); }
+                }
+
                 switch (kind)
                 {
                     case Kind.Footer: renderer.Footer(d, l); break;
@@ -156,7 +167,14 @@ internal static class Program
                     case Kind.Multi: renderer.Multi(d, l); break;
                     case Kind.NegNumeric: renderer.NegNumeric(d, l); break;
                     case Kind.NegProse: renderer.NegProse(d, l); break;
+                    case Kind.NegPage: chrome.NegativePage(d, split, loc); break;
+                    case Kind.NegTalk: chrome.NegativeTalk(d, split, loc, 2 + d.R.Int(5)); break;
                     default: throw new InvalidOperationException(kind);
+                }
+
+                if (wrap)
+                {
+                    if (view == 0) { chrome.Fill(d, split, loc, d.R.Int(1300)); } else { chrome.NegativeTalk(d, split, loc, 1 + d.R.Int(2)); }
                 }
 
                 int bad = d.Check(out string? problem);
@@ -229,7 +247,7 @@ internal static class Program
         return Convert.ToHexString(SHA256.HashData(f)).ToLowerInvariant();
     }
 
-    private static void WriteManifest(string outDir, ulong seed, int count, Pools pools, Stats st, List<(string File, long Lines, string Sha256)> files)
+    private static void WriteManifest(string outDir, ulong seed, int count, Pools pools, Stats st, List<(string File, long Lines, string Sha256)> files, string? crawlDir)
     {
         string exeDir = AppContext.BaseDirectory;
         using FileStream fs = File.Create(Path.Combine(outDir, "manifest.json"));
@@ -258,8 +276,22 @@ internal static class Program
         }
 
         w.WriteEndArray();
+        w.WriteStartArray("crawlPages");
+        foreach (string f in crawlDir is null ? [] : new[] { "web.jsonl", "ugc.jsonl" })
+        {
+            string path = Path.Combine(crawlDir!, f);
+            if (File.Exists(path))
+            {
+                w.WriteStartObject();
+                w.WriteString("file", f);
+                w.WriteString("sha256", Sha(path));
+                w.WriteEndObject();
+            }
+        }
+
+        w.WriteEndArray();
         w.WriteStartArray("lexicon");
-        foreach (string f in new[] { "Lexicon.cs", "Kinds.cs", "Fields.cs" })
+        foreach (string f in new[] { "Lexicon.cs", "Kinds.cs", "Fields.cs", "Chrome.cs" })
         {
             string src = Path.Combine(exeDir, "sources", f);
             if (File.Exists(src))
