@@ -15,6 +15,21 @@ DATA = "https://data.commoncrawl.org/"
 USER_AGENT = "onecontact-eval-selection/1.0 (research; evaluation sets only)"
 
 
+_PROBE = DATA + "cc-index/collections/CC-MAIN-2026-43/indexes/cluster.idx"
+
+
+def throttled():
+    """True when a tiny known-good range request is also refused, i.e. the 403 means rate limiting and not a missing object."""
+    req = urllib.request.Request(_PROBE, headers={"User-Agent": USER_AGENT, "Range": "bytes=0-63"})
+    try:
+        with urllib.request.urlopen(req, timeout=60):
+            return False
+    except urllib.error.HTTPError as e:
+        return e.code == 403
+    except Exception:
+        return False
+
+
 def get(url, byte_range=None, tries=8, pause=0.35):
     """GET with exponential back-off on 5xx/SlowDown; returns bytes or None for a permanent miss."""
     delay = 2.0
@@ -28,6 +43,10 @@ def get(url, byte_range=None, tries=8, pause=0.35):
             time.sleep(pause)
             return data
         except urllib.error.HTTPError as e:
+            if e.code == 403 and throttled():
+                # CloudFront answers 403 to a client that asks too often; wait and ask again rather than count it as a missing object.
+                time.sleep(120)
+                continue
             if e.code in (404, 403, 416):
                 return None
             time.sleep(delay)

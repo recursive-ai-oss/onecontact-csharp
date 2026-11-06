@@ -146,6 +146,7 @@ def main():
     ap.add_argument("--gold", required=True)
     ap.add_argument("--pred", action="append", default=[])
     ap.add_argument("--country")
+    ap.add_argument("--coarse-only", action="store_true", help="address sets labelled without fine street parts: skip the fine rows")
     ap.add_argument("--reference")
     ap.add_argument("--resamples", type=int, default=1000)
     ap.add_argument("--seed", type=int, default=20261105)
@@ -159,7 +160,7 @@ def main():
         preds[name] = load(path)
     out = []
     if args.kind == "address":
-        for mode in ("coarse", "fine"):
+        for mode in (("coarse",) if args.coarse_only else ("coarse", "fine")):
             fine = mode == "fine"
             systems = {n: d for n, d in preds.items() if not fine or any(v.get("parts") for v in d.values())}
             per = {n: [address_item(gold[i], d.get(i), fine) for i in ids] for n, d in systems.items()}
@@ -167,8 +168,9 @@ def main():
             full = {n: [(1 if t[3] else 0, 1) for t in v] for n, v in per.items()}
             report(ratio_stat, f"address full-parse accuracy ({mode})", full, len(ids), args, out)
     else:
-        tok, ctok, cls = defaultdict(list), defaultdict(list), defaultdict(list)
+        tok, ctok, cls, legal = defaultdict(list), defaultdict(list), defaultdict(list), defaultdict(list)
         has_class = {n: any("class" in v for v in d.values()) for n, d in preds.items()}
+        has_company_parts = {n: any("B" in v.get("parts", {}) or "L" in v.get("parts", {}) for v in d.values()) for n, d in preds.items()}
         for n, d in preds.items():
             for i in ids:
                 g = gold[i]
@@ -181,11 +183,17 @@ def main():
                     tok[n].append((right, len(words)))
                 elif g["class"] == "company":
                     ctok[n].append((right, len(words)))
+                    if has_company_parts[n]:
+                        # a legal form is detected when the system reports a legal-form part; right when that agrees with the gold labels
+                        detected = bool(p and p.get("parts", {}).get("L"))
+                        legal[n].append((1 if detected == ("L" in gl) else 0, 1))
                 if has_class[n]:
                     cls[n].append((1 if p and p.get("class") == g["class"] else 0, 1))
         # person and company token accuracy only over the items of that class; the same item set for every system.
         report(ratio_stat, "name token accuracy (person and multiple items)", dict(tok), len(next(iter(tok.values()))) if tok else 0, args, out)
         report(ratio_stat, "company token accuracy (company items)", dict(ctok), len(next(iter(ctok.values()))) if ctok else 0, args, out)
+        if legal:
+            report(ratio_stat, "legal-form detection accuracy (company items)", dict(legal), len(next(iter(legal.values()))), args, out)
         report(ratio_stat, "name classification accuracy (all items)", dict(cls), len(next(iter(cls.values()))) if cls else 0, args, out)
     for e in out:
         extra = ""
