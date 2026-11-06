@@ -9,7 +9,8 @@ using RecursiveAI.OneContact.Names;
 // usage: eval-rules address|name <gold.jsonl> <predictions.jsonl>
 //
 // Reads an evaluation set (one JSON object per line, as tools/Eval/score.py documents) and writes one prediction per item in the
-// scorer's format. Values are the text as written in the input (the parts' own text), never the standardized text, because the
+// scorer's format. With ONECONTACT_EVAL_HINT=1 each item's `country` is passed to the parser as its region hint (the sets are per country);
+// without it the parser gets no hint, as the reference parsers do. Values are the text as written in the input (the parts' own text), never the standardized text, because the
 // gold values are surface text. Nothing is printed except counts.
 if (args.Length != 3 || args[0] is not ("address" or "name"))
 {
@@ -17,6 +18,7 @@ if (args.Length != 3 || args[0] is not ("address" or "name"))
     return 64;
 }
 
+bool hint = Environment.GetEnvironmentVariable("ONECONTACT_EVAL_HINT") == "1";
 int n = 0, refused = 0;
 using StreamWriter output = new(args[2], false, new UTF8Encoding(false));
 foreach (string line in File.ReadLines(args[1]))
@@ -39,7 +41,7 @@ foreach (string line in File.ReadLines(args[1]))
         w.WriteString("id", id);
         if (args[0] == "address")
         {
-            if (!WriteAddress(w, text))
+            if (!WriteAddress(w, text, hint && country.Length == 2 ? Region.Parse(country) : Region.Unknown))
             {
                 refused++;
             }
@@ -59,12 +61,12 @@ foreach (string line in File.ReadLines(args[1]))
 Console.WriteLine($"items {n}, address refused {refused}");
 return 0;
 
-static bool WriteAddress(Utf8JsonWriter w, string text)
+static bool WriteAddress(Utf8JsonWriter w, string text, Region region)
 {
     // The scorer expects blank/absent fields to be omitted.
     Dictionary<string, string> fields = [];
     Dictionary<string, string> parts = [];
-    bool ok = RuleAddressParser.TryParse(text, Region.Unknown, out ParsedAddress? a, out _) == OperationStatus.Done && a is not null;
+    bool ok = RuleAddressParser.TryParse(text, region, out ParsedAddress? a, out _) == OperationStatus.Done && a is not null;
     if (ok)
     {
         List<string> road = [], unit = [], box = [];
