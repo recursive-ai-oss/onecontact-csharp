@@ -47,18 +47,18 @@ public sealed class PhoneNumberMatcher
     private const string Punctuation = "[-x\u2010-\u2015\u2212\u30FC\uFF0D-\uFF0F \u00A0\u00AD\u200B\u2060\u3000()\uFF08\uFF09\uFF3B\uFF3D.\\[\\]/~\u2053\u223C\uFF5E]{0,4}";
     private const string DigitSequence = "\\p{Nd}{1,20}";
 
-    private static readonly PhoneRegex Candidate = PhoneRegex.Compile(
+    internal static readonly PhoneRegex Candidate = PhoneRegex.Compile(
         "(?:[" + LeadClassBody + "]" + Punctuation + "){0,2}" + DigitSequence + "(?:" + Punctuation + DigitSequence + "){0,20}(?:" + PhoneText.ExtensionForMatching + ")?",
         PhoneRegex.CaseMode.Unicode);
 
-    private static readonly PhoneRegex LeadClass = PhoneRegex.Compile("[" + LeadClassBody + "]");
+    internal static readonly PhoneRegex LeadClass = PhoneRegex.Compile("[" + LeadClassBody + "]");
 
-    private static readonly PhoneRegex SlashSeparatedDates = PhoneRegex.Compile("(?:(?:[0-3]?\\d/[01]?\\d)|(?:[01]?\\d/[0-3]?\\d))/(?:[12]\\d)?\\d{2}");
-    private static readonly PhoneRegex TimeStamps = PhoneRegex.Compile("[12]\\d{3}[-/]?[01]\\d[-/]?[0-3]\\d +[0-2]\\d$");
-    private static readonly PhoneRegex TimeStampsSuffix = PhoneRegex.Compile(":[0-5]\\d");
-    private static readonly PhoneRegex MatchingBrackets = PhoneRegex.Compile(
+    internal static readonly PhoneRegex SlashSeparatedDates = PhoneRegex.Compile("(?:(?:[0-3]?\\d/[01]?\\d)|(?:[01]?\\d/[0-3]?\\d))/(?:[12]\\d)?\\d{2}");
+    internal static readonly PhoneRegex TimeStamps = PhoneRegex.Compile("[12]\\d{3}[-/]?[01]\\d[-/]?[0-3]\\d +[0-2]\\d$");
+    internal static readonly PhoneRegex TimeStampsSuffix = PhoneRegex.Compile(":[0-5]\\d");
+    internal static readonly PhoneRegex MatchingBrackets = PhoneRegex.Compile(
         "(?:[" + OpeningParens + "])?(?:" + NonParens + "+[" + ClosingParens + "])?" + NonParens + "+(?:[" + OpeningParens + "]" + NonParens + "+[" + ClosingParens + "]){0,3}" + NonParens + "*");
-    private static readonly PhoneRegex PubPages = PhoneRegex.Compile("\\d{1,5}-+\\d{1,5}\\s{0,4}\\(\\d{1,4}");
+    internal static readonly PhoneRegex PubPages = PhoneRegex.Compile("\\d{1,5}-+\\d{1,5}\\s{0,4}\\(\\d{1,4}");
 
     // When a whole candidate fails, the pieces between these separators are tried on their own, in this order.
     private static readonly PhoneRegex[] InnerMatches =
@@ -167,12 +167,13 @@ public sealed class PhoneNumberMatcher
             return null;
         }
 
-        if (ParseAndVerify(text, candidate.ToString(), offset, region, leniency) is { } whole)
+        string candidateText = candidate.ToString();
+        if (ParseAndVerify(text, candidateText, offset, region, leniency) is { } whole)
         {
             return whole;
         }
 
-        return ExtractInnerMatch(text, candidate.ToString(), offset, region, leniency, ref triesLeft);
+        return ExtractInnerMatch(text, candidateText, offset, region, leniency, ref triesLeft);
     }
 
     private PhoneNumberMatch? ExtractInnerMatch(ReadOnlySpan<char> text, string candidate, int offset, Region region, PhoneMatchLeniency leniency, ref long triesLeft)
@@ -249,7 +250,7 @@ public sealed class PhoneNumberMatcher
             }
         }
 
-        if (_parser.TryParse(candidate, region, true, out PhoneNumber number, out _) != System.Buffers.OperationStatus.Done)
+        if (!_parser.TryParseKeepingRaw(candidate, region, out PhoneNumber number))
         {
             return null;
         }

@@ -414,8 +414,27 @@ internal static class UrlParser
     // and remembers each code point's UTF-16 offset in the input; the entry after the last is the end offset.
     private static void Prepare(string input, int first, int last, out int[] cps, out int[] origin)
     {
-        var cpList = new List<int>(last - first);
-        var originList = new List<int>(last - first + 1);
+        // Count first so both arrays are allocated once, at their final size.
+        int count = 0;
+        for (int i = first; i < last; i++)
+        {
+            char c = input[i];
+            if (c is '\t' or '\n' or '\r')
+            {
+                continue;
+            }
+
+            if (char.IsHighSurrogate(c) && i + 1 < last && char.IsLowSurrogate(input[i + 1]))
+            {
+                i++;
+            }
+
+            count++;
+        }
+
+        cps = new int[count];
+        origin = new int[count + 1];
+        int n = 0;
         for (int i = first; i < last; i++)
         {
             char c = input[i];
@@ -436,13 +455,12 @@ internal static class UrlParser
                 cp = 0xFFFD;
             }
 
-            cpList.Add(cp);
-            originList.Add(start);
+            cps[n] = cp;
+            origin[n] = start;
+            n++;
         }
 
-        originList.Add(last);
-        cps = [.. cpList];
-        origin = [.. originList];
+        origin[n] = last;
     }
 
     private static bool IsAsciiAlpha(int c) => c is >= 'a' and <= 'z' or >= 'A' and <= 'Z';
@@ -498,8 +516,8 @@ internal static class UrlParser
         bool track = stateOverride is null && baseUrl is null;
         UrlState state = stateOverride ?? UrlState.SchemeStart;
         var buffer = new StringBuilder();
-        var opaquePath = new StringBuilder(); // appended to url.OpaquePath when the opaque path state ends
-        var fragment = new StringBuilder(); // appended to url.Fragment when the parse ends
+        StringBuilder? opaquePath = null; // created when the opaque path state first writes; appended to url.OpaquePath when that state ends
+        StringBuilder? fragment = null; // created when the fragment state first writes; appended to url.Fragment when the parse ends
         int bufferLength = 0; // code points in buffer, for the authority state's pointer rewind
         bool atSignSeen = false;
 
@@ -1188,8 +1206,8 @@ internal static class UrlParser
                 case UrlState.OpaquePath:
                     if (c == '?')
                     {
-                        url.OpaquePath += opaquePath.ToString();
-                        opaquePath.Clear();
+                        url.OpaquePath += opaquePath?.ToString();
+                        opaquePath?.Clear();
                         url.Query = string.Empty;
                         if (track)
                         {
@@ -1200,8 +1218,8 @@ internal static class UrlParser
                     }
                     else if (c == '#')
                     {
-                        url.OpaquePath += opaquePath.ToString();
-                        opaquePath.Clear();
+                        url.OpaquePath += opaquePath?.ToString();
+                        opaquePath?.Clear();
                         url.Fragment = string.Empty;
                         if (track)
                         {
@@ -1212,11 +1230,11 @@ internal static class UrlParser
                     }
                     else if (c == ' ')
                     {
-                        opaquePath.Append(RemainingStartsWith('?') || RemainingStartsWith('#') ? "%20" : " ");
+                        (opaquePath ??= new StringBuilder()).Append(RemainingStartsWith('?') || RemainingStartsWith('#') ? "%20" : " ");
                     }
                     else if (c != Eof)
                     {
-                        PercentEncoding.AppendEncoded(opaquePath, c, PercentEncodeSet.C0Control);
+                        PercentEncoding.AppendEncoded(opaquePath ??= new StringBuilder(), c, PercentEncodeSet.C0Control);
                     }
 
                     break;
@@ -1248,7 +1266,7 @@ internal static class UrlParser
                 case UrlState.Fragment:
                     if (c != Eof)
                     {
-                        PercentEncoding.AppendEncoded(fragment, c, PercentEncodeSet.Fragment);
+                        PercentEncoding.AppendEncoded(fragment ??= new StringBuilder(), c, PercentEncodeSet.Fragment);
                     }
 
                     break;
@@ -1260,12 +1278,12 @@ internal static class UrlParser
             }
         }
 
-        if (opaquePath.Length > 0)
+        if (opaquePath is { Length: > 0 })
         {
             url.OpaquePath += opaquePath.ToString();
         }
 
-        if (fragment.Length > 0)
+        if (fragment is { Length: > 0 })
         {
             url.Fragment = (url.Fragment ?? string.Empty) + fragment.ToString();
         }

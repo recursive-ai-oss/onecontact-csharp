@@ -242,14 +242,19 @@ internal static class EmailAddressParser
                 return false;
             }
 
-            string domainText = _s[(at + 1)..end].ToString();
-            EmailFacts facts = _facts;
-            if (!EmailDomain.TryNormalize(domainText, ref facts, out string ascii, out _))
+            string ascii;
+            if (!EmailDomain.TryNormalizePlainAscii(_s[(at + 1)..end], out ascii!))
             {
-                return false;
+                // Not the plain shape (a single label, a long label, a Punycode label, a numeric last label): the general normalization decides.
+                EmailFacts facts = _facts;
+                if (!EmailDomain.TryNormalize(_s[(at + 1)..end].ToString(), ref facts, out ascii, out _))
+                {
+                    return false;
+                }
+
+                _facts = facts;
             }
 
-            _facts = facts;
             _local = _s[start..at].ToString();
             _domain = ascii;
             _localSpan = new SourceSpan(start, at - start);

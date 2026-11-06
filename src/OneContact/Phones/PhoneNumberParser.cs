@@ -67,6 +67,18 @@ public sealed partial class PhoneNumberParser
         return true;
     }
 
+    // The matcher's parse of a candidate it already holds as a string: the string itself is kept as the raw input, and no detail is built.
+    internal bool TryParseKeepingRaw(string input, Region defaultRegion, out PhoneNumber value)
+    {
+        if (!ParseNumber(input, defaultRegion, input, out value, out _).IsNone)
+        {
+            value = default;
+            return false;
+        }
+
+        return true;
+    }
+
     /// <summary>Parses a phone number.</summary>
     /// <param name="input">The text. Surrounding white space, and any text before the first digit or plus sign, is ignored.</param>
     /// <param name="defaultRegion">The region that national numbers belong to; <see cref="Region.Unknown"/> accepts only numbers that start with a plus sign.</param>

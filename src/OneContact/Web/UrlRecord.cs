@@ -60,7 +60,7 @@ internal sealed class UrlRecord
     /// <returns>The serialized URL.</returns>
     internal string Serialize(bool excludeFragment = false)
     {
-        var sb = new StringBuilder();
+        var sb = new StringBuilder(64);
         sb.Append(Scheme).Append(':');
         if (Host is not null)
         {
@@ -89,7 +89,7 @@ internal sealed class UrlRecord
             sb.Append("/.");
         }
 
-        sb.Append(SerializePath());
+        AppendPath(sb);
         if (Query is not null)
         {
             sb.Append('?').Append(Query);
@@ -110,13 +110,29 @@ internal sealed class UrlRecord
             return OpaquePath;
         }
 
+        if (Path.Count == 1)
+        {
+            return string.Concat("/", Path[0]);
+        }
+
         var sb = new StringBuilder();
+        AppendPath(sb);
+        return sb.ToString();
+    }
+
+    // The path as the serializer writes it: the opaque path, or each segment after a slash.
+    private void AppendPath(StringBuilder sb)
+    {
+        if (OpaquePath is not null)
+        {
+            sb.Append(OpaquePath);
+            return;
+        }
+
         foreach (string segment in Path)
         {
             sb.Append('/').Append(segment);
         }
-
-        return sb.ToString();
     }
 
     // The getters of the URL API (section 6.1), used to compare against the conformance data.

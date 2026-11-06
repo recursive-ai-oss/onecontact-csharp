@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using RecursiveAI.OneContact.Extraction;
 using RecursiveAI.OneContact.Extraction.Markup;
+using RecursiveAI.OneContact.Extraction.Obfuscation;
 using RecursiveAI.OneContact.Extraction.Text;
 using RecursiveAI.OneContact.Models;
 using RecursiveAI.OneContact.Models.Tier1;
@@ -20,6 +21,19 @@ internal static class Profiles
         Inputs.Page[] pages = Enumerable.Range(1, 8).Select(i => Inputs.MakePage(i, 24)).ToArray();
         Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"page: {pages[0].Html.Length} chars of HTML, {pages[0].Text.Length} of text"));
         var extractor = new ContactExtractor { Sources = ExtractionSources.Markup | ExtractionSources.Text, DefaultRegion = Region.US };
+        try
+        {
+            Document d0 = Document.Parse(pages[0].Html);
+            DocumentStyles st0 = DocumentStyles.Create(d0);
+            AccessibilityTree tree0 = AccessibilityTree.Build(d0, st0);
+            NavigationLists lists0 = tree0.CreateNavigationLists();
+            Console.WriteLine($"cascade ok: {lists0.Landmarks.Count} landmarks, {lists0.Headings.Count} headings");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"cascade FAILED: {e.GetType().Name}: {e.Message}");
+        }
+
         Time("Document.Parse", pages, p => Document.Parse(p.Html).GetHashCode());
         Document[] docs = pages.Select(p => Document.Parse(p.Html)).ToArray();
         Time("DocumentStyles.Create", pages, p => DocumentStyles.Create(Document.Parse(p.Html)).GetHashCode());
@@ -28,6 +42,12 @@ internal static class Profiles
             Document d = Document.Parse(p.Html);
             DocumentStyles st = DocumentStyles.Create(d);
             return AccessibilityTree.Build(d, st).GetHashCode();
+        });
+        Time("styles + tree + CreateNavigationLists", pages, p =>
+        {
+            Document d = Document.Parse(p.Html);
+            DocumentStyles st = DocumentStyles.Create(d);
+            return AccessibilityTree.Build(d, st).CreateNavigationLists().Landmarks.Count;
         });
         Time("parse + VisibleTextReader.Read", pages, p =>
         {
@@ -40,6 +60,19 @@ internal static class Profiles
             TextView view = PlainTextView.Build(p.Text);
             return TextFieldReader.Read(ctx, view, new MatcherPhoneFinder(Region.US), null, out _).Count;
         });
+        Time("  EmailFinder.Find per line", pages, p => PerLine(p, (view, text, l, sink) => EmailFinder.Find(text, l.Start, l.End, sink.Emails)));
+        Time("  LabelCandidates.TryFind per line", pages, p => PerLine(p, (view, text, l, sink) => LabelCandidates.TryFind(text, l.Start, l.End, out _)));
+        Time("  AddressCandidates.Find (view)", pages, p =>
+        {
+            var hits = new List<AddressHit>();
+            AddressCandidates.Find(PlainTextView.Build(p.Text), hits);
+            return hits.Count;
+        });
+        Time("  UrlCandidates.Find per line", pages, p => PerLine(p, (view, text, l, sink) => UrlCandidates.Find(text, l.Start, l.End, sink.Urls)));
+        Time("  ShapePhoneFinder per line", pages, p => PerLine(p, (view, text, l, sink) => ShapePhoneFinder.Instance.Find(text, l.Start, l.End, sink.Phones)));
+        var matcherFinder = new MatcherPhoneFinder(Region.US);
+        Time("  MatcherPhoneFinder per line", pages, p => PerLine(p, (view, text, l, sink) => matcherFinder.Find(text, l.Start, l.End, sink.Phones)));
+        Time("  PlainTextView.Build only", pages, p => PlainTextView.Build(p.Text).Lines.Count);
         Time("ExtractText (all)", pages, p => extractor.ExtractText(p.Text).Fields.Count);
         Time("ExtractHtml (all)", pages, p => extractor.ExtractHtml(p.Html).Fields.Count);
         return 0;
@@ -92,6 +125,31 @@ internal static class Profiles
         sw.Stop();
         Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"model.Analyze alone: {sw.Elapsed.TotalMilliseconds * 1000 / k:F1} us per call"));
         return 0;
+    }
+
+    private sealed class Sinks
+    {
+        public readonly List<EmailHit> Emails = [];
+        public readonly List<UrlHit> Urls = [];
+        public readonly List<PhoneHit> Phones = [];
+    }
+
+    private static int PerLine(Inputs.Page p, Action<TextView, string, TextLine, Sinks> work)
+    {
+        TextView view = PlainTextView.Build(p.Text);
+        string text = view.Text;
+        var sink = new Sinks();
+        int n = 0;
+        foreach (TextLine l in view.Lines)
+        {
+            sink.Emails.Clear();
+            sink.Urls.Clear();
+            sink.Phones.Clear();
+            work(view, text, l, sink);
+            n += sink.Emails.Count + sink.Urls.Count + sink.Phones.Count;
+        }
+
+        return n;
     }
 
     private static void Time(string label, Inputs.Page[] pages, Func<Inputs.Page, int> work)

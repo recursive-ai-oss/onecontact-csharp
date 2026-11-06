@@ -47,6 +47,12 @@ internal static class SocialProfiles
             return WebFacts.None;
         }
 
+        // Only the networks' own hosts and the "/@name" form on any host can match; everything else needs no look at the path.
+        if (path.AsSpan().IndexOf('@') < 0 && !IsNetworkHost(host))
+        {
+            return WebFacts.None;
+        }
+
         string[] segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
         if (segments.Length == 0)
         {
@@ -113,7 +119,12 @@ internal static class SocialProfiles
     }
 
     private static bool HostIs(string host, string domain) =>
-        host.Equals(domain, StringComparison.Ordinal) || host.EndsWith("." + domain, StringComparison.Ordinal);
+        host.Equals(domain, StringComparison.Ordinal)
+        || (host.Length > domain.Length && host[host.Length - domain.Length - 1] == '.' && host.EndsWith(domain, StringComparison.Ordinal));
+
+    private static bool IsNetworkHost(string host) =>
+        HostIs(host, "linkedin.com") || HostIs(host, "twitter.com") || HostIs(host, "x.com") || HostIs(host, "github.com") || HostIs(host, "facebook.com")
+        || HostIs(host, "fb.com") || HostIs(host, "instagram.com") || HostIs(host, "youtube.com") || HostIs(host, "tiktok.com");
 
     private static bool IsHandle(string s, int maxLength, bool allowDot, bool allowHyphen)
     {
