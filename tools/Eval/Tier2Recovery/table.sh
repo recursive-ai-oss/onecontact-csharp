@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # usage: table.sh <before tag> <after tag>; prints the before -> after table of the documentation (markdown): per country, with a hint and without one,
 # every-field %, field %, refusals and wrong-country count.
-d=${ONECONTACT_TIER2_OUT:-$HOME/onecontact/u38}
+d=${ONECONTACT_TIER2_OUT:-$HOME/onecontact/tier2-recovery}
 rows() { # tag -> "cc hint every fields refused wrong"
   awk '/hint=/ { cc=$1; h=($2=="hint=no") ? "no" : "yes";
     for (i=1;i<=NF;i++) { if ($i ~ /^every-field=/) { ep=$(i+1); gsub(/[()%]/,"",ep) }

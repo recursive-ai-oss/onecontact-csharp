@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # usage: run-all.sh <tag>; runs the recovery tool over the dev files of all 38 Tier 2 countries and writes <tag>/<cc>.txt and <tag>/misses-<cc>.tsv
-# under ONECONTACT_TIER2_OUT (default ~/onecontact/u38). The dev files are the register renders of each country's training data.
+# under ONECONTACT_TIER2_OUT (default ~/onecontact/tier2-recovery). The dev files are the register renders of each country's training data.
 export PATH=~/dotnet10:$PATH DOTNET_ROOT=~/dotnet10 DOTNET_PROCESSOR_COUNT=4 DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
 test -e ~/WORKER-BENCH.lock && { echo bench lock; exit 9; }
 tag=${1:?tag}
-out=${ONECONTACT_TIER2_OUT:-$HOME/onecontact/u38}/$tag
+out=${ONECONTACT_TIER2_OUT:-$HOME/onecontact/tier2-recovery}/$tag
 mkdir -p "$out"
 nice dotnet build tools/Eval/Tier2Recovery -c Release -m:4 -v quiet -clp:NoSummary > "$out/build.log" 2>&1
 if grep -qE 'error|warning' "$out/build.log"; then grep -E 'error|warning' "$out/build.log" | sort -u | head; exit 1; fi

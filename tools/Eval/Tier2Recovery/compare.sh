@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # usage: compare.sh <before tag> <after tag>; prints, per country, hint and no hint: every-field %, field %, refusals, wrong-country count, before -> after.
-d=${ONECONTACT_TIER2_OUT:-$HOME/onecontact/u38}
+d=${ONECONTACT_TIER2_OUT:-$HOME/onecontact/tier2-recovery}
 parse() { # file -> cc hint every fields refused wrong
   awk '/hint=/ { cc=$1; h=$2; if (h=="hint=no") h="no"; else h="yes";
     for (i=1;i<=NF;i++) { if ($i ~ /^every-field=/) { split($i,a,"="); e=a[2]; getline_pct=$(i+1); gsub(/[()%]/,"",getline_pct); ep=getline_pct }
