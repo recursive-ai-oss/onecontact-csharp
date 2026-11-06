@@ -121,7 +121,7 @@ internal static partial class Tier2Reader
             List<Tok> houseToks = [toks[h]];
             List<Piece> tail = [];
             Tok gapFrom = toks[h];
-            Piece? peeled = null;
+            List<Piece> peeled = [];
             for (int s = 0; s < segments.Count; s++)
             {
                 (List<Tok> segment, bool comma) = segments[s];
@@ -148,12 +148,27 @@ internal static partial class Tier2Reader
                 gapFrom = segment[^1];
                 segment = words;
 
+                // Lithuania: a village (k.) and a municipality (sav.) may follow the house number on the same line ("Miško a. 7 Radviliškio r. sav.").
+                if (country.Profile == "lt" && s == segments.Count - 1 && !segment.All(NorthTailOk) && LithuanianPlaces(segment, out int placesFrom) is { } places)
+                {
+                    foreach (List<Tok> place in places)
+                    {
+                        peeled.Add(LithuanianPlacePiece(place, country));
+                    }
+
+                    segment = segment.GetRange(0, placesFrom);
+                    if (segment.Count == 0)
+                    {
+                        continue;
+                    }
+                }
+
                 // "korter 8 Mustamäe linnaosa": a district or municipality name closes the last segment; it is the dependent locality, not part of the unit.
                 if (s == segments.Count - 1 && segment.Count >= 3 && !segment.All(NorthTailOk) && IsDependentLocality(segment.GetRange(segment.Count - 2, 2), country) && segment.Take(segment.Count - 2).All(NorthTailOk))
                 {
                     List<Tok> place = segment.GetRange(segment.Count - 2, 2);
                     string placeWritten = Join(place);
-                    peeled = new Piece(StreetPartRole.Other, placeWritten, placeWritten, T2Text.Title(placeWritten, capitalsKept: true), Span(place), "t2-dependent-locality");
+                    peeled.Add(new Piece(StreetPartRole.Other, placeWritten, placeWritten, T2Text.Title(placeWritten, capitalsKept: true), Span(place), "t2-dependent-locality"));
                     segment = segment.GetRange(0, segment.Count - 2);
                 }
 
@@ -177,7 +192,7 @@ internal static partial class Tier2Reader
                         segment = segment.GetRange(1, segment.Count - 1);
                     }
 
-                    if (segment.Count >= 2 && segment[0].Key is "LGH" or "DZ" or "KORP" or "KORTER")
+                    if (segment.Count >= 2 && (segment[0].Key is "LGH" or "DZ" or "KORP" or "KORTER" || country.Profile == "lt" && segment[0].Key is "BUTAS" or "B"))
                     {
                         // lgh (PostNord), dz. (Latvian rules), korp.: the word is the designator, what follows it the number.
                         List<Tok> number = segment.GetRange(1, segment.Count - 1);
@@ -205,17 +220,14 @@ internal static partial class Tier2Reader
                 return null;
             }
 
-            if (peeled is not null)
-            {
-                tail.Add(peeled);
-            }
+            tail.AddRange(peeled);
 
             List<Tok> nameToks = toks.GetRange(0, h);
             string nameWritten = Join(nameToks);
             List<Piece> pieces = [new Piece(StreetPartRole.StreetName, nameWritten, nameWritten, DisplayName(nameWritten), Span(nameToks), "t2-street-name")];
             string houseWritten = Join(houseToks);
             // Estonia also writes the apartment after a slash ("46/49"); in Latvia a slash joins a double number ("48/50").
-            int dash = country.Profile is "ee" or "lv" or "lt" && houseToks.Count == 1 ? houseWritten.LastIndexOfAny(country.Profile == "ee" ? ['-', '–', '—', '/'] : ['-', '–', '—']) : -1;
+            int dash = country.Profile is "ee" or "lv" or "lt" && houseToks.Count == 1 ? houseWritten.LastIndexOfAny(country.Profile is "ee" or "lt" ? ['-', '–', '—', '/'] : ['-', '–', '—']) : -1;
             if (dash > 0 && dash < houseWritten.Length - 1 && houseWritten[(dash + 1)..].All(c => char.IsAsciiDigit(c) || char.IsAsciiLetter(c)) && char.IsAsciiDigit(houseWritten[dash + 1]))
             {
                 // The apartment follows the house number after a dash (UPU Estonia and Lithuania sheets, Latvian rules): two parts, written as one.
@@ -347,7 +359,7 @@ internal static partial class Tier2Reader
             for (int i = 0; i < before.Count; i++)
             {
                 List<Tok> toks = before[i].Toks;
-                if (toks.Count == 3 && IsDependentLocality(toks.GetRange(1, 2), country) && !toks.Any(t => t.Text.Any(char.IsAsciiDigit)) && ParseDeliveryLine(toks, country.Code, country, allowStreet: true) is null)
+                if (country.Profile != "lt" && toks.Count == 3 && IsDependentLocality(toks.GetRange(1, 2), country) && !toks.Any(t => t.Text.Any(char.IsAsciiDigit)) && ParseDeliveryLine(toks, country.Code, country, allowStreet: true) is null)
                 {
                     before[i] = new Unit(toks.GetRange(1, 2));
                     before.Insert(i, new Unit(toks.GetRange(0, 1)));
@@ -380,12 +392,112 @@ internal static partial class Tier2Reader
         private static Piece NorthOtherPiece(List<Tok> toks, T2Country country)
         {
             Piece piece = OtherPiece(toks, country, afterStreet: true);
-            return IsDependentLocality(toks, country) ? piece with { Rule = "t2-dependent-locality" } : piece;
+            return country.Profile == "lt" && IsLithuanianMunicipality(toks) ? piece with { Rule = "t2-admin-area" } : IsDependentLocality(toks, country) ? piece with { Rule = "t2-dependent-locality" } : piece;
+        }
+
+        // Lithuania: a village is written with k. (kaimas) after its name, a municipality with sav. (savivaldybė, "r. sav." for a district municipality, "m. sav." for a city one).
+        // The marker words make a line certain; the UPU Lithuania sheet prints the rural address with the municipality in the postcode line ("RASEINIU R. SAV.").
+        private static bool IsLithuanianVillage(List<Tok> toks) => toks.Count is >= 2 and <= 4 && toks[^1].Key == "K" && !toks.Any(t => t.Text.Any(char.IsAsciiDigit));
+
+        private static bool IsLithuanianMunicipality(List<Tok> toks) => toks.Count is >= 2 and <= 4 && toks[^1].Key == "SAV" && !toks.Any(t => t.Text.Any(char.IsAsciiDigit));
+
+        private static Piece LithuanianPlacePiece(List<Tok> toks, T2Country country)
+        {
+            Piece piece = OtherPiece(toks, country, afterStreet: true);
+            return piece with { Rule = IsLithuanianMunicipality(toks) ? "t2-admin-area" : "t2-dependent-locality" };
+        }
+
+        // The words after a house number that are villages and municipalities only: from the first word that is not a floor or door word to the end, cut after each k. and sav.
+        private static List<List<Tok>>? LithuanianPlaces(List<Tok> segment, out int start)
+        {
+            start = segment.FindIndex(t => !NorthTailOk(t));
+            if (start < 0)
+            {
+                return null;
+            }
+
+            List<List<Tok>> places = [];
+            List<Tok> current = [];
+            for (int i = start; i < segment.Count; i++)
+            {
+                current.Add(segment[i]);
+                if (segment[i].Key is "K" or "SAV")
+                {
+                    places.Add(current);
+                    current = [];
+                }
+            }
+
+            return current.Count == 0 && places.Count > 0 && places.All(p => IsLithuanianVillage(p) || IsLithuanianMunicipality(p)) ? places : null;
+        }
+
+        // In lines, "Pienionių k., Anykščių r. sav." is one line with a comma inside: a village and a municipality, each a line of its own.
+        private static void SplitLithuanianPlaces(List<Unit> before, T2Country country)
+        {
+            if (country.Profile != "lt")
+            {
+                return;
+            }
+
+            for (int i = 0; i < before.Count; i++)
+            {
+                List<Tok> toks = before[i].Toks;
+                if (toks.Any(t => t.Text.Any(char.IsAsciiDigit)) || toks[^1].Key is not ("K" or "SAV"))
+                {
+                    continue;
+                }
+
+                List<List<Tok>> places = [];
+                List<Tok> current = [];
+                foreach (Tok t in toks)
+                {
+                    current.Add(t);
+                    if (t.Key is "K" or "SAV")
+                    {
+                        places.Add(current);
+                        current = [];
+                    }
+                }
+
+                if (places.Count < 2 || current.Count > 0 || !places.All(p => IsLithuanianVillage(p) || IsLithuanianMunicipality(p)))
+                {
+                    continue;
+                }
+
+                before.RemoveAt(i);
+                before.InsertRange(i, places.Select(p => new Unit(p)));
+                i += places.Count - 1;
+            }
+        }
+
+        // On one line "Sakalauskas ir Ko, MB, Aušros g. 23": the legal form after a comma belongs to the company name before it.
+        private static void MergeLithuanianLegalSuffix(List<Unit> before, T2Country country)
+        {
+            if (country.Profile != "lt")
+            {
+                return;
+            }
+
+            for (int i = 1; i < before.Count; i++)
+            {
+                List<Tok> t = before[i].Toks;
+                if (t.Count == 1 && T2Rules.NorthLegalForms.Contains(t[0].Key) && !before[i - 1].Toks.Any(x => x.Text.Any(char.IsAsciiDigit)))
+                {
+                    before[i - 1].Toks = [.. before[i - 1].Toks, .. t];
+                    before.RemoveAt(i);
+                    i--;
+                }
+            }
         }
 
         // A parish (Latvia: pag.) or a rural municipality or city district (Estonia: vald, linnaosa) name stands for the dependent locality.
         private static bool IsDependentLocality(List<Tok> toks, T2Country country)
         {
+            if (country.Profile == "lt")
+            {
+                return IsLithuanianVillage(toks);
+            }
+
             bool dependent = country.Profile == "lv" && toks[^1].Key is "PAG" or "PAGASTS" or "PAGASTA" || country.Profile == "ee" && toks[^1].Key is "VALD" or "LINN" or "LINNAOSA";
             return dependent && toks.Count <= 2 && !toks.Any(t => t.Text.Any(char.IsAsciiDigit));
         }
@@ -407,12 +519,12 @@ internal static partial class Tier2Reader
         }
 
         // On one line the commas cut the address into units: the floor and door that follow the house number go back to the street line, with their comma.
-        private static void MergeNorthFloorAndDoor(List<Unit> before)
+        private static void MergeNorthFloorAndDoor(List<Unit> before, T2Country country)
         {
             for (int i = 1; i < before.Count; i++)
             {
                 List<Tok> t = before[i].Toks;
-                bool unit = t.Count is >= 1 and <= 3 && t.All(NorthTailOk) && (t[0].Text.Any(char.IsAsciiDigit) || T2Rules.NorthUnitWords.Contains(t[0].Key))
+                bool unit = t.Count is >= 1 and <= 3 && t.All(NorthTailOk) && (t[0].Text.Any(char.IsAsciiDigit) || T2Rules.NorthUnitWords.Contains(t[0].Key) || country.Profile == "lt" && t.Count == 2 && t[0].Key == "B")
                     && before[i - 1].Toks.Any(x => IsNorthNumber(x.Text)) && !StartsWithSpatial(before[i - 1].Toks);
                 if (unit)
                 {

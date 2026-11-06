@@ -79,6 +79,34 @@ Measured on the register dev examples (2000 per country, rules alone, with the c
 
 Without a hint the Czech, Croatian and Hungarian forms are shared with other countries, so most text is refused as `address.country-undetermined` by design (CZ 1594, HR 1181, HU 955 of 2000); Romania and Australia read without a hint as well as with it.
 
+### Second recovery round: Mexico, Poland, Slovenia, Slovakia
+
+Same measurement (2000 register dev examples per country, rules alone). Both columns come from the same recovery tool with the same gold conventions: the marker word of a number (`Núm.`) counts with the house number as `No.` does. Before is the code without this round; "every" is every labelled field recovered, "fields" the share of labelled fields recovered.
+
+| Country | Hint | Every field before → after | Fields before → after | Top refusals after |
+|---|---|---|---|---|
+| MX | yes | 4.7 → 73.3 | 42.5 → 87.1 | no-last-line 140 (no postcode), model-required 29, country-conflict 5 |
+| MX | no | 4.0 → 67.8 | 39.5 → 80.8 | no-last-line 134, country-undetermined 131, model-required 42 |
+| PL | yes | 72.3 → 92.4 | 81.0 → 95.1 | no-last-line 107 |
+| PL | no | 75.1 → 87.5 | 84.3 → 90.6 | no-last-line 125, country-undetermined 65 |
+| SI | yes | 78.5 → 89.9 | 90.2 → 93.0 | no-last-line 143, model-required 6 |
+| SI | no | 26.2 → 29.0 | 32.1 → 32.8 | country-undetermined 1249, no-last-line 145 |
+| SK | yes | 89.3 → 91.3 | 93.7 → 94.4 | no-last-line 108, model-required 4 |
+| SK | no | 13.2 → 13.5 | 16.8 → 16.9 | country-undetermined 1592, no-last-line 123 |
+
+Without a hint the four-digit (SI) and `NNN NN` (SK) forms are shared with other countries and stay `address.country-undetermined` by design. A refusal as `no-last-line` is mostly text without a postcode, which the rules never invent.
+
+What the rules read now, each from the guide named:
+
+- **Poland.** Five digits without the dash (`08530 Dęblin`) are `08-530` when the text is known to be Polish (a hint or the country name); without that they are not read as Polish (France, Germany and others share the form). Poczta Polska, *Zasady poprawnego adresowania*, 1.2: the building number and, after it, the number of the flat or premises. `9/93` is a house number `9` and a unit number `93`, printed together as written; `m. 22` (mieszkanie) and `lok. 5` (lokal) are the designator and the unit number, also when a comma set them apart on one line; `Skrytka 396` is a box.
+- **Slovenia.** A single letter after a space belongs to the house number (`213 a`, `4 c`; the UPU Slovenia sheet writes `p.p.` and the letter forms follow Slovenian usage); `p. p. 3795` is a box.
+- **Slovakia.** `P.O.BOX 341` and `Poštový priečinok 1084` start a box line (UPU Slovakia sheet: P.O. Box). A box word inside a street line (`Závodie P.O.BOX 1970`) leaves the line to the model instead of reading it as a street name. A legal form after a comma (`Mikuš a spol., v.o.s., Neded 931`) belongs to the company name before it.
+- **Mexico** (UPU Mexico sheet: colonia line, postcode, locality and state abbreviation):
+  - `C.P.` / `CP` (código postal) stands in front of the digits and is part of the postal-code field as the writer set it; the standard value is the five digits. The code may come after the locality (`León, C.P. 37240`; `…, La Barca, Jalisco, C.P. 47912`) or before it with the locality and state after (`C.P. 38500, Apaseo el Alto, Guanajuato`). The word alone does not make the text Mexican: without a hint, a Mexican state or a colonia line is needed (Spain writes `C.P.` too).
+  - A line that starts with `Col.`, `Colonia`, `Fracc.`, `Fraccionamiento`, `Barrio`, `Pueblo`, `Ejido`, `Residencial` or `Unidad Habitacional` is the dependent locality; a colonia that follows the street number on the same line (`… 105B Col. Los Angeles 27140 Torreón`) is a line of its own. A quarter named without such a word stays an additional line as written.
+  - `S/N` (sin número) is the house number of a street without one. `Ciudad de México` and `Estado de México` are states, not the country; `Coahuila de Zaragoza` and `Michoacán de Ocampo` are read. A state name after `de` (`Tepatitlán de Morelos`) is part of the town. When the country stands on a line of its own, a `México` left on the locality line is the state. A lone `México` that could be the state or the country (`…, Ecatepec de Morelos, México, C.P. 55418`) is left to the model.
+  - A legal form after a comma (`Servicios Díaz, S.C., Calle …`) belongs to the company name.
+
 ## Sources
 
 UPU country sheets (`upu.int/UPU/media/upu/PostalEntitiesFiles/addressingUnit/<iso3>En.pdf`, retrieved 2026-11-05): Poland 08/2018, Czech Republic 02/2018, Slovakia 01/2013, Slovenia 05/2016, Croatia 05/2014, Hungary 01/2012, Romania 10/2007 (`rouEn`), Mexico 03/2017, Australia 07/2017. Own guides: Poczta Polska "Zasady poprawnego adresowania i oznakowania przesyłek listowych"; Česká pošta "How to correctly label the consignment" (about 19 recommended formats); Magyar Posta "Tájékoztató a levélküldemények helyes címzéséről"; Australia Post "Correct addressing" (November 2022) and "Address Presentation Standards" (1999). No licence is stated on the guides; facts and short examples only, cited by page. The examples used as tests are the 89 rows of `testdata/addresses/authority-examples-tier2c-south.tsv`: UPU Poland 4, Czech Republic 9, Slovakia 8, Slovenia 3, Croatia 3, Hungary 2, Romania 3, Mexico 2, Australia 6; Česká pošta 19; Australia Post 30 (1999 standards and 2022 brochure, element examples included). The libpostal dictionaries of `pl`, `cs`, `sk`, `sl`, `hr`, `hu` and `ro` at the pinned tag, through the ingest tool.
