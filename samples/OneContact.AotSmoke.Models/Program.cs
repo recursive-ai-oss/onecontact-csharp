@@ -34,13 +34,14 @@ Check(r == OperationStatus.Done && ruled is not null && rd.Fields.All(f => f.Sou
 NameModelResult n = ContactModels.Name!.Analyze("Northwind Traders LLC");
 Check(n.Class == NameClass.Company, "name class");
 
-// Text extraction stays rules and markup with the package referenced: the span head is in the weights but is not registered.
-Check(ContactModels.Spans is null, "the span model is not registered by the package");
+// Plain-text extraction uses the span head the package registers; a rule's field is still a rule's.
+Check(ContactModels.Spans is not null, "the span model is registered by the package");
 ExtractResult x = new ContactExtractor { Sources = ExtractionSources.Text, DefaultRegion = Region.US }.ExtractText("Best regards\nJohn Carter\nAcme Plumbing LLC\nTel: (217) 555-0143\njcarter@acmeplumbing.example");
-Check(x.Fields.All(f => f.Decision == DecisionSource.Rule), "every extracted field is a rule's");
+Check(x.Of(FieldKind.Email).All(f => f.Decision == DecisionSource.Rule), "the e-mail address is a rule's");
+Check(x.Of(FieldKind.Phone).Count == 1, "the phone number is found");
 Check(x.Of(FieldKind.Email).Count == 1, "the e-mail address is found");
 
-// The head is reachable for anyone who asks for it.
+// The head is also reachable directly.
 Check(Tier1Model.Instance.Find("John Carter\njcarter@acmeplumbing.example").Spans.Count > 0, "the span head runs");
 
 Console.WriteLine(failures == 0 ? "ok" : "failed");
