@@ -92,5 +92,16 @@ class Command(unittest.TestCase):
             self.assertNotIn("Acme", out)
 
 
+class PostcodePrefix(unittest.TestCase):
+    def test_country_prefix_is_not_part_of_the_postcode(self):
+        gold = {"fields": {"postcode": "3505", "city": "Dudelange"}}
+        for written in ("L-3505", "l 3505", "3505"):
+            right, predicted, _, exact = score.address_item(gold, {"fields": {"postcode": written, "city": "Dudelange"}}, False)
+            self.assertEqual((right, predicted, exact), (2, 2, True))
+        # Canadian postal codes start with letters and are not touched.
+        gold = {"fields": {"postcode": "K1A 0B1"}}
+        self.assertTrue(score.address_item(gold, {"fields": {"postcode": "K1A0B1"}}, False)[3])
+
+
 if __name__ == "__main__":
     unittest.main()

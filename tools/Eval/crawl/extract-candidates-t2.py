@@ -108,8 +108,8 @@ def strata(text, p):
         s.append("range")
     if tier2.RURAL.search(text):
         s.append("rural")
-    if p.get("territory"):
-        s.append("dom-" + p["territory"])
+    if country == "FR" and re.search(r"(?<!\d)9[78]\d{3}(?!\d)", text):
+        s.append("dom-postcode")  # an overseas-department postcode, whatever the host's TLD
     lang = tier2.page_lang(p["languages"], country)
     if lang:
         s.append("lang-" + lang)
@@ -123,12 +123,18 @@ for p in pages:
                         "url_kind": "root" if re.match(r"https?://[^/]+/?$", p["url"]) else "inner", "strata": strata(t, p)})
 
 
-def stratified(items, n, per_host):
+def same_address_key(it):
+    """Hosting and legal-notice boilerplate repeats one address on many hosts: items with the same digit groups count as one."""
+    d = re.findall(r"\d+", it["text"])
+    return "#".join(d) if len(d) >= 2 else re.sub(r"\W+", "", it["text"].lower())
+
+
+def stratified(items, n, per_host, key=None):
     seen, uniq = set(), []
     rng.shuffle(items)
     hc = defaultdict(int)
     for it in items:
-        k = re.sub(r"\W+", "", it["text"].lower())
+        k = key(it) if key else re.sub(r"\W+", "", it["text"].lower())
         if k in seen or k in EXCLUDED or hc[it["host"]] >= per_host:
             continue
         seen.add(k)
@@ -150,7 +156,7 @@ def stratified(items, n, per_host):
     return chosen, len(uniq), dict(counts)
 
 
-ch, avail, counts = stratified(by_addr, n_addr, 2)
+ch, avail, counts = stratified(by_addr, n_addr, 2, same_address_key)
 with open(os.path.join(out, f"draft-address-{country}.jsonl"), "w", encoding="utf-8") as f:
     for i, it in enumerate(ch):
         f.write(json.dumps({"id": f"addr-{country}-{i:03d}", "country": country, **it}, ensure_ascii=False) + "\n")
@@ -219,7 +225,7 @@ for p in pages:
         m = LABELLED.match(ln)
         cand = None
         if m:
-            cand = re.split(r"\s*(?:[;|]|\s[-–]\s|\s\(|,\s*(?=[a-zà-ÿ0-9]))", m.group(2).strip())[0].strip(" ,.")
+            cand = re.split(r"\s*(?:[;|]|\s[-–]\s|\s\(|,\s*(?=[a-zà-ÿ0-9]))", m.group(1).strip())[0].strip(" ,.")
             # an address or number after the name belongs to the next field
             cand = re.split(r",\s*(?=\d|Tel|Tél|Rechtsanw|Notar|Rue|Str)", cand)[0].strip(" ,.")
             src = "labelled"
