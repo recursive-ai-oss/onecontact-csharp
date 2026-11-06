@@ -1,0 +1,91 @@
+# Street types of group C-south. Columns as t2-street-types.tsv: set, full form (upper case, no accents), abbreviation, variants (semicolon separated).
+# The authorities list no abbreviation tables for these countries (the UPU sheets print Ul., Str., nám.); the forms are the ones the guides' examples use plus the common written forms of each language. The types are recognized so the name starts after them, and the key reads them as one word.
+# road-au: Australia Post, Address Presentation Standards p. 21 (thoroughfare types and abbreviations, after AS 4590), the other rows are common thoroughfare types; the abbreviation is never forced: the guide allows spelling the type out in full.
+road-pl	ULICA	UL	ULICY;ULICE
+road-pl	ALEJA	AL	ALEJE;ALEI;ALEJ
+road-pl	PLAC	PL	PLACU
+road-pl	OSIEDLE	OS	OSIEDLA
+road-pl	RYNEK	-
+road-pl	BULWAR	BULW
+road-pl	SKWER	-
+road-pl	DROGA	-
+road-pl	RONDO	-
+road-cz	ULICE	UL
+road-cz	NAMESTI	NAM
+road-cz	TRIDA	TR
+road-cz	NABREZI	NABR
+road-cz	SADY	-
+road-sk	ULICA	UL
+road-sk	NAMESTIE	NAM
+road-sk	TRIEDA	TR
+road-sk	NABREZIE	NABR
+road-sk	CESTA	-
+road-si	ULICA	UL
+road-si	CESTA	-
+road-si	TRG	-
+road-si	POT	-
+road-si	NABREZJE	NAB
+road-hr	ULICA	UL
+road-hr	TRG	-
+road-hr	CESTA	-
+road-hr	PUT	-
+road-hr	OBALA	-
+road-hr	SETALISTE	SET
+road-hu	UTCA	U
+road-hu	UT	-
+road-hu	TER	-	TERE
+road-hu	KORUT	KRT
+road-hu	KOZ	-
+road-hu	SETANY	-
+road-hu	RAKPART	RKP
+road-hu	FASOR	-
+road-hu	SOR	-
+road-hu	DULO	-
+road-ro	STRADA	STR
+road-ro	BULEVARDUL	BD	BULEVARD;B DUL;BDUL;BLD
+road-ro	CALEA	-
+road-ro	ALEEA	AL	ALEEA
+road-ro	PIATA	PTA	P TA
+road-ro	SOSEAUA	SOS
+road-ro	DRUMUL	-
+road-ro	SPLAIUL	SPL
+road-ro	INTRAREA	INTR
+road-ro	FUNDATURA	FUND
+road-mx	CALLE	-
+road-mx	AVENIDA	AV	AVE
+road-mx	BOULEVARD	BLVD	BVD
+road-mx	CALZADA	CALZ
+road-mx	CARRETERA	CARR
+road-mx	CERRADA	CDA
+road-mx	PRIVADA	PRIV
+road-mx	PROLONGACION	PROL
+road-mx	ANDADOR	-
+road-mx	CIRCUITO	-
+road-mx	PERIFERICO	-
+road-mx	EJE	-
+road-mx	CAMINO	-
+road-mx	PASEO	-
+road-au	ALLEY	ALLY
+road-au	ARCADE	ARC
+road-au	AVENUE	AVE	AV
+road-au	BOULEVARD	BVD	BLVD
+road-au	CLOSE	CL
+road-au	COURT	CT
+road-au	CRESCENT	CRES
+road-au	DRIVE	DR
+road-au	ESPLANADE	ESP
+road-au	GROVE	GR
+road-au	HIGHWAY	HWY
+road-au	LANE	LANE	LN
+road-au	PARADE	PDE
+road-au	PLACE	PL
+road-au	ROAD	RD
+road-au	SQUARE	SQ
+road-au	STREET	ST
+road-au	TERRACE	TCE
+road-au	CIRCUIT	CCT
+road-au	GARDENS	GDNS
+road-au	WAY	WAY
+road-au	PARKWAY	PWY
+road-au	FREEWAY	FWY
+road-au	PROMENADE	PROM

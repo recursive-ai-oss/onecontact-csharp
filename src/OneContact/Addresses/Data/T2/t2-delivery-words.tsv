@@ -28,3 +28,8 @@ MT	box	KAXXA POSTALI	Kaxxa Postali
 AD	box	BP	BP
 AD	box	AP	AP
 AD	box	APARTAT	Apartat
+ES	box	APARTADO DE CORREOS	Apartado de Correos
+ES	box	APDO	Apartado
+IT,SM,VA	box	CP	Casella postale
+IT,SM,VA	box	CASELLA POSTALE	Casella postale
+PT	box	APARTADO	Apartado

@@ -33,6 +33,13 @@ public static class AddressExpander
         (ExpansionLanguages.Estonian, "et"),
         (ExpansionLanguages.Latvian, "lv"),
         (ExpansionLanguages.Lithuanian, "lt"),
+        (ExpansionLanguages.Polish, "pl"),
+        (ExpansionLanguages.Czech, "cs"),
+        (ExpansionLanguages.Slovak, "sk"),
+        (ExpansionLanguages.Slovenian, "sl"),
+        (ExpansionLanguages.Croatian, "hr"),
+        (ExpansionLanguages.Hungarian, "hu"),
+        (ExpansionLanguages.Romanian, "ro"),
     ];
 
     /// <summary>Expands an address.</summary>
@@ -279,7 +286,7 @@ public static class AddressExpander
         {
             case PhraseKind.StreetType:
                 // A street type is not the first word of an English address ("st marys church" is a saint); French, Italian, Iberian and Maltese types lead the name.
-                return i > 0 || entry.Language is "fr" or "it" or "es" or "pt" or "ca" or "eu" or "gl" or "mt" && words.Count > length;
+                return i > 0 || entry.Language is "fr" or "it" or "es" or "pt" or "ca" or "eu" or "gl" or "mt" or "pl" or "cs" or "sk" or "sl" or "hr" or "ro" && words.Count > length;
             case PhraseKind.NumberedUnit:
             case PhraseKind.NumberWord:
                 return nextLooksNumeric;

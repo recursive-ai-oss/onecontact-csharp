@@ -67,7 +67,7 @@ bpost-de	PLATZ	Pl.	PL
 bpost-de	GEWERBEGEBIET	GG.	GG
 bpost-de	RESIDENZ	Res.	RES
 # Group B. Road types that start (or, in Maltese and Irish usage, hold) a street line, so a line that names a street but has no number is still a street line (UPU Italy: "CALLE DEL CRISTO CANNAREGIO 1678", "Piazza San Calisto" on the UPU Vatican sheet; UPU Spain: "Calle Huertas 18"; UPU Portugal: "R LEAL DA CAMARA 31"; UPU Malta: "Triq San Guzepp"; UPU Andorra: "CARRER AIGUETA 19"). The authorities publish no abbreviation table in these sheets, so the abbreviation column is empty and no type is rewritten; the variants are the usual abbreviations, recognized and left as written.
-road-es	CALLE	-	C/;CL;CLL
+road-es	CALLE	-	C/;C;CL;CLL
 road-es	AVENIDA	-	AVDA;AVD;AV
 road-es	PLAZA	-	PZA;PLZA;PL
 road-es	PASEO	-	PSO
@@ -93,7 +93,7 @@ road-pt	AVENIDA	-	AV;AVDA
 road-pt	TRAVESSA	-	TRAV;TV
 road-pt	PRACA	-	PC;PCA
 road-pt	LARGO	-	LG
-road-pt	ESTRADA	-	EST
+road-pt	ESTRADA	-	EST;ESTR
 road-pt	CAMINHO	-	CAM
 road-pt	ALAMEDA	-	AL
 road-pt	BECO	-	BC
@@ -101,10 +101,10 @@ road-pt	CALCADA	-
 road-pt	AZINHAGA	-	
 road-pt	ROTUNDA	-	
 road-pt	URBANIZACAO	-	URB
-road-it	VIA	-	
+road-it	VIA	-	V
 road-it	VIALE	-	VLE
 road-it	VICOLO	-	VLO
-road-it	PIAZZA	-	PZA;PIAZ
+road-it	PIAZZA	-	PZA;PZZA;PIAZ
 road-it	PIAZZALE	-	PLE
 road-it	CORSO	-	CSO
 road-it	LARGO	-	
@@ -156,3 +156,127 @@ road-ad	RUE	-
 road-ad	AVENUE	-	
 road-ad	PLACE	-	
 road-ad	BOULEVARD	-	BD
+# Group B, added after measuring the rules on the dev examples of the training data. road-es, road-it, road-pt and road-ad: more road types and the usual abbreviations the UPU sheets
+# do not list. tail-en: English road types that END a name in the United Kingdom, the Crown dependencies, Ireland and Malta ("Featherstone Street", "Mount Vernon Rd"); a name
+# keeps its type apart only when the type is the last word and a name word comes before it.
+road-es	RUA	-	R;R/
+road-es	LUGAR	-	
+road-es	CALLEJON	-	CJON
+road-es	CALLEJA	-	
+road-es	BAJADA	-	
+road-es	PARAJE	-	
+road-es	BARRIADA	-	
+road-es	BARRIO	-	
+road-es	CARRERA	-	
+road-es	COSTANILLA	-	
+road-es	VEREDA	-	
+road-es	SENDA	-	
+road-es	RAMBLA	-	
+road-es	MUELLE	-	
+road-es	PRAZA	-	PZA
+road-es	ESTRADA	-	ESTR
+road-es	KALEA	-	
+road-it	STRADONE	-	
+road-it	VIA PRIVATA	-	
+road-it	VICO	-	
+road-it	CORTE	-	
+road-it	CALLE	-	
+road-it	LUNGOMARE	-	
+road-it	BORGO	-	BGO
+road-it	PIAZZETTA	-	
+road-it	PIAZZALE	-	
+road-it	VIALE	-	
+road-it	LARGO	-	LGO
+road-it	CORSO	-	
+road-it	VICOLO	-	
+road-it	CONTRADA	-	
+road-it	SALITA	-	
+road-it	SCALINATA	-	
+road-it	STRADA	-	STR
+road-pt	AVENIDA	-	AVDA;AV
+road-pt	CAMINHO	-	CAM
+road-pt	ESTRADA	-	EST;ESTR
+road-pt	ALAMEDA	-	AL
+road-pt	LARGO	-	LG
+road-pt	TRAVESSA	-	TRAV;TV
+road-pt	PRACA	-	PC;PCA
+road-pt	BAIRRO	-	
+road-pt	QUINTA	-	
+road-pt	LUGAR	-	
+road-pt	URBANIZACAO	-	URB
+road-pt	BECO	-	BC
+road-pt	CALCADA	-	CC
+road-pt	RUA	-	R
+road-ad	CARRER	-	C/;C
+road-ad	PLACA	-	PL
+road-ad	CAMI	-	CM
+road-ad	AVINGUDA	-	AV;AVDA
+road-ad	PASSEIG	-	PG
+road-ad	CARRETERA	-	CTRA
+road-ad	RUA	-	
+road-ad	RIERA	-	
+tail-en	ROAD	-	RD
+tail-en	STREET	-	ST
+tail-en	LANE	-	LN
+tail-en	CLOSE	-	CL
+tail-en	AVENUE	-	AVE
+tail-en	DRIVE	-	DR
+tail-en	GARDENS	-	GDNS
+tail-en	WAY	-	
+tail-en	CRESCENT	-	CRES
+tail-en	COURT	-	CT
+tail-en	GROVE	-	
+tail-en	PLACE	-	PL
+tail-en	TERRACE	-	TERR;TER
+tail-en	HILL	-	
+tail-en	PARK	-	PK
+tail-en	WALK	-	
+tail-en	RISE	-	
+tail-en	MEWS	-	
+tail-en	ROW	-	
+tail-en	SQUARE	-	SQ
+tail-en	GREEN	-	
+tail-en	GATE	-	
+tail-en	PATH	-	
+tail-en	PARADE	-	
+tail-en	VIEW	-	
+tail-en	VALE	-	
+tail-en	HEIGHTS	-	HTS
+tail-en	LAWNS	-	
+tail-en	LAWN	-	
+tail-en	QUAY	-	
+tail-en	MALL	-	
+tail-en	CIRCUS	-	
+tail-en	FIELDS	-	
+tail-en	VILLAS	-	
+tail-en	COTTAGES	-	
+tail-en	WYND	-	
+tail-en	BRAE	-	
+tail-en	BOULEVARD	-	BLVD
+tail-en	PARKWAY	-	
+tail-en	ESTATE	-	
+tail-en	MANOR	-	
+tail-en	BANK	-	
+tail-en	MEADOW	-	
+tail-en	ORCHARD	-	
+tail-en	RIDE	-	
+tail-en	EMBANKMENT	-	
+tail-en	HEY	-	
+# CTT, Manual de Endereçamento (October 2014), Anexo I: the recommended abbreviations of the road types.
+road-pt	PRACETA	-	PCT
+road-pt	PRACA	-	PC
+road-pt	JARDIM	-	JRD
+road-pt	PARQUE	-	PQ
+road-pt	PATIO	-	PTO
+road-pt	QUINTA	-	QTA
+road-pt	ROTUNDA	-	ROT
+road-pt	TRANSVERSAL	-	TRANSV
+road-pt	VILA	-	VL
+road-pt	ZONA	-	ZN
+road-pt	AZINHAGA	-	AZ
+road-pt	CASAL	-	CSL
+road-pt	ESCADAS	-	ESC
+road-pt	ESCADINHAS	-	ESCNH
+road-pt	LOTEAMENTO	-	LOTEAM
+road-pt	PROLONGAMENTO	-	PROLNG
+road-pt	CALCADINHA	-	CCNH

@@ -1,0 +1,12 @@
+# Tier 2 group C-south (Poland, the Czech Republic, Slovakia, Slovenia, Croatia, Hungary, Romania, Mexico, Australia). Same columns as t2-countries.tsv; a twelfth column names the profile that decides how the reader writes a line.
+# Postcode forms: pl (UPU Poland sheet and Poczta Polska's addressing rules: two digits, a dash, three digits, left of the locality), cz-sk (UPU Czech Republic and Slovakia sheets: three digits, a space, two digits, then two spaces), 4d (Slovenia, Hungary), 5d (Croatia, Mexico), 6d (UPU Romania sheet), au (UPU Australia sheet: locality, state, postcode on the last line).
+# Profiles: pl, cz, sk, si, hr, hu (locality line above the street line, postcode on a line of its own: UPU Hungary sheet, Magyar Posta), ro, mx (state abbreviation after the locality, UPU Mexico sheet), au (street and locality lines in capitals without punctuation, Australia Post).
+PL	POLAND	plain	pl	pl	PL		last	0	1	road-pl	pl
+CZ	CZECH REPUBLIC	plain	cs	cz-sk	CZ		last	0	2	road-cz	cz
+SK	SLOVAKIA	plain	sk	cz-sk	SK		last	0	2	road-sk	sk
+SI	SLOVENIA	plain	sl	4d	SI		last	0	1	road-si	si
+HR	CROATIA	plain	hr	5d	HR	HR-	last	0	1	road-hr	hr
+HU	HUNGARY	plain	hu	4d	H,HU		last	0	1	road-hu	hu
+RO	ROMANIA	plain	ro	6d	RO		last	0	1	road-ro	ro
+MX	MEXICO	plain	es	5d	MX		last	0	1	road-mx	mx
+AU	AUSTRALIA	plain	en	au			first	0	1	road-au	au

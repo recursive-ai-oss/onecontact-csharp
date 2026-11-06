@@ -1,0 +1,42 @@
+# State abbreviations written after the locality (group C-south). Columns: country, printed abbreviation, names and variants (semicolon separated, matched upper case without accents, punctuation dropped).
+# MX: UPU Mexico sheet "Province abbreviations" (its CDMX row is headed "Cuidad de México"); the full names are the states' own names. AU: UPU Australia sheet "List of states", Australia Post Address Presentation Standards p. 24.
+MX	AGS	Aguascalientes;Ags
+MX	BC	Baja California;B C
+MX	BCS	Baja California Sur;BCS;B C S
+MX	CAM	Campeche;Camp
+MX	COAH	Coahuila;Coah
+MX	COL	Colima
+MX	CHIS	Chiapas;Chis
+MX	CHIH	Chihuahua;Chih
+MX	CDMX	Ciudad de Mexico;Cuidad de Mexico;Distrito Federal;DF;CD MX;Cd Mx
+MX	DGO	Durango;Dgo
+MX	GTO	Guanajuato;Gto
+MX	GRO	Guerrero;Gro
+MX	HGO	Hidalgo;Hgo
+MX	JAL	Jalisco;Jal
+MX	MEX	Estado de Mexico;Edo de Mexico;Edomex
+MX	MICH	Michoacan;Mich
+MX	MOR	Morelos;Mor
+MX	NAY	Nayarit;Nay
+MX	NL	Nuevo Leon;N L
+MX	OAX	Oaxaca;Oax
+MX	PUE	Puebla;Pue
+MX	QRO	Queretaro;Qro
+MX	Q. ROO	Quintana Roo;Q Roo;Q.Roo;QRoo
+MX	SLP	San Luis Potosi;S L P
+MX	SIN	Sinaloa;Sin
+MX	SON	Sonora;Son
+MX	TAB	Tabasco;Tab
+MX	TAMPS	Tamaulipas;Tamps
+MX	TLAX	Tlaxcala;Tlax
+MX	VER	Veracruz;Ver
+MX	YUC	Yucatan;Yuc
+MX	ZAC	Zacatecas;Zac
+AU	ACT	Australian Capital Territory
+AU	NSW	New South Wales
+AU	NT	Northern Territory
+AU	QLD	Queensland
+AU	SA	South Australia
+AU	TAS	Tasmania
+AU	VIC	Victoria
+AU	WA	Western Australia

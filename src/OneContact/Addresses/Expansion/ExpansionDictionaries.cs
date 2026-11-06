@@ -72,6 +72,27 @@ public enum ExpansionLanguages
 
     /// <summary>Lithuanian (street types, directionals, unit and level words, post office words).</summary>
     Lithuanian = 1 << 23,
+
+    /// <summary>Polish (street types, unit and level words, post office words).</summary>
+    Polish = 1 << 24,
+
+    /// <summary>Czech (street types, unit and level words, post office words).</summary>
+    Czech = 1 << 25,
+
+    /// <summary>Slovak (street types, unit and level words, post office words).</summary>
+    Slovak = 1 << 26,
+
+    /// <summary>Slovenian (street types, unit and level words, post office words).</summary>
+    Slovenian = 1 << 27,
+
+    /// <summary>Croatian (street types, unit and level words, post office words).</summary>
+    Croatian = 1 << 28,
+
+    /// <summary>Hungarian (street types that end a name, unit and level words, post office words).</summary>
+    Hungarian = 1 << 29,
+
+    /// <summary>Romanian (street types, unit and level words, post office words).</summary>
+    Romanian = 1 << 30,
 }
 
 /// <summary>What kind of word a dictionary phrase is; it decides where the phrase may be expanded.</summary>
@@ -155,7 +176,7 @@ internal static class ExpansionDictionaries
     {
         EmbeddedTables tables = new(typeof(ExpansionDictionaries).Assembly, "OneContact.Data.libpostal-dictionaries.ocd");
         Index index = new();
-        foreach (string language in new[] { "en", "fr", "de", "nl", "it", "lb", "es", "pt", "ca", "eu", "gl", "mt", "ga", "da", "sv", "fi", "nb", "is", "et", "lv", "lt" })
+        foreach (string language in new[] { "en", "fr", "de", "nl", "it", "lb", "es", "pt", "ca", "eu", "gl", "mt", "ga", "da", "sv", "fi", "nb", "is", "et", "lv", "lt", "pl", "cs", "sk", "sl", "hr", "hu", "ro" })
         {
             foreach (string file in new[] { "concatenated_suffixes_separable", "concatenated_suffixes_inseparable" })
             {

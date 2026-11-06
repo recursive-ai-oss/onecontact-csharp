@@ -9,19 +9,19 @@ namespace RecursiveAI.OneContact.Fuzz;
 
 /// <summary>
 /// A bounded smoke run for the address rule parser over text in the style of France, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland,
-/// Liechtenstein, the United Kingdom with Jersey, Guernsey and the Isle of Man, Ireland, Spain, Portugal, Italy, San Marino, the Vatican, Malta and Andorra: mutates the committed guide examples at random (seeded), feeds every mutant to the parser with each country as the hint and without one, and checks that
+/// Liechtenstein, the United Kingdom with Jersey, Guernsey and the Isle of Man, Ireland, Spain, Portugal, Italy, San Marino, the Vatican, Malta, Andorra, Poland, the Czech Republic, Slovakia, Slovenia, Croatia, Hungary, Romania, Mexico and Australia: mutates the committed guide examples at random (seeded), feeds every mutant to the parser with each country as the hint and without one, and checks that
 /// nothing throws, that every field's offsets lie inside the input and slice to its text, and that both renderings and the key can be computed.
-/// Usage: <c>fuzz address-smoke &lt;example files, separated by a semicolon&gt; &lt;seconds&gt;</c>; the Tier 2 example files are testdata/addresses/authority-examples-tier2a.tsv -tier2b.tsv and -tier2c-north.tsv.
+/// Usage: <c>fuzz address-smoke &lt;example files, separated by a semicolon&gt; &lt;seconds&gt;</c>; the Tier 2 example files are testdata/addresses/authority-examples-tier2a.tsv -tier2b.tsv -tier2c-north.tsv and -tier2c-south.tsv.
 /// </summary>
 internal static class AddressSmoke
 {
     private static readonly string[] Specials =
     [
         "\n", ", ", " / ", " - ", "L-", "CH-", "FL-", "D-", "B-", "F-", "MC-", " CEDEX ", " BP ", "Postfach ", "Postbus ", " bus ", " bte ", " // ", "0", "9", "98000", "1234 AB", "\u0000",
-        "\u0301", "\u00DF", "\u00E9", "\ud83d\ude00", "\u4e2d", "\t", "  ", "'", "\u2019", ".", "-", "\r\n", "FRANCE", "BELGIUM", "Switzerland", "SW1A 1AA", "T37 F8HK", "HMR 1428", "AD500", "2725–079", "00120", "47890", "3º, C", "CO. ", " RM", "(Madrid)", "Apartado ", "P.O. Box ", "UNITED KINGDOM", "CHANNEL ISLANDS", "15,500", "DENMARK", "123 45", "LV\u20131050", "LT-04340", "6\u20131", "1. th", "lgh 1234", "Postboks ", "P. d. ", "dz. 1",
+        "\u0301", "\u00DF", "\u00E9", "\ud83d\ude00", "\u4e2d", "\t", "  ", "'", "\u2019", ".", "-", "\r\n", "FRANCE", "BELGIUM", "Switzerland", "SW1A 1AA", "T37 F8HK", "HMR 1428", "AD500", "2725–079", "00120", "47890", "3º, C", "CO. ", " RM", "Nr ", "ul. ", "č. p. ", "Budapest, ", "Col. ", "C.P. ", " NSW 2000", " VIC ", "Unit 4/", "00-950", "110 00", "1000 Ljubljana", "10000 Zagreb", "010011 București", "(Madrid)", "Apartado ", "P.O. Box ", "UNITED KINGDOM", "CHANNEL ISLANDS", "15,500", "DENMARK", "123 45", "LV\u20131050", "LT-04340", "6\u20131", "1. th", "lgh 1234", "Postboks ", "P. d. ", "dz. 1",
     ];
 
-    private static readonly string[] Countries = ["FR", "MC", "GP", "BE", "NL", "LU", "DE", "AT", "CH", "LI", "GB", "JE", "GG", "IM", "IE", "ES", "PT", "IT", "SM", "VA", "MT", "AD", "DK", "SE", "FI", "NO", "IS", "EE", "LV", "LT"];
+    private static readonly string[] Countries = ["FR", "MC", "GP", "BE", "NL", "LU", "DE", "AT", "CH", "LI", "GB", "JE", "GG", "IM", "IE", "ES", "PT", "IT", "SM", "VA", "MT", "AD", "PL", "CZ", "SK", "SI", "HR", "HU", "RO", "MX", "AU", "DK", "SE", "FI", "NO", "IS", "EE", "LV", "LT"];
 
     internal static int Run(string examples, int seconds)
     {
@@ -51,7 +51,8 @@ internal static class AddressSmoke
                     parsed++;
                     foreach (ParsedAddressField f in a.Fields)
                     {
-                        if (f.Span.Start < 0 || f.Span.End > input.Length || (f.Name != "country" && string.CompareOrdinal(input, f.Span.Start, f.Text, 0, f.Text.Length) != 0))
+                        // The US/CA reader stores the standardized designator ("P.O Box" for "P.O. Box"), so its text is not a slice of the input.
+                        if (f.Span.Start < 0 || f.Span.End > input.Length || (f.Name is not ("country" or "street.box-designator") && string.CompareOrdinal(input, f.Span.Start, f.Text, 0, f.Text.Length) != 0))
                         {
                             return Fail(input, hint, "offset outside the input or not the field text: " + f.Name);
                         }
