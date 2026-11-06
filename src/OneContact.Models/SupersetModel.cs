@@ -1,6 +1,9 @@
 using RecursiveAI.OneContact.Names;
 using RecursiveAI.OneNlp;
+using RecursiveAI.OneModel.Tensors;
 using RecursiveAI.OneNlp.Neural;
+using RecursiveAI.OneNlp.Neural.Components;
+using RecursiveAI.OneNlp.Neural.Encoders;
 
 namespace RecursiveAI.OneContact.Models.Superset;
 
@@ -81,9 +84,9 @@ public sealed class SupersetModel : IAddressFieldModel, INameModel, IContactSpan
             return new NameModelResult(NameClass.Unknown, 0f, []);
         }
 
-        _nameClass.Process(doc);
+        // One pass of the shared encoder serves both heads; calling each head's Process would encode the words twice.
+        PredictShared(doc, (TrainableHead)_nameClass, (TrainableHead)_nameParts);
         (NameClass cls, float confidence) = SupersetLabels.Vote(doc);
-        _nameParts.Process(doc);
         return new NameModelResult(cls, confidence, SupersetLabels.Spans(doc, TokenColumn.Pos));
     }
 
@@ -121,6 +124,25 @@ public sealed class SupersetModel : IAddressFieldModel, INameModel, IContactSpan
         }
 
         return new ContactSpanResult(spans, starts);
+    }
+
+    // Encodes the document once and lets each head write its labels from the same encoder output. This is what a head's Process does for itself
+    // (no gradients, activations released when done, the head's weights read one caller at a time), with the encoder pass shared.
+    private static void PredictShared(Doc doc, params TrainableHead[] heads)
+    {
+        IEncoder encoder = heads[0].Encoder;
+        encoder.Weights?.Eval();
+        using NoGradScope noGrad = GradMode.NoGrad();
+        using var scope = new ActivationScope();
+        EncodedBatch encoded = encoder.Encode([doc]);
+        foreach (TrainableHead head in heads)
+        {
+            lock (head)
+            {
+                head.Weights.Eval();
+                head.Predict(encoded, [doc]);
+            }
+        }
     }
 
     private Doc NewDoc(string text)

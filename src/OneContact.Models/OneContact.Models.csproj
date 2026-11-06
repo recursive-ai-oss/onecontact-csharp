@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Models.Tests" />
+    <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Models.Superset.Tests" />
     <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Recipe.Models" />
   </ItemGroup>
 

@@ -3,7 +3,11 @@ using System.Text;
 using System.Text.Json;
 using RecursiveAI.OneContact;
 using RecursiveAI.OneContact.Addresses.Parsing;
+using RecursiveAI.OneContact.Models;
+using RecursiveAI.OneContact.Models.Superset;
 
+// With the environment variable ONECONTACT_MODELS_MODEL set to a saved pipeline file, the Tier 1 + Tier 2 model is registered, so the parser uses rules first and the
+// model where the rules refuse; the output then says model=yes. Without it the rules read alone. Each row also gives the micro precision, recall and F1 of the fields.
 // usage: eval-tier2-recovery <dir with <cc>.dev.jsonl files> <examples per country> <countries, comma separated> [misses file]
 //
 // For each country takes an even sample of its dev file (all of it when it is smaller), runs the rule parser alone, and reports how often every labelled field
@@ -14,6 +18,14 @@ if (args.Length < 3)
 {
     Console.Error.WriteLine("usage: eval-tier2-recovery <dir> <examples per country> <countries> [misses file]");
     return 64;
+}
+
+string? modelPath = Environment.GetEnvironmentVariable("ONECONTACT_MODELS_MODEL");
+if (!string.IsNullOrEmpty(modelPath))
+{
+    using FileStream modelStream = File.OpenRead(modelPath);
+    SupersetModel superset = SupersetModel.Load(modelStream);
+    ContactModels.Register(SupersetModel.PackageId, 2, superset, superset, superset);
 }
 
 int per = int.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture);
@@ -45,7 +57,7 @@ foreach (string country in args[2].Split(','))
     {
         Region hint = withHint ? Region.Parse(country) : Region.Unknown;
         int examples = 0, everyField = 0, noExtra = 0, wrongCountry = 0;
-        long seen = 0, found = 0;
+        long seen = 0, found = 0, extras = 0;
         Dictionary<string, int> refusals = new(StringComparer.Ordinal);
         Dictionary<string, (int Seen, int Found)> perLabel = new(StringComparer.Ordinal);
         foreach (string line in sample)
@@ -82,7 +94,9 @@ foreach (string country in args[2].Split(','))
                 }
             }
 
-            HashSet<(string, int, int)> got = MergeConvention(parsed, text, typeInName, prefixInPostcode);
+            HashSet<(string, int, int)> got = [.. MergeConvention(parsed, text, typeInName, prefixInPostcode).Select(g => (Lab(g.Item1), g.Item2, g.Item3))];
+            HashSet<(string, int, int)> goldAll = [.. gold.Select(g => (Lab(g.L), g.S, g.E))];
+            extras += got.Count(g => !goldAll.Contains(g));
             bool every = true;
             foreach ((int s, int e, string l) in gold)
             {
@@ -109,7 +123,9 @@ foreach (string country in args[2].Split(','))
 
         int refused = refusals.Values.Sum();
         StringBuilder sb = new();
-        sb.Append($"{country} hint={(withHint ? "yes" : "no ")} n={examples} every-field={everyField} ({100.0 * everyField / examples:0.0}%) no-extra={noExtra} ({100.0 * noExtra / examples:0.0}%) fields={found}/{seen} ({100.0 * found / Math.Max(1, seen):0.0}%) refused={refused} wrong-country={wrongCountry}");
+        double precision = found + extras == 0 ? 0 : 100.0 * found / (found + extras);
+        double recall = seen == 0 ? 0 : 100.0 * found / seen;
+        sb.Append($"{country} model={(string.IsNullOrEmpty(modelPath) ? "no" : "yes")} hint={(withHint ? "yes" : "no ")} f1={(precision + recall == 0 ? 0 : 2 * precision * recall / (precision + recall)):0.0} p={precision:0.0} r={recall:0.0} n={examples} every-field={everyField} ({100.0 * everyField / examples:0.0}%) no-extra={noExtra} ({100.0 * noExtra / examples:0.0}%) fields={found}/{seen} ({100.0 * found / Math.Max(1, seen):0.0}%) refused={refused} wrong-country={wrongCountry}");
         if (refused > 0)
         {
             sb.Append(" [" + string.Join(", ", refusals.OrderBy(k => k.Key, StringComparer.Ordinal).Select(k => k.Key + " " + k.Value)) + "]");

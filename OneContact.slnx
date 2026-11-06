@@ -10,6 +10,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/OneContact.Tests/OneContact.Tests.csproj" />
     <Project Path="tests/OneContact.Models.Tests/OneContact.Models.Tests.csproj" />
+    <Project Path="tests/OneContact.Models.Superset.Tests/OneContact.Models.Superset.Tests.csproj" />
   </Folder>
   <Folder Name="/recipes/">
     <Project Path="recipes/tier1/OneContact.Recipe.Tier1.csproj" />
@@ -17,6 +18,7 @@
   <Folder Name="/samples/">
     <Project Path="samples/OneContact.AotSmoke/OneContact.AotSmoke.csproj" />
     <Project Path="samples/OneContact.AotSmoke.Models/OneContact.AotSmoke.Models.csproj" />
+    <Project Path="samples/OneContact.AotSmoke.ModelsSuperset/OneContact.AotSmoke.ModelsSuperset.csproj" />
   </Folder>
   <Folder Name="/bench/">
     <Project Path="bench/OneContact.Bench/OneContact.Bench.csproj" />
