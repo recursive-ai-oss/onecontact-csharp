@@ -29,3 +29,25 @@ Street before number everywhere. Norway, the Czech Republic and Estonia put the 
 ## Not yet covered
 
 Denmark, Sweden, Finland, Iceland, Lithuania, Poland, Slovakia, Slovenia, Croatia, Hungary, Romania, Mexico and Australia have no loader yet; the provenance file records what was found out about each source.
+
+
+## Group C-3: Croatia, Hungary, Romania, Australia
+
+```
+tools/data/fetch-tier2c3.sh                        # the four sources, each file checked against tools/data/pins/{hr,hu,ro,au}.pin
+AddressTier2C count  --data <train dir> --out <dir> --countries HR,HU,RO,AU
+AddressTier2C render --data <train dir> --out <dir> --countries HR,HU,RO,AU
+AddressTier2C check  --out <dir>
+tools/data/try-tier2c3.sh                          # count, render, check and show examples for HU,AU,RO into scratch directories
+```
+
+The options, splits and determinism are those above; these countries are drawn by `RendererC3.cs` (layouts, rates and the labelled pieces are the same kind as the others) from `tools/data/templates/tier2c3-names.tsv` (recipient and organisation parts) and `tier2c3-streets.tsv`.
+
+| Country | Records | Region (sampling stratum) | Notes |
+|---|---|---|---|
+| HR | every address of the INSPIRE Addresses file: street, number with letter, post office name and postcode, settlement | first two postcode digits | The street name includes its type (`Brežna ulica`, `Ulica Stjepana Radića`). A settlement that is not the post office goes on its own line (`dependent-locality`). Flats follow a slash (`12/3`, drawn). |
+| HU | **synthesized**: each GeoNames postcode and place with 42 streets drawn from our list | county | Hungary has no open address register. Numbers are drawn (`12.`, `3/A.`, the full stop belongs to the number span). Half the label layouts follow the mail form (city, street, postcode on separate lines), the rest put the postcode first. Recipients are written family name first. |
+| RO | street rows of the Posta Romana workbook for Bucharest (with sector) and for the localities over 50,000, and its village rows | Bucharest sector or county | Three numbers are drawn per row inside the register's range (steps of two), anywhere on a street whose number cell is empty. A village has no street: the village name (50 % with `Sat`) stands in the street place with a drawn number. `nr.` belongs to the house-number span; flats and blocks (`bl. 4, ap. 15`) are drawn. Types appear in full (`Strada`, `Bulevardul`) or short (`Str.`, `Bd.`); the register writes person-named streets surname first (`Mincu Ion`) and the examples keep that. 20 % of examples use the cedilla letters. |
+| AU | **synthesized**: each GeoNames postcode, place and state with 14 streets drawn from our list | state | Number before street; units as `Unit 3, 45 Smith Street` or `3/45 Smith Street`; the "postal" casing is Australia Post's capitals with short street types (`45 SMITH ST`, `SYDNEY NSW 2000`); state as the abbreviation or the full name. |
+
+Croatia, Hungary and Romania also draw an ASCII variant (diacritics dropped, 7 %), as people type them. Counts, licences and hashes: `tools/data/provenance/address-tier2-c.md`.

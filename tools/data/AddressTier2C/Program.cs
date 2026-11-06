@@ -64,6 +64,11 @@ internal static class Program
         string outDir = o["out"];
         Directory.CreateDirectory(outDir);
         Dictionary<string, long> targets = new(DefaultTargets, StringComparer.Ordinal);
+        foreach (KeyValuePair<string, long> kv in Registers.TargetsC3)
+        {
+            targets.TryAdd(kv.Key, kv.Value);
+        }
+
         if (o.TryGetValue("targets", out string? t))
         {
             foreach (string kv in t.Split(',', StringSplitOptions.RemoveEmptyEntries))
@@ -163,6 +168,7 @@ internal static class Program
         }
 
         Renderer renderer = new(Path.Combine(AppContext.BaseDirectory, "templates"), new Rates(), seed);
+        RendererC3 rendererC3 = new(Path.Combine(AppContext.BaseDirectory, "templates"), new Rates(), seed);
         Stats stats = new();
         Rejects rejects = new();
         long duplicates = 0;
@@ -192,7 +198,7 @@ internal static class Program
                 }
 
                 bool dev = Prng.Hash(a.Id, SplitSalt) % 1000 < (ulong)devPerMille;
-                Example ex = renderer.Render(a);
+                Example ex = RendererC3.Handles(country) ? rendererC3.Render(a) : renderer.Render(a);
                 string role = dev ? "dev" : "train";
                 buffer.ResetWrittenCount();
                 WriteJson(buffer, ex, a);

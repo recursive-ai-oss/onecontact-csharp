@@ -66,7 +66,7 @@ internal static partial class Registers
         "CZ" => Czechia(Path.Combine(Directory(dataRoot, "cz-ruian"), "20261031_OB_ADR_csv.zip"), rejects),
         "LV" => Latvia(Path.Combine(Directory(dataRoot, "lv-varis"), "aw_eka.csv"), rejects),
         "EE" => Estonia(Path.Combine(Directory(dataRoot, "ee-ads"), "AADRESSID_KOMPONENTIDEGA.csv"), rejects),
-        _ => throw new ArgumentException("unknown country " + country),
+        _ => GroupC3(country, dataRoot, rejects),
     };
 
     // Matrikkelen Adresse CSV (Kartverket, CC BY 4.0): only road addresses (vegadresse) have a street name and number; farm and cadastral

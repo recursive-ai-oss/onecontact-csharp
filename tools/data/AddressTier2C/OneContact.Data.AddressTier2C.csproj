@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <None Include="../templates/tier2c-*" Link="templates/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../templates/tier2c3-*" Link="templates/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../pins/*.pin" Link="pins/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
