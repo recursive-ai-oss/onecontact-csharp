@@ -25,6 +25,47 @@ public class Tier2GroupBTests
         return data;
     }
 
+    public static TheoryData<string, string, string, string, string, string, string> PostCases()
+    {
+        TheoryData<string, string, string, string, string, string, string> data = [];
+        foreach (string[] c in AddressTestData.Rows("testdata/addresses/authority-examples-tier2b-posts.tsv", 7))
+        {
+            data.Add(c[0], c[1], c[2], c[3], c[4].Replace("\\n", "\n", StringComparison.Ordinal), c[5].Replace("\\n", "\n", StringComparison.Ordinal), c[6].Replace("\\n", "\n", StringComparison.Ordinal));
+        }
+
+        return data;
+    }
+
+    [Theory]
+    [MemberData(nameof(PostCases))]
+    public void PostsOwnExampleIsStandardized(string id, string citation, string hint, string withCountry, string input, string postal, string display)
+    {
+        ExampleIsStandardized(id, citation, hint, withCountry, input, postal, display);
+    }
+
+    [Fact]
+    public void PortugueseAbbreviationsLoseTheirClosingPeriod()
+    {
+        // CTT, Manual de Endereco, p. 7: no period closes an abbreviation; words are separated by a space.
+        Assert.Equal("MARIA DOS SANTOS\nAV D JOÃO II 5\n1999-001 LISBOA", Parse("MARIA DOS SANTOS\nAV. D. JOÃO II 5\n1999-001 LISBOA", "PT", out _).ToString(AddressStyle.Postal));
+    }
+
+    [Fact]
+    public void BritishAddressWithTwoLinesAboveThePostcodeInTheSameCaseIsLeftToTheModel()
+    {
+        // Royal Mail: the post town is in capitals and the county, which is optional, follows it; two lines in one style cannot be told apart.
+        Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse("58 Hordley Avenue\nShrewsbury\nShropshire\nSY4 1AA", Region.Parse("GB"), out _, out ParseDetail d));
+        Assert.Equal(ReasonCode.AddressModelRequired, d.PrimaryReason);
+        Assert.Equal("SHREWSBURY", Parse("58 Hordley Avenue\nShrewsbury\nSY4 1AA", "GB", out _).Locality!.Value.Standard);
+    }
+
+    [Fact]
+    public void CountryNameAbovePostcodeIsNotAPostTown()
+    {
+        // Jersey Post writes the nation above the postcode for addresses in Britain.
+        Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse("Miss P Jones\n1 Castle Road\nHeswall\nBournemouth\nENGLAND\nBH1 1AA", Region.Unknown, out _, out _));
+    }
+
     [Theory]
     [MemberData(nameof(Cases))]
     public void ExampleIsStandardized(string id, string citation, string hint, string withCountry, string input, string postal, string display)
@@ -108,7 +149,7 @@ public class Tier2GroupBTests
         Assert.Equal("MACROOM", a.Locality!.Value.Standard);
         Assert.Equal("CO. CORK", a.AdminArea!.Value.Standard);
         Assert.Equal("T37 F8HK", a.PostalCode!.Value.Standard);
-        Assert.Equal("Ms M Sullivan\n56 BROOMFIELD\nMACROOM\nCO. CORK\nT37 F8HK", a.ToString(AddressStyle.Postal));
+        Assert.Equal("Ms M Sullivan\n56 Broomfield\nMACROOM\nCO. CORK\nT37 F8HK", a.ToString(AddressStyle.Postal));
     }
 
     [Fact]
