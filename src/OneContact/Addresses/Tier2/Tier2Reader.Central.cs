@@ -224,6 +224,14 @@ internal static partial class Tier2Reader
             }
         }
 
+        private static bool RomanianTrailingLocality(List<Tok> toks, out int streetEnd)
+        {
+            streetEnd = toks.FindLastIndex(t => t.Text.Any(char.IsAsciiDigit)) + 1;
+            int words = toks.Count - streetEnd;
+            return streetEnd >= 2 && words is >= 1 and <= 3
+                && toks.Skip(streetEnd).All(t => !t.Text.EndsWith('.') && !T2Rules.UnitWords.Contains(t.Key) && !IsRomanianSectorWord(t.Key) && char.IsLetter(t.Text[0]));
+        }
+
         // UPU Romania sheet: "200716 CRAIOVA", the postcode of six digits left of the locality. Romanians also write the sector of Bucharest or the county after the locality
         // ("011371 Bucureşti, Sector 1", which on one line is a unit of its own after the postcode) and put the postcode last ("Pitești, 110040"; "București, Sector 3, 032391").
         // A sector or county unit after a unit with the postcode is joined to it; a postcode that ends the text is moved in front of the locality before it.
@@ -273,6 +281,26 @@ internal static partial class Tier2Reader
                 {
                     keep--;
                     locality = [.. units[keep].Toks, .. locality];
+                }
+
+                // The locality written on the street's line without a comma ("Strada Frumoasă Nr. 51 București, Sector 1, 010986"): the words after the last number are the locality.
+                // Only plain words qualify, so a building or apartment tail ("bl. A1", "ap. 4") is never taken for one.
+                int target = IsRomanianSectorWord(locality[0].Key) ? keep - 1 : keep;
+                if (target >= 0 && RomanianTrailingLocality(units[target].Toks, out int streetEnd))
+                {
+                    List<Tok> all = units[target].Toks;
+                    List<Tok> tail = all.GetRange(streetEnd, all.Count - streetEnd);
+                    units[target] = new Unit(all.GetRange(0, streetEnd));
+                    if (target == keep)
+                    {
+                        units.Insert(keep + 1, new Unit(tail));
+                        keep++;
+                        locality = tail;
+                    }
+                    else
+                    {
+                        locality = [.. tail, .. locality];
+                    }
                 }
             }
 

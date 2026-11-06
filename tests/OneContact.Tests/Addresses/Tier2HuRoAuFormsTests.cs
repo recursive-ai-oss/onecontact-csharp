@@ -57,6 +57,18 @@ public class Tier2HuRoAuFormsTests
     public void RomanianPostcodeLabel(string input, string postal) =>
         Assert.Equal(postal, Read(input, "RO").ToString(AddressStyle.Postal));
 
+    // A locality written on the street's line without a comma is the plain words after the last number.
+    [Theory]
+    [InlineData("Strada Frumoasă Nr. 51 București, Sector 1, 010986", "Strada Frumoasă Nr. 51\n010986 BUCUREȘTI SECTOR 1")]
+    [InlineData("Str. Mihai Eminescu nr. 5 Cluj-Napoca, 400001", "Str. Mihai Eminescu nr. 5\n400001 CLUJ-NAPOCA")]
+    [InlineData("Str. Mihai Eminescu nr. 5, Sector 2, București, cod poștal 020001", "Str. Mihai Eminescu nr. 5\nSector 2\n020001 BUCUREȘTI")]
+    public void RomanianLocalityOnTheStreetLine(string input, string postal) =>
+        Assert.Equal(postal, Read(input, "RO").ToString(AddressStyle.Postal));
+
+    [Fact]
+    public void RomanianBuildingTailIsNeverALocality() =>
+        Assert.NotEqual(OperationStatus.Done, RuleAddressParser.TryParse("Str. Mihai Eminescu nr. 5 bl. A1, 400001", Region.Parse("RO"), out _, out _));
+
     [Fact]
     public void RomanianStreetNamedCodIsNotALabel()
     {

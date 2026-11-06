@@ -107,6 +107,28 @@ What the rules read now, each from the guide named:
   - `S/N` (sin número) is the house number of a street without one. `Ciudad de México` and `Estado de México` are states, not the country; `Coahuila de Zaragoza` and `Michoacán de Ocampo` are read. A state name after `de` (`Tepatitlán de Morelos`) is part of the town. When the country stands on a line of its own, a `México` left on the locality line is the state. A lone `México` that could be the state or the country (`…, Ecatepec de Morelos, México, C.P. 55418`) is left to the model.
   - A legal form after a comma (`Servicios Díaz, S.C., Calle …`) belongs to the company name.
 
+### Web forms of Hungary, Romania and Australia
+
+Forms people write on web pages, read from the posts' layouts above (all examples in the tests are our own):
+
+- **Hungary.** Postcode, locality and street on one line without commas (`1068 Budapest Király utca 80.`): the locality is the word after the postcode, with a district (`VI. ker.`) if one follows; what is left must read as a street line with a Hungarian street type or a box. A locality of several words is not guessed, and a street line that comes before the postcode with the locality in front of it (`Pécsudvard Arany köz 98. 7762`) stays with the model, because a recipient's name cannot be told from a locality word. A box number may end in a period (`Pf. 12.`). Without a hint, `utca` and the full word `postafiók` are Hungarian evidence (`Pf.` is not: German-speaking posts abbreviate Postfach the same way).
+- **Romania.** The label of the postcode (`cod`, `cod poștal`, `Cod poștal:`) is left out of every field. A postcode written between the street and the locality is joined to the locality after it. A locality written on the street line without a comma is the plain words after the last number (`Strada Frumoasă Nr. 51 București, Sector 1, 010986`); a tail with a period or a building word (`bl.`, `ap.`) is never taken for one. A text with no locality or no postcode still goes to the model.
+- **Australia.** Commas around the state and the postcode (`Sydney, NSW, 2000`; `Sydney NSW, 2000`) are read like the unseparated form, provided a street or box line and a locality stand before the state. `Unit 3/12 Smith St` and `Shop 4/100 George St` keep the unit and the street number apart.
+- **Names.** `adw.` (adwokat), `r.pr.` (radca prawny), `radca prawny`, `adwokat` and `nadzw.` are Polish titles alongside `dr`, `dr hab.`, `mgr`, `inż.` and `prof.`. `adw.` and `r.pr.` count without a language hint; the full words need Polish. No gender or salutation is inferred.
+
+Recovery on the register dev rows (2000 per country, rules alone; every labelled field recovered / labelled fields recovered; main before the change and after, same rows, same tool):
+
+| Country | Hint | Every field before | after | Fields before | after | Refused before | after |
+|---|---|---|---|---|---|---|---|
+| HU | yes | 92.6 | 92.6 | 94.0 | 94.0 | no-last-line 128 | no-last-line 128 |
+| HU | no | 45.2 | 72.1 | 47.8 | 74.0 | country-undetermined 955, no-last-line 131 | country-undetermined 410, no-last-line 131 |
+| RO | yes | 50.2 | 51.3 | 68.8 | 71.1 | model-required 21, no-last-line 435 | model-required 19, no-last-line 378 |
+| RO | no | 50.2 | 51.3 | 68.8 | 71.1 | no-last-line 456 | no-last-line 397 |
+| AU | yes | 90.6 | 90.6 | 91.5 | 91.5 | country-conflict 4, model-required 24, no-last-line 160 | unchanged |
+| AU | no | 85.9 | 85.9 | 86.7 | 86.7 | country-undetermined 4, no-last-line 276 | unchanged |
+
+The register rows mostly lack what the web forms add (their refusals are texts with no postcode, a postcode with no locality, or a glued recipient), so the table moves little; the new forms are covered by the unit tests. No other Tier 2 country changed on its dev rows.
+
 ## Sources
 
 UPU country sheets (`upu.int/UPU/media/upu/PostalEntitiesFiles/addressingUnit/<iso3>En.pdf`, retrieved 2026-11-05): Poland 08/2018, Czech Republic 02/2018, Slovakia 01/2013, Slovenia 05/2016, Croatia 05/2014, Hungary 01/2012, Romania 10/2007 (`rouEn`), Mexico 03/2017, Australia 07/2017. Own guides: Poczta Polska "Zasady poprawnego adresowania i oznakowania przesyłek listowych"; Česká pošta "How to correctly label the consignment" (about 19 recommended formats); Magyar Posta "Tájékoztató a levélküldemények helyes címzéséről"; Australia Post "Correct addressing" (November 2022) and "Address Presentation Standards" (1999). No licence is stated on the guides; facts and short examples only, cited by page. The examples used as tests are the 89 rows of `testdata/addresses/authority-examples-tier2c-south.tsv`: UPU Poland 4, Czech Republic 9, Slovakia 8, Slovenia 3, Croatia 3, Hungary 2, Romania 3, Mexico 2, Australia 6; Česká pošta 19; Australia Post 30 (1999 standards and 2022 brochure, element examples included). The libpostal dictionaries of `pl`, `cs`, `sk`, `sl`, `hr`, `hu` and `ro` at the pinned tag, through the ingest tool.
