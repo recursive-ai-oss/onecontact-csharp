@@ -1,0 +1,15 @@
+# Delivery words of the northern group. Columns: countries (comma separated), role, variant (upper case, no accents), printed form.
+# Postboks (UPU Denmark and Norway sheets, Posten Norge addressing page), PO Box (UPU Norway sheet), BOX (UPU Sweden sheet), PL and PB (UPU Finland sheet; PB is the Swedish form), Posthólf (UPU Iceland sheet), P. d. (UPU Lithuania sheet),
+# poste restante words: Poste restante (UPU Finland sheet, Posten Norge), Nõudmiseni (UPU Estonia glossary), Iki pareikalavimo (UPU Lithuania sheet).
+DK,NO	box	POSTBOKS	Postboks
+NO	box	PO BOX	PO Box
+SE	box	BOX	BOX
+FI	box	PL	PL
+FI	box	PB	PB
+FI	box	POBOX	P.O.Box
+IS	box	POSTHOLF	Pósthólf
+LT	box	P D	P. d.
+NO	general	POSTE RESTANTE	Poste Restante
+FI	general	POSTE RESTANTE	Poste restante
+EE	general	NOUDMISENI	Nõudmiseni
+LT	general	IKI PAREIKALAVIMO	Iki pareikalavimo

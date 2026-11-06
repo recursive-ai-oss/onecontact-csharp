@@ -1,0 +1,14 @@
+# Words of the northern group. Columns: kind (unit or spatial), word (upper case, no accents, periods dropped).
+# unit: follows a house number and belongs to it: lgh (PostNord Sweden, apartment), st, kl, th, tv, mf (Danmarks Adresser, floor and side), dz and korp (Latvian rules for unified postal addresses, apartment and building), Ullakkohuoneisto (UPU Finland example, attic flat).
+# spatial: a line that starts so is not a street line: Bolignummer and Bnr (Posten Norge, the dwelling number line above the street).
+unit	LGH
+unit	ST
+unit	KL
+unit	TH
+unit	TV
+unit	MF
+unit	DZ
+unit	KORP
+unit	ULLAKKOHUONEISTO
+spatial	BOLIGNUMMER
+spatial	BNR
