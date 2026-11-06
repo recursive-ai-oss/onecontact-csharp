@@ -7,18 +7,20 @@ using OneContact.Data.AddressUsCa;
 
 namespace OneContact.Data.AddressTier2C;
 
-// AddressTier2C: register addresses of Norway, the Czech Republic, Latvia and Estonia rendered as labelled free-text training examples.
+// AddressTier2C: register addresses of Norway, the Czech Republic, Latvia, Estonia, Mexico, Poland, Slovenia, Slovakia and Lithuania rendered as labelled free-text training examples.
 //
 //   AddressTier2C count  --data <train dir> --out <dir> [--countries no,cz,...] [--targets NO=250000,...]
 //   AddressTier2C render --data <train dir> --out <dir> [--countries no,cz,...] [--seed 20261105] [--dev-per-mille 20]
 //   AddressTier2C check  --out <dir>
+//   AddressTier2C convert --data <train dir> --countries pl,sk,si   (one-off plain tables of the large or awkward registers)
 internal static class Program
 {
-    private static readonly string[] AllCountries = ["NO", "CZ", "LV", "EE"];
+    private static readonly string[] AllCountries = ["NO", "CZ", "LV", "EE", "MX", "PL", "SI", "SK", "LT"];
 
     private static readonly Dictionary<string, long> DefaultTargets = new(StringComparer.Ordinal)
     {
         ["NO"] = 250_000, ["CZ"] = 250_000, ["LV"] = 150_000, ["EE"] = 150_000,
+        ["MX"] = 330_000, ["PL"] = 250_000, ["SI"] = 250_000, ["SK"] = 250_000, ["LT"] = 250_000,
     };
 
     internal const ulong SelectSalt = 0x53454C45435433UL;
@@ -38,6 +40,7 @@ internal static class Program
             "count" => Count(o),
             "render" => Render(o),
             "check" => Check(o),
+            "convert" => Derivation.Run(o),
             _ => 2,
         };
     }

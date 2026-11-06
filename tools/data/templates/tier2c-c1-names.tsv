@@ -1,0 +1,176 @@
+# kind	language	value; invented name parts for recipient and organisation lines, written for these templates (no register)
+given	es	José
+given	es	María
+given	es	Juan
+given	es	Guadalupe
+given	es	Luis
+given	es	Ana
+given	es	Carlos
+given	es	Patricia
+given	es	Miguel
+given	es	Laura
+given	es	Jorge
+given	es	Sofía
+family	es	Hernández
+family	es	García
+family	es	Martínez
+family	es	López
+family	es	González
+family	es	Rodríguez
+family	es	Pérez
+family	es	Sánchez
+family	es	Ramírez
+family	es	Flores
+family	es	Torres
+family	es	Díaz
+org	es	{fam} y Asociados, S.A. de C.V.
+org	es	{word} {city}, S.A. de C.V.
+org	es	Grupo {fam} S.A.P.I. de C.V.
+org	es	{word} del Centro, S. de R.L.
+org	es	Servicios {word} {fam}, S.C.
+word	es	Comercial
+word	es	Industrial
+word	es	Constructora
+word	es	Distribuidora
+word	es	Logística
+word	es	Tecnología
+org	pl	{fam} Sp. z o.o.
+org	pl	{word} {city} S.A.
+org	pl	Przedsiębiorstwo {word} {fam}
+org	pl	{word} i Synowie sp. j.
+org	pl	Zakład {word} {fam}
+word	pl	Budowlane
+word	pl	Handlowe
+word	pl	Transport
+word	pl	Usługi
+word	pl	Technika
+word	pl	Mazowsze
+given	sl	Janez
+given	sl	Marija
+given	sl	Franc
+given	sl	Ana
+given	sl	Marko
+given	sl	Maja
+given	sl	Andrej
+given	sl	Irena
+given	sl	Matej
+given	sl	Nina
+given	sl	Luka
+given	sl	Tina
+family	sl	Novak
+family	sl	Horvat
+family	sl	Kovačič
+family	sl	Krajnc
+family	sl	Zupančič
+family	sl	Potočnik
+family	sl	Kos
+family	sl	Vidmar
+family	sl	Golob
+family	sl	Turk
+family	sl	Mlakar
+family	sl	Kovač
+org	sl	{fam} d.o.o.
+org	sl	{word} {city} d.d.
+org	sl	Podjetje {word} {fam} s.p.
+org	sl	{word} in sinovi d.n.o.
+org	sl	{fam} storitve d.o.o.
+word	sl	Gradnja
+word	sl	Trgovina
+word	sl	Prevozi
+word	sl	Storitve
+word	sl	Tehnika
+word	sl	Alpe
+org	sk	{fam} s.r.o.
+org	sk	{word} {city} a.s.
+org	sk	{fam} a spol., v.o.s.
+org	sk	{word} servis s.r.o.
+org	sk	Autodoprava {fam}
+word	sk	Stavby
+word	sk	Obchod
+word	sk	Doprava
+word	sk	Elektro
+word	sk	Slovak
+word	sk	Tatra
+org	lt	UAB "{fam}"
+org	lt	UAB "{word} {city}"
+org	lt	AB "{word}"
+org	lt	{fam} ir Ko, MB
+org	lt	IĮ {fam}
+word	lt	Statyba
+word	lt	Prekyba
+word	lt	Transportas
+word	lt	Paslaugos
+word	lt	Baltija
+word	lt	Nemunas
+given	pl	Jan
+given	pl	Anna
+given	pl	Piotr
+given	pl	Katarzyna
+given	pl	Krzysztof
+given	pl	Małgorzata
+given	pl	Tomasz
+given	pl	Agnieszka
+given	pl	Paweł
+given	pl	Barbara
+given	pl	Marcin
+given	pl	Ewa
+family	pl	Nowak
+family	pl	Wójcik
+family	pl	Kowalczyk
+family	pl	Mazur
+family	pl	Krawczyk
+family	pl	Kaczmarek
+family	pl	Zając
+family	pl	Król
+family	pl	Sikora
+family	pl	Baran
+family	pl	Duda
+family	pl	Szewczyk
+given	sk	Ján
+given	sk	Mária
+given	sk	Peter
+given	sk	Eva
+given	sk	Martin
+given	sk	Zuzana
+given	sk	Jozef
+given	sk	Katarína
+given	sk	Michal
+given	sk	Lucia
+given	sk	Marek
+given	sk	Jana
+family	sk	Varga
+family	sk	Tóth
+family	sk	Nagy
+family	sk	Szabó
+family	sk	Molnár
+family	sk	Kollár
+family	sk	Baláž
+family	sk	Hudák
+family	sk	Polák
+family	sk	Mikuš
+family	sk	Oravec
+family	sk	Šimko
+given	lt	Jonas
+given	lt	Petras
+given	lt	Antanas
+given	lt	Mindaugas
+given	lt	Tomas
+given	lt	Darius
+given	lt	Rimas
+given	lt	Algirdas
+given	lt	Vytautas
+given	lt	Kęstutis
+given	lt	Saulius
+given	lt	Gediminas
+family	lt	Kazlauskas
+family	lt	Jankauskas
+family	lt	Stankevičius
+family	lt	Vasiliauskas
+family	lt	Butkus
+family	lt	Paulauskas
+family	lt	Urbonas
+family	lt	Navickas
+family	lt	Sakalauskas
+family	lt	Rimkus
+family	lt	Petrauskas
+family	lt	Mockus

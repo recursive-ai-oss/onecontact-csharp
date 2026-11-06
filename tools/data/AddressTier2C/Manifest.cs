@@ -13,6 +13,11 @@ internal static class Manifest
         ("cz-ruian", "Creative Commons Attribution 4.0 (CC BY 4.0)", "RÚIAN, adresní místa (CSV výměnný formát), Český úřad zeměměřický a katastrální; CC BY 4.0."),
         ("lv-varis", "CC-BY-4.0", "Valsts adrešu reģistra informācijas sistēma (VARIS), Valsts zemes dienests, atvērtie dati; CC BY 4.0."),
         ("ee-ads", "Maa- ja Ruumiameti avatud ruumiandmete litsents (free for any lawful use with the data source named)", "Aadressiandmete süsteem (ADS), Maa- ja Ruumiamet, 2026."),
+        ("mx-denue", "Términos de Libre Uso de la Información del INEGI (commercial use allowed, source named)", "Fuente: INEGI, Directorio Estadístico Nacional de Unidades Económicas, DENUE 05/2026."),
+        ("pl-prg", "Dane PRG są dostępne bezpłatnie i do dowolnego wykorzystania (GUGiK, geoportal.gov.pl)", "Państwowy Rejestr Granic, punkty adresowe, Główny Urząd Geodezji i Kartografii, 2026."),
+        ("si-rpe", "Creative Commons Attribution 4.0 International (CC BY 4.0)", "Register prostorskih enot, Geodetska uprava Republike Slovenije; CC BY 4.0."),
+        ("sk-ra", "CC0 (terms of use of the dataset on data.gov.sk)", "Register adries, Ministerstvo vnútra Slovenskej republiky (CC0)."),
+        ("lt-ar", "Creative Commons Attribution 4.0 International (CC BY 4.0)", "Adresų registras, VĮ Registrų centras (open data via geoportal.lt); CC BY 4.0."),
     ];
 
     internal static void Write(string path, Dictionary<string, string> o, ulong seed, int devPerMille, Renderer renderer, Stats stats, string outDir, string selectionPath, long duplicates, string dataRoot)
