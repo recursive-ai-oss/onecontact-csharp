@@ -55,38 +55,174 @@ internal static partial class Tier2Reader
 
         // UPU Australia sheet: "NORTH SYDNEY NSW 2060": the postcode is four digits after the state abbreviation, which is capitals. The unit is rearranged to read postcode,
         // state, locality, as the other countries' last lines do; the spans still point at the words in the input.
-        private static bool FindAustralian(List<Unit> units, string? known, out int unitIndex, out int tokenIndex, out PostcodeMatch match)
+        private bool FindAustralian(List<Unit> units, string? known, out int unitIndex, out int tokenIndex, out PostcodeMatch match)
         {
             unitIndex = tokenIndex = 0;
             match = null!;
-            if (known is not null and not "AU")
+            if (known is not null and not "AU" || units.Count == 0)
             {
                 return false;
             }
 
+            // Written on one line, a comma before the state puts "NSW 2827" in a unit of its own ("Downer, ACT 2602"); it belongs to the locality before it.
             int u = units.Count - 1;
+            if (units.Count >= 2 && units[u].Toks.Count is >= 2 and <= 4 && IsAustralianPostcode(units[u].Toks[^1].Text) && AustralianState(units[u].Toks, units[u].Toks.Count - 1, known, out _, out _) == 0
+                && !units[u - 1].Toks.Any(t => IsAustralianPostcode(t.Text)))
+            {
+                units[u - 1] = new Unit([.. units[u - 1].Toks, .. units[u].Toks]);
+                units.RemoveAt(u);
+                u--;
+            }
+
             List<Tok> toks = units[u].Toks;
-            if (toks.Count < 3)
+            if (toks.Count < 3 || !IsAustralianPostcode(toks[^1].Text))
             {
                 return false;
             }
 
             Tok pc = toks[^1];
-            Tok state = toks[^2];
-            if (pc.Text.Length != 4 || !pc.Text.All(char.IsAsciiDigit) || !state.Text.All(char.IsAsciiLetterUpper) || !T2Rules.States.ContainsKey(("AU", state.Key)))
+            int stateAt = AustralianState(toks, toks.Count - 1, known, out string? printed, out bool abbreviation);
+            if (stateAt < 1)
             {
                 return false;
             }
 
-            List<Tok> locality = toks.GetRange(0, toks.Count - 2);
+            List<Tok> stateToks = toks.GetRange(stateAt, toks.Count - 1 - stateAt);
+            List<Tok> locality = toks.GetRange(0, stateAt);
+            List<Tok>? street = null;
+
+            // Several lines' worth of words on one line ("187 Wilson Esplanade Downer, ACT 2602"): the locality starts after the one street type that can end a street name.
             if (locality.Any(t => t.Text.Any(char.IsAsciiDigit)))
             {
+                int house = locality.FindIndex(t => t.Text.Any(char.IsAsciiDigit));
+                T2Country au = T2Rules.Countries["AU"];
+                List<int> ends = [];
+                for (int k = house + 2; k < locality.Count - 1 && locality.Count - 1 - k <= 3; k++)
+                {
+                    if (T2Rules.FindType(au, locality[k].Key) is not null && locality.Skip(k + 1).All(t => !t.Text.Any(char.IsAsciiDigit)))
+                    {
+                        ends.Add(k);
+                    }
+                }
+
+                if (ends.Count != 1)
+                {
+                    return false;
+                }
+
+                street = locality.GetRange(0, ends[0] + 1);
+                locality = locality.GetRange(ends[0] + 1, locality.Count - ends[0] - 1);
+            }
+
+            if (street is not null)
+            {
+                units[u] = new Unit(street);
+                units.Add(new Unit(abbreviation ? [pc, .. stateToks, .. locality] : [pc, .. locality]));
+                u++;
+            }
+            else
+            {
+                units[u] = new Unit(abbreviation ? [pc, .. stateToks, .. locality] : [pc, .. locality]);
+            }
+
+            if (!abbreviation)
+            {
+                _state = stateToks;
+                _stateAbbreviation = printed!;
+            }
+
+            unitIndex = u;
+            match = new PostcodeMatch(1, pc.Text, ["AU"], null);
+            return true;
+        }
+
+        private static bool IsAustralianPostcode(string s) => s.Length == 4 && s.All(char.IsAsciiDigit);
+
+        // The state before the postcode: the abbreviation in capitals (in any case once the country is known to be Australian), or the name in full in any case. Returns the
+        // index of its first token, or -1.
+        private static int AustralianState(List<Tok> toks, int end, string? known, out string? printed, out bool abbreviation)
+        {
+            printed = null;
+            abbreviation = false;
+            if (end >= 1 && T2Rules.States.TryGetValue(("AU", toks[end - 1].Key), out string? abbr) && abbr.Length <= 3 && toks[end - 1].Text.Length <= 3
+                && (toks[end - 1].Text.All(char.IsAsciiLetterUpper) || known == "AU" && toks[end - 1].Text.All(char.IsAsciiLetter)))
+            {
+                printed = abbr;
+                abbreviation = toks[end - 1].Text.All(char.IsAsciiLetterUpper);
+                return end - 1;
+            }
+
+            for (int n = Math.Min(3, end - 1); n >= 1; n--)
+            {
+                if (T2Rules.States.TryGetValue(("AU", T2Rules.Key(Join(toks.GetRange(end - n, n)))), out string? name) && !(n == 1 && toks[end - 1].Text.Length <= 3))
+                {
+                    printed = name;
+                    return end - n;
+                }
+            }
+
+            return -1;
+        }
+
+        // ---- Romania -----------------------------------------------------------------------------------------------------------------------------------
+
+        private static bool IsRomanianSectorWord(string key) => key is "SECTOR" or "SECTORUL" or "JUD" or "JUD." or "JUDETUL" or "JUDET";
+
+        private static bool IsRomanianPostcode(string s) => s.Length == 6 && s.All(char.IsAsciiDigit);
+
+        // UPU Romania sheet: "200716 CRAIOVA", the postcode of six digits left of the locality. Romanians also write the sector of Bucharest or the county after the locality
+        // ("011371 Bucureşti, Sector 1", which on one line is a unit of its own after the postcode) and put the postcode last ("Pitești, 110040"; "București, Sector 3, 032391").
+        // A sector or county unit after a unit with the postcode is joined to it; a postcode that ends the text is moved in front of the locality before it.
+        private static bool FindRomanian(List<Unit> units, string? known, out int unitIndex, out int tokenIndex, out PostcodeMatch match)
+        {
+            unitIndex = tokenIndex = 0;
+            match = null!;
+            if (known is not null and not "RO" || units.Count == 0)
+            {
                 return false;
             }
 
-            units[u] = new Unit([pc, state, .. locality]);
-            unitIndex = u;
-            match = new PostcodeMatch(1, pc.Text, ["AU"], null);
+            while (units.Count >= 2 && units[^1].Toks.Count > 0 && IsRomanianSectorWord(units[^1].Toks[0].Key) && units[^2].Toks.Any(t => IsRomanianPostcode(t.Text) || t.Text.Length == 9 && t.Text.StartsWith("RO-", StringComparison.OrdinalIgnoreCase) && IsRomanianPostcode(t.Text[3..])))
+            {
+                units[^2] = new Unit([.. units[^2].Toks, .. units[^1].Toks]);
+                units.RemoveAt(units.Count - 1);
+            }
+
+            List<Tok> last = units[^1].Toks;
+            if (last.Count == 0 || !IsRomanianPostcode(last[^1].Text))
+            {
+                return false;
+            }
+
+            // The locality: the words before the postcode on its line, or the unit before a lone postcode, with the sector or county unit in front of it.
+            List<Tok> locality = [];
+            int keep = units.Count - 1;
+            if (last.Count > 1)
+            {
+                locality = last.GetRange(0, last.Count - 1);
+            }
+            else if (units.Count >= 2)
+            {
+                keep--;
+                locality = units[keep].Toks;
+                while (keep > 0 && IsRomanianSectorWord(locality[0].Key) && units[keep - 1].Toks.Count > 0 && !units[keep - 1].Toks.Any(t => t.Text.Any(char.IsAsciiDigit)))
+                {
+                    keep--;
+                    locality = [.. units[keep].Toks, .. locality];
+                }
+            }
+
+            // Digits belong to a locality only as the number of a sector ("Sector 3"); anything else with digits is a street line ("nr. 41").
+            if (locality.Count == 0 || IsRomanianSectorWord(locality[0].Key) && locality.Count <= 2 || locality.Where((t, i) => t.Text.Any(char.IsAsciiDigit) && !(i > 0 && IsRomanianSectorWord(locality[i - 1].Key))).Any())
+            {
+                return false;
+            }
+
+            Tok pc = last[^1];
+            units.RemoveRange(keep, units.Count - keep);
+            units.Add(new Unit([pc, .. locality]));
+            unitIndex = units.Count - 1;
+            match = new PostcodeMatch(1, pc.Text, ["RO"], null);
             return true;
         }
 
@@ -498,7 +634,21 @@ internal static partial class Tier2Reader
                 return null;
             }
 
-            Add(StreetPartRole.HouseNumber, toks[i], "australia-post-house-number");
+            // "4/12 Smith St": the unit number, a slash and the street number (Australia Post, Address Presentation Standards p. 15); two parts that print as written.
+            int slash = toks[i].Text.IndexOf('/', StringComparison.Ordinal);
+            if (slash > 0 && slash == toks[i].Text.LastIndexOf('/') && IsUnitId(toks[i].Text[..slash]) && IsHouseNumber(toks[i].Text[(slash + 1)..]))
+            {
+                Tok unit = new(toks[i].Text[..slash], toks[i].Start);
+                Tok number = new(toks[i].Text[(slash + 1)..], toks[i].Start + slash + 1);
+                Add(StreetPartRole.UnitNumber, unit, "australia-post-unit-slash");
+                Add(StreetPartRole.HouseNumber, number, "australia-post-house-number");
+                pieces[^1] = pieces[^1] with { Before = "/" };
+            }
+            else
+            {
+                Add(StreetPartRole.HouseNumber, toks[i], "australia-post-house-number");
+            }
+
             i++;
             int typeAt = -1;
             for (int k = toks.Count - 1; k > i; k--)

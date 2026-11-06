@@ -161,6 +161,7 @@ internal static partial class Tier2Reader
             int tokenIndex;
             PostcodeMatch match;
             if (!FindAustralian(units, known, out unitIndex, out tokenIndex, out match)
+                && !FindRomanian(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindLastLine(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindPostcodeLast(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindProvinceLine(units, known, out unitIndex, out tokenIndex, out match)
@@ -382,7 +383,7 @@ internal static partial class Tier2Reader
                 adminLine = Join(_province).ToUpperInvariant();
                 adminWords = Join(_province);
             }
-            else if (code == "AU" && localityToks.Count >= 2 && T2Rules.States.ContainsKey(("AU", localityToks[0].Key)))
+            else if (code == "AU" && _state is null && localityToks.Count >= 2 && T2Rules.States.ContainsKey(("AU", localityToks[0].Key)))
             {
                 // Rearranged by FindAustralian: the state stands first, before the locality.
                 Tok state = localityToks[0];
@@ -390,9 +391,9 @@ internal static partial class Tier2Reader
                 adminInfo = (state.Text, state.Text, state.Span, "upu-australia-state");
                 adminInline = state.Text;
             }
-            else if (code == "MX" && _state is not null)
+            else if (code is "MX" or "AU" && _state is not null)
             {
-                adminInfo = (Slice(Span(_state)), _stateAbbreviation, Span(_state), "upu-mexico-state");
+                adminInfo = (Slice(Span(_state)), _stateAbbreviation, Span(_state), code == "MX" ? "upu-mexico-state" : "upu-australia-state");
                 adminInline = _stateAbbreviation;
             }
             else if (code == "MX" && localityToks.Count >= 2 && StateTail("MX", localityToks, out int stateWords, out string stateAbbreviation) && stateWords < localityToks.Count)
