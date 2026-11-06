@@ -59,6 +59,22 @@ with open(os.path.join(out_dir, "probablepeople.jsonl"), "w", encoding="utf-8") 
                 pass
         out.write(json.dumps({"id": i, "class": kind, "parts": parts}, ensure_ascii=False) + "\n")
 
+# cleanco (its documented basename function): a legal form is detected when taking it off changes the name; written as {"id", "has_form", "parts"}.
+import re  # noqa: E402
+try:
+    from cleanco import basename  # noqa: E402
+except ImportError:
+    basename = None
+if basename is not None:
+    def squash(x):
+        return re.sub(r"\s+", " ", x).strip()
+    with open(os.path.join(out_dir, "cleanco.jsonl"), "w", encoding="utf-8") as out:
+        for i, text in rows:
+            base = squash(basename(text))
+            has_form = base != squash(text).strip(" ,.")
+            removed = [w for w in text.split() if w.strip(",.") not in [b.strip(",.") for b in base.split()]] if has_form else []
+            out.write(json.dumps({"id": i, "has_form": has_form, "parts": {"B": [base] if base else [], "L": [" ".join(removed)] if removed else []}}, ensure_ascii=False) + "\n")
+
 with open(os.path.join(out_dir, "versions.json"), "w", encoding="utf-8") as f:
-    json.dump({p: metadata.version(p) for p in ("nameparser", "probablepeople")}, f)
+    json.dump({p: metadata.version(p) for p in ("nameparser", "probablepeople", "cleanco")}, f)
 print("items", len(rows))
