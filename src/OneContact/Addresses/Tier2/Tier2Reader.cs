@@ -226,6 +226,20 @@ internal static partial class Tier2Reader
                 }
             }
 
+            // The northern group: a company name that runs into the street on one line is split off, and the Latvian and Estonian municipality and parish names are told from the locality.
+            List<Tok>? northAdmin = null;
+            List<Tok>? northDependent = null;
+            if (country.IsNorth)
+            {
+                SplitCompanyPrefix(before, country);
+                SplitHouseNameAndParish(before, country);
+                NorthLocality(country, before, ref localityToks, out northAdmin, out northDependent, out List<Tok>? houseName);
+                if (houseName is not null)
+                {
+                    before.Add(new Unit(houseName));
+                }
+            }
+
             // "Rheinstr., 53, 52306 Hagen" and "8, VIESSE": a house number set apart by commas belongs to the street name next to it.
             if (!_multiLine)
             {
@@ -240,6 +254,7 @@ internal static partial class Tier2Reader
                 }
                 else if (country.IsNorth)
                 {
+                    MergeNorthNameAndNumber(before);
                     MergeNorthFloorAndDoor(before);
                 }
             }
@@ -255,6 +270,11 @@ internal static partial class Tier2Reader
                 {
                     first = i;
                 }
+            }
+
+            if (first < 0 && country.Profile is "lv" or "ee")
+            {
+                first = NorthHouseName(before, parsed, localityToks, northDependent, northAdmin, country);
             }
 
             // A unit line right above the street line ("Flat 30", "17º B") belongs with it.
@@ -305,6 +325,7 @@ internal static partial class Tier2Reader
             }
 
             List<ParsedAddressText> leading = [];
+            List<bool> leadingDependent = [];
             List<(string Postal, string Display)> leadingLayout = [];
             for (int i = 0; i < first; i++)
             {
@@ -317,6 +338,7 @@ internal static partial class Tier2Reader
                     : country.Profile.Length > 0 && !country.IsNorth ? Slice(Span(toks))
                     : string.Join(' ', toks.Select(t => t.Text));
                 leading.Add(new ParsedAddressText(Slice(Span(toks)), Span(toks), standard));
+                leadingDependent.Add(country.IsNorth && IsDependentLocality(toks, country));
                 leadingLayout.Add((standard, T2Text.Title(written, capitalsKept: true)));
             }
 
@@ -326,7 +348,7 @@ internal static partial class Tier2Reader
             for (int i = first; i < before.Count; i++)
             {
                 // A line after the first delivery line is another delivery line (a box, a locality name, a village); what the rules cannot place is kept as written.
-                Line line = parsed[i] ?? new Line(StreetLineKind.Street, [OtherPiece(before[i].Toks, country, afterStreet: true)]);
+                Line line = parsed[i] ?? new Line(StreetLineKind.Street, [country.IsNorth ? NorthOtherPiece(before[i].Toks, country) : OtherPiece(before[i].Toks, country, afterStreet: true)]);
                 delivery.Add(new StreetLine(line.Kind, [.. line.Pieces.Where(p => p.Standard.Length > 0).Select(p => new StreetPart(p.Role, Slice(p.Span), p.Standard, p.Span, p.Rule))]));
                 int houseAt = line.Pieces.FindLastIndex(p => p.Role == StreetPartRole.HouseNumber);
                 if (country.Profile is "it" or "sm" or "va" && line.Kind == StreetLineKind.Street && houseAt >= 0 && houseAt < line.Pieces.Count - 1
@@ -410,6 +432,24 @@ internal static partial class Tier2Reader
                 adminWords = Join(_county);
             }
 
+            string northDependentPostal = string.Empty;
+            string northDependentDisplay = string.Empty;
+            string adminInlineDisplay = string.Empty;
+            if (northAdmin is not null)
+            {
+                // Estonia: the county follows the locality on the postcode line ("48103 Põltsamaa Jõgeva maakond"); Latvia: the municipality follows it, after a comma ("Valmiera, Valmieras nov., LV-4201").
+                string adminWritten = Join(northAdmin);
+                adminInfo = (adminWritten, adminWritten, Span(northAdmin), "t2-north-admin");
+                adminInline = adminWritten.ToUpperInvariant();
+                adminInlineDisplay = T2Text.Title(adminWritten, capitalsKept: true);
+            }
+
+            if (northDependent is not null)
+            {
+                northDependentPostal = Join(northDependent).ToUpperInvariant();
+                northDependentDisplay = T2Text.Title(Join(northDependent), capitalsKept: true);
+            }
+
             string localityWritten = Join(localityToks);
             string localityPostal = country.Afnor ? T2Text.SaintAbbreviated(T2Text.Afnor(localityWritten)) : country.Profile == "lt" || country.LocalityAsWritten ? localityWritten : localityWritten.ToUpperInvariant();
             string localityDisplay = T2Text.Title(localityWritten, capitalsKept: true);
@@ -432,28 +472,28 @@ internal static partial class Tier2Reader
                 if (country.Profile == "lv")
                 {
                     // UPU Latvia sheet: the locality, a comma, then LV- and the four digits on the same line.
-                    lastPostal = localityPostal + ", " + printed;
-                    lastDisplay = localityDisplay + ", " + printed;
+                    lastPostal = (northDependentPostal.Length > 0 ? northDependentPostal + ", " : string.Empty) + localityPostal + (adminInline.Length > 0 ? ", " + adminInline : string.Empty) + ", " + printed;
+                    lastDisplay = (northDependentDisplay.Length > 0 ? northDependentDisplay + ", " : string.Empty) + localityDisplay + (adminInlineDisplay.Length > 0 ? ", " + adminInlineDisplay : string.Empty) + ", " + printed;
                 }
             }
             else
             {
                 lastPostal = printed + separator + localityPostal + (adminInline.Length > 0 ? " " + adminInline : string.Empty) + (adminLine.Length > 0 ? "\n" + adminLine : string.Empty);
-                lastDisplay = printed + " " + localityDisplay + (adminInline.Length > 0 ? " " + adminInline : string.Empty) + (adminLine.Length > 0 ? "\n" + adminLineDisplay : string.Empty);
+                lastDisplay = printed + " " + localityDisplay + (adminInline.Length > 0 ? " " + (adminInlineDisplay.Length > 0 ? adminInlineDisplay : adminInline) : string.Empty) + (adminLine.Length > 0 ? "\n" + adminLineDisplay : string.Empty);
             }
 
             // Fields in input order, every one with its offsets and the rule that decided it.
             List<ParsedAddressField> fields = [];
             for (int i = 0; i < leading.Count; i++)
             {
-                fields.Add(new ParsedAddressField("leading-line", leading[i].Text, leading[i].Standard, leading[i].Span, 1f, DecisionSource.Rule, "line-structure"));
+                fields.Add(new ParsedAddressField(leadingDependent[i] ? "dependent-locality" : "leading-line", leading[i].Text, leading[i].Standard, leading[i].Span, 1f, DecisionSource.Rule, leadingDependent[i] ? "t2-dependent-locality" : "line-structure"));
             }
 
             foreach (StreetLine line in delivery)
             {
                 foreach (StreetPart p in line.Parts)
                 {
-                    fields.Add(new ParsedAddressField("street." + RoleName(p.Role), p.Text, p.Standard, p.Span, 1f, DecisionSource.Rule, p.Rule));
+                    fields.Add(new ParsedAddressField(p.Rule == "t2-dependent-locality" ? "dependent-locality" : "street." + RoleName(p.Role), p.Text, p.Standard, p.Span, 1f, DecisionSource.Rule, p.Rule));
                 }
             }
 
@@ -466,10 +506,40 @@ internal static partial class Tier2Reader
                 fields.Add(admin.Value);
             }
 
+            if (northDependent is not null)
+            {
+                fields.Add(new ParsedAddressField("dependent-locality", Slice(Span(northDependent)), Join(northDependent), Span(northDependent), 1f, DecisionSource.Rule, "t2-dependent-locality"));
+            }
+
             List<Tok> postcodeToks = lastToks.GetRange(0, match.Length);
-            ParsedAddressField? postal = new("postal-code", Slice(Span(postcodeToks)), postcodeStd, Span(postcodeToks), 1f, DecisionSource.Rule, "postcode-" + country.Code.ToLowerInvariant());
+            SourceSpan postcodeSpan = Span(postcodeToks);
+            ParsedAddressField? prefixCountry = null;
+            if (country.IsNorth && country.Profile is not ("lv" or "lt") && match.PrefixCountry is not null)
+            {
+                // The country code before the postcode (DK-1352) is the country; the postcode is the digits after the dash.
+                string firstTok = postcodeToks[0].Text;
+                int dash = firstTok.IndexOfAny(['-', '\u2013', '\u2014']);
+                if (dash is 1 or 2 && firstTok[..dash].All(char.IsLetter))
+                {
+                    prefixCountry = new ParsedAddressField("country", firstTok[..dash], country.CountryLine, new SourceSpan(postcodeToks[0].Start, dash), 1f, DecisionSource.Rule, "country-prefix");
+                    int digitsAt = postcodeToks[0].Start + dash + 1;
+                    postcodeSpan = new SourceSpan(digitsAt, postcodeToks[^1].End - digitsAt);
+                }
+            }
+
+            ParsedAddressField? postal = new("postal-code", Slice(postcodeSpan), postcodeStd, postcodeSpan, 1f, DecisionSource.Rule, "postcode-" + country.Code.ToLowerInvariant());
             fields.Add(postal.Value);
             ParsedAddressField? countryName = null;
+            if (prefixCountry is not null)
+            {
+                // "FI-02970 ESPOO" and "Suomi": the code and the name are both the country.
+                fields.Add(prefixCountry.Value);
+                if (named is null)
+                {
+                    countryName = prefixCountry;
+                }
+            }
+
             if (named is { } n)
             {
                 countryName = new ParsedAddressField("country", Slice(n.Span), country.CountryLine, n.Span, 1f, DecisionSource.Rule, "country-name");
@@ -1261,7 +1331,7 @@ internal static partial class Tier2Reader
 
             if (country.IsNorth)
             {
-                return ParseNorth(toks);
+                return ParseNorth(toks, country);
             }
 
             // Malta and Andorra write the number on either side of the name: "27 Andilina" or "Triq San Guzepp 27". A type first and a house number after the name settle it.

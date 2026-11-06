@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Fetches the sources of Croatia, Hungary, Romania and Australia into the data cache, each file checked against its pin
-# (tools/data/pins/{hr,hu,ro,au}.pin; same pin format and cache layout as fetch-register.sh). The Romanian workbook is converted to
+# (tools/data/pins/{hr,hu,ro,au,au-abs}.pin; same pin format and cache layout as fetch-register.sh). The Romanian workbook is converted to
 # tab-separated text by ro-infocod-to-tsv.py, and the converted files are checked against the `derived` lines of ro.pin.
 # Licences: provenance/address-tier2-c.md.
 set -euo pipefail
 here=$(dirname "$0")
 root=${ONECONTACT_DATA:-$HOME/onecontact/data}/train
-for pin in hr hu ro au; do
+for pin in hr hu ro au au-abs; do
   name=$(awk '$1 == "register" { print $2 }' "$here/pins/$pin.pin")
   dest=$root/$name
   mkdir -p "$dest"
@@ -32,3 +32,16 @@ while read -r kind file expected; do
   if [ "$actual" != "$expected" ]; then echo "MISMATCH $file (converted): got $actual, the pin says $expected" >&2; exit 2; fi
   echo "ok       $file (converted)"
 done < "$here/pins/ro.pin"
+
+# Australia: convert the ABS correspondence workbook (inside the downloaded zip) to tab-separated text.
+abs=$root/$(awk '$1 == "register" { print $2 }' "$here/pins/au-abs.pin")
+if [ ! -f "$abs/sal-poa.tsv" ]; then
+  unzip -o -q "$abs/asgs2021correspondences.zip" CG_SAL_2021_POA_2021.xlsx -d "$abs"
+  uv run --no-project --with openpyxl==3.1.5 python "$here/au-abs-to-tsv.py" "$abs/CG_SAL_2021_POA_2021.xlsx" "$abs/sal-poa.tsv"
+fi
+while read -r kind file expected; do
+  [ "$kind" = derived ] || continue
+  actual=$(sha256sum "$abs/$file" | cut -d' ' -f1)
+  if [ "$actual" != "$expected" ]; then echo "MISMATCH $file (converted): got $actual, the pin says $expected" >&2; exit 2; fi
+  echo "ok       $file (converted)"
+done < "$here/pins/au-abs.pin"

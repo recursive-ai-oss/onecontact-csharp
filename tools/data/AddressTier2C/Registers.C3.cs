@@ -23,7 +23,7 @@ internal static partial class Registers
         "HR" => Croatia(Path.Combine(Directory(dataRoot, "hr-dgu"), "INSPIRE_Addresses_AD.zip"), rejects),
         "HU" => Hungary(Path.Combine(Directory(dataRoot, "hu-geonames"), "HU.zip"), rejects),
         "RO" => Romania(Directory(dataRoot, "ro-posta"), rejects),
-        "AU" => Australia(Path.Combine(Directory(dataRoot, "au-geonames"), "AU.zip"), rejects),
+        "AU" => Australia(Path.Combine(Directory(dataRoot, "au-geonames"), "AU.zip"), Path.Combine(Directory(dataRoot, "au-abs"), "sal-poa.tsv"), rejects),
         _ => throw new ArgumentException("unknown country " + country),
     };
 
@@ -227,11 +227,53 @@ internal static partial class Registers
         }
     }
 
-    private static IEnumerable<Addr> Australia(string zipPath, Rejects rejects)
+    private static readonly string[] AustralianStates = ["", "NSW", "VIC", "QLD", "SA", "WA", "TAS", "NT", "ACT"];
+
+    /// <summary>"Abbotsford (NSW)" and "Greenmount (Mackay - Qld)" to "Abbotsford" and "Greenmount": ABS adds the state or the council to make names unique.</summary>
+    private static string WithoutAbsQualifier(string name)
     {
-        List<string> streets = StreetList("AU");
-        HashSet<string> seen = [];
-        foreach (string[] c in GeoNamesRows(zipPath, "AU.txt"))
+        int open = name.LastIndexOf(" (", StringComparison.Ordinal);
+        return open > 0 && name.EndsWith(')') ? name[..open] : name;
+    }
+
+    /// <summary>
+    /// ABS suburbs and localities with the postal area each falls in (SAL to POA correspondence, ASGS Edition 3): the first digit of the
+    /// SAL code is the state or territory. Special purpose codes (no usual address, migratory, outside Australia), the "Remainder"
+    /// areas, other territories and rows below the ABS minimum output size are left out. Then the GeoNames pairs the ABS file does not
+    /// have are added.
+    /// </summary>
+    private static IEnumerable<(string Postal, string Place, string State, string Source)> AustralianPlaces(string geoNamesZip, string absTsv, Rejects rejects)
+    {
+        HashSet<string> seen = new(StringComparer.OrdinalIgnoreCase);
+        foreach (string line in File.ReadLines(absTsv).Skip(1))
+        {
+            string[] c = line.Split('	');
+            string code = c[0];
+            string postal = c[2];
+            if (code.Length != 5 || !code.All(char.IsAsciiDigit) || code[0] is '0' or '9' || code[1..] is "9494" or "9797" || c[1].Contains("Remainder", StringComparison.Ordinal))
+            {
+                rejects.Add("au: ABS special purpose code, remainder area or other territory");
+                continue;
+            }
+
+            if (postal.Length != 4 || !postal.All(char.IsAsciiDigit) || c[6] != "0")
+            {
+                rejects.Add("au: ABS pair without a four-digit postal area, or below the minimum output size");
+                continue;
+            }
+
+            string place = WithoutAbsQualifier(c[1]);
+            string state = AustralianStates[code[0] - '0'];
+            if (!seen.Add(postal + "|" + place + "|" + state))
+            {
+                rejects.Add("au: repeated postcode, place and state");
+                continue;
+            }
+
+            yield return (postal, place, state, "abs");
+        }
+
+        foreach (string[] c in GeoNamesRows(geoNamesZip, "AU.txt"))
         {
             string postal = c[1].Trim();
             string place = c[2].Trim();
@@ -248,9 +290,18 @@ internal static partial class Registers
                 continue;
             }
 
+            yield return (postal, place, state, "gn");
+        }
+    }
+
+    private static IEnumerable<Addr> Australia(string geoNamesZip, string absTsv, Rejects rejects)
+    {
+        List<string> streets = StreetList("AU");
+        foreach ((string postal, string place, string state, string source) in AustralianPlaces(geoNamesZip, absTsv, rejects))
+        {
             for (int i = 0; i < AustraliaStreetsPerPlace; i++)
             {
-                string id = $"gn-au:{postal}:{place}:{state}:{i}";
+                string id = $"{source}-au:{postal}:{place}:{state}:{i}";
                 ulong h = Prng.Hash(id, 0x4155);
                 yield return new Addr
                 {
