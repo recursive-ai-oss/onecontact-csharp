@@ -137,6 +137,12 @@ internal static class EmailAddressParser
             }
 
             _sourceSpan = new SourceSpan(start, end - start);
+            if (TryReadPlainAddrSpec(start, end))
+            {
+                Classify();
+                return true;
+            }
+
             int addrStart = start;
             int addrEnd = end;
             bool angle = false;
@@ -177,6 +183,71 @@ internal static class EmailAddressParser
             }
 
             Classify();
+            return true;
+        }
+
+        // The usual address: a dot-atom local part, "@" and a domain of letters, digits, hyphens and dots, all ASCII, with no comment, quote,
+        // angle bracket or white space. For this shape the grammar reduces to splitting at the "@"; the domain still goes through the same
+        // normalization. Anything else, including every failure, is left to the full grammar, which also reports it.
+        private bool TryReadPlainAddrSpec(int start, int end)
+        {
+            int at = -1;
+            char previous = '.';
+            for (int i = start; i < end; i++)
+            {
+                char c = _s[i];
+                if (c == '@')
+                {
+                    if (at >= 0 || i == start)
+                    {
+                        return false;
+                    }
+
+                    if (previous == '.')
+                    {
+                        return false;
+                    }
+
+                    at = i;
+                    previous = '@';
+                }
+                else if (c == '.')
+                {
+                    // No leading, trailing or doubled dot in the local part; the domain's dots are checked by its normalization.
+                    if (at < 0 && previous == '.')
+                    {
+                        return false;
+                    }
+
+                    previous = '.';
+                }
+                else if (at < 0 ? IsAtextAscii(c) : char.IsAsciiLetterOrDigit(c) || c == '-')
+                {
+                    previous = c;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            if (at < 0 || at + 1 >= end)
+            {
+                return false;
+            }
+
+            string domainText = _s[(at + 1)..end].ToString();
+            EmailFacts facts = _facts;
+            if (!EmailDomain.TryNormalize(domainText, ref facts, out string ascii, out _))
+            {
+                return false;
+            }
+
+            _facts = facts;
+            _local = _s[start..at].ToString();
+            _domain = ascii;
+            _localSpan = new SourceSpan(start, at - start);
+            _domainSpan = new SourceSpan(at + 1, end - at - 1);
             return true;
         }
 

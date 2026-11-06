@@ -1,5 +1,8 @@
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Toolchains.InProcess.NoEmit;
 using System.Text.RegularExpressions;
 using RecursiveAI.OneContact;
 using RecursiveAI.OneContact.Phones;
@@ -98,5 +101,31 @@ public class PhoneRow
 
 internal static class Program
 {
-    private static void Main(string[] args) => BenchmarkSwitcher.FromAssembly(typeof(RegionRow).Assembly).Run(args);
+    private static int Main(string[] args)
+    {
+        if (args.Length > 0 && args[0] == "profile-extract")
+        {
+            return Profiles.Extract();
+        }
+
+        if (args.Length > 0 && args[0] == "profile-names")
+        {
+            return Profiles.Names();
+        }
+
+        if (args.Length > 0 && args[0] == "profile-phone")
+        {
+            return PhoneProfile.Run();
+        }
+
+        if (args.Length > 0 && args[0] == "accuracy")
+        {
+            return Accuracy.Run();
+        }
+
+        // The in-process toolchain: the assembly name differs from the project name, so a generated child project cannot find it.
+        ManualConfig config = DefaultConfig.Instance.AddJob((Environment.GetEnvironmentVariable("ONECONTACT_BENCH_JOB") == "default" ? Job.Default : Job.ShortRun).WithToolchain(InProcessNoEmitToolchain.Instance));
+        BenchmarkSwitcher.FromAssembly(typeof(RegionRow).Assembly).Run(args, config);
+        return 0;
+    }
 }

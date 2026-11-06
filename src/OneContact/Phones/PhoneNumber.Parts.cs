@@ -66,13 +66,15 @@ public readonly partial struct PhoneNumber
     }
 
     internal PhoneNumber WithoutExtension() =>
-        _extension is null ? this : new PhoneNumber(_countryCode, _nationalNumber, _leadingZeros, null, _rawInput, _codeSource, _carrierCode, Source, Flags);
+        _extension is null ? this : new PhoneNumber(_countryCode, _nationalNumber, _leadingZeros, null, _rawInput, _codeSource, _carrierCode, Source, Flags, CachedType);
 
     /// <summary>Gets the type of line (fixed, mobile, toll free, ...) by the numbering plan of the number's region.</summary>
-    public PhoneNumberType Type => PhoneNumberParser.Default.GetNumberType(this);
+    public PhoneNumberType Type => CachedType ?? PhoneNumberParser.Default.GetNumberType(this);
+
+    internal PhoneNumberType? CachedType => _typePlusOne == 0 ? null : (PhoneNumberType)(_typePlusOne - 1);
 
     /// <summary>Gets a value indicating whether the number matches a number pattern of its region's plan.</summary>
-    public bool IsValid => PhoneNumberParser.Default.IsValid(this);
+    public bool IsValid => Type != PhoneNumberType.Unknown;
 
     /// <summary>Gets the region the number belongs to, or <see cref="Region.Unknown"/> when it matches none or is a non-geographic number.</summary>
     public Region Region => PhoneNumberParser.Default.GetRegion(this);

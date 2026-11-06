@@ -15,7 +15,11 @@ public class PhoneMatcherRow
 
     /// <summary>Builds the text.</summary>
     [GlobalSetup]
-    public void Setup()
+    public void Setup() => _text = MakeText();
+
+    /// <summary>Builds the seeded text.</summary>
+    /// <returns>About one million characters.</returns>
+    internal static string MakeText()
     {
         string[] words = ["the", "customer", "called", "about", "order", "and", "asked", "for", "a", "refund", "on", "12/03/2021", "at", "10:30:15", "ref", "A-4471", "please", "reply", "to", "support", "2012-12-22"];
         string[] numbers = ["(202) 456-1111", "202-456-1111", "+1 650 253 0000", "1-800-356-9377", "650.253.0000", "+44 20 7946 0958", "2024561111", "(212) 736-5000 ext. 12"];
@@ -35,7 +39,7 @@ public class PhoneMatcherRow
             sb.Append(rng.Next(12) == 0 ? ". " : " ");
         }
 
-        _text = sb.ToString();
+        return sb.ToString();
     }
 
     /// <summary>Gets the leniency under test.</summary>

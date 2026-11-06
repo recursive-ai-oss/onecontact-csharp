@@ -11,7 +11,14 @@ internal static class WebAddressParser
     // Schemes that are recognized without "//" after the colon: the ones written like "mailto:a@b" or "tel:+1555...".
     private static readonly string[] OpaqueSchemes = ["mailto", "tel", "sms", "urn", "geo", "callto", "skype", "magnet", "news", "data", "javascript", "about", "blob"];
 
-    internal static OperationStatus TryParse(ReadOnlySpan<char> input, out WebAddress value, out ParseDetail detail)
+    internal static OperationStatus TryParse(ReadOnlySpan<char> input, out WebAddress value, out ParseDetail detail) =>
+        Parse(input, wantDetail: true, out value, out detail);
+
+    // The bool-returning parse builds no ParseDetail.
+    internal static bool TryParseValue(ReadOnlySpan<char> input, out WebAddress value) =>
+        Parse(input, wantDetail: false, out value, out _) == OperationStatus.Done;
+
+    private static OperationStatus Parse(ReadOnlySpan<char> input, bool wantDetail, out WebAddress value, out ParseDetail detail)
     {
         int start = 0;
         int end = input.Length;
@@ -28,7 +35,7 @@ internal static class WebAddressParser
         if (start == end)
         {
             value = default;
-            detail = ParseDetail.Failure(ReasonCode.Empty, new SourceSpan(0, input.Length));
+            detail = wantDetail ? ParseDetail.Failure(ReasonCode.Empty, new SourceSpan(0, input.Length)) : ParseDetail.Empty;
             return OperationStatus.InvalidData;
         }
 
@@ -42,7 +49,7 @@ internal static class WebAddressParser
         if (!UrlParser.TryParse(toParse, null, out UrlRecord url, out UrlFailure failure, ref spans))
         {
             value = default;
-            detail = ParseDetail.Failure(Reason(failure), new SourceSpan(start, end - start));
+            detail = wantDetail ? ParseDetail.Failure(Reason(failure), new SourceSpan(start, end - start)) : ParseDetail.Empty;
             return OperationStatus.InvalidData;
         }
 
@@ -78,8 +85,7 @@ internal static class WebAddressParser
         if (url.HostKind == HostKind.Domain && url.Host is { } host)
         {
             string name = host.EndsWith('.') ? host[..^1] : host;
-            publicSuffix = PublicSuffixList.GetPublicSuffix(name);
-            registrable = PublicSuffixList.GetRegistrableDomain(name);
+            PublicSuffixList.Analyze(name, out publicSuffix, out registrable);
             if (HasPunycodeLabel(host))
             {
                 facts |= WebFacts.InternationalizedDomain;
@@ -96,7 +102,7 @@ internal static class WebAddressParser
         string canonical = url.Serialize(excludeFragment: true);
         var parts = new WebParts(url.Scheme, url.Host ?? string.Empty, url.HostKind, url.Port, pathText, url.OpaquePath, url.Query, publicSuffix, registrable);
         value = new WebAddress(canonical, new SourceSpan(start, end - start), facts, parts);
-        detail = new ParseDetail([], Fields(spans, shift, start, end, assumed));
+        detail = wantDetail ? new ParseDetail([], Fields(spans, shift, start, end, assumed)) : ParseDetail.Empty;
         return OperationStatus.Done;
     }
 
@@ -190,15 +196,23 @@ internal static class WebAddressParser
 
     private static bool HasPunycodeLabel(string host)
     {
-        foreach (string label in host.Split('.'))
+        // A label starts at the beginning or after a dot.
+        int at = 0;
+        while (true)
         {
-            if (label.StartsWith("xn--", StringComparison.Ordinal))
+            int found = host.IndexOf("xn--", at, StringComparison.Ordinal);
+            if (found < 0)
+            {
+                return false;
+            }
+
+            if (found == 0 || host[found - 1] == '.')
             {
                 return true;
             }
-        }
 
-        return false;
+            at = found + 1;
+        }
     }
 
     private static ReasonCode Reason(UrlFailure failure) => failure switch

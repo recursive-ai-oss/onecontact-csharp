@@ -8,6 +8,8 @@ internal static class EmailRules
     private static readonly EmbeddedTables DisposableTables = new(typeof(EmailRules).Assembly, "OneContact.Data.disposable-email-domains.ocd");
     private static readonly Lazy<HashSet<string>> Disposable = new(LoadDisposable, LazyThreadSafetyMode.ExecutionAndPublication);
 
+    private const int MaxRoleLength = 24;
+
     // RFC 2142 section 4 (business mailboxes: info, marketing, sales, support), section 5 (network mailboxes: abuse, noc, security) and
     // section 5 (support: postmaster, hostmaster, usenet, news, webmaster, www, uucp, ftp), plus the generic role names common on contact pages.
     private static readonly HashSet<string> Roles = new(StringComparer.Ordinal)
@@ -117,8 +119,16 @@ internal static class EmailRules
         }
 
         int plus = localPart.IndexOf('+', StringComparison.Ordinal);
-        string name = (plus > 0 ? localPart[..plus] : localPart).ToLowerInvariant();
-        return Roles.Contains(name);
+        ReadOnlySpan<char> name = plus > 0 ? localPart.AsSpan(0, plus) : localPart;
+        if (name.Length > MaxRoleLength)
+        {
+            return false;
+        }
+
+        // Bounds: MaxRoleLength characters, the longest name on the role list.
+        Span<char> folded = stackalloc char[MaxRoleLength];
+        int written = name.ToLowerInvariant(folded);
+        return written == name.Length && Roles.GetAlternateLookup<ReadOnlySpan<char>>().Contains(folded[..written]);
     }
 
     /// <summary>Gets the corrected address for a mistyped provider domain, or <see langword="null"/>.</summary>
