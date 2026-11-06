@@ -1,0 +1,24 @@
+# Words that name a unit inside a building and are followed by its number or letter. Columns: countries (comma separated), word (upper case, no accents, periods dropped).
+# English words of the United Kingdom, Ireland, Malta and the Crown dependencies; Italian words of Italy, San Marino and the Vatican (UPU Italy sheet: INTERNO, PIANO); the Catalan and Spanish words of Andorra (UPU Andorra sheet: Apartament, Entrada).
+GB,JE,GG,IM,IE,MT	FLAT
+GB,JE,GG,IM,IE,MT	APT
+GB,JE,GG,IM,IE,MT	APARTMENT
+GB,JE,GG,IM,IE,MT	SUITE
+GB,JE,GG,IM,IE,MT	UNIT
+GB,JE,GG,IM,IE,MT	ROOM
+GB,JE,GG,IM,IE,MT	BLOCK
+GB,JE,GG,IM,IE,MT	STUDIO
+IT,SM,VA	INTERNO
+IT,SM,VA	INT
+IT,SM,VA	SCALA
+IT,SM,VA	SC
+IT,SM,VA	PIANO
+AD	PIS
+AD	PISO
+AD	PLANTA
+AD	ESC
+AD	ESCALA
+AD	EDIFICI
+AD	EDIFICIO
+AD	APARTAMENT
+AD	ENTRADA

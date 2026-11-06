@@ -69,6 +69,9 @@ internal sealed record T2Country(
     /// <summary>Gets whether the country writes its lines with the profiles of the last group (Poland, the Czech Republic, Slovakia, Slovenia, Croatia, Hungary, Romania, Mexico, Australia).</summary>
     internal bool IsCentral => Profile is "pl" or "cz" or "sk" or "si" or "hr" or "hu" or "ro" or "mx" or "au";
 
+    /// <summary>Gets whether the locality is printed as written (Jersey Post asks for capitals on the postcode only) instead of in capitals.</summary>
+    internal bool LocalityAsWritten { get; init; }
+
     /// <summary>Gets whether the postcode follows the locality (the United Kingdom, Ireland, Malta).</summary>
     internal bool PostcodeLast => Postcode is PostcodeForm.Uk or PostcodeForm.Eircode or PostcodeForm.Maltese or PostcodeForm.Latvian;
 
@@ -110,6 +113,13 @@ internal static partial class T2Rules
 
     /// <summary>Italian province codes.</summary>
     internal static IReadOnlySet<string> ItProvinces => Loaded.Value.ItProvinces;
+
+    /// <summary>Gets whether a word names a unit inside a building in the country (<c>Flat</c>, <c>Interno</c>); a number or letter follows it.</summary>
+    internal static bool IsUnitDesignator(string country, string key) => Loaded.Value.Designators.Contains((country, key));
+
+    /// <summary>Finds the English road type that ends a name (<c>STREET</c>, <c>RD</c>), or <see langword="null"/>.</summary>
+    internal static T2Type? FindTailType(string key) =>
+        Loaded.Value.TypesBySetAndVariant.TryGetValue(("tail-en", key), out T2Type? type) ? type : null;
 
     /// <summary>Words that follow a house number and belong to it (staircase, floor, door).</summary>
     internal static IReadOnlySet<string> UnitWords => Loaded.Value.UnitWords;
@@ -165,7 +175,7 @@ internal static partial class T2Rules
         Loaded.Value.Delivery.TryGetValue((country, words), out T2Delivery? d) ? d : null;
 
     /// <summary>The most words of a delivery word.</summary>
-    internal static int MaxDeliveryWords => 2;
+    internal static int MaxDeliveryWords => 3;
 
     /// <summary>Upper case without accents, hyphens and apostrophes read as spaces, periods dropped: the form every table is matched in.</summary>
     internal static string Key(string text)
@@ -235,6 +245,7 @@ internal static partial class T2Rules
                 r[10].Split(','))
             {
                 Profile = r.Length > 11 ? r[11] : string.Empty,
+                LocalityAsWritten = r.Length > 12 && r[12] == "written",
             };
         }
 
@@ -300,6 +311,14 @@ internal static partial class T2Rules
             t.ItProvinces.Add(r[0]);
         }
 
+        foreach (string[] r in RuleFile.Read("t2-unit-designators.tsv"))
+        {
+            foreach (string country in r[0].Split(','))
+            {
+                t.Designators.Add((country, r[1]));
+            }
+        }
+
         foreach (string[] r in ReadParts("t2-unit-words"))
         {
             t.UnitWords.Add(r[0]);
@@ -350,5 +369,7 @@ internal static partial class T2Rules
         internal HashSet<string> ItProvinces { get; } = new(StringComparer.Ordinal);
 
         internal HashSet<string> UnitWords { get; } = new(StringComparer.Ordinal);
+
+        internal HashSet<(string, string)> Designators { get; } = [];
     }
 }
