@@ -61,6 +61,11 @@ internal sealed class Renderer
         ["CZ"] = ["Česká republika", "Czech Republic", "Česko", "Czechia"],
         ["LV"] = ["Latvija", "Latvia"],
         ["EE"] = ["Eesti", "Estonia"],
+        ["DK"] = ["Danmark", "Denmark", "DANMARK"],
+        ["SE"] = ["Sverige", "Sweden", "SVERIGE"],
+        ["FI"] = ["Suomi", "Finland", "SUOMI"],
+        ["FI-AX"] = ["Åland", "Finland", "ÅLAND"],
+        ["IS"] = ["Ísland", "Iceland", "ÍSLAND"],
     };
 
     private readonly Rates _rates;
@@ -71,9 +76,9 @@ internal sealed class Renderer
     {
         _rates = rates;
         _seed = seed;
-        string path = Path.Combine(templatesDir, "tier2c-names.tsv");
-        Sha256 = Sha256Of(path);
-        foreach (string line in File.ReadLines(path))
+        string[] paths = Directory.GetFiles(templatesDir, "tier2c-names*.tsv").OrderBy(p => p, StringComparer.Ordinal).ToArray();
+        Sha256 = paths.Length == 1 ? Sha256Of(paths[0]) : Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(string.Concat(paths.Select(Sha256Of))))).ToLowerInvariant();
+        foreach (string line in paths.SelectMany(File.ReadLines))
         {
             if (line.Length == 0 || line[0] == '#')
             {
@@ -172,7 +177,7 @@ internal sealed class Renderer
             lines.Add(last);
             if (_r.Chance(label ? _rt.CountryLabel : _rt.CountryLine))
             {
-                string[] names = CountryNames[cc];
+                string[] names = CountryNames[cc == "FI" && _a.Region == "19" ? "FI-AX" : cc];
                 lines.Add([new Piece(names[_r.Weighted(new[] { 0.7, 0.2, 0.06, 0.04 }[..names.Length])], "country")]);
                 _events.Add("country");
             }
@@ -282,6 +287,13 @@ internal sealed class Renderer
             {
                 string sep = _a.Country == "LV" ? " " : _r.Chance(_rt.SpacedSuffix) ? " " : string.Empty;
                 string suffix = _a.Country == "NO" && _r.Chance(0.15) ? _a.Suffix.ToLowerInvariant() : _a.Suffix;
+                if (_a.Country == "FI" && _r.Chance(0.4))
+                {
+                    // Finnish postal custom writes the staircase letter in capitals after a space ("Kauppakatu 5 B").
+                    sep = " ";
+                    suffix = _a.Suffix.ToUpperInvariant();
+                }
+
                 number += sep + suffix;
             }
 
@@ -345,7 +357,44 @@ internal sealed class Renderer
                 _events.Add("unit:synthetic");
             }
 
+            else if (_a.Country is "DK" or "SE" or "FI" && _r.Chance(_rt.SyntheticUnit / 2))
+            {
+                AddNordicUnit(p);
+            }
+
             return p;
+        }
+
+        // Flat designations drawn for the countries whose registers carry none: Danish floor and side ("2. th."), Swedish apartment number
+        // ("lgh 1101"), Finnish flat number after the staircase letter ("5 B 12").
+        private void AddNordicUnit(List<Piece> p)
+        {
+            switch (_a.Country)
+            {
+                case "DK":
+                    string floor = _r.Pick(new[] { "st.", "1.", "2.", "3.", "4." });
+                    string side = _r.Pick(new[] { "th.", "tv.", "mf.", string.Empty });
+                    p.Add(new Piece(", ", null));
+                    p.Add(new Piece(Case(side.Length == 0 ? floor : floor + " " + side), "street.unit-number"));
+                    break;
+                case "SE":
+                    p.Add(new Piece(" ", null));
+                    p.Add(new Piece(Case(_r.Pick(new[] { "lgh", "lgh", "Lgh" })), "street.unit-designator"));
+                    p.Add(new Piece(" ", null));
+                    p.Add(new Piece((1000 + (1 + _r.Int(9)) * 100 + 1 + _r.Int(5)).ToString(CultureInfo.InvariantCulture), "street.unit-number"));
+                    break;
+                default:
+                    if (_a.Suffix.Length == 0)
+                    {
+                        return;
+                    }
+
+                    p.Add(new Piece(" ", null));
+                    p.Add(new Piece((1 + _r.Int(120)).ToString(CultureInfo.InvariantCulture), "street.unit-number"));
+                    break;
+            }
+
+            _events.Add("unit:synthetic");
         }
 
         private List<Piece> PostBoxPieces(string cc)
@@ -355,6 +404,10 @@ internal sealed class Renderer
                 "NO" => ["Postboks", "Postboks", "Pb."],
                 "CZ" => ["Poštovní přihrádka", "P.O.Box", "PO Box"],
                 "LV" => ["Pasta kastīte", "p/k", "PK"],
+                "DK" => ["Postboks", "Postboks", "Pb."],
+                "SE" => ["Box", "Box", "Postbox"],
+                "FI" => _a.Language == "sv" ? ["PB", "PB", "Postbox"] : ["PL", "PL", "Postilokero"],
+                "IS" => ["Pósthólf", "Pósthólf", "Pósth."],
                 _ => ["Postkast", "PK", "Postkast"],
             };
             string number = (1 + _r.Int(_r.Chance(0.5) ? 999 : 9999)).ToString(CultureInfo.InvariantCulture);
@@ -368,7 +421,7 @@ internal sealed class Renderer
             bool noPostal = _r.Chance(_rt.MissingPostalCode);
             bool noPlace = !noPostal && _r.Chance(_rt.MissingLocality);
             string place = _a.Locality;
-            if (_mode == 3 && cc == "NO")
+            if (_mode == 3 && cc is "NO" or "FI" or "SE")
             {
                 place = place.ToUpperInvariant();
             }
@@ -393,17 +446,22 @@ internal sealed class Renderer
             {
                 case "NO":
                 case "EE":
+                case "DK":
+                case "SE":
+                case "FI":
+                case "IS":
                     // "0155 Oslo", "NO-0155 Oslo", "EE-10115 Tallinn".
                     if (!noPostal)
                     {
                         if (_r.Chance(_rt.CountryCodePrefix))
                         {
-                            p.Add(new Piece(cc, "country"));
+                            p.Add(new Piece(cc == "FI" && _a.Region == "19" ? "AX" : cc, "country"));
                             p.Add(new Piece("-", null));
                             _events.Add("code-prefix");
                         }
 
-                        p.Add(new Piece(postal, "postal-code"));
+                        // Swedish postcodes are written "123 45", sometimes without the space.
+                        p.Add(new Piece(cc == "SE" && _r.Chance(0.1) ? postal.Replace(" ", string.Empty, StringComparison.Ordinal) : postal, "postal-code"));
                     }
 
                     if (!noPlace)

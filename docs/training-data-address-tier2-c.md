@@ -1,4 +1,4 @@
-# Address training data, Tier 2 group C (Norway, the Czech Republic, Latvia, Estonia so far)
+# Address training data, Tier 2 group C (Norway, the Czech Republic, Latvia, Estonia, Denmark, Sweden, Finland, Iceland so far)
 
 How the examples for the address-field head are made for these countries. File format, label names, splits and determinism are those of `docs/training-data-address-tier2-a.md`; this page says what differs. The tool is `tools/data/AddressTier2C` (it shares the tokenizer, random generator, example type and span rules with the other address tools and the delimited-text reader with group A). Registers, licences and counts: `tools/data/provenance/address-tier2-c.md`.
 
@@ -28,4 +28,21 @@ Street before number everywhere. Norway, the Czech Republic and Estonia put the 
 
 ## Not yet covered
 
-Denmark, Sweden, Finland, Iceland, Lithuania, Poland, Slovakia, Slovenia, Croatia, Hungary, Romania, Mexico and Australia have no loader yet; the provenance file records what was found out about each source.
+Lithuania, Poland, Slovakia, Slovenia, Croatia, Hungary, Romania, Mexico and Australia have no loader yet; the provenance file records what was found out about each source.
+
+## Denmark, Sweden, Finland (with Åland) and Iceland
+
+```
+tools/data/fetch-nordic.sh                        # the Finnish and Icelandic registers and the GeoNames lists, each checked against tools/data/pins/{fi,is,nordic}.pin
+AddressTier2C count  --data <train dir> --out <dir> --countries dk,se,fi,is
+AddressTier2C render --data <train dir> --out <dir> --countries dk,se,fi,is
+```
+
+| Country | Records used | Region (sampling stratum) | Notes |
+|---|---|---|---|
+| FI | DVV building addresses (dBASE table) with one street name, a house number (`12`, `12 B`, `12-14`) and a postcode GeoNames knows; post office by postcode | the 19 regions of the register, Åland included | Finnish-only and Swedish-only addresses in their own language; bilingual addresses in Finnish. The staircase letter is written in capitals after a space in 40 % of examples (`Kauppakatu 5 B`) and a flat number may follow it. Åland addresses use `AX-` as the code prefix and `Åland` on the country line. |
+| IS | Staðfangaskrá rows with a street or farm name and no plot, land or special name; letter kept as written | municipality number | A farm with no number is a street name alone (`Unusel, 561 Varmahlíð`), as for Latvian villages. |
+| DK | GeoNames postcode areas with a drawn street name and number | region | Synthetic streets. Flat designations as floor and side (`2. th.`, `st. tv.`) in 3 % of examples. |
+| SE | GeoNames postcode areas with a drawn street name and number | county | Synthetic streets. Postcode `123 45`, without the space in 10 %; apartment as `lgh 1101`. |
+
+The last line is `postcode place` in all four (`2100 København Ø`, `123 45 Stockholm`, `00100 Helsinki`, `101 Reykjavík`), with the country code in front in 7 % (`DK-2100`, `SE-123 45`, `FI-00100`, `IS-101`). The postal casing variant writes the place in capitals for Finland and Sweden as for Norway. Post box lines are `Postboks`, `Box`, `PL` (Finnish) or `PB` (Swedish in Finland), and `Pósthólf`. Name parts for recipient and organisation lines are in `tools/data/templates/tier2c-names-nordic.tsv` (the renderer reads every `tier2c-names*.tsv`), street vocabulary in `tier2c-streets-nordic.tsv`.

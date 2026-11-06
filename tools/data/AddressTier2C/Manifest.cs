@@ -1,6 +1,8 @@
 using System.Text;
 using System.Text.Json;
 
+using Nordic = OneContact.Data.AddressTier2C.Registers;
+
 namespace OneContact.Data.AddressTier2C;
 
 /// <summary>Writes manifest.json: seed, renderer version, the pinned register files, every output file with its role, line count and SHA-256, and the counts.</summary>
@@ -13,7 +15,12 @@ internal static class Manifest
         ("cz-ruian", "Creative Commons Attribution 4.0 (CC BY 4.0)", "RÚIAN, adresní místa (CSV výměnný formát), Český úřad zeměměřický a katastrální; CC BY 4.0."),
         ("lv-varis", "CC-BY-4.0", "Valsts adrešu reģistra informācijas sistēma (VARIS), Valsts zemes dienests, atvērtie dati; CC BY 4.0."),
         ("ee-ads", "Maa- ja Ruumiameti avatud ruumiandmete litsents (free for any lawful use with the data source named)", "Aadressiandmete süsteem (ADS), Maa- ja Ruumiamet, 2026."),
+        ("fi-dvv", "Creative Commons Attribution 4.0 International (CC BY 4.0)", "Rakennusten osoitetiedot, Digi- ja väestötietovirasto (Väestörekisterikeskus), CC BY 4.0."),
+        ("is-stadfangaskra", "Creative Commons Attribution (CC BY), as listed by the publisher's open data catalogue entry", "Staðfangaskrá, HMS / Þjóðskrá Íslands, CC BY."),
+        ("nordic-geonames", "Creative Commons Attribution 4.0 (CC BY 4.0)", "GeoNames postal codes, www.geonames.org; CC BY 4.0."),
     ];
+
+    private const int SyntheticPerCountry = Nordic.SyntheticRecords;
 
     internal static void Write(string path, Dictionary<string, string> o, ulong seed, int devPerMille, Renderer renderer, Stats stats, string outDir, string selectionPath, long duplicates, string dataRoot)
     {
@@ -29,6 +36,7 @@ internal static class Manifest
         w.WriteString("selectionSha256", Renderer.Sha256Of(selectionPath));
         w.WriteString("templatesSha256", renderer.Sha256);
         w.WriteNumber("droppedDuplicates", duplicates);
+        w.WriteString("syntheticParts", $"DK, SE: the postcode areas and place names are real (GeoNames); the street names are drawn from our own vocabulary (tier2c-streets-nordic.tsv, {SyntheticPerCountry} records per country before sampling) and the house number and letter are drawn. FI: the register is real; bilingual addresses are used in Finnish only. IS: the register is real");
         w.WritePropertyName("rates");
         JsonSerializer.Serialize(w, renderer.Rates.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(renderer.Rates)));
         w.WritePropertyName("registers");

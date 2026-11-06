@@ -14,11 +14,12 @@ namespace OneContact.Data.AddressTier2C;
 //   AddressTier2C check  --out <dir>
 internal static class Program
 {
-    private static readonly string[] AllCountries = ["NO", "CZ", "LV", "EE"];
+    private static readonly string[] AllCountries = ["NO", "CZ", "LV", "EE", "DK", "SE", "FI", "IS"];
 
     private static readonly Dictionary<string, long> DefaultTargets = new(StringComparer.Ordinal)
     {
         ["NO"] = 250_000, ["CZ"] = 250_000, ["LV"] = 150_000, ["EE"] = 150_000,
+        ["DK"] = 150_000, ["SE"] = 150_000, ["FI"] = 250_000, ["IS"] = 150_000,
     };
 
     internal const ulong SelectSalt = 0x53454C45435433UL;
