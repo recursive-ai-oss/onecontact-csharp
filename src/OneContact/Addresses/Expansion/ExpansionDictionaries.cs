@@ -48,6 +48,30 @@ public enum ExpansionLanguages
 
     /// <summary>Irish (street types, building and unit words).</summary>
     Irish = 4096,
+
+    /// <summary>Danish (street types, directionals, unit and level words, post office words).</summary>
+    Danish = 1 << 16,
+
+    /// <summary>Swedish (street types, directionals, unit and level words, post office words).</summary>
+    Swedish = 1 << 17,
+
+    /// <summary>Finnish (street types, directionals, unit and level words, post office words).</summary>
+    Finnish = 1 << 18,
+
+    /// <summary>Norwegian, Bokmål (street types, directionals, unit and level words, post office words); the libpostal dictionary for it is named <c>nb</c>.</summary>
+    Norwegian = 1 << 19,
+
+    /// <summary>Icelandic (street types, directionals, unit and level words, post office words).</summary>
+    Icelandic = 1 << 20,
+
+    /// <summary>Estonian (street types, directionals, unit and level words, post office words).</summary>
+    Estonian = 1 << 21,
+
+    /// <summary>Latvian (street types, directionals, unit and level words).</summary>
+    Latvian = 1 << 22,
+
+    /// <summary>Lithuanian (street types, directionals, unit and level words, post office words).</summary>
+    Lithuanian = 1 << 23,
 }
 
 /// <summary>What kind of word a dictionary phrase is; it decides where the phrase may be expanded.</summary>
@@ -131,7 +155,7 @@ internal static class ExpansionDictionaries
     {
         EmbeddedTables tables = new(typeof(ExpansionDictionaries).Assembly, "OneContact.Data.libpostal-dictionaries.ocd");
         Index index = new();
-        foreach (string language in new[] { "en", "fr", "de", "nl", "it", "lb", "es", "pt", "ca", "eu", "gl", "mt", "ga" })
+        foreach (string language in new[] { "en", "fr", "de", "nl", "it", "lb", "es", "pt", "ca", "eu", "gl", "mt", "ga", "da", "sv", "fi", "nb", "is", "et", "lv", "lt" })
         {
             foreach (string file in new[] { "concatenated_suffixes_separable", "concatenated_suffixes_inseparable" })
             {

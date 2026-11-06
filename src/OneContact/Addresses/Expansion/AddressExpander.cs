@@ -25,6 +25,14 @@ public static class AddressExpander
         (ExpansionLanguages.Galician, "gl"),
         (ExpansionLanguages.Maltese, "mt"),
         (ExpansionLanguages.Irish, "ga"),
+        (ExpansionLanguages.Danish, "da"),
+        (ExpansionLanguages.Swedish, "sv"),
+        (ExpansionLanguages.Finnish, "fi"),
+        (ExpansionLanguages.Norwegian, "nb"),
+        (ExpansionLanguages.Icelandic, "is"),
+        (ExpansionLanguages.Estonian, "et"),
+        (ExpansionLanguages.Latvian, "lv"),
+        (ExpansionLanguages.Lithuanian, "lt"),
     ];
 
     /// <summary>Expands an address.</summary>

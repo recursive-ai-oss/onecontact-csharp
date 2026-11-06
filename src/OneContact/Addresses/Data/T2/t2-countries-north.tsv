@@ -1,0 +1,11 @@
+# Northern Tier 2 group (Denmark, Sweden, Finland, Norway, Iceland, Estonia, Latvia, Lithuania). Columns as in t2-countries.tsv; the last column is the profile that decides how the reader writes a line.
+# Postcode forms: 4d (DK, NO: four digits left of the locality, UPU sheets 05/2024 and 01/2013), 3d (IS: three digits, UPU 07/2002), se (SE: five digits with a space between the third and fourth, UPU 11/2024), 5d (FI, EE, LT: five digits, UPU 11/2024, 06/2014, 06/2018), lv (LV: LV- and four digits after the locality and a comma, UPU 09/2023).
+# Lines are as written and the locality in capitals (the UPU sheets print it so); Lithuania keeps the locality as written (the sheet prints Vilnius and Kaunas in mixed case, province names in capitals). House number after the name for every country (name first).
+DK	DENMARK	plain	da	4d	DK		last	0	1	-	dk
+SE	SWEDEN	plain	sv	se	SE,S		last	0	1	-	se
+FI	FINLAND	plain	fi,sv	5d	FI		last	0	1	-	fi
+NO	NORWAY	plain	nb	4d	NO,N		last	0	1	-	no
+IS	ICELAND	plain	is	3d	IS		last	0	1	-	is
+EE	ESTONIA	plain	et	5d	EE		last	0	1	-	ee
+LV	LATVIA	plain	lv	lv	LV	LV-	last	0	1	-	lv
+LT	LITHUANIA	plain	lt	5d	LT	LT-	last	0	1	-	lt

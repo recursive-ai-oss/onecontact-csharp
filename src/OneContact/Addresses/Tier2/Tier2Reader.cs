@@ -15,7 +15,7 @@ namespace RecursiveAI.OneContact.Addresses.Tier2;
 /// box line starts with the authority's box word. Anything else is refused with <see cref="ReasonCode.AddressModelRequired"/>. Nothing is invented: no locality
 /// from a postcode, no country when the content and the hint are silent.
 /// </summary>
-internal static class Tier2Reader
+internal static partial class Tier2Reader
 {
     internal static bool Handles(Region region) => T2Rules.Handles(region);
 
@@ -91,7 +91,7 @@ internal static class Tier2Reader
         "ALLEE", "AVENUE", "BOULEVARD", "CHEMIN", "CHAUSSEE", "COURS", "IMPASSE", "PASSAGE", "PLACE", "QUAI", "ROUTE", "RUE", "VOIE", "SENTIER", "PROMENADE", "ESPLANADE", "FAUBOURG", "MONTEE", "TRAVERSE", "GRAND RUE", "SQUARE",
     };
 
-    private sealed class Reader(string text, Region hint)
+    private sealed partial class Reader(string text, Region hint)
     {
         private readonly List<ParseIssue> _issues = [];
 
@@ -201,7 +201,7 @@ internal static class Tier2Reader
             // BE: a box literal that a comma set apart belongs to the street line before it ("Kortijkstraat 37, bus 1").
             for (int i = 1; i < before.Count; i++)
             {
-                if (before[i].Toks.Count == 2 && before[i].Toks[0].Key is "BUS" or "BTE" or "BOX" && IsBoxNumber(before[i].Toks[1].Text))
+                if (!country.IsNorth && before[i].Toks.Count == 2 && before[i].Toks[0].Key is "BUS" or "BTE" or "BOX" && IsBoxNumber(before[i].Toks[1].Text))
                 {
                     before[i - 1].Toks.AddRange(before[i].Toks);
                     before.RemoveAt(i);
@@ -216,6 +216,10 @@ internal static class Tier2Reader
                 if (country.Profile is "es" or "pt" or "it" or "sm" or "va" or "ad")
                 {
                     MergeFloorAndDoor(before);
+                }
+                else if (country.IsNorth)
+                {
+                    MergeNorthFloorAndDoor(before);
                 }
             }
 
@@ -243,7 +247,7 @@ internal static class Tier2Reader
             // A bulk receiver has no delivery line: its name lines and the postcode with the locality are the whole address (UPU Luxembourg and Germany sheets).
             // Only name lines without digits qualify; anything else the rules cannot place goes to the model.
             // Britain and Ireland name properties: a house name is a whole delivery point, so more lines qualify there and there is nothing to warn about.
-            bool named2 = country.Profile is "uk" or "ie";
+            bool named2 = country.Profile is "uk" or "ie" || country.IsNorth;
             bool bulk = first < 0 && before.Count >= 1 && before.Count <= (named2 ? 6 : 3) && before.All(u => !u.Toks.Any(t => t.Text.Any(char.IsAsciiDigit)));
             if (first < 0 && !bulk)
             {
@@ -327,7 +331,7 @@ internal static class Tier2Reader
             }
 
             string localityWritten = Join(localityToks);
-            string localityPostal = country.Afnor ? T2Text.SaintAbbreviated(T2Text.Afnor(localityWritten)) : localityWritten.ToUpperInvariant();
+            string localityPostal = country.Afnor ? T2Text.SaintAbbreviated(T2Text.Afnor(localityWritten)) : country.Profile == "lt" ? localityWritten : localityWritten.ToUpperInvariant();
             string localityDisplay = T2Text.Title(localityWritten, capitalsKept: true);
             string postcodeStd = match.Standard;
             string printed = country.PrintedPrefix + postcodeStd;
@@ -340,6 +344,12 @@ internal static class Tier2Reader
                 // UPU United Kingdom, Ireland and Malta sheets: the post town, the county where there is one, then the postcode on a line of its own.
                 lastPostal = localityPostal + (adminLine.Length > 0 ? "\n" + adminLine : string.Empty) + "\n" + printed;
                 lastDisplay = localityDisplay + (adminLine.Length > 0 ? "\n" + adminLineDisplay : string.Empty) + "\n" + printed;
+                if (country.Profile == "lv")
+                {
+                    // UPU Latvia sheet: the locality, a comma, then LV- and the four digits on the same line.
+                    lastPostal = localityPostal + ", " + printed;
+                    lastDisplay = localityDisplay + ", " + printed;
+                }
             }
             else
             {
@@ -628,6 +638,11 @@ internal static class Tier2Reader
 
         private static PostcodeMatch? TrailingAt(List<Tok> toks)
         {
+            if (LatvianPostcodeAt(toks) is { } latvian)
+            {
+                return latvian;
+            }
+
             if (toks.Count >= 2)
             {
                 string a = toks[^2].Text.ToUpperInvariant();
@@ -760,6 +775,19 @@ internal static class Tier2Reader
         {
             string t = toks[i].Text;
 
+            // The Baltic posts print the country code with a dash that is often typeset as an en dash (UPU Latvia and Lithuania sheets: LT–04340).
+            int typeset = t.IndexOfAny(['–', '—']);
+            if (typeset is 1 or 2 && t.Length > typeset + 1 && t[..typeset].All(char.IsLetter))
+            {
+                t = t[..typeset] + "-" + t[(typeset + 1)..];
+            }
+
+            PostcodeMatch? north = NorthMatchAt(toks, i, t, known);
+            if (north is not null)
+            {
+                return north;
+            }
+
             // A country letter prefix: L-1234, D-26133, CH-3000, FL-9490, MC-98000.
             string? prefixCountry = null;
             string digits = t;
@@ -818,9 +846,16 @@ internal static class Tier2Reader
 
             if (digits.Length == 5)
             {
+                // Finland, Estonia, Lithuania and Sweden share the five-digit form with France, Germany, Spain and Italy: a hint or a country name decides (00120 is Helsinki, and 97xxx and 98xxx
+                // exist in Finland and Estonia too). Sweden writes a space after the third digit (UPU Sweden sheet).
+                if (prefixCountry is null && known is "FI" or "EE" or "LT" or "SE")
+                {
+                    return new PostcodeMatch(1, known == "SE" ? digits[..3] + " " + digits[3..] : digits, [known], null);
+                }
+
                 // 00120 is the Vatican's (UPU Vatican sheet); San Marino uses 47890 to 47899 (UPU San Marino sheet, list of postcodes per locality).
                 List<string> candidates = prefixCountry is not null
-                    ? (prefixCountry is "FR" or "DE" or "MC" or "ES" or "IT" or "SM" or "VA" ? [prefixCountry] : [])
+                    ? (prefixCountry is "FR" or "DE" or "MC" or "ES" or "IT" or "SM" or "VA" or "FI" or "EE" or "LT" ? [prefixCountry] : [])
                     : digits == "00120" ? ["VA"]
                     : digits.StartsWith("4789", StringComparison.Ordinal) ? ["SM"]
                     : digits.StartsWith("980", StringComparison.Ordinal) ? ["MC"]
@@ -832,8 +867,8 @@ internal static class Tier2Reader
             if (digits.Length == 4)
             {
                 List<string> candidates = prefixCountry is not null
-                    ? (prefixCountry is "BE" or "AT" or "CH" or "LI" or "LU" ? [prefixCountry] : [])
-                    : ["BE", "AT", "CH", "LI", "LU"];
+                    ? (prefixCountry is "BE" or "AT" or "CH" or "LI" or "LU" or "DK" or "NO" ? [prefixCountry] : [])
+                    : ["BE", "AT", "CH", "LI", "LU", "DK", "NO"];
                 return candidates.Count == 0 ? null : new PostcodeMatch(1, digits, candidates, prefixCountry);
             }
 
@@ -1051,6 +1086,11 @@ internal static class Tier2Reader
             if (!allowStreet)
             {
                 return null;
+            }
+
+            if (country.IsNorth)
+            {
+                return ParseNorth(toks);
             }
 
             if (country.NumberFirst)
