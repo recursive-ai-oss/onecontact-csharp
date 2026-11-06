@@ -25,6 +25,18 @@ internal enum PostcodeForm
 
     /// <summary><c>AD</c> and three digits (<c>AD700</c>).</summary>
     Andorran,
+
+    /// <summary>Two digits, a dash and three digits (<c>00-950</c>), left of the locality: Poland.</summary>
+    Polish,
+
+    /// <summary>Three digits and two digits with a space between (<c>110 00</c>): the Czech Republic and Slovakia.</summary>
+    ThreeTwoDigits,
+
+    /// <summary>Six digits (<c>060274</c>): Romania.</summary>
+    SixDigits,
+
+    /// <summary>Four digits after the state abbreviation on the last line (<c>NORTH SYDNEY NSW 2060</c>): Australia.</summary>
+    Australian,
 }
 
 /// <summary>The rules of one country of the first Tier 2 group, read from <c>t2-countries.tsv</c>.</summary>
@@ -42,8 +54,11 @@ internal sealed record T2Country(
     int LocalitySpaces,
     string[] TypeSets)
 {
-    /// <summary>How the country writes a line (<c>uk</c>, <c>ie</c>, <c>es</c>, <c>pt</c>, <c>it</c>, <c>sm</c>, <c>va</c>, <c>mt</c>, <c>ad</c>); empty for the first group.</summary>
+    /// <summary>How the country writes a line (<c>uk</c>, <c>ie</c>, <c>es</c>, <c>pt</c>, <c>it</c>, <c>sm</c>, <c>va</c>, <c>mt</c>, <c>ad</c>, and for the last group <c>pl</c>, <c>cz</c>, <c>sk</c>, <c>si</c>, <c>hr</c>, <c>hu</c>, <c>ro</c>, <c>mx</c>, <c>au</c>); empty for the first group.</summary>
     internal string Profile { get; init; } = string.Empty;
+
+    /// <summary>Gets whether the country writes its lines with the profiles of the last group (Poland, the Czech Republic, Slovakia, Slovenia, Croatia, Hungary, Romania, Mexico, Australia).</summary>
+    internal bool IsCentral => Profile is "pl" or "cz" or "sk" or "si" or "hr" or "hu" or "ro" or "mx" or "au";
 
     /// <summary>Gets whether the postcode follows the locality (the United Kingdom, Ireland, Malta).</summary>
     internal bool PostcodeLast => Postcode is PostcodeForm.Uk or PostcodeForm.Eircode or PostcodeForm.Maltese;
@@ -89,6 +104,9 @@ internal static class T2Rules
 
     /// <summary>Swiss canton codes.</summary>
     internal static IReadOnlySet<string> Cantons => Loaded.Value.Cantons;
+
+    /// <summary>State abbreviations (Mexico, Australia): the key is the country and the state's name or abbreviation as <see cref="Key"/> writes it; the value is the printed abbreviation.</summary>
+    internal static IReadOnlyDictionary<(string Country, string Name), string> States => Loaded.Value.States;
 
     /// <summary>Gets a value indicating whether the country belongs to the group.</summary>
     internal static bool Handles(Region country) => !country.IsUnknown && Countries.ContainsKey(country.Code);
@@ -157,10 +175,24 @@ internal static class T2Rules
         return string.Join(' ', sb.ToString().Split(' ', StringSplitOptions.RemoveEmptyEntries));
     }
 
+    // The tables of each group of countries are files of their own, so groups are added without touching each other's rows: the first group's file has no suffix.
+    private static readonly string[] Parts = [string.Empty, "-c-south"];
+
+    private static IEnumerable<string[]> ReadParts(string name)
+    {
+        foreach (string part in Parts)
+        {
+            foreach (string[] row in RuleFile.Read(name + part + ".tsv"))
+            {
+                yield return row;
+            }
+        }
+    }
+
     private static Tables Load()
     {
         Tables t = new();
-        foreach (string[] r in RuleFile.Read("t2-countries.tsv"))
+        foreach (string[] r in ReadParts("t2-countries"))
         {
             t.Countries[r[0]] = new T2Country(
                 r[0],
@@ -176,6 +208,10 @@ internal static class T2Rules
                     "pt" => PostcodeForm.Portuguese,
                     "mt" => PostcodeForm.Maltese,
                     "ad" => PostcodeForm.Andorran,
+                    "pl" => PostcodeForm.Polish,
+                    "cz-sk" => PostcodeForm.ThreeTwoDigits,
+                    "6d" => PostcodeForm.SixDigits,
+                    "au" => PostcodeForm.Australian,
                     _ => PostcodeForm.FourDigitsTwoLetters,
                 },
                 r[5].Split(','),
@@ -190,13 +226,13 @@ internal static class T2Rules
             };
         }
 
-        foreach (string[] r in RuleFile.Read("t2-country-names.tsv"))
+        foreach (string[] r in ReadParts("t2-country-names"))
         {
             t.CountryNames[r[0]] = r[1];
             t.MaxCountryWords = Math.Max(t.MaxCountryWords, r[0].Count(c => c == ' ') + 1);
         }
 
-        foreach (string[] r in RuleFile.Read("t2-street-types.tsv"))
+        foreach (string[] r in ReadParts("t2-street-types"))
         {
             T2Type type = new(r[0], r[1], r[2] == "-" ? string.Empty : r[2]);
             if (!t.TypesBySet.TryGetValue(r[0], out List<T2Type>? list))
@@ -221,7 +257,7 @@ internal static class T2Rules
             }
         }
 
-        foreach (string[] r in RuleFile.Read("t2-delivery-words.tsv"))
+        foreach (string[] r in ReadParts("t2-delivery-words"))
         {
             foreach (string country in r[0].Split(','))
             {
@@ -229,7 +265,7 @@ internal static class T2Rules
             }
         }
 
-        foreach (string[] r in RuleFile.Read("t2-spatial-words.tsv"))
+        foreach (string[] r in ReadParts("t2-spatial-words"))
         {
             t.SpatialWords.Add(r[0]);
         }
@@ -252,9 +288,18 @@ internal static class T2Rules
             t.ItProvinces.Add(r[0]);
         }
 
-        foreach (string[] r in RuleFile.Read("t2-unit-words.tsv"))
+        foreach (string[] r in ReadParts("t2-unit-words"))
         {
             t.UnitWords.Add(r[0]);
+        }
+
+        foreach (string[] r in RuleFile.Read("t2-states-c-south.tsv"))
+        {
+            t.States[(r[0], Key(r[1]))] = r[1];
+            foreach (string name in r.Length > 2 ? r[2].Split(';') : [])
+            {
+                t.States[(r[0], Key(name))] = r[1];
+            }
         }
 
         foreach (string[] r in RuleFile.Read("t2-cantons.tsv"))
@@ -268,6 +313,8 @@ internal static class T2Rules
     private sealed class Tables
     {
         internal Dictionary<string, T2Country> Countries { get; } = new(StringComparer.Ordinal);
+
+        internal Dictionary<(string, string), string> States { get; } = [];
 
         internal Dictionary<string, string> CountryNames { get; } = new(StringComparer.Ordinal);
 

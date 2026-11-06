@@ -26,6 +26,12 @@ internal sealed class T2Layout
 
     internal (string Postal, string Display) Last { get; }
 
+    /// <summary>The locality as a line of its own, printed above the street line (Hungary); <see langword="null"/> for the countries whose locality shares the last line.</summary>
+    internal (string Postal, string Display)? LocalityLine { get; init; }
+
+    /// <summary>The number of leading lines printed above <see cref="LocalityLine"/>.</summary>
+    internal int LocalityAfter { get; init; }
+
     /// <summary>The English name of the country as the country line prints it (domestic mail leaves it out).</summary>
     internal string CountryLine => Country.CountryLine;
 
@@ -33,9 +39,19 @@ internal sealed class T2Layout
     {
         bool postal = style == AddressStyle.Postal;
         List<string> lines = [];
-        foreach ((string p, string d) in Leading)
+        for (int i = 0; i < Leading.Count; i++)
         {
-            lines.Add(postal ? p : d);
+            if (LocalityLine is { } before && i == LocalityAfter)
+            {
+                lines.Add(postal ? before.Postal : before.Display);
+            }
+
+            lines.Add(postal ? Leading[i].Postal : Leading[i].Display);
+        }
+
+        if (LocalityLine is { } locality && LocalityAfter >= Leading.Count)
+        {
+            lines.Add(postal ? locality.Postal : locality.Display);
         }
 
         foreach ((string p, string d) in Delivery)
@@ -62,6 +78,7 @@ internal static class T2Text
     private static readonly HashSet<string> Capitals = new(StringComparer.Ordinal)
     {
         "CEDEX", "BP", "CS", "TSA", "PF", "PB", "ZI", "ZA", "ZAC", "ZAD", "CCAL", "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII", "CCI", "RC", "AP", "NV", "SA", "AG", "BV", "GMBH", "SARL", "SAS", "SPRL", "CVBA", "VZW", "ASBL",
+        "PO", "GPO", "RMB", "RMS", "RSD", "CMB", "CMA", "CPA", "CDMX", "BC", "DC",
     };
 
     // Particles that are written in lower case inside a name.
@@ -69,7 +86,7 @@ internal static class T2Text
     {
         "DE", "DU", "DES", "LA", "LE", "LES", "ET", "SUR", "SOUS", "EN", "AU", "AUX", "D", "L",
         "VAN", "DER", "DEN", "TE", "TEN", "HET", "VON", "ZU", "ZUR", "ZUM", "AM", "AN", "IM", "IN", "UND", "BEI", "OB",
-        "DI", "DEL", "DELLA", "DA", "AL",
+        "DI", "DEL", "DELLA", "DA", "AL", "NAD", "POD", "AND",
         "LAS", "LOS", "Y", "DO", "DOS", "DAS", "DEI", "DEGLI", "DELLE", "DELLO", "OF",
     };
 
@@ -173,7 +190,7 @@ internal static class T2Text
             else
             {
                 sb.Append(c);
-                boundary = c is '-' or '/' or '.' or '\'' && c != '\'';
+                boundary = c is '-' or '\u2013' or '\u2014' or '/' or '.' or '\'' && c != '\'';
             }
         }
 
