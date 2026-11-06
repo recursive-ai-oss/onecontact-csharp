@@ -100,6 +100,15 @@ def addresses(p, cc):
         if COUNTRY_RE.match(nxt):
             block.append(nxt)
         text = "\n".join(block)
+        # Running prose (a privacy notice that quotes an address) is not an address block: every line stays short.
+        if any(len(b.split()) > 10 for b in block):
+            continue
+        # Page furniture that carries digits shaped like a postcode: copyright lines, bank and tax identifiers, prices.
+        if re.search(r"©|\(c\)|copyright|pridr[žz]an|jogok|all rights|\bIBAN\b|\bTRR\b|\bIČO?\b|\bNIP\b|\bREGON\b|\bKč\b|\bPLN\b|\bHUF\b|\bEUR\b|\bKM\b|\bkn\b", text, re.I):
+            continue
+        # A bare six-digit number is not enough for Romania: phone numbers and catalogue codes look the same.
+        if cc == "RO" and not re.search(r"\b(?:str|strada|bd|bdul|b-dul|bulevardul|calea|aleea|[şsș]os|[şsș]oseaua|pia[țt]a|splaiul|nr|no|cod|street|road|avenue)\b", text, re.I):
+            continue
         if 10 <= len(text) <= 230 and not re.search(r"@|https?://|www\.", text):
             res.append(text)
     return res
