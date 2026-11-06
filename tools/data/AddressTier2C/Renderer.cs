@@ -50,7 +50,7 @@ internal sealed class Rates
 /// countries, the postcode first on the last line in Norway, the Czech Republic and Estonia and last in Latvia. Only labelled pieces
 /// carry letters and digits, so every one of them lies inside a span.
 /// </summary>
-internal sealed class Renderer
+internal sealed partial class Renderer
 {
     /// <summary>Changes whenever a template, rate or draw order changes, so a manifest says which renderer made its files.</summary>
     internal const string Version = "tier2c-2026-11-05.1";
@@ -76,7 +76,7 @@ internal sealed class Renderer
     {
         _rates = rates;
         _seed = seed;
-        string[] paths = Directory.GetFiles(templatesDir, "tier2c-names*.tsv").OrderBy(p => p, StringComparer.Ordinal).ToArray();
+        string[] paths = Directory.GetFiles(templatesDir, "tier2c-*names*.tsv").OrderBy(p => p, StringComparer.Ordinal).ToArray();
         Sha256 = paths.Length == 1 ? Sha256Of(paths[0]) : Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(string.Concat(paths.Select(Sha256Of))))).ToLowerInvariant();
         foreach (string line in paths.SelectMany(File.ReadLines))
         {
@@ -104,7 +104,7 @@ internal sealed class Renderer
 
     internal Example Render(Addr a) => new Ctx(this, a, Prng.For(_seed, a.Id)).Run();
 
-    private sealed class Ctx
+    private sealed partial class Ctx
     {
         private readonly Renderer _o;
         private readonly Addr _a;
@@ -177,7 +177,7 @@ internal sealed class Renderer
             lines.Add(last);
             if (_r.Chance(label ? _rt.CountryLabel : _rt.CountryLine))
             {
-                string[] names = CountryNames[cc == "FI" && _a.Region == "19" ? "FI-AX" : cc];
+                string[] names = CountryNames.TryGetValue(cc == "FI" && _a.Region == "19" ? "FI-AX" : cc, out string[]? known) ? known : CountryNamesC1[cc];
                 lines.Add([new Piece(names[_r.Weighted(new[] { 0.7, 0.2, 0.06, 0.04 }[..names.Length])], "country")]);
                 _events.Add("country");
             }
@@ -275,6 +275,11 @@ internal sealed class Renderer
         // Street name, then number: "Storgata 12B", "Hlavní 123/4", "Brīvības iela 10 k-2", "Kase põik 9-12".
         private List<Piece> Delivery()
         {
+            if (C1)
+            {
+                return DeliveryC1();
+            }
+
             List<Piece> p = [new Piece(Case(_a.Street), "street.name")];
             if (_a.HouseNumber.Length == 0)
             {
@@ -399,6 +404,11 @@ internal sealed class Renderer
 
         private List<Piece> PostBoxPieces(string cc)
         {
+            if (C1)
+            {
+                return PostBoxC1(cc);
+            }
+
             string[] designators = cc switch
             {
                 "NO" => ["Postboks", "Postboks", "Pb."],
@@ -417,6 +427,11 @@ internal sealed class Renderer
         // The last line, and any line of its own for a district or parish.
         private List<Piece> LastLine(string cc, out List<Piece> dependentLine)
         {
+            if (C1)
+            {
+                return LastLineC1(cc, out dependentLine);
+            }
+
             dependentLine = [];
             bool noPostal = _r.Chance(_rt.MissingPostalCode);
             bool noPlace = !noPostal && _r.Chance(_rt.MissingLocality);

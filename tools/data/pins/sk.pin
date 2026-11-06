@@ -1,0 +1,7 @@
+register sk-ra-2024-05-21
+file obec.zip 77793 efac7140a1024bcf76511c65684a96ffd15db432842d6cd18b5cfcc42916db14 https://data.slovensko.sk/download?id=4ba7672f-cad5-492a-a1bb-a992038f09e5
+file cast.zip 171549 00fdb777a5dd2f2d402f98b74dc627ed5ea36ac50cc7f77437684ba8e46dc362 https://data.slovensko.sk/download?id=137d193c-63c0-4a64-9636-b157b597de17
+file ulica.zip 1078797 a681616fdeb1a09a542eae9e8d939af4126b8a0c55d35a041ef772f0abecf547 https://data.slovensko.sk/download?id=e83a0a43-115d-4ee9-ab2f-fb7b9209c96d
+file budova.zip 87494899 6e0024a75a71113e6ef5b3719fca52bba53a6595dd6ea59e26a75737f563fa04 https://data.slovensko.sk/download?id=28709e7e-9666-426c-8571-ec20c1c6308f
+file vchod.zip 211117336 0a05c7385c9b3c8f4a8c9d3e9bd607dbc64dbff00779f285e068d5840b8dd2cb https://data.slovensko.sk/download?id=11c502e2-5158-46c5-aa16-839ada16ea0e
+derived sk-addresses.tsv.gz 18208402 814ab1c173ea5ab8e7f2152bdc553e5889a495e3bda02599adb5fa3600efa6eb AddressTier2C convert

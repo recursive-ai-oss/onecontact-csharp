@@ -6,7 +6,7 @@ using OneContact.Data.AddressTier2A;
 namespace OneContact.Data.AddressTier2C;
 
 /// <summary>One register address in the shape the renderer reads, whichever register it came from.</summary>
-internal sealed record Addr
+internal sealed partial record Addr
 {
     internal string Id { get; init; } = string.Empty;
 
@@ -66,6 +66,11 @@ internal static partial class Registers
         "CZ" => Czechia(Path.Combine(Directory(dataRoot, "cz-ruian"), "20261031_OB_ADR_csv.zip"), rejects),
         "LV" => Latvia(Path.Combine(Directory(dataRoot, "lv-varis"), "aw_eka.csv"), rejects),
         "EE" => Estonia(Path.Combine(Directory(dataRoot, "ee-ads"), "AADRESSID_KOMPONENTIDEGA.csv"), rejects),
+        "MX" => Mexico(Directory(dataRoot, "mx-denue"), rejects),
+        "PL" => Derived("PL", "pl", Path.Combine(Directory(dataRoot, "pl-prg"), "derived", "pl-addresses.tsv.gz"), rejects),
+        "SI" => Derived("SI", "sl", Path.Combine(Directory(dataRoot, "si-rpe"), "derived", "si-addresses.tsv.gz"), rejects),
+        "SK" => Derived("SK", "sk", Path.Combine(Directory(dataRoot, "sk-ra"), "derived", "sk-addresses.tsv.gz"), rejects),
+        "LT" => Lithuania(Directory(dataRoot, "lt-ar"), rejects),
         "DK" or "SE" or "FI" or "IS" => NordicRaw(country, dataRoot, rejects),
         _ => GroupC3(country, dataRoot, rejects),
     };

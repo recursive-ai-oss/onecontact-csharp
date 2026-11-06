@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Turns the open address registers of Norway, the Czech Republic, Latvia and Estonia into labelled free-text training examples
+  <!-- Turns the open address registers of Norway, the Czech Republic, Latvia, Estonia, Mexico, Poland, Slovenia, Slovakia and Lithuania into labelled free-text training examples
        through our own templates. It shares the tokenizer, random generator, example type and span rules with the United States and
        Canada tool, and the delimited-text reader with the group A tool. -->
   <PropertyGroup>

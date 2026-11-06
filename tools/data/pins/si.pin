@@ -1,0 +1,4 @@
+register si-rpe-2026-11-06
+file ad-postal.xml.gz 12917 56481d858513608997d5be6d84ee7528ccbce74fe7dbd5b50a44d212bf5bcf98 https://ipi.eprostor.gov.si/wfs-si-gurs-ins/ad/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=ad:PostalDescriptor
+file ad-address.xml.gz 52677105 1618bb25c01fdb34d6aa6a02735e989e9bb24e04c4180d3c5dc35e1cb0dc19b4 https://ipi.eprostor.gov.si/wfs-si-gurs-ins/ad/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=ad:Address
+derived si-addresses.tsv.gz 9362650 0088489b1421184945f017958903fe6ba4e98e37ffdf6d271cb856190a526688 AddressTier2C convert
