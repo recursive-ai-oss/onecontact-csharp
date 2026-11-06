@@ -96,6 +96,11 @@ internal static partial class T2Rules
     /// <summary>The countries by code.</summary>
     internal static IReadOnlyDictionary<string, T2Country> Countries => Loaded.Value.Countries;
 
+    private static readonly Lazy<string[]> Trials = new(() => [.. Countries.Keys.Where(c => c is not ("GP" or "MQ" or "GF" or "RE" or "YT")).Order(StringComparer.Ordinal)]);
+
+    /// <summary>The countries a text of unknown country is read as, one by one, to infer its country (the overseas departments are read as France).</summary>
+    internal static IReadOnlyList<string> TrialCountries => Trials.Value;
+
     /// <summary>Country names as they end an address, to the country code.</summary>
     internal static IReadOnlyDictionary<string, string> CountryNames => Loaded.Value.CountryNames;
 
