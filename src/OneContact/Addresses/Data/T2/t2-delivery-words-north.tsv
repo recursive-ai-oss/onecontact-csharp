@@ -9,6 +9,8 @@ FI	box	PB	PB
 FI	box	POBOX	P.O.Box
 IS	box	POSTHOLF	Pósthólf
 LT	box	P D	P. d.
+LT	box	PD	P. d.
+LT	box	PASTO DEZUTE	Pašto dėžutė
 NO	general	POSTE RESTANTE	Poste Restante
 FI	general	POSTE RESTANTE	Poste restante
 EE	general	NOUDMISENI	Nõudmiseni

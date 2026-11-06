@@ -30,6 +30,12 @@ internal static partial class Tier2Reader
                 return new PostcodeMatch(1, digits[..2] + "-" + digits[3..], ["PL"], prefixCountry);
             }
 
+            // Poczta Polska writes the code with its dash; written without it, five digits are Polish only when the text is known to be Polish, because other countries share the form.
+            if (known == "PL" && prefixCountry is null or "PL" && digits.Length == 5 && digits.All(char.IsAsciiDigit))
+            {
+                return new PostcodeMatch(1, digits[..2] + "-" + digits[2..], ["PL"], prefixCountry);
+            }
+
             if (known is null or "CZ" or "SK" && prefixCountry is null or "CZ" or "SK")
             {
                 List<string> candidates = prefixCountry is not null ? [prefixCountry] : known is "CZ" or "SK" ? [known] : ["CZ", "SK"];
@@ -312,12 +318,112 @@ internal static partial class Tier2Reader
             return false;
         }
 
+        // Mexican writers put the postcode after "C.P." or "CP" (código postal), often after the locality: "León, C.P. 37240", "C.P. 38500, Apaseo el Alto, Guanajuato".
+        // UPU Mexico sheet: postcode + locality + state abbreviation. When the code does not stand in front of its locality, the units are rearranged to read code, locality, state,
+        // as the other countries' last lines do; the spans still point at the words in the input. Only for text that is Mexican by hint or has no hint, and only with the "C.P." word.
+        private static bool FindMexicanPostcodeWord(List<Unit> units, string? known, out int unitIndex, out int tokenIndex, out PostcodeMatch match)
+        {
+            unitIndex = tokenIndex = 0;
+            match = null!;
+            if (known is not null and not "MX")
+            {
+                return false;
+            }
+
+            int u = units.FindLastIndex(x => x.Toks.Count >= 2 && IsPostalCodeWord(x.Toks[^2]) && IsMexicanCode(x.Toks[^1].Text));
+            if (u < 0 || units.Count - 1 - u > 2)
+            {
+                return false;
+            }
+
+            T2Country mx = T2Rules.Countries["MX"];
+            List<Tok> unit = units[u].Toks;
+            Tok[] pair = [unit[^2], unit[^1]];
+            List<Tok> head = unit.GetRange(0, unit.Count - 2);
+            List<Tok> locality;
+            int from = u;
+            Unit? headUnit = null;
+            if (u < units.Count - 1)
+            {
+                // The locality, and after it the state, follow the code as units of their own; what stands in front of the code in its unit is a line of its own.
+                List<Unit> after = units.GetRange(u + 1, units.Count - u - 1);
+                if (after.Any(x => x.Toks.Count > 5 || x.Toks.Any(t => t.Text.Any(char.IsAsciiDigit))) || StartsWithSpatial(after[0].Toks))
+                {
+                    return false;
+                }
+
+                if (after.Count == 2 && !(StateTail("MX", after[1].Toks, out int w, out _) && w == after[1].Toks.Count))
+                {
+                    return false;
+                }
+
+                locality = [.. after.SelectMany(x => x.Toks)];
+                headUnit = head.Count > 0 ? new Unit(head) : null;
+            }
+            else if (head.Count > 0)
+            {
+                // Written in lines, "Pénjamo, C.P. 36900" is one line with the locality in front of the code. A line with digits or a street type in front of it is not a locality.
+                if (head.Count > 5 || head.Any(t => t.Text.Any(char.IsAsciiDigit)) || StartsWithSpatial(head) || T2Rules.FindType(mx, head[0].Key) is not null)
+                {
+                    return false;
+                }
+
+                locality = head;
+            }
+            else if (u > 0)
+            {
+                // On one line the locality, or the locality and the state, are the units in front of the code.
+                int l = u - 1;
+                if (units[l].Toks is [{ Key: "MEXICO" }])
+                {
+                    // "Ecatepec de Morelos, México, C.P. 55418": México is the state or the country; the rules do not choose.
+                    return false;
+                }
+
+                bool stateOnly = StateTail("MX", units[l].Toks, out int sw, out _) && sw == units[l].Toks.Count;
+                if (stateOnly && l > 0)
+                {
+                    l--;
+                }
+
+                List<Tok> place = units[l].Toks;
+                if (place.Count > 5 || place.Any(t => t.Text.Any(char.IsAsciiDigit)) || StartsWithSpatial(place) || T2Rules.FindType(mx, place[0].Key) is not null && place.Count > 1)
+                {
+                    return false;
+                }
+
+                locality = [.. units.GetRange(l, u - l).SelectMany(x => x.Toks)];
+                from = l;
+            }
+            else
+            {
+                return false;
+            }
+
+            List<Unit> rearranged = units.GetRange(0, from);
+            if (headUnit is not null)
+            {
+                rearranged.Add(headUnit);
+            }
+
+            rearranged.Add(new Unit([.. pair, .. locality]));
+            units.Clear();
+            units.AddRange(rearranged);
+            unitIndex = units.Count - 1;
+            match = new PostcodeMatch(2, pair[1].Text, ["MX", "ES"], null);
+            return true;
+        }
+
+        private static bool IsPostalCodeWord(Tok t) => t.Key == "CP";
+
+        private static bool IsMexicanCode(string s) => s.Length == 5 && s.All(char.IsAsciiDigit);
+
         private static bool StateTail(string country, List<Tok> toks, out int words, out string abbreviation)
         {
             for (int n = Math.Min(3, toks.Count); n >= 1; n--)
             {
                 string key = T2Rules.Key(Join(toks.GetRange(toks.Count - n, n)));
-                if (T2Rules.States.TryGetValue((country, key), out string? printed))
+                if (T2Rules.States.TryGetValue((country, key), out string? printed) && !(n == 1 && toks.Count > 1 && toks[^2].Key is "DE" or "DEL" or "LA" or "LOS" or "LAS" or "EL" or "Y"))
                 {
                     words = n;
                     abbreviation = printed;
@@ -607,8 +713,27 @@ internal static partial class Tier2Reader
         private Line? ParseCentral(List<Tok> toks, T2Country country, int typeWords)
         {
             bool hu = country.Profile == "hu";
+
+            if (country.Profile == "mx" && IsMexicanSettlementLine(toks))
+            {
+                return null;
+            }
+
+            // A box word inside the line ("Závodie P.O.BOX 1970") means this is not a plain street line; the rules leave it to the model.
+            if (country.Profile is "cz" or "sk" or "si" && toks.Skip(1).Any(t => T2Rules.FindDelivery(country.Code, t.Key) is { Role: "box" }))
+            {
+                return null;
+            }
+
             int j = -1;
-            for (int k = typeWords + 1; k < toks.Count; k++)
+
+            // Mexican streets without a number end in "S/N" (sin número); the word stands where the number would.
+            if (country.Profile == "mx" && toks.Count - 1 > typeWords && toks[^1].Key == "S/N")
+            {
+                j = toks.Count - 1;
+            }
+
+            for (int k = typeWords + 1; j < 0 && k < toks.Count; k++)
             {
                 // "#456" and "No. 456": Mexican and Romanian writers put a marker before the number.
                 string numberText = toks[k].Text.StartsWith('#') ? toks[k].Text[1..] : toks[k].Text;
@@ -697,13 +822,60 @@ internal static partial class Tier2Reader
                 Add(StreetPartRole.Other, m.Text, m.Text, m.Text, m.Span, "t2-number-marker");
             }
 
-            Add(StreetPartRole.HouseNumber, house.Text, house.Text, house.Text, house.Span, "t2-house-number");
-            if (j < toks.Count - 1)
+            int tailFrom = j + 1;
+            string houseStandard = house.Text;
+            if (country.Profile == "si" && tailFrom < toks.Count && toks[tailFrom].Text.Length == 1 && char.IsAsciiLetter(toks[tailFrom].Text[0]) && char.IsAsciiDigit(house.Text[^1]))
             {
-                List<Tok> tail = toks.GetRange(j + 1, toks.Count - j - 1);
-                string tailText = Slice(tail);
-                bool numberOnly = tail.Count == 1 && tail[0].Text.Any(char.IsAsciiDigit);
-                Add(numberOnly ? StreetPartRole.UnitNumber : StreetPartRole.UnitDesignator, tailText, tailText, tailText, Span(tail), "t2-floor-and-door");
+                // Slovenian house numbers carry a letter that may stand after a space ("213 a"); the letter is part of the number.
+                Tok letter = toks[tailFrom];
+                house = new Tok(text.Substring(house.Start, letter.End - house.Start), house.Start);
+                houseStandard = toks[j].Text + " " + letter.Text;
+                tailFrom++;
+            }
+
+            int slash = country.Profile == "pl" ? house.Text.IndexOf('/', StringComparison.Ordinal) : -1;
+            if (slash > 0 && slash == house.Text.LastIndexOf('/') && IsHouseNumber(house.Text[..slash]) && IsHouseNumber(house.Text[(slash + 1)..]))
+            {
+                // Poczta Polska, Zasady poprawnego adresowania 1.2: the number of the building and, after it, that of the flat or premises; "9/93" is both, written together.
+                string building = house.Text[..slash];
+                string flat = house.Text[(slash + 1)..];
+                Add(StreetPartRole.HouseNumber, building, building, building, new SourceSpan(house.Start, building.Length), "t2-house-number");
+                pieces.Add(new Piece(StreetPartRole.UnitNumber, flat, flat, flat, new SourceSpan(house.Start + slash + 1, flat.Length), "poczta-polska-flat", "/"));
+                previousEnd = house.End;
+            }
+            else
+            {
+                Add(StreetPartRole.HouseNumber, house.Text, houseStandard, houseStandard, house.Span, "t2-house-number");
+            }
+
+            if (tailFrom < toks.Count)
+            {
+                List<Tok> tail = toks.GetRange(tailFrom, toks.Count - tailFrom);
+
+                // Poland: "m. 22" (mieszkanie), "lok. 5" (lokal) - the word is the designator and what follows it the number.
+                List<Tok> flats = [];
+                int at = 0;
+                while (at + 1 < tail.Count && T2Rules.IsUnitDesignator(country.Code, tail[at].Key) && IsUnitNumber(tail[at + 1].Text))
+                {
+                    flats.Add(tail[at]);
+                    flats.Add(tail[at + 1]);
+                    at += 2;
+                }
+
+                if (at == tail.Count && at > 0)
+                {
+                    for (int f = 0; f < flats.Count; f += 2)
+                    {
+                        Add(StreetPartRole.UnitDesignator, flats[f].Text, flats[f].Text, flats[f].Text, flats[f].Span, "poczta-polska-flat");
+                        Add(StreetPartRole.UnitNumber, flats[f + 1].Text, flats[f + 1].Text, flats[f + 1].Text, flats[f + 1].Span, "poczta-polska-flat");
+                    }
+                }
+                else
+                {
+                    string tailText = Slice(tail);
+                    bool numberOnly = tail.Count == 1 && tail[0].Text.Any(char.IsAsciiDigit);
+                    Add(numberOnly ? StreetPartRole.UnitNumber : StreetPartRole.UnitDesignator, tailText, tailText, tailText, Span(tail), "t2-floor-and-door");
+                }
             }
 
             return new Line(StreetLineKind.Street, pieces);
@@ -846,13 +1018,61 @@ internal static partial class Tier2Reader
                 {
                     bool prevHasNumber = prev.Any(x => IsNum(x.Text, hu));
                     bool marker = t.Count >= 2 && t[0].Key is "NR" or "NO" or "NUM" && !prevHasNumber;
-                    bool tail = prevHasNumber && TailOkC(t, 0) && (t[0].Text.Any(char.IsAsciiDigit) || T2Rules.UnitWords.Contains(t[0].Key) || IsRoman(t[0].Text));
+                    bool tail = prevHasNumber && TailOkC(t, 0) && (t[0].Text.Any(char.IsAsciiDigit) || T2Rules.UnitWords.Contains(t[0].Key) || IsRoman(t[0].Text) || t.Count >= 2 && T2Rules.IsUnitDesignator(country.Code, t[0].Key));
                     merge = marker || tail;
                 }
 
                 if (merge)
                 {
                     before[i - 1].Toks = [.. prev, .. t];
+                    before.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+
+        // UPU Mexico sheet: the line "Col. Tlatilco" is the name of the quarter (colonia); a housing estate (fraccionamiento), a barrio, a pueblo, an ejido or a residencial is the
+        // same kind of line. The marker word makes the line certain; a quarter named without a marker word stays a line as written.
+        private static bool IsMexicanSettlementLine(List<Tok> toks) =>
+            toks.Count >= 2 && (toks[0].Key is "COL" or "COLONIA" or "FRACC" or "FRACCIONAMIENTO" or "BARRIO" or "PUEBLO" or "EJIDO" or "RESIDENCIAL" || toks[0].Key == "UNIDAD" && toks[1].Key == "HABITACIONAL");
+
+        private static Piece CentralOtherPiece(List<Tok> toks, T2Country country)
+        {
+            Piece piece = OtherPiece(toks, country, afterStreet: true);
+            return country.Profile == "mx" && IsMexicanSettlementLine(toks) ? piece with { Rule = "t2-dependent-locality" } : piece;
+        }
+
+        // Written on one line, the colonia follows the street number without a comma ("Calle X 12 Col. Y"); it is a line of its own.
+        private static void SplitColoniaWord(List<Unit> before)
+        {
+            for (int i = 0; i < before.Count; i++)
+            {
+                List<Tok> toks = before[i].Toks;
+                int at = toks.FindIndex(1, t => t.Key is "COL" or "COLONIA" or "FRACC" or "FRACCIONAMIENTO");
+                if (at > 0 && at < toks.Count - 1 && toks.Take(at).Any(t => t.Text.Any(char.IsAsciiDigit) || t.Key == "S/N"))
+                {
+                    before[i] = new Unit(toks.GetRange(at, toks.Count - at));
+                    before.Insert(i, new Unit(toks.GetRange(0, at)));
+                    i++;
+                }
+            }
+        }
+
+        // On one line the legal form of a company name stands after a comma ("Servicios Díaz, S.C., Calle X 10"; "Mikuš a spol., v.o.s., Neded 931"): it belongs to the name before it.
+        private static void MergeLegalSuffix(List<Unit> before, T2Country country)
+        {
+            for (int i = 1; i < before.Count; i++)
+            {
+                string key = string.Join(' ', before[i].Toks.Select(t => t.Key));
+                bool legal = country.Profile switch
+                {
+                    "mx" => key is "SC" or "AC" or "SA" or "SA DE CV" or "S DE RL DE CV" or "SAPI DE CV" or "SAB DE CV" or "SRL DE CV" or "SAS",
+                    "sk" or "cz" => key is "SRO" or "VOS" or "AS" or "KS" or "SPOL SRO",
+                    _ => false,
+                };
+                if (legal && before[i - 1].Toks.Count > 0 && !before[i - 1].Toks.Any(x => x.Text.Any(char.IsAsciiDigit)))
+                {
+                    before[i - 1].Toks = [.. before[i - 1].Toks, .. before[i].Toks];
                     before.RemoveAt(i);
                     i--;
                 }
