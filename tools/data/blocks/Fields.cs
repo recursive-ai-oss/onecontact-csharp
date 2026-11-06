@@ -6,7 +6,12 @@ namespace OneContact.Data.Blocks;
 /// <summary>A North American number: area code, exchange and line.</summary>
 internal sealed record Phone(string Area, string Exchange, string Line, string? Ext)
 {
-    internal string Digits => Area + Exchange + Line;
+    /// <summary>For numbers outside North America: the digits as shown (national significant number, with the country code when shown), and the shown text.</summary>
+    internal string? ShownDigits { get; init; }
+
+    internal string? ShownText { get; init; }
+
+    internal string Digits => ShownDigits ?? Area + Exchange + Line;
 }
 
 /// <summary>Generates the structured field values blocks are made of. Phone numbers are valid for their region by the library's own metadata and drawn at random,
@@ -56,6 +61,48 @@ internal sealed class FieldGen
         return n.IsValid && n.IsValidForRegion(region);
     }
 
+    /// <summary>A number of a Tier 2 country: valid for its region by the library's metadata, made by changing the last digits of the region's example number, written the national or the international way.</summary>
+    internal Phone PhoneT2(Prng r, string country, bool ext)
+    {
+        Region region = Region.Parse(country);
+        foreach (PhoneNumberType type in new[] { r.Chance(0.3) ? PhoneNumberType.Mobile : PhoneNumberType.FixedLine, PhoneNumberType.FixedLine })
+        {
+            PhoneNumber? example = PhoneNumber.GetExample(region, type);
+            if (example is null)
+            {
+                continue;
+            }
+
+            string nsn = example.Value.NationalSignificantNumber;
+            int keep = Math.Max(2, nsn.Length - 4 - r.Int(3));
+            for (int tries = 0; tries < 60; tries++)
+            {
+                char[] digits = nsn.ToCharArray();
+                for (int i = keep; i < digits.Length; i++)
+                {
+                    digits[i] = (char)('0' + r.Int(10));
+                }
+
+                PhoneNumber candidate = PhoneNumber.Create(example.Value.CountryCode, new string(digits));
+                if (!candidate.IsValid || !candidate.IsValidForRegion(region))
+                {
+                    continue;
+                }
+
+                bool international = r.Chance(0.45);
+                string shown = candidate.Format(international ? PhoneFormat.International : PhoneFormat.National);
+                string only = new(shown.Where(char.IsAsciiDigit).ToArray());
+                string? extension = ext ? (1 + r.Int(r.Chance(0.5) ? 99 : 999)).ToString(CultureInfo.InvariantCulture) : null;
+                return new Phone(string.Empty, string.Empty, only, extension) { ShownDigits = only, ShownText = shown };
+            }
+        }
+
+        PhoneNumber fallback = PhoneNumber.GetExample(region)!.Value;
+        string fb = fallback.Format(PhoneFormat.International);
+        string fbDigits = new(fb.Where(char.IsAsciiDigit).ToArray());
+        return new Phone(string.Empty, string.Empty, fbDigits, null) { ShownDigits = fbDigits, ShownText = fb };
+    }
+
     internal Phone Phone(Prng r, Loc loc, bool ext)
     {
         string[] areas = _areas[(int)loc];
@@ -83,6 +130,11 @@ internal sealed class FieldGen
     internal string FormatPhone(Phone p, Prng r, Loc loc, LexSet lex, bool allowObfuscation, out bool obfuscated)
     {
         obfuscated = false;
+        if (p.ShownText is not null)
+        {
+            return p.Ext is not null ? p.ShownText + lex.ExtLabels[r.Int(lex.ExtLabels.Length)] + p.Ext : p.ShownText;
+        }
+
         string a = p.Area;
         string x = p.Exchange;
         string l = p.Line;
@@ -178,7 +230,9 @@ internal sealed class FieldGen
             }
         }
 
-        string tld = loc == Loc.UsEn
+        string tld = loc == Loc.T2
+            ? r.Pick(new[] { "com", "com", "de", "de", "fr", "fr", "nl", "it", "es", "pl", "cz", "se", "no", "dk", "fi", "at", "ch", "be", "pt", "hu", "ro", "eu", "net", "org", "si", "sk", "hr", "lt", "lv", "ee", "ie", "co.uk", "mt", "mx", "com.au" })
+            : loc == Loc.UsEn
             ? r.Pick(new[] { "com", "com", "com", "com", "com", "com", "com", "net", "org", "us", "biz", "co", "io" })
             : r.Pick(new[] { "ca", "ca", "ca", "ca", "ca", "com", "com", "com", "org", "net", loc == Loc.CaFr ? "qc.ca" : "ca" });
         return name + "." + tld;
@@ -216,7 +270,9 @@ internal sealed class FieldGen
         };
     }
 
-    internal string FreeDomain(Prng r, Loc loc) => loc == Loc.UsEn ? r.Pick(FreeMail) : r.Pick(FreeMailCa);
+    private static readonly string[] FreeMailT2 = ["gmail.com", "outlook.com", "hotmail.com", "yahoo.com", "icloud.com", "web.de", "gmx.de", "gmx.net", "t-online.de", "orange.fr", "free.fr", "laposte.net", "libero.it", "wp.pl", "o2.pl", "seznam.cz", "centrum.cz", "telenet.be", "ziggo.nl", "live.nl", "bluewin.ch", "sapo.pt", "terra.es", "proton.me", "post.sk"];
+
+    internal string FreeDomain(Prng r, Loc loc) => loc == Loc.T2 ? r.Pick(FreeMailT2) : loc == Loc.UsEn ? r.Pick(FreeMail) : r.Pick(FreeMailCa);
 
     /// <summary>The shown spelling of an email address; <paramref name="mode"/> is "o" when it is obfuscated.</summary>
     internal static string ShowEmail(string email, Prng r, bool allowObfuscation, out string mode)

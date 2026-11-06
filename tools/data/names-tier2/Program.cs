@@ -100,6 +100,7 @@ internal static class Program
 
         // The exact bytes depend on the order, so it is fixed: by id.
         all.Sort((a, b) => string.CompareOrdinal(a.Id, b.Id));
+        SortedDictionary<string, long> counts;
         using (ExampleWriter w = new(outDir))
         {
             foreach (Example e in all)
@@ -110,8 +111,10 @@ internal static class Program
                 }
             }
 
-            WriteManifest(outDir, o, seed, version: Version, w.Counts, perCountry, gleifStats);
+            counts = w.Counts;
         }
+
+        WriteManifest(outDir, o, seed, version: Version, counts, perCountry, gleifStats);
 
         Console.WriteLine("done " + Version + " examples=" + all.Count(e => e.Split != "reserved"));
         return 0;

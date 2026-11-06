@@ -41,6 +41,11 @@ internal static class Program
                 return Render(Opt("names"), Opt("addr"), Opt("tiger"), Opt("out"), opts.GetValueOrDefault("crawl"),
                     ulong.Parse(Opt("seed", "20261106"), CultureInfo.InvariantCulture),
                     int.Parse(Opt("count", "560000"), CultureInfo.InvariantCulture));
+            case "render-tier2":
+                return RenderTier2(Opt("names"), [.. Opt("addr-files").Split(',', StringSplitOptions.RemoveEmptyEntries)], Opt("out"),
+                    ulong.Parse(Opt("seed", "20261108"), CultureInfo.InvariantCulture),
+                    int.Parse(Opt("count", "400000"), CultureInfo.InvariantCulture),
+                    int.Parse(Opt("per-file", "6000"), CultureInfo.InvariantCulture));
             case "report":
                 RuleReport.Run(Opt("out"), int.Parse(Opt("sample", "5000"), CultureInfo.InvariantCulture));
                 return 0;
@@ -63,11 +68,18 @@ internal static class Program
         internal string Line = "";
     }
 
-    private static int Render(string namesDir, string addrDir, string tigerDir, string outDir, string? crawlDir, ulong seed, int count)
+    private static int Render(string namesDir, string addrDir, string tigerDir, string outDir, string? crawlDir, ulong seed, int count) =>
+        RenderWith(() => Pools.Load(namesDir, addrDir, tigerDir), outDir, crawlDir, seed, count, tier2: false);
+
+    // Tier 2 blocks: every block is in the Tier 2 locale. The tool version is the same, the manifest says which mode made the set.
+    private static int RenderTier2(string namesDir, IReadOnlyList<string> addressFiles, string outDir, ulong seed, int count, int perFile) =>
+        RenderWith(() => Pools.LoadTier2(namesDir, addressFiles, perFile), outDir, null, seed, count, tier2: true);
+
+    private static int RenderWith(Func<Pools> load, string outDir, string? crawlDir, ulong seed, int count, bool tier2)
     {
         Directory.CreateDirectory(outDir);
         Console.WriteLine("loading pools");
-        Pools pools = Pools.Load(namesDir, addrDir, tigerDir);
+        Pools pools = load();
         Console.WriteLine(pools.Summary());
         FieldGen fg = new();
         Renderer renderer = new(pools, fg);
@@ -89,7 +101,7 @@ internal static class Program
             {
                 int first = (b0 + k) * ChunkSize;
                 int last = Math.Min(count, first + ChunkSize);
-                results[k] = RenderChunk(renderer, chrome, seed, first, last);
+                results[k] = RenderChunk(renderer, chrome, seed, first, last, tier2);
             });
             foreach ((List<Rendered> lines, Stats st) in results)
             {
@@ -118,7 +130,7 @@ internal static class Program
         return total.SpanFailures == 0 ? 0 : 1;
     }
 
-    private static (List<Rendered>, Stats) RenderChunk(Renderer renderer, Chrome chrome, ulong seed, int first, int last)
+    private static (List<Rendered>, Stats) RenderChunk(Renderer renderer, Chrome chrome, ulong seed, int first, int last, bool tier2)
     {
         List<Rendered> lines = [];
         Stats st = new();
@@ -133,7 +145,7 @@ internal static class Program
             }
 
             Prng r = Prng.For(seed, id);
-            Loc loc = (Loc)r.Weighted([60, 22, 18]);
+            Loc loc = tier2 ? Loc.T2 : (Loc)r.Weighted([60, 22, 18]);
             int ki = r.Weighted(Kind.All.Select(k => k.Weight).ToArray());
             (string kind, _, bool page, bool crm) = Kind.All[ki];
             Logical l = renderer.Make(r, split, loc, kind);
@@ -239,7 +251,7 @@ internal static class Program
         return Encoding.UTF8.GetString(ms.ToArray());
     }
 
-    internal static string LocName(Loc loc) => loc switch { Loc.UsEn => "us-en", Loc.CaEn => "ca-en", _ => "ca-fr" };
+    internal static string LocName(Loc loc) => loc switch { Loc.UsEn => "us-en", Loc.CaEn => "ca-en", Loc.T2 => "tier2", _ => "ca-fr" };
 
     internal static string Sha(string path)
     {

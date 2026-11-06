@@ -68,18 +68,28 @@ internal static class Program
     {
         string suffix = dev ? "-dev" : string.Empty;
         int addrCount = Num(o, dev ? "address-dev-count" : "address-count", dev ? 8000 : 300000);
-        int nameCount = Num(o, dev ? "names-dev-count" : "names-count", dev ? 8000 : 200000);
+        int bigCount = Num(o, dev ? "address-big-dev-count" : "address-big-count", addrCount);
         List<Example> all = [];
+        // Files named in --address-big (the United States, Canada and the territories) have their own count; the other files share --address-count evenly
+        // (a file with fewer lines gives all of them), so every country is seen.
+        HashSet<string> big = new(o.TryGetValue("address-big", out string? bigList) ? bigList.Split(',', StringSplitOptions.RemoveEmptyEntries) : [], StringComparer.Ordinal);
         string[] addressFiles = Files(o, "addresses" + suffix);
-        // The count is shared out evenly over the files, so every region is seen.
+        string[] others = [.. addressFiles.Where(f => !big.Contains(StripSplit(f)))];
         foreach (string file in addressFiles)
         {
-            all.AddRange(Data.ReadAddresses(file, strings, addrCount / Math.Max(1, addressFiles.Length), SelectionSalt));
+            int count = big.Contains(StripSplit(file)) ? bigCount : addrCount / Math.Max(1, others.Length);
+            all.AddRange(Data.ReadAddresses(file, strings, count, SelectionSalt));
         }
 
+        // Names come in two groups with their own counts, so the Tier 2 languages are not drowned by the larger United States and Canada set.
         if (o.ContainsKey("names" + suffix))
         {
-            all.AddRange(Data.ReadNames(Files(o, "names" + suffix), strings, nameCount, SelectionSalt));
+            all.AddRange(Data.ReadNames(Files(o, "names" + suffix), strings, Num(o, dev ? "names-dev-count" : "names-count", dev ? 8000 : 200000), SelectionSalt));
+        }
+
+        if (o.ContainsKey("names2" + suffix))
+        {
+            all.AddRange(Data.ReadNames(Files(o, "names2" + suffix), strings, Num(o, dev ? "names2-dev-count" : "names2-count", dev ? 8000 : 200000), SelectionSalt));
         }
 
         // A fixed shuffle, so batches mix addresses and names whatever order the files came in.
@@ -205,6 +215,9 @@ internal static class Program
 
         return 0;
     }
+
+    // "/path/us.train.jsonl" -> "us"
+    private static string StripSplit(string file) => Path.GetFileName(file).Split('.')[0];
 
     private static string[] Files(Dictionary<string, string> o, string key)
     {
