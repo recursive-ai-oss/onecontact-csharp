@@ -55,3 +55,30 @@ The country line (English, in capitals for Postal) is printed only when asked: `
 ## Expansions
 
 `ExpansionLanguages.Danish`, `Swedish`, `Finnish`, `Norwegian`, `Icelandic`, `Estonian`, `Latvian` and `Lithuanian` use the libpostal dictionaries `da`, `sv`, `fi`, `nb`, `is`, `et`, `lv`, `lt` (street types, directionals, unit and level words, post office words, ambiguous expansions) at the pinned tag, listed in `upstream/libpostal-dictionaries/PIN`. Each language keeps its own ambiguous-expansion list. The German and Dutch ending expansion (`Hauptstr` → `Hauptstrasse`) is not applied to the northern languages. Keys of the United States, Canada and the first two groups do not change.
+
+## Labels and extra forms (recovery round)
+
+Measured against the register-rendered dev files (see the repo's `tools/Eval/Tier2Recovery`), these forms are read by rules:
+
+- **Country code before the postcode** (`DK-1352`, `NO-6419`, `SE-839 89`, `IS-102`, `FI-02970`, `EE-`): the code is the `country` field and the postcode is the digits after the dash. Latvian and Lithuanian postcodes keep `LV-` and `LT-` as part of the postcode.
+- **Unit labels.** Floor and door as the writer set them (`1. th`, `st. a19`, `13`, a Norwegian dwelling number `H0219`) are one unit number; a designator word (`lgh`, `dz.`, `korp.`, Estonian `korter`) is the designator and what follows it the number. In Estonia, Latvia and Lithuania the apartment after the house number's dash (`6–1`, `2 - 22`, and in Estonia also a slash, `46/49`) is the unit number; a Latvian building (`5 k-8`) stays part of the house number. The dash keeps its spacing in Postal.
+- **Box words**: `Pb.` (DK, NO), `Postbox` (SE), `Postilokero` (FI), `Pósth.` (IS), `Postkast`, `PK` (EE), `Pasta kastīte`, `PK`, `p/k` (LV).
+- **A company name that runs into the street on one line** is split after its legal form (`ApS`, `A/S`, `AB`, `Oy`, `AS`, `ehf`, …) when the rest is a street line. A person's name that runs into the street is not split: where the name ends and the street begins is not certain, so such a line is read as a street name or refused, and the model decides.
+- **Latvia.** `Valmiera, Valmieras nov., LV-4201`: the municipality (`nov.`) is the admin area and the town the locality; a parish (`pag.`) line or segment is the dependent locality, and with a parish and no street the line above it is the house name (the Latvian rules: the house name stands where the street would in the countryside). A parish with the house name in front of it on one line (`Saulītes Sēļu pag. Sēļi`) is split into house name, parish and locality.
+- **Estonia.** `48103 Põltsamaa Jõgeva maakond`: the county is the admin area; a `vald`, `linn` or `linnaosa` line is the dependent locality; with such a line (or a village locality and a line besides the addressee) and no street, the line above is the farm or house name.
+
+What the rules leave to the model on purpose: a lone name line above a postcode in Iceland, Norway, Finland and Estonia (recipient or farm name: the sheets do not say), a Latvian `Name 8` without `iela` (a street or a farm, the Latvian rules allow both), a person's name glued to a street, a street and a locality on one line (`Marijas iela 22 Rūjiena`), and a postcode written without its `LV-`.
+
+### Second recovery round: Lithuania
+
+Measured on the 2000 register dev examples (rules alone). The recovery tool keeps `LT-` inside the postal-code field for Lithuania, as the register does (the other countries' registers label the letters apart); both columns use it.
+
+| Hint | Every field before → after | Fields before → after | Top refusals after |
+|---|---|---|---|
+| yes | 58.5 → 93.6 | 82.3 → 95.6 | no-last-line 91 (no postcode), model-required 4 |
+| no | 53.7 → 85.7 | 75.6 → 87.7 | country-undetermined 159, no-last-line 94 |
+
+- **Village and municipality.** The UPU Lithuania sheet prints the rural address with the municipality (`RASEINIU R. SAV.`) and the locality apart. A line (or comma segment, or the words after the house number on one line) ending in `k.` (kaimas) is the dependent locality, including `Dabužių I k.`; one ending in `sav.` (`r. sav.`, `m. sav.`) is the admin area. `Pienionių k., Anykščių r. sav.` in one line of a label is two lines. The municipality stays where the writer put it in the printed layout; only its field changes.
+- **Box.** `PD 2876` and `Pašto dėžutė 12` as well as the sheet's `P. d.`.
+- **Apartment.** `butas 1` and `b. 3` after the house number are the designator and the unit number. A slash between house and apartment (`66/72`) is read like the sheet's dash, printed as written.
+- **Company name.** `MB` after a comma (`Sakalauskas ir Ko, MB, Aušros g. 23`) belongs to the name before it; as `UAB` and `AB` it also ends a company name that runs into the street on one line.

@@ -22,3 +22,9 @@ AD	EDIFICI
 AD	EDIFICIO
 AD	APARTAMENT
 AD	ENTRADA
+# Polish flat and premises words (Poczta Polska, Zasady poprawnego adresowania, 1.2: the building number and, after it, the flat or premises): m. (mieszkanie), lok. (lokal).
+PL	M
+PL	MIESZK
+PL	MIESZKANIE
+PL	LOK
+PL	LOKAL

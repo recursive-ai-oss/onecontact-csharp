@@ -3,7 +3,7 @@
 
 usage: run-eval-names.py <gold.jsonl> <output directory>
 
-Writes probablepeople.jsonl, nameparser.jsonl and cleanco.jsonl in the scorer's format ({"id", "class", "parts": {letter: [text]}}), plus versions.json.
+Writes probablepeople.jsonl and nameparser.jsonl in the scorer's format ({"id", "class", "parts": {letter: [text]}}), plus versions.json.
 Label mappings (the packages' documented labels -> our letters; T title, G given, M middle, F family, S suffix, N nickname, B company
 base, L legal form):
   probablepeople: PrefixMarital, PrefixOther -> T; GivenName, FirstInitial -> G; MiddleName, MiddleInitial -> M; Surname, LastInitial,
@@ -14,7 +14,6 @@ base, L legal form):
 """
 import json
 import os
-import re
 import sys
 from importlib import metadata
 
@@ -60,23 +59,21 @@ with open(os.path.join(out_dir, "probablepeople.jsonl"), "w", encoding="utf-8") 
                 pass
         out.write(json.dumps({"id": i, "class": kind, "parts": parts}, ensure_ascii=False) + "\n")
 
-# cleanco (documented `basename`): the words it removes from a name are the legal form it detected; it has no class and no person parts.
-from cleanco import basename  # noqa: E402
-
-
-def squash(s):
-    return re.sub(r"\s+", " ", s).strip()
-
-
-with open(os.path.join(out_dir, "cleanco.jsonl"), "w", encoding="utf-8") as out:
-    for i, text in rows:
-        base = squash(basename(text))
-        removed = []
-        if base != squash(text).strip(" ,."):
-            base_words = [b.strip(",.") for b in base.split()]
-            removed = [w for w in text.split() if w.strip(",.") not in base_words]
-        parts = {"B": [base] if base else [], "L": [" ".join(removed)] if removed else []}
-        out.write(json.dumps({"id": i, "parts": parts}, ensure_ascii=False) + "\n")
+# cleanco (its documented basename function): a legal form is detected when taking it off changes the name; written as {"id", "has_form", "parts"}.
+import re  # noqa: E402
+try:
+    from cleanco import basename  # noqa: E402
+except ImportError:
+    basename = None
+if basename is not None:
+    def squash(x):
+        return re.sub(r"\s+", " ", x).strip()
+    with open(os.path.join(out_dir, "cleanco.jsonl"), "w", encoding="utf-8") as out:
+        for i, text in rows:
+            base = squash(basename(text))
+            has_form = base != squash(text).strip(" ,.")
+            removed = [w for w in text.split() if w.strip(",.") not in [b.strip(",.") for b in base.split()]] if has_form else []
+            out.write(json.dumps({"id": i, "has_form": has_form, "parts": {"B": [base] if base else [], "L": [" ".join(removed)] if removed else []}}, ensure_ascii=False) + "\n")
 
 with open(os.path.join(out_dir, "versions.json"), "w", encoding="utf-8") as f:
     json.dump({p: metadata.version(p) for p in ("nameparser", "probablepeople", "cleanco")}, f)

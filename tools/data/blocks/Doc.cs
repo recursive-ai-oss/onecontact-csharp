@@ -74,6 +74,14 @@ internal sealed class Doc
         return this;
     }
 
+    /// <summary>A line of unlabelled text that is kept in both views (page chrome, prose around a block).</summary>
+    internal Doc Line(string s)
+    {
+        Next();
+        _text.Append(s);
+        return this;
+    }
+
     /// <summary>An item that carries no field (navigation, boilerplate, filler). Dropped in the CRM view unless items sit on their own lines.</summary>
     internal Doc Noise(string s)
     {

@@ -6,6 +6,7 @@ Everything these scripts write goes to the private evaluation directory given on
 import gzip
 import html.parser
 import io
+import os
 import re
 import time
 import urllib.request
@@ -15,24 +16,9 @@ DATA = "https://data.commoncrawl.org/"
 USER_AGENT = "onecontact-eval-selection/1.0 (research; evaluation sets only)"
 
 
-_PROBE = DATA + "cc-index/collections/CC-MAIN-2026-43/indexes/cluster.idx"
-
-
-def throttled():
-    """True when a tiny known-good range request is also refused, i.e. the 403 means rate limiting and not a missing object."""
-    req = urllib.request.Request(_PROBE, headers={"User-Agent": USER_AGENT, "Range": "bytes=0-63"})
-    try:
-        with urllib.request.urlopen(req, timeout=60):
-            return False
-    except urllib.error.HTTPError as e:
-        return e.code == 403
-    except Exception:
-        return False
-
-
-def get(url, byte_range=None, tries=8, pause=0.35):
-    """GET with exponential back-off on 5xx/SlowDown; returns bytes or None for a permanent miss."""
-    delay = 2.0
+def get(url, byte_range=None, tries=12, pause=float(os.environ.get("CC_PAUSE", "0.35"))):
+    """GET with back-off on throttling (the host answers 503 to about half the requests of a busy client); None for a permanent miss."""
+    delay = 0.5
     for attempt in range(tries):
         req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
         if byte_range:
@@ -43,17 +29,13 @@ def get(url, byte_range=None, tries=8, pause=0.35):
             time.sleep(pause)
             return data
         except urllib.error.HTTPError as e:
-            if e.code == 403 and throttled():
-                # CloudFront answers 403 to a client that asks too often; wait and ask again rather than count it as a missing object.
-                time.sleep(120)
-                continue
-            if e.code in (404, 403, 416):
+            # 403 is also what the host answers while it throttles a client: retry it a few times before calling it a miss.
+            if e.code in (404, 416) or (e.code == 403 and attempt >= 3):
                 return None
-            time.sleep(delay)
-            delay = min(delay * 2, 60)
         except Exception:
-            time.sleep(delay)
-            delay = min(delay * 2, 60)
+            pass
+        time.sleep(delay)
+        delay = min(delay * 1.6, 10)
     return None
 
 

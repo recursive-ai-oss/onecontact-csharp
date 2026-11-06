@@ -10,6 +10,10 @@ namespace RecursiveAI.OneContact.Addresses.Tier2;
 internal static partial class T2Rules
 {
     private static HashSet<string> _northUnitWords = new(StringComparer.Ordinal);
+    private static HashSet<string> _northLegalForms = new(StringComparer.Ordinal);
+
+    /// <summary>Legal-form words that end a company name in the northern group (<c>ApS</c>, <c>AB</c>, <c>Oy</c>, <c>AS</c>, <c>ehf</c>).</summary>
+    internal static IReadOnlySet<string> NorthLegalForms => _northLegalForms;
 
     /// <summary>Words that follow a house number in the northern group and belong to it (floor, door, apartment, building).</summary>
     internal static IReadOnlySet<string> NorthUnitWords => _northUnitWords;
@@ -58,11 +62,16 @@ internal static partial class T2Rules
         }
 
         HashSet<string> units = new(StringComparer.Ordinal);
+        HashSet<string> legal = new(StringComparer.Ordinal);
         foreach (string[] r in RuleFile.Read("t2-north-words.tsv"))
         {
             if (r[0] == "unit")
             {
                 units.Add(r[1]);
+            }
+            else if (r[0] == "legal")
+            {
+                legal.Add(r[1]);
             }
             else
             {
@@ -71,5 +80,6 @@ internal static partial class T2Rules
         }
 
         _northUnitWords = units;
+        _northLegalForms = legal;
     }
 }

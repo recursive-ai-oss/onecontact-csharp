@@ -16,14 +16,21 @@ internal sealed partial class TextFieldReader
     private const int MaxPieceLines = 40;
     private const int MaxPieceChars = 3000;
 
-    // How sure the model must be, as the mean probability of the words of the span. Chosen on development blocks: the mean is low for
-    // correct spans (it is trained with dropout and spans have uncertain edges), and from 0.3 up to 0.45 the scores are within 0.2 points of
-    // no cut at all, while 0.6 loses a fifth of company names and 0.75 loses most addresses.
+    // How sure the model must be, as the mean probability of the words of the span. Chosen on development blocks, the largest cut whose scores
+    // stay within 0.5 points of no cut on every field (0.4; at 0.5 the company scores lose more than two points).
     // Settable inside the assembly (and by the evaluation tools) so that a cut can be compared on development blocks; there is no public option.
-    internal static float MinConfidence { get; set; } = 0.3f;
+    internal static float MinConfidence { get; set; } = 0.4f;
 
     private void RunModel(IContactSpanModel model)
     {
+        // Plain text only. On real web pages the model made records and addresses worse than the rules alone (its extra addresses were
+        // mostly page text, and its names and organizations split records wrongly), so a web page is read by the markup and the rules.
+        // See docs/extraction.md, "The span model on real pages".
+        if (!_view.IsPlain)
+        {
+            return;
+        }
+
         string text = _view.Text;
         List<TextLine> lines = _view.Lines;
         var blocks = new SortedSet<int>();
