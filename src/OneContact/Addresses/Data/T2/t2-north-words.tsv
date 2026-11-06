@@ -1,4 +1,4 @@
-# Words of the northern group. Columns: kind (unit or spatial), word (upper case, no accents, periods dropped).
+# Words of the northern group. Columns: kind (unit, spatial or legal), word (upper case, no accents, periods dropped).
 # unit: follows a house number and belongs to it: lgh (PostNord Sweden, apartment), st, kl, th, tv, mf (Danmarks Adresser, floor and side), dz and korp (Latvian rules for unified postal addresses, apartment and building), Ullakkohuoneisto (UPU Finland example, attic flat).
 # spatial: a line that starts so is not a street line: Bolignummer and Bnr (Posten Norge, the dwelling number line above the street).
 unit	LGH
@@ -12,3 +12,25 @@ unit	KORP
 unit	ULLAKKOHUONEISTO
 spatial	BOLIGNUMMER
 spatial	BNR
+# legal: a legal-form word that ends a company name: ApS, A/S, I/S, K/S, IVS, P/S (Denmark), AB, HB, KB (Sweden), Oy, Oyj, Ky (Finland), AS, ASA, ANS (Norway), ehf, hf, slf (Iceland).
+legal	APS
+legal	A/S
+legal	I/S
+legal	K/S
+legal	IVS
+legal	P/S
+legal	AB
+legal	MB
+legal	HB
+legal	KB
+legal	OY
+legal	OYJ
+legal	KY
+legal	AS
+legal	ASA
+legal	ANS
+legal	EHF
+legal	HF
+legal	SLF
+unit	KORTER
+unit	BUTAS

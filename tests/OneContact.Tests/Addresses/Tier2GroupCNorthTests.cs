@@ -127,7 +127,7 @@ public class Tier2GroupCNorthTests
         ParsedAddress a = Parse(text, "DK");
         Assert.Equal("Hr. Henrik Nielsen\nKastanievej 15, 2\nAgerskov\n8660 SKANDERBORG", a.ToString(AddressStyle.Postal));
         Assert.Contains(a.DeliveryLines[0].Parts, p => p.Role == StreetPartRole.HouseNumber && p.Text == "15");
-        Assert.Contains(a.DeliveryLines[0].Parts, p => p.Role == StreetPartRole.UnitDesignator && p.Text == "2");
+        Assert.Contains(a.DeliveryLines[0].Parts, p => p.Role == StreetPartRole.UnitNumber && p.Text == "2");
         foreach (ParsedAddressField f in a.Fields)
         {
             Assert.Equal(f.Text, text.Substring(f.Span.Start, f.Span.Length));
@@ -135,16 +135,18 @@ public class Tier2GroupCNorthTests
     }
 
     [Theory]
-    [InlineData("Brīvības ielā 90—23", "90—23")]
-    [InlineData("Salnas ielā 48/50", "48/50")]
-    [InlineData("Raunas ielā 45/4—22", "45/4—22")]
-    [InlineData("Raunas 45/4—22", "45/4—22")]
-    public void LatvianHouseAndApartmentNumbersAreRead(string street, string number)
+    [InlineData("Brīvības ielā 90—23", "90", "23")]
+    [InlineData("Salnas ielā 48/50", "48/50", "")]
+    [InlineData("Raunas ielā 45/4—22", "45/4", "22")]
+    [InlineData("Raunas 45/4—22", "45/4", "22")]
+    public void LatvianHouseAndApartmentNumbersAreRead(string street, string house, string apartment)
     {
         // The Latvian rules for a unified postal address: a dash between the house and apartment number, a slash for a double number or a building.
         ParsedAddress a = Parse(street + "\nRīga, LV-1010", "LV");
-        Assert.Equal(number, a.DeliveryLines[0].Parts.Single(p => p.Role == StreetPartRole.HouseNumber).Text);
-        Assert.Equal("RĪGA, LV-1010", a.ToString(AddressStyle.Postal).Split('\n')[1]);
+        Assert.Equal(house, a.DeliveryLines[0].Parts.Single(p => p.Role == StreetPartRole.HouseNumber).Text);
+        Assert.Equal(apartment, a.DeliveryLines[0].Parts.SingleOrDefault(p => p.Role == StreetPartRole.UnitNumber).Text ?? string.Empty);
+        Assert.Equal(street, a.ToString(AddressStyle.Postal).Split('\n')[0]);
+        Assert.Equal("RīGA, LV-1010".ToUpperInvariant(), a.ToString(AddressStyle.Postal).Split('\n')[1]);
     }
 
     [Fact]
@@ -196,5 +198,32 @@ public class Tier2GroupCNorthTests
         Assert.Equal(OperationStatus.Done, PostalAddress.TryParse("Narva mnt 7\n10117 Tallinn", Region.Parse("EE"), out PostalAddress a, out _));
         Assert.Equal(OperationStatus.Done, PostalAddress.TryParse("NARVA MAANTEE 7\n10117 TALLINN", Region.Parse("EE"), out PostalAddress b, out _));
         Assert.Equal(RecursiveAI.OneContact.Keys.AddressKey.Compute(a, RecursiveAI.OneContact.KeyVersion.V1), RecursiveAI.OneContact.Keys.AddressKey.Compute(b, RecursiveAI.OneContact.KeyVersion.V1));
+    }
+
+    private static HashSet<string> Labelled(string text, string hint) => [.. Parse(text, hint).Fields.Select(f => f.Name + "=" + f.Text)];
+
+    [Theory]
+    [InlineData("Mads Hansen\nÆblehaven, 1\nDK-1352 København K", "DK", "country=DK", "postal-code=1352")]
+    [InlineData("Fjärdgränden 21 lgh 1103, 575 33 EKSJÖ", "SE", "street.unit-designator=lgh", "street.unit-number=1103")]
+    [InlineData("Nielsen Byg ApS Amagerbrogade 21 2640 Hedehusene", "DK", "leading-line=Nielsen Byg ApS", "street.name=Amagerbrogade")]
+    [InlineData("Upes iela 1\nMazsalaca, Valmieras nov., LV-4215", "LV", "locality=Mazsalaca", "admin-area=Valmieras nov.")]
+    [InlineData("Tehnika tn 24\nPõltsamaa vald\n48103 Põltsamaa Jõgeva maakond", "EE", "dependent-locality=Põltsamaa vald", "admin-area=Jõgeva maakond")]
+    [InlineData("Vītola Līga\nRīvēni\nMatīšu pag.\nMatīši, Valmieras nov., LV-4210", "LV", "street.name=Rīvēni", "dependent-locality=Matīšu pag.")]
+    [InlineData("VEI 238 39B\n9170 LONGYEARBYEN", "NO", "street.name=VEI 238", "street.house-number=39B")]
+    [InlineData("Alasi tn 32, korter 304, 50109 Tartu", "EE", "street.unit-designator=korter", "street.unit-number=304")]
+    [InlineData("Nomāļu iela 2 - 22\nTalsi, Talsu nov., LV-3201", "LV", "street.house-number=2", "street.unit-number=22")]
+    public void FieldsAreLabelledAsTheRegistersDo(string text, string hint, string first, string second)
+    {
+        // A country code before the postcode is the country; a dash, lgh, dz. or korter splits the apartment from the house number; a parish, municipality or county is its own field.
+        HashSet<string> fields = Labelled(text, hint);
+        Assert.Contains(first, fields);
+        Assert.Contains(second, fields);
+    }
+
+    [Fact]
+    public void ASplitLatvianLocalityLineIsWrittenOnOneLine()
+    {
+        Assert.Equal("MAZSALACA, VALMIERAS NOV., LV-4215", Parse("Upes iela 1\nMazsalaca, Valmieras nov., LV-4215", "LV").ToString(AddressStyle.Postal).Split('\n')[1]);
+        Assert.Equal("48103 PÕLTSAMAA JÕGEVA MAAKOND", Parse("Tehnika tn 24\n48103 Põltsamaa Jõgeva maakond", "EE").ToString(AddressStyle.Postal).Split('\n')[1]);
     }
 }

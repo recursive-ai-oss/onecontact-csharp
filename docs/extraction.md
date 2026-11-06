@@ -79,45 +79,40 @@ JSON nesting 64; microdata, RDFa and h-card item nesting 32; 200,000 item visits
 
 ## The span model
 
-**Measured and not yet enabled.** The Tier 1 package carries a contact-span head, but it does not register it: on real web pages it makes most rows worse than rules alone (see "The span model on real pages" below), and no model may make a row worse than rules. Referencing the package therefore changes nothing in extraction, which stays rules and markup. The wiring below is in place and tested, and the evaluation tools register the head themselves, so a retrained head can be scored; it is switched on by registering it as the `spans` argument of `ContactModels.Register`.
+**Plain text only.** The Tier 1 package registers its contact-span head, and `ExtractText` uses it. A web page (`Extract` over HTML) does not: on real pages the head made the record and address rows worse than the rules alone (see "The span model on real pages" below), and no model may make a row worse than rules. Pages are read by the markup readers and the rules, with or without the package.
 
 When a contact-span model is registered (`ContactModels.Spans`, `docs/models.md`), the text half also runs it over the visible text, in pieces of up to 40 lines or 3,000 characters. Rules first: the model's spans are considered only after every rule candidate has been taken, and a span that touches any character a rule took is dropped, so a rule's field is never replaced, shortened or split.
 
-- A model span becomes a field of the same kinds the rules make: `person` a name, `company` an organization (the grouping decides whether it names the record or its employer, as for a `Company:` label), `address`, `phone`, `email`, `website`. It must have a mean probability of at least 0.3 (chosen on development blocks, see below).
+- A model span becomes a field of the same kinds the rules make: `person` a name, `company` an organization (the grouping decides whether it names the record or its employer, as for a `Company:` label), `address`, `phone`, `email`, `website`. It must have a mean probability of at least 0.4 (chosen on development blocks, see below).
 - The core parsers still decide: a model email or website that does not parse (a website needs a registrable domain) is not a field, and a model phone is kept only when the numbering plan accepts it (and a region is known). A model address is parsed by the rules and then the address model like any other free-text address; nothing is invented.
 - Such a field has `Decision` = `DecisionSource.Model` and `Confidence` = the model's (halved when the value could not be normalized, as for every field); every other field says `Rule`. Its `Source` is `Text`.
 - **Blocks.** The model also says where a contact block begins. Grouping treats a block start as a hard edge: fields on or after the start line are not put in a group with fields before it. The layout rules (containers, landmarks, headings, four lines, a second email or address) still apply as before, so the model can only split a group, never join two.
 - **Without a registered span model** (the default) extraction is rules and markup. Nothing is downloaded.
 
-Development-block rows (field F1 of `ExtractText` with a US default region, exact span / overlap, 6,000 blocks, rules only → rules + model): address 43.9 → 96.6 / 46.2 → 99.2; company 0 → 93.2 / 0 → 96.8; person 0 → 95.2 / 0 → 97.4; phone 96.6 → 97.0 / 97.9 → 98.4; email 99.3 → 99.3; website 99.7 → 99.7. The rules find no names or companies without a label. The confidence cut was chosen on these blocks: from 0.0 to 0.3 scores are within 0.2 points, 0.6 loses a fifth of the company names and 0.75 most addresses.
+Development-block rows (`blocks-us-ca-v3`, 6,000 dev blocks: contact blocks inside pages with navigation, prose, product names and look-alike lines, plus notes and signatures; exact-span field F1 of `ExtractText` with a US default region, rules + model at cut 0.4): address 93.3, company 85.8, person 91.2, phone 96.1, email 94.5, website 76.0. The rules alone find no names or companies without a label; email and website sit below 100 because the dev pages hold look-alike lines the rules take (`logo@2x.png`, `brandname.com`), and the address row is capped the same way by lines such as "Now serving Portland, OR 97201". The cut is the largest from 0.0 to 0.9 whose scores stay within 0.5 points of no cut on every field: 0.4 (0.5 loses 2.5 points on company).
 
 ## The span model on real pages
 
-Scored once per cut on the private extraction evaluation sets (`extraction-eval-sets.md`: 119 pages, 115 text items; visible-text mentions, value F1, 1000-resample bootstrap 95% interval, aggregates only), by `tools/Eval/extraction/run-model-eval.sh`. The cut is the minimum mean probability of a model span. Cuts 0.3 (shipped) and 0.4 (the highest cut within 0.5 points of no cut on every field of 6,000 development blocks) are the candidates; 0.9 is a diagnostic that was not a candidate (it is where the development scores collapse). No cut was chosen on these sets.
+Scored on the private extraction evaluation sets (`extraction-eval-sets.md`: 119 pages, 115 text items; visible-text mentions, value F1, 1000-resample bootstrap 95% interval, aggregates only) by `tools/Eval/extraction/run-model-eval.sh`, once per candidate. The first head (trained on blocks that were mostly contact data) read ordinary page text as names, companies and addresses: on web pages it predicted 1,136 persons for 15 gold and 1,503 organizations for 69, address F1 fell from 84.0 to 42.2 and record F1 from 30.3 to 7.5.
 
-| Set, type | Rules only | Rules + model, cut 0.3 | cut 0.4 | cut 0.9 (diagnostic) | Best reference |
-|---|---|---|---|---|---|
-| web person | 0 | 1.6 [0.6, 2.9], P 0.8 R 60 | 1.8 [0.7, 3.3] | 2.2 [0, 5.6] | spaCy trf 8.4 [3.7, 14.0], R 86.7 |
-| web org | 0 | 4.7 [3.3, 6.1], P 2.5 R 54 | 5.7 [3.8, 7.5] | 19.3 [8.2, 29.6], P 57 R 12 | spaCy 11.0 [8.3, 14.5], R 72.5 |
-| web address | 84.0 [76.6, 90.3] | 42.2 [34.8, 50.6], P 27 R 93 | 59.3 [50.8, 68.0] | 84.0 | none |
-| web phone | 99.0 [97.4, 100] | 99.0 | 99.0 | 99.0 | libphonenumber 99.0 |
-| web email | 98.9 [97.0, 100] | 98.3 [96.2, 100] | 98.3 | 98.9 | Recognizers 92.2 |
-| web website | 58.2 [41.6, 73.3] | 54.2 [38.1, 69.4] | 55.2 | 58.2 | Recognizers 58.2 |
-| web record F1 | 30.3 [20.8, 39.3] | 7.5 [4.7, 10.7] | 9.9 [6.2, 14.1] | 26.7 [18.1, 34.4] | none |
-| text person | 0 | 9.2 [1.9, 17.0], P 5.6 R 25 | 10.1 [2.1, 18.4] | 10.3 [0, 24.5] | spaCy 61.3 [45.8, 75.8], R 95 |
-| text org | 0 | 15.6 [8.1, 23.3], P 10.7 R 29 | 17.4 [8.7, 26.3] | 5.0 [0, 15.8] | spaCy 32.9 [21.3, 46.4], R 60.5 |
-| text address | 46.2 [24.4, 64.0] | 68.9 [52.8, 82.9], P 66 R 72 | 71.2 [55.2, 86.3] | 46.2 | none |
-| text phone, email | 100, 100 | 100, 100 | 100, 100 | 100, 100 | libphonenumber 100; Recognizers 92.0, 96.6 |
-| text website | 34.5 [9.5, 56.0] | 34.5 | 34.5 | 34.5 | Recognizers 34.5 |
-| text record F1 | 22.8 [11.5, 34.8] | 15.6 [7.4, 24.6] | 18.5 [9.2, 27.6] | 19.3 [8.7, 30.6] | none |
+The retrained head learns from blocks inside pages: `tools/data/blocks` renders each contact block between unlabelled page chrome (navigation, headings, product and brand names, prose, testimonials, news, bylines, forms, cookie banners, legal lines), plus pages with no contact block and look-alike lines (roads and exits, service areas, `logo@2x.png`, social handles). All of that text is ours, written for the generator; the held-out fifth of every list is used by dev blocks only.
 
-What the sets show:
+| Set, type | Rules only | Head v1 (cut 0.3) | v2 data (cut 0.4) | v3 data (cut 0.4), all fields | v3, text only (shipped) | Best reference |
+|---|---|---|---|---|---|---|
+| web person | 0 | 1.6 | 4.0 | 8.0 [2.3, 14.5] | 0 (not used) | spaCy 8.4 |
+| web org | 0 | 4.7 | 20.1 | 16.0 [9.0, 23.0] | 0 (not used) | spaCy 11.0 |
+| web address | 84.0 [76.6, 90.3] | 42.2 | 76.2 | 76.7 [67.1, 85.3] | 84.0 | none |
+| web email | 98.9 | 98.3 | 97.8 | 98.3 | 98.9 | Recognizers 92.2 |
+| web record F1 | 30.3 [20.8, 39.3] | 7.5 | 26.6 | 23.7 [16.0, 30.4] (−6.6 [−12.5, −1.2]) | 30.3 | none |
+| text person | 0 | 9.2 | 11.4 | 18.8 [0, 38.1] | 18.8 | spaCy 61.3 |
+| text org | 0 | 15.6 | 12.7 | 17.2 [4.4, 30.2] | 17.2 | spaCy 32.9 |
+| text address | 46.2 [24.4, 64.0] | 68.9 | 74.1 | 71.7 [53.9, 88.5] | 71.7 | none |
+| text phone, email, website | 100, 100, 34.5 | same | same | same | same | |
+| text record F1 | 22.8 [11.5, 34.8] | 15.6 | 25.3 | 25.3 [13.6, 37.0] | 25.3 [−3.8, +9.8 vs rules] | none |
 
-- **On web pages the model is badly off.** It marks ordinary page text as names, companies and addresses (web person: 1,136 predicted for 15 gold; org: 1,503 for 69; address: 249 for 73), because it was trained on blocks that are mostly contact data, with few negatives and none that look like a real page's navigation, product names and prose. Raising the cut does not repair this: at 0.9 the address row only gets back to the rules' score (the model adds nothing), and names and companies stay far below spaCy.
-- **On short free text it helps addresses** (46 → 69 with 95% intervals that overlap, but the recall goes from 31 to 72) and finds some companies; its names are far behind spaCy (recall 25 against 95).
-- **Phones and emails** are the rules' and stay so; the model adds one wrong email on the web set (98.9 → 98.3).
-- **Records:** the model splits and fills groups wrongly on pages, so record F1 falls on both sets.
-- The development scores (98.6 field F1) do not carry to real text, as expected from template-built blocks; the next training step is data with real negatives, not a different cut. The span model should not be treated as ready for web pages.
+- **Text:** no row is below the rules, address recall goes from 31 to 66 at 79 precision, and the model finds people and organizations the rules cannot. Overall value F1 on text 66.2 → 67.9 (+1.7 [−2.4, +5.7]). Names and organizations stay far from spaCy's recall (person recall 15 against 95): the head is conservative, which is what keeps precision at 25.
+- **Web:** even with realistic chrome the head's addresses (precision 68 against the rules' 95) and its names and organizations (precision 4 and 13) lower the record row beyond noise (−6.6 [−12.5, −1.2]) and the overall value F1 (−17). It is therefore not used on web pages: the model runs on plain text only, and a web page is read by the markup and the rules, identical to rules-only (shipped configuration rescored: every row +0.00). The web restriction was chosen after the first two candidates' web rows were seen, as a structural choice (rule precision against model precision), not a threshold.
+- Address-field and name rows on the Tier 1 address and name sets are byte-identical to before (the encoder is frozen).
 
 ## Obfuscation
 

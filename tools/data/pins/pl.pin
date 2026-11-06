@@ -1,0 +1,3 @@
+register pl-prg-2026-11-04
+file POLSKA.zip 564310338 e2177a50ae4c47e3a547ba4dc6366c754e90cdc789ea39f8fb7206942b97b433 https://opendata.geoportal.gov.pl/prg/adresy/PunktyAdresowe/POLSKA.zip
+derived pl-addresses.tsv.gz 244462778 cf05b3fab6c758082ca9292134c0450e5d7b1e81d1aadd2becdd7dc6b6d3d345 AddressTier2C convert

@@ -1,0 +1,141 @@
+# kind	language	value; invented name parts for recipient and organisation lines for Denmark, Sweden, Finland and Iceland, written for these templates (no register)
+given	da	Anders
+given	da	Mette
+given	da	Lars
+given	da	Louise
+given	da	Jens
+given	da	Camilla
+given	da	Søren
+given	da	Pernille
+given	da	Henrik
+given	da	Maria
+given	da	Mads
+given	da	Katrine
+family	da	Jensen
+family	da	Nielsen
+family	da	Hansen
+family	da	Pedersen
+family	da	Andersen
+family	da	Christensen
+family	da	Larsen
+family	da	Sørensen
+family	da	Rasmussen
+family	da	Jørgensen
+family	da	Petersen
+family	da	Madsen
+org	da	{fam} Byg ApS
+org	da	{word} & {fam} A/S
+org	da	{city} {word} ApS
+org	da	{fam} Ejendomme I/S
+org	da	{word}service ApS
+word	da	Nordisk
+word	da	Fjord
+word	da	Vest
+word	da	Data
+word	da	Regnskab
+word	da	Transport
+given	sv	Erik
+given	sv	Anna
+given	sv	Lars
+given	sv	Karin
+given	sv	Johan
+given	sv	Maria
+given	sv	Anders
+given	sv	Eva
+given	sv	Mikael
+given	sv	Sofia
+given	sv	Per
+given	sv	Linnéa
+family	sv	Andersson
+family	sv	Johansson
+family	sv	Karlsson
+family	sv	Nilsson
+family	sv	Eriksson
+family	sv	Larsson
+family	sv	Olsson
+family	sv	Persson
+family	sv	Svensson
+family	sv	Gustafsson
+family	sv	Pettersson
+family	sv	Jonsson
+org	sv	{fam} Bygg AB
+org	sv	{word} & {fam} AB
+org	sv	{city} {word} AB
+org	sv	{fam} Fastigheter HB
+org	sv	{word}tjänst AB
+word	sv	Nordisk
+word	sv	Fjärd
+word	sv	Väst
+word	sv	Data
+word	sv	Redovisning
+word	sv	Transport
+given	fi	Matti
+given	fi	Anna
+given	fi	Juha
+given	fi	Maria
+given	fi	Mikko
+given	fi	Johanna
+given	fi	Timo
+given	fi	Katja
+given	fi	Heikki
+given	fi	Sanna
+given	fi	Antti
+given	fi	Liisa
+family	fi	Korhonen
+family	fi	Virtanen
+family	fi	Mäkinen
+family	fi	Nieminen
+family	fi	Mäkelä
+family	fi	Hämäläinen
+family	fi	Laine
+family	fi	Heikkinen
+family	fi	Koskinen
+family	fi	Järvinen
+family	fi	Lehtonen
+family	fi	Saarinen
+org	fi	{fam} Rakennus Oy
+org	fi	{word} & {fam} Oy
+org	fi	{city} {word} Oy
+org	fi	{fam} Kiinteistöt Ky
+org	fi	{word}palvelu Oy
+word	fi	Pohjola
+word	fi	Järvi
+word	fi	Länsi
+word	fi	Data
+word	fi	Kirjanpito
+word	fi	Kuljetus
+given	is	Jón
+given	is	Guðrún
+given	is	Sigurður
+given	is	Anna
+given	is	Gunnar
+given	is	Kristín
+given	is	Magnús
+given	is	Sigríður
+given	is	Ólafur
+given	is	Helga
+given	is	Björn
+given	is	Ragnheiður
+family	is	Jónsson
+family	is	Sigurðsson
+family	is	Guðmundsson
+family	is	Gunnarsson
+family	is	Ólafsson
+family	is	Einarsson
+family	is	Magnússon
+family	is	Kristjánsson
+family	is	Jónsdóttir
+family	is	Sigurðardóttir
+family	is	Guðmundsdóttir
+family	is	Gunnarsdóttir
+org	is	{fam} ehf.
+org	is	{word} og {fam} ehf.
+org	is	{city} {word} ehf.
+org	is	{fam} byggingar ehf.
+org	is	{word}þjónusta ehf.
+word	is	Norður
+word	is	Fjörður
+word	is	Vestur
+word	is	Gögn
+word	is	Bókhald
+word	is	Flutningar

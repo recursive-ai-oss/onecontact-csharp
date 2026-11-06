@@ -40,6 +40,8 @@ internal static class Kind
     internal const string Multi = "multi-location";
     internal const string NegNumeric = "negative-numeric";
     internal const string NegProse = "negative-prose";
+    internal const string NegPage = "negative-page";
+    internal const string NegTalk = "negative-talk";
 
     internal static readonly (string Name, double Weight, bool Page, bool Crm)[] All =
     [
@@ -53,9 +55,14 @@ internal static class Kind
         (Multi, 6, true, true),
         (NegNumeric, 6, true, true),
         (NegProse, 5, true, true),
+        (NegPage, 28, true, false),
+        (NegTalk, 5, false, true),
     ];
 
-    internal static bool IsNegative(string kind) => kind is NegNumeric or NegProse;
+    internal static bool IsNegative(string kind) => kind is NegNumeric or NegProse or NegPage or NegTalk;
+
+    /// <summary>Kinds that sit inside the page or text around them (navigation, prose, product lists) in some of their renderings.</summary>
+    internal static bool Wrapped(string kind) => kind is Footer or Contact or Staff or Signature or Card or Multi or Note or Ugc;
 }
 
 /// <summary>Everything that turns a <see cref="Logical"/> into text with spans, one method per block kind.</summary>

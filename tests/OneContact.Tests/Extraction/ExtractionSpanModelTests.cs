@@ -92,4 +92,17 @@ public sealed class ExtractionSpanModelTests
             Assert.Single(extractor.ExtractText(signatures).Records);
         }
     }
+
+    [Fact]
+    public void AWebPageIsReadByRulesAndMarkupWhateverModelIsRegistered()
+    {
+        // The same words as plain text get a model name; inside a page the model is not consulted (it made real pages worse than the rules).
+        const string html = "<html><body><p>Spoke with Jane Smith about the renewal.</p><p>She can be reached on jane.smith@acme.example.</p></body></html>";
+        var model = new FixedSpanModel(["Jane Smith"], ("Jane Smith", "person", 0.9f));
+        using IDisposable scope = ContactModels.Scope(null, null, model);
+        ExtractResult page = new ContactExtractor().ExtractHtml(html);
+        Assert.DoesNotContain(page.Fields, f => f.Decision == DecisionSource.Model);
+        Assert.Empty(page.Of(FieldKind.Name));
+        Assert.Equal(DecisionSource.Model, Assert.Single(new ContactExtractor().ExtractText(Note).Of(FieldKind.Name)).Decision);
+    }
 }

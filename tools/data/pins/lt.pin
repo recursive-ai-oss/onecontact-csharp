@@ -1,0 +1,4 @@
+register lt-ar-2026-11-04
+file RC_adresai_atviri_duomenys.zip 1920014807 c7b3b93cde062e4103f2ed239b08b17dea97170e9c820c1a8037bf48e6e6a56e https://www.geoportal.lt/download/opendata/RC/RC_adresai_atviri_duomenys.zip
+derived lt-addresses.tsv.gz 25354434 8813ded70c24533981f6cec3cd77d3ce4176b4fe7a1cf8b51a32a8e1f1887e00 convert-lt-gdb.py
+derived lt-flats.tsv.gz 3377078 308b78f0e089df047630b50d0353ff3293f9f3d6f3fec4d91c55ba9b60500bed convert-lt-gdb.py

@@ -232,9 +232,35 @@ public class Tier2GroupCSouthTests
         // "Unit 4" alone above the street number is the guide's alternative (a separate line above the street line): it is kept as written.
         Assert.Equal("Unit 4\n12 SMITH ST W\nSYDNEY NSW 2000", a.ToString(AddressStyle.Postal));
         ParsedAddress b = Parse("4/12 Smith St W, SYDNEY NSW 2000", "AU");
-        StreetRoles(b, StreetPartRole.HouseNumber, StreetPartRole.StreetName, StreetPartRole.StreetType, StreetPartRole.PostDirectional);
+        // The slash form is a unit number and a street number that print as written ("4/12").
+        StreetRoles(b, StreetPartRole.UnitNumber, StreetPartRole.HouseNumber, StreetPartRole.StreetName, StreetPartRole.StreetType, StreetPartRole.PostDirectional);
         Assert.Equal("NSW", b.AdminArea!.Value.Standard);
+        Assert.Equal("4/12 SMITH ST W\nSYDNEY NSW 2000", b.ToString(AddressStyle.Postal));
     }
+
+    [Theory]
+    [InlineData("97 Roberts Circuit, Camira Queensland 4300", "97 ROBERTS CIRCUIT\nCAMIRA QLD 4300")]
+    [InlineData("187 Wilson Esplanade Downer, ACT 2602", "187 WILSON ESPLANADE\nDOWNER ACT 2602")]
+    [InlineData("12 Smith St\nSydney nsw 2000", "12 SMITH ST\nSYDNEY NSW 2000")]
+    public void AustralianStateInFullOrOnOneLine(string input, string postal) =>
+        Assert.Equal(postal, Parse(input, "AU").ToString(AddressStyle.Postal));
+
+    [Fact]
+    public void RomanianCountyIsTheAdminAreaAndCommaBelowLettersFold()
+    {
+        ParsedAddress a = Parse("Strada Sion Gheorghe 67, 400241 Cluj-Napoca, județul Cluj", "RO");
+        Assert.Equal("județul Cluj", a.AdminArea!.Value.Standard);
+        Assert.Equal("Cluj-Napoca", a.Locality!.Value.Text);
+        Assert.Equal("400241 CLUJ-NAPOCA, JUDEȚUL CLUJ", a.ToString(AddressStyle.Postal).Split('\n')[^1]);
+        Assert.Equal(AddressExpander.Fold("Județ Ștefan Țepeș"), AddressExpander.Fold("Judet Stefan Tepes"));
+    }
+
+    [Theory]
+    [InlineData("Strada Televiziunii, nr. 41, 062362 București, Sector 6", "RO")]
+    [InlineData("Strada Rosetti C. A. 26\nPitești, 110040", "RO")]
+    [InlineData("Intrarea Versului, 18, Râmnicu Vâlcea, 240192", "RO")]
+    public void RomanianPostcodeLastAndSectorTail(string input, string hint) =>
+        Assert.Equal(Region.Parse("RO"), Parse(input, hint).Country);
 
     private static void StreetRoles(ParsedAddress a, params StreetPartRole[] roles) =>
         Assert.Equal(roles, a.DeliveryLines[0].Parts.Select(p => p.Role).ToArray());

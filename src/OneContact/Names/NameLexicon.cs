@@ -44,6 +44,8 @@ internal static class NameLexicon
 
         // Polish, Czech, Slovak, Slovenian, Croatian, Hungarian, Romanian, Maltese, Irish
         "pan|pl,cs,sk", "pani|pl,cs,sk", "panna|pl", "mgr|*", "inz|pl,sl,hr,cs,sk", "lek|pl", "hab|pl", "ks|pl", "mec|pl",
+        // Polish professional titles as the bars and chambers print them: adwokat (adw.), radca prawny (r.pr.), the habilitated doctor's "dr hab." and the associate professor's "prof. nadzw.".
+        "adw|*", "adwokat|pl", "rpr|*", "radcaprawny|pl", "nadzw|pl",
         "slecna|cs,sk", "mudr|cs,sk", "judr|cs,sk", "phdr|cs,sk", "rndr|cs,sk", "mvdr|cs,sk", "paeddr|cs,sk", "thdr|cs,sk", "dis|cs,sk",
         "g|sl,hr", "ga|sl", "gospod|sl", "gospa|sl", "gda|hr", "gdja|hr", "gospodin|hr", "gospoda|hr", "sc|hr",
         "id|hu", "ifj|hu", "ozv|hu", "dl|ro", "domnul|ro", "doamna|ro", "domnisoara|ro", "conf|ro", "lect|ro", "av|ro",
@@ -327,7 +329,7 @@ internal static class NameLexicon
     }
 
     // Titles written as several words: only these are looked up across word boundaries, so that initials ("M. S") never add up to a title ("Ms").
-    private static readonly FrozenSet<string> MultiWordTitles = new[] { "deheer", "antuasal", "antathair", "antollamh", "antsiur" }.ToFrozenSet(StringComparer.Ordinal);
+    private static readonly FrozenSet<string> MultiWordTitles = new[] { "deheer", "radcaprawny", "antuasal", "antathair", "antollamh", "antsiur" }.ToFrozenSet(StringComparer.Ordinal);
 
     internal static bool IsMultiWordTitle(string folded, string[] languages) => MultiWordTitles.Contains(folded) && IsTitle(folded, languages);
 

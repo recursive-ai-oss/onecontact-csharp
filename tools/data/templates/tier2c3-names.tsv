@@ -1,0 +1,142 @@
+# kind	language	value; invented name parts for recipient and organisation lines, written for these templates (no register)
+given	hr	Ivan
+given	hr	Marko
+given	hr	Josip
+given	hr	Ana
+given	hr	Marija
+given	hr	Petra
+given	hr	Luka
+given	hr	Ivana
+given	hr	Tomislav
+given	hr	Mateja
+given	hr	Davor
+given	hr	Katarina
+family	hr	Horvat
+family	hr	Kovačević
+family	hr	Babić
+family	hr	Marić
+family	hr	Jurić
+family	hr	Novak
+family	hr	Kovač
+family	hr	Knežević
+family	hr	Vuković
+family	hr	Marković
+family	hr	Petrović
+family	hr	Matić
+given	hu	Anna
+given	hu	Péter
+given	hu	László
+given	hu	Katalin
+given	hu	István
+given	hu	Judit
+given	hu	Gábor
+given	hu	Zsuzsanna
+given	hu	Tamás
+given	hu	Eszter
+given	hu	Balázs
+given	hu	Réka
+family	hu	Nagy
+family	hu	Kovács
+family	hu	Tóth
+family	hu	Szabó
+family	hu	Horváth
+family	hu	Varga
+family	hu	Kiss
+family	hu	Molnár
+family	hu	Németh
+family	hu	Farkas
+family	hu	Balogh
+family	hu	Papp
+given	ro	Andrei
+given	ro	Maria
+given	ro	Ion
+given	ro	Elena
+given	ro	Mihai
+given	ro	Ioana
+given	ro	Alexandru
+given	ro	Cristina
+given	ro	Vasile
+given	ro	Gabriela
+given	ro	Radu
+given	ro	Daniela
+family	ro	Popescu
+family	ro	Ionescu
+family	ro	Popa
+family	ro	Stan
+family	ro	Dumitru
+family	ro	Gheorghe
+family	ro	Constantin
+family	ro	Marin
+family	ro	Stoica
+family	ro	Munteanu
+family	ro	Rusu
+family	ro	Matei
+given	en	James
+given	en	Emma
+given	en	Liam
+given	en	Olivia
+given	en	Jack
+given	en	Chloe
+given	en	Noah
+given	en	Grace
+given	en	Ethan
+given	en	Sophie
+given	en	Lachlan
+given	en	Matilda
+family	en	Smith
+family	en	Jones
+family	en	Williams
+family	en	Brown
+family	en	Wilson
+family	en	Taylor
+family	en	Anderson
+family	en	Thompson
+family	en	Walker
+family	en	Harris
+family	en	Nguyen
+family	en	Campbell
+org	hr	{fam} d.o.o.
+org	hr	{word} {fam} d.o.o.
+org	hr	{city} {word} d.d.
+org	hr	Obrt {fam}
+org	hr	{word} j.d.o.o.
+org	hu	{fam} Kft.
+org	hu	{word} {fam} Bt.
+org	hu	{city} {word} Zrt.
+org	hu	{fam} és Társa Kft.
+org	hu	{word} Kft.
+org	ro	{fam} S.R.L.
+org	ro	{word} {fam} SRL
+org	ro	{city} {word} S.A.
+org	ro	{fam} Construct S.R.L.
+org	ro	{word} PFA
+org	en	{fam} Pty Ltd
+org	en	{word} {fam} Pty Ltd
+org	en	{city} {word} Pty Limited
+org	en	{fam} & Sons Pty Ltd
+org	en	{word} Services Pty Ltd
+word	hr	Adria
+word	hr	Slavonija
+word	hr	Jadran
+word	hr	Zagorje
+word	hr	Dalmacija
+word	hr	Panonija
+word	hu	Alföld
+word	hu	Duna
+word	hu	Tisza
+word	hu	Balaton
+word	hu	Mecsek
+word	hu	Bakony
+word	ro	Carpați
+word	ro	Dunărea
+word	ro	Transilvania
+word	ro	Muntenia
+word	ro	Bucovina
+word	ro	Dobrogea
+word	en	Coastal
+word	en	Southern
+word	en	Pacific
+word	en	Summit
+word	en	Harbour
+word	en	Outback
+word	en	Federation

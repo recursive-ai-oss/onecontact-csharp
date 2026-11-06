@@ -22,8 +22,8 @@ Provenance of the data and of the trained weights: `src/OneContact.Models.Tier1/
 `spans.sh` adds the extraction span head to a trained pipeline with the encoder frozen, so the address and name heads stay as they are:
 
 ```
-BASE=<tier1.onenlp from the run above> BLOCKS=<blocks-us-ca-v1 folder with train/ and dev/> OUT=<run folder> BUDGET=1500 EPOCHS=6 recipes/tier1/spans.sh   # repeat until it prints model=...
+BASE=<tier1.onenlp from the run above> BLOCKS=<blocks-us-ca-v3 folder with train/ and dev/> OUT=<run folder> BUDGET=1500 EPOCHS=4 BLOCKS_COUNT=400000 recipes/tier1/spans.sh   # repeat until it prints model=...
 Program.cs spans-dev --model <tier1.onenlp> --blocks-dev <dev files>   # field and block-start scores per label
 ```
 
-500,000 blocks (chosen by a hash), learning rate 0.003, seed 1, dropout 0.1, patience 4; the model of the best dev evaluation is written to `OUT/tier1.onenlp`. Data and results: `src/OneContact.Models.Tier1/PROVENANCE.md`.
+400,000 examples (chosen by a hash), learning rate 0.003, seed 1, dropout 0.1, patience 4; the model of the best dev evaluation is written to `OUT/tier1.onenlp`. Data and results: `src/OneContact.Models.Tier1/PROVENANCE.md`.

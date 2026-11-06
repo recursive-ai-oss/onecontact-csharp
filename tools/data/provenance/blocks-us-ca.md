@@ -1,6 +1,6 @@
 # Provenance: contact-block training data, United States and Canada (`blocks-us-ca`)
 
-Training text for the extraction span head: short pieces of text (page footers, contact sections, staff lists, email signatures, business cards, CRM notes, free user text and look-alike negatives) in which person names, company names, addresses, phones, emails and websites are labelled with exact character offsets, and where each record's block begins is marked. English (US and Canada) and Canadian French. The generator is `tools/data/blocks` (`OneContact.Data.Blocks`, version `blocks-1`). This file is the committed record; the run's `manifest.json` (every file hash, the seed and all counts) stays with the generated data.
+Training text for the extraction span head: short pieces of text (page footers, contact sections, staff lists, email signatures, business cards, CRM notes, free user text and look-alike negatives) in which person names, company names, addresses, phones, emails and websites are labelled with exact character offsets, and where each record's block begins is marked. English (US and Canada) and Canadian French. The generator is `tools/data/blocks` (`OneContact.Data.Blocks`, version `blocks-1` for run v1, `blocks-3` for run v3). This file is the committed record; the run's `manifest.json` (every file hash, the seed and all counts) stays with the generated data.
 
 ## What it contains
 
@@ -89,3 +89,13 @@ dotnet run --project tools/data/blocks -c Release -- report --out <dir> [--sampl
 ```
 
 `render` exits non-zero when any span fails its check. Adding a locale means adding its pools to `Pools.cs`, a `LexSet` to `Lexicon.cs` and a weight in `Program.cs`; the block kinds and field generators do not change.
+
+## Run `blocks-us-ca-v3` (blocks inside pages)
+
+The v1 blocks are mostly contact data; a model trained on them read ordinary page text as names, companies and addresses. Version `blocks-3` of the generator (`Chrome.cs`) renders the page and text around a block: in the page view, 75% of contact blocks sit between unlabelled chrome (up to about 1,700 characters before and 1,300 after), and in the CRM view 30% of notes and signatures sit between running sentences. New kinds with no field: `negative-page` (a whole page of chrome, 28 of 190 weight points on the page view) and `negative-talk` (sentences that mention people, places and companies the way news and chat do). Chrome items: navigation lists, headings, paragraphs of one to four sentences, testimonials (the customer named, not labelled), product cards, news entries, bylines, form labels, cookie banners and button text, service lists, place lists, breadcrumbs, number lines, legal lines, and look-alike lines (road and exit news, service areas with a city and ZIP code, `logo@2x.png`, social handles, `brandname.com`, ZIP lists). Every word list and template is ours, written for the generator; people and company names inside chrome come from the same split-respecting pools as the blocks and are never labelled there. A fifth of every list (items whose index is a multiple of five) is used by dev blocks only.
+
+Seed 20261107, 450,000 ids tried, 22,604 in the reserved buckets, span failures 0. A second render gave byte-identical data files (the manifest differs only by the generator source hashes after crawl support was added). Train 617,634 examples (179,621 without a field, 29%); dev 13,433 (3,902). Train spans: person 838,118, phone 944,838, email 773,685, company 299,098, address 389,409, website 160,897. Inputs as for v1 (manifests `fab62fc5…`, `51619188…`, `fee680bd…`). `Lexicon.cs` `4b1019a0…`, `Kinds.cs` `217b09c3…`, `Fields.cs` `683e88d4…`.
+
+### Optional: real page text from a crawl folder
+
+`render --crawl DIR` mixes lines of real pages into the chrome (half of the chrome items). `DIR` holds `web.jsonl` and `ugc.jsonl` made by `crawl-negatives.py` from pages fetched with `tools/Eval/extraction/select.py` and `fetch.py` and read to visible text with `eval-extract visible`. A page is kept only when no line of it looks like contact data, so every line used is a line with no field; a page's split is fixed by a hash of its host. Hosts of every private evaluation set are excluded at selection and the overlap is checked afterwards. This variant trains a separate candidate and is not in the shipped weights.
