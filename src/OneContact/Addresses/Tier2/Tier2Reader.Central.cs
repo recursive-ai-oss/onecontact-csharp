@@ -168,7 +168,9 @@ internal static partial class Tier2Reader
 
         private static bool IsRomanianSectorWord(string key) => key is "SECTOR" or "SECTORUL" or "JUD" or "JUD." or "JUDETUL" or "JUDET";
 
-        private static bool IsRomanianPostcode(string s) => s.Length == 6 && s.All(char.IsAsciiDigit);
+        private static bool IsRomanianCountyWord(string key) => key is "JUD" or "JUDET" or "JUDETUL";
+
+        private static bool IsRomanianPostcode(string s) => s.Length == 6 && s.All(char.IsAsciiDigit) || s.Length == 9 && s.StartsWith("RO-", StringComparison.OrdinalIgnoreCase) && s[3..].All(char.IsAsciiDigit);
 
         // UPU Romania sheet: "200716 CRAIOVA", the postcode of six digits left of the locality. Romanians also write the sector of Bucharest or the county after the locality
         // ("011371 Bucureşti, Sector 1", which on one line is a unit of its own after the postcode) and put the postcode last ("Pitești, 110040"; "București, Sector 3, 032391").
@@ -182,7 +184,7 @@ internal static partial class Tier2Reader
                 return false;
             }
 
-            while (units.Count >= 2 && units[^1].Toks.Count > 0 && IsRomanianSectorWord(units[^1].Toks[0].Key) && units[^2].Toks.Any(t => IsRomanianPostcode(t.Text) || t.Text.Length == 9 && t.Text.StartsWith("RO-", StringComparison.OrdinalIgnoreCase) && IsRomanianPostcode(t.Text[3..])))
+            while (units.Count >= 2 && units[^1].Toks.Count > 0 && IsRomanianSectorWord(units[^1].Toks[0].Key) && units[^2].Toks.Any(t => IsRomanianPostcode(t.Text)))
             {
                 units[^2] = new Unit([.. units[^2].Toks, .. units[^1].Toks]);
                 units.RemoveAt(units.Count - 1);
@@ -222,7 +224,7 @@ internal static partial class Tier2Reader
             units.RemoveRange(keep, units.Count - keep);
             units.Add(new Unit([pc, .. locality]));
             unitIndex = units.Count - 1;
-            match = new PostcodeMatch(1, pc.Text, ["RO"], null);
+            match = new PostcodeMatch(1, pc.Text[^6..], ["RO"], null);
             return true;
         }
 
@@ -717,7 +719,7 @@ internal static partial class Tier2Reader
         }
 
         // Writes the last line of a country of this group; returns false for the other countries.
-        private static bool CentralLast(T2Country country, string postcode, string localityPostal, string localityDisplay, string adminInline, out string postal, out string display)
+        private static bool CentralLast(T2Country country, string postcode, string localityPostal, string localityDisplay, string adminInline, string adminInlineDisplay, out string postal, out string display)
         {
             switch (country.Profile)
             {
@@ -725,6 +727,11 @@ internal static partial class Tier2Reader
                     // UPU Australia sheet: locality, state, postcode, all in capitals, one space between them (Australia Post prefers two; its 2022 brochure prints one).
                     postal = localityPostal + " " + adminInline + " " + postcode;
                     display = localityDisplay + " " + adminInline + " " + postcode;
+                    return true;
+                case "ro":
+                    // UPU Romania sheet: postcode and locality; a county the writer gave follows the locality after a comma.
+                    postal = country.PrintedPrefix + postcode + " " + localityPostal + (adminInline.Length > 0 ? ", " + adminInline : string.Empty);
+                    display = country.PrintedPrefix + postcode + " " + localityDisplay + (adminInlineDisplay.Length > 0 ? ", " + adminInlineDisplay : string.Empty);
                     return true;
                 case "hu":
                     // UPU Hungary sheet: the postcode alone on the last line; the locality is printed above the street line.

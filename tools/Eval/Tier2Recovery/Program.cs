@@ -151,6 +151,18 @@ static HashSet<(string, int, int)> MergeConvention(ParsedAddress parsed, string 
         }
     }
 
+    // The registers label "HR-40000" as the country letters and the postcode apart.
+    foreach ((string, int S, int E) pc in fields.Where(f => f.Name == "postal-code").ToList())
+    {
+        int dash = text.IndexOf('-', pc.S);
+        if (dash > pc.S && dash < pc.E && dash - pc.S <= 2 && text.AsSpan(pc.S, dash - pc.S).ToString().All(char.IsLetter))
+        {
+            fields.Remove(pc);
+            fields.Add(("postal-code", dash + 1, pc.E));
+            fields.Add(("country", pc.S, dash));
+        }
+    }
+
     return [.. fields];
 }
 

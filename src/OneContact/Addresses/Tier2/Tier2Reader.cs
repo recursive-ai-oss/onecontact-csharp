@@ -372,6 +372,7 @@ internal static partial class Tier2Reader
             // the Italian province code ("00122 ROMA RM"), the Spanish province on its own line or in parentheses, the Irish county on its own line.
             (string Written, string Standard, SourceSpan Span, string Rule)? adminInfo = null;
             string adminInline = string.Empty;
+            List<Tok>? roCounty = null;
             string adminLine = string.Empty;
             string adminWords = string.Empty;
             if (code is "CH" or "LI" && localityToks.Count >= 2 && localityToks[^1].Text.Length == 2 && localityToks[^1].Text.All(char.IsUpper) && T2Rules.Cantons.Contains(localityToks[^1].Text))
@@ -425,6 +426,14 @@ internal static partial class Tier2Reader
                 adminInfo = (Slice(Span(stateToks)), stateAbbreviation, Span(stateToks), "upu-mexico-state");
                 adminInline = stateAbbreviation;
             }
+            else if (code == "RO" && localityToks.FindIndex(1, w => IsRomanianCountyWord(w.Key)) is var countyAt and > 0 && countyAt < localityToks.Count - 1)
+            {
+                // The county after the locality ("Giurgiu, jud. Giurgiu"; UPU Romania sheet lists the county among the address elements): kept as written.
+                roCounty = localityToks.GetRange(countyAt, localityToks.Count - countyAt);
+                localityToks.RemoveRange(countyAt, roCounty.Count);
+                adminInfo = (Slice(Span(roCounty)), Join(roCounty), Span(roCounty), "t2-romania-county");
+                adminInline = Join(roCounty).ToUpperInvariant();
+            }
             else if (code == "IE" && _county is not null)
             {
                 adminInfo = (Slice(Span(_county)), Join(_county).ToUpperInvariant(), Span(_county), "upu-ireland-county");
@@ -434,7 +443,7 @@ internal static partial class Tier2Reader
 
             string northDependentPostal = string.Empty;
             string northDependentDisplay = string.Empty;
-            string adminInlineDisplay = string.Empty;
+            string adminInlineDisplay = roCounty is null ? string.Empty : T2Text.Title(Join(roCounty), capitalsKept: true);
             if (northAdmin is not null)
             {
                 // Estonia: the county follows the locality on the postcode line ("48103 Põltsamaa Jõgeva maakond"); Latvia: the municipality follows it, after a comma ("Valmiera, Valmieras nov., LV-4201").
@@ -459,7 +468,7 @@ internal static partial class Tier2Reader
             string adminLineDisplay = adminLine.Length == 0 ? string.Empty : T2Text.Title(adminWords, capitalsKept: true);
             string lastPostal;
             string lastDisplay;
-            if (country.IsCentral && CentralLast(country, printed, localityPostal, localityDisplay, adminInline, out string centralPostal, out string centralDisplay))
+            if (country.IsCentral && CentralLast(country, printed, localityPostal, localityDisplay, adminInline, adminInlineDisplay, out string centralPostal, out string centralDisplay))
             {
                 lastPostal = centralPostal;
                 lastDisplay = centralDisplay;
