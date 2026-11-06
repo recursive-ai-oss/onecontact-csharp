@@ -1,13 +1,61 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- Placeholder until its stage: it will reference OneNLP, OneModel or OneHtml then, and is not packed before that. -->
-    <IsPackable>false</IsPackable>
-    <Description>libphonenumber- and libpostal-class contact data for .NET: Trained models for OneContact, Tier 1 and Tier 2. Not packable yet.</Description>
+    <IsPackable>true</IsPackable>
+    <Description>libphonenumber- and libpostal-class contact data for .NET: the trained models for addresses and names in the United States, Canada and every Tier 2 country. One small shared encoder with an address-field head, a name head and a contact-span head for extraction, from weights packed inside this assembly. No downloads. An early preview.</Description>
+    <PackageTags>$(PackageTags);address;names;model</PackageTags>
+    <!-- The weights are embedded as resources, so a NativeAOT or trimmed application carries them with no file to copy. -->
+    <ModelsWeightsDir Condition="'$(ModelsWeightsDir)' == ''">$(ONECONTACT_MODELS_WEIGHTS)</ModelsWeightsDir>
   </PropertyGroup>
+
+  <Import Project="weights.manifest.props" />
+
+  <ItemGroup>
+    <!-- The registration file is shipped, not compiled here. -->
+    <Compile Remove="contentFiles/**" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../OneContact/OneContact.csproj" />
+    <PackageReference Include="RecursiveAI.OneNlp.Neural" />
+    <PackageReference Include="RecursiveAI.OneModel" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Models.Tests" />
+    <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Recipe.Models" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../PACKAGE.md" Pack="true" PackagePath="/" />
+    <None Include="weights.manifest.props" Pack="true" PackagePath="/" />
+    <None Include="PROVENANCE.md" Pack="true" PackagePath="/" />
+    <None Include="THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="/" />
+    <None Include="../../LICENSE-MIT" Pack="true" PackagePath="/" />
+    <None Include="../../LICENSE-APACHE" Pack="true" PackagePath="/" />
+    <!-- Compiled into the referencing project: the module initializer that registers the models. -->
+    <Content Include="contentFiles/OneContactModelsRegistration.cs" Pack="true" PackagePath="contentFiles/cs/any/" BuildAction="Compile" PackageCopyToOutput="false" CopyToOutputDirectory="Never" />
+  </ItemGroup>
+
+  <!-- With a weights directory (property ModelsWeightsDir or environment variable ONECONTACT_MODELS_WEIGHTS): check every file against the
+       manifest and embed it. Without one the project still builds (for development), but cannot be packed. -->
+  <Target Name="EmbedModelsWeights" BeforeTargets="AssignTargetPaths" Condition="'$(ModelsWeightsDir)' != ''">
+    <ItemGroup>
+      <_Weight Include="@(ModelsWeight)" Path="$([MSBuild]::EnsureTrailingSlash('$(ModelsWeightsDir)'))%(Identity)" WeightName="%(Identity)" />
+    </ItemGroup>
+    <Error Condition="!Exists('%(_Weight.Path)')" Text="Weights file '%(_Weight.WeightName)' is missing from '$(ModelsWeightsDir)'. Put the files listed in src/OneContact.Models/weights.manifest.props there." />
+    <GetFileHash Files="@(_Weight->'%(Path)')" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="_WeightHashed" />
+    </GetFileHash>
+    <Error Condition="!$([System.String]::Equals('%(_WeightHashed.FileHash)', '%(_WeightHashed.Sha256)', System.StringComparison.OrdinalIgnoreCase))"
+           Text="Weights file '%(_WeightHashed.WeightName)' does not match the manifest: sha256 %(_WeightHashed.FileHash), expected %(_WeightHashed.Sha256). Use the weights listed in weights.manifest.props, or update the manifest and PROVENANCE.md together." />
+    <ItemGroup>
+      <EmbeddedResource Include="@(_WeightHashed)" LogicalName="weights/%(_WeightHashed.WeightName)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RequireModelsWeightsToPack" BeforeTargets="GenerateNuspec" Condition="'$(ModelsWeightsDir)' == ''">
+    <Error Text="Packing needs the weights: set the environment variable ONECONTACT_MODELS_WEIGHTS (or the property ModelsWeightsDir) to the directory that holds the files listed in weights.manifest.props." />
+  </Target>
 
 </Project>

@@ -326,7 +326,7 @@ internal static class ModelAddressReader
         }
     }
 
-    private static StreetPartRole RoleOf(string name) => name switch
+    internal static StreetPartRole RoleOf(string name) => name switch
     {
         "house-number" => StreetPartRole.HouseNumber,
         "fraction" => StreetPartRole.Fraction,
