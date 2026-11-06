@@ -68,3 +68,17 @@ Measured against the register-rendered dev files (see the repo's `tools/Eval/Tie
 - **Estonia.** `48103 Põltsamaa Jõgeva maakond`: the county is the admin area; a `vald`, `linn` or `linnaosa` line is the dependent locality; with such a line (or a village locality and a line besides the addressee) and no street, the line above is the farm or house name.
 
 What the rules leave to the model on purpose: a lone name line above a postcode in Iceland, Norway, Finland and Estonia (recipient or farm name: the sheets do not say), a Latvian `Name 8` without `iela` (a street or a farm, the Latvian rules allow both), a person's name glued to a street, a street and a locality on one line (`Marijas iela 22 Rūjiena`), and a postcode written without its `LV-`.
+
+### Second recovery round: Lithuania
+
+Measured on the 2000 register dev examples (rules alone). The recovery tool keeps `LT-` inside the postal-code field for Lithuania, as the register does (the other countries' registers label the letters apart); both columns use it.
+
+| Hint | Every field before → after | Fields before → after | Top refusals after |
+|---|---|---|---|
+| yes | 58.5 → 93.6 | 82.3 → 95.6 | no-last-line 91 (no postcode), model-required 4 |
+| no | 53.7 → 85.7 | 75.6 → 87.7 | country-undetermined 159, no-last-line 94 |
+
+- **Village and municipality.** The UPU Lithuania sheet prints the rural address with the municipality (`RASEINIU R. SAV.`) and the locality apart. A line (or comma segment, or the words after the house number on one line) ending in `k.` (kaimas) is the dependent locality, including `Dabužių I k.`; one ending in `sav.` (`r. sav.`, `m. sav.`) is the admin area. `Pienionių k., Anykščių r. sav.` in one line of a label is two lines. The municipality stays where the writer put it in the printed layout; only its field changes.
+- **Box.** `PD 2876` and `Pašto dėžutė 12` as well as the sheet's `P. d.`.
+- **Apartment.** `butas 1` and `b. 3` after the house number are the designator and the unit number. A slash between house and apartment (`66/72`) is read like the sheet's dash, printed as written.
+- **Company name.** `MB` after a comma (`Sakalauskas ir Ko, MB, Aušros g. 23`) belongs to the name before it; as `UAB` and `AB` it also ends a company name that runs into the street on one line.

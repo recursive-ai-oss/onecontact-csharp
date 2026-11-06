@@ -3,13 +3,17 @@
 # UPU Slovakia sheet (P.O. Box, Poste Restante); UPU Slovenia sheet (p.p.); UPU Croatia sheet (P.P.); UPU Hungary sheet and Magyar Posta (PF., postafiók, Postán maradó); UPU Mexico sheet and Correos de México (Apartado Postal); Australia Post (PO Box, GPO Box, Locked Bag, Private Bag, RMB, RMS, RSD, CMB, CMA, CPA, Care PO).
 PL	box	SKRYTKA POCZTOWA	Skrytka pocztowa
 PL	box	SKR POCZT	skr. poczt.
+PL	box	SKRYTKA	skrytka
 PL	general	POSTE RESTANTE	Poste restante
 CZ	box	POSTOVNI PRIHRADKA	poštovní přihrádka
 CZ,SK	box	PO BOX	P.O. Box
+CZ,SK	box	POBOX	P.O. Box
 CZ	box	DODAVACI SCHRANA	dodávací schrána
 CZ,SK	general	POSTE RESTANTE	Poste restante
 SK	box	POSTOVA PRIHRADKA	poštová priehradka
+SK	box	POSTOVY PRIECINOK	poštový priečinok
 SI	box	PP	p.p.
+SI	box	P P	p.p.
 SI	box	POSTNI PREDAL	poštni predal
 HR	box	PP	P.P.
 HR	box	POSTANSKI PRETINAC	poštanski pretinac

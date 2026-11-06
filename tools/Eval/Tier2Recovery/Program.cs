@@ -38,6 +38,9 @@ foreach (string country in args[2].Split(','))
     // Some registers (the Czech, Croatian, Hungarian and Australian renders) label a street's type as part of its name, and a house-number marker with the number
     // ("nr. 68"). The parser keeps the type and the marker apart, so for a sample whose gold has no street.type label the parts are joined before comparing.
     bool typeInName = !sample.Any(l => l.Contains("\"street.type\"", StringComparison.Ordinal));
+
+    // Some registers (the Lithuanian one) keep the country letters inside the postcode ("LT-02216"); the rest label them apart. The gold of the sample says which.
+    bool prefixInPostcode = sample.Any(l => HasPrefixedPostcode(l));
     foreach (bool withHint in new[] { false, true })
     {
         Region hint = withHint ? Region.Parse(country) : Region.Unknown;
@@ -79,7 +82,7 @@ foreach (string country in args[2].Split(','))
                 }
             }
 
-            HashSet<(string, int, int)> got = MergeConvention(parsed, text, typeInName);
+            HashSet<(string, int, int)> got = MergeConvention(parsed, text, typeInName, prefixInPostcode);
             bool every = true;
             foreach ((int s, int e, string l) in gold)
             {
@@ -121,7 +124,27 @@ foreach (string country in args[2].Split(','))
 }
 
 
-static HashSet<(string, int, int)> MergeConvention(ParsedAddress parsed, string text, bool typeInName)
+static bool HasPrefixedPostcode(string line)
+{
+    using JsonDocument doc = JsonDocument.Parse(line);
+    string text = doc.RootElement.GetProperty("text").GetString()!;
+    foreach (JsonElement e in doc.RootElement.GetProperty("entities").EnumerateArray())
+    {
+        if (e[2].GetString() == "postal-code")
+        {
+            ReadOnlySpan<char> pc = text.AsSpan(e[0].GetInt32(), e[1].GetInt32() - e[0].GetInt32());
+            int dash = pc.IndexOf('-');
+            if (dash is 1 or 2 && pc[..dash].ToString().All(char.IsLetter))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+static HashSet<(string, int, int)> MergeConvention(ParsedAddress parsed, string text, bool typeInName, bool prefixInPostcode)
 {
     List<(string Name, int S, int E)> fields = [.. parsed.Fields.Select(f => (f.Name, f.Span.Start, f.Span.End))];
     if (typeInName)
@@ -142,7 +165,7 @@ static HashSet<(string, int, int)> MergeConvention(ParsedAddress parsed, string 
         foreach ((string, int S, int E) other in fields.Where(f => f.Name == "street.other").ToList())
         {
             (string, int S, int E) number = fields.FirstOrDefault(f => f.Name == "street.house-number" && Adjacent(other.E, f.S));
-            if (number.Item1 is not null && text.Substring(other.S, other.E - other.S).TrimEnd('.').ToLowerInvariant() is "nr" or "no" or "č. p" or "c. p")
+            if (number.Item1 is not null && text.Substring(other.S, other.E - other.S).TrimEnd('.').ToLowerInvariant() is "nr" or "no" or "num" or "núm" or "č. p" or "c. p")
             {
                 fields.Remove(other);
                 fields.Remove(number);
@@ -154,6 +177,11 @@ static HashSet<(string, int, int)> MergeConvention(ParsedAddress parsed, string 
     // The registers label "HR-40000" as the country letters and the postcode apart.
     foreach ((string, int S, int E) pc in fields.Where(f => f.Name == "postal-code").ToList())
     {
+        if (prefixInPostcode)
+        {
+            break;
+        }
+
         int dash = text.IndexOf('-', pc.S);
         if (dash > pc.S && dash < pc.E && dash - pc.S <= 2 && text.AsSpan(pc.S, dash - pc.S).ToString().All(char.IsLetter))
         {
