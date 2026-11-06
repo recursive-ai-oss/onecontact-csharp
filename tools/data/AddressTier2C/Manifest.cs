@@ -27,6 +27,7 @@ internal static class Manifest
         ("hr-dgu", "Otvorena dozvola (Croatian open licence: commercial and non-commercial use with the source named)", "Adrese (INSPIRE), Državna geodetska uprava; contains public sector information under the Otvorena dozvola."),
         ("hu-geonames", "Creative Commons Attribution 4.0 (CC BY 4.0)", "GeoNames postal codes, geonames.org; CC BY 4.0. Street names are our own."),
         ("ro-posta", "Open Government Licence Romania v1.0 (OGL-ROU-1.0)", "Coduri poștale România (Infocod, Sept. 2016), Poșta Română, via data.gov.ro; contains public information under the Open Government Licence v1.0."),
+        ("au-abs", "Creative Commons Attribution 4.0 International (CC BY 4.0)", "Australian Bureau of Statistics, ASGS Edition 3 (2021) geographic correspondences, CG_SAL_2021_POA_2021; CC BY 4.0."),
         ("au-geonames", "Creative Commons Attribution 4.0 (CC BY 4.0)", "GeoNames postal codes, geonames.org; CC BY 4.0. Street names are our own."),
     ];
 
@@ -54,7 +55,12 @@ internal static class Manifest
         w.WriteStartArray();
         foreach ((string prefix, string licence, string attribution) in Registers.Concat(RegistersC3))
         {
-            string pin = Path.Combine(pinDir, (prefix.Split('-')[0]) + ".pin");
+            string pin = Path.Combine(pinDir, prefix + ".pin");
+            if (!File.Exists(pin))
+            {
+                pin = Path.Combine(pinDir, prefix.Split('-')[0] + ".pin");
+            }
+
             if (!File.Exists(pin) || Directory.GetDirectories(dataRoot, prefix + "-*").Length == 0)
             {
                 continue;
