@@ -1,0 +1,406 @@
+# kind	language	value; invented name parts for recipient and organisation lines, written for these templates (no register)
+given	en	James
+given	en	Mary
+given	en	John
+given	en	Sarah
+given	en	David
+given	en	Emma
+given	en	Michael
+given	en	Laura
+given	en	Peter
+given	en	Hannah
+given	en	Andrew
+given	en	Claire
+given	en	Thomas
+given	en	Rachel
+given	en	Paul
+given	en	Helen
+given	en	Mark
+given	en	Fiona
+given	en	Daniel
+given	en	Karen
+given	en	Stephen
+given	en	Jane
+given	en	Oliver
+given	en	Amy
+given	en	Callum
+given	en	Niamh
+given	en	Sean
+given	en	Aoife
+given	en	Ryan
+given	en	Grace
+family	en	Smith
+family	en	Jones
+family	en	Taylor
+family	en	Brown
+family	en	Williams
+family	en	Wilson
+family	en	Evans
+family	en	Thomas
+family	en	Johnson
+family	en	Roberts
+family	en	Walker
+family	en	Wright
+family	en	Robinson
+family	en	Thompson
+family	en	White
+family	en	Hughes
+family	en	Edwards
+family	en	Green
+family	en	Hall
+family	en	Wood
+family	en	Harris
+family	en	Clarke
+family	en	Patel
+family	en	Murphy
+family	en	Kelly
+family	en	Byrne
+family	en	Ryan
+family	en	Walsh
+family	en	OBrien
+family	en	McCarthy
+family	en	Campbell
+family	en	Stewart
+family	en	Morgan
+family	en	Davies
+family	en	Reid
+family	en	Fraser
+word	en	Harbour
+word	en	Bridge
+word	en	Meadow
+word	en	Oakfield
+word	en	Riverside
+word	en	Greenway
+word	en	Northern
+word	en	Castle
+word	en	Summit
+word	en	Beacon
+word	en	Crown
+word	en	Orchard
+word	en	Kingsway
+word	en	Highfield
+org	en	{fam} & Sons Ltd
+org	en	{fam} Solicitors
+org	en	{word} Dental Practice
+org	en	{word} Consulting Ltd
+org	en	The {word} Partnership
+org	en	{fam} Plumbing & Heating
+org	en	{word} Surgery
+org	en	{city} Garden Centre
+org	en	{word} Veterinary Clinic
+org	en	{fam} Accountants LLP
+given	es	José
+given	es	Antonio
+given	es	María
+given	es	Manuel
+given	es	Carmen
+given	es	Francisco
+given	es	Pilar
+given	es	David
+given	es	Laura
+given	es	Javier
+given	es	Marta
+given	es	Carlos
+given	es	Ana
+given	es	Miguel
+given	es	Lucía
+given	es	Pedro
+given	es	Isabel
+given	es	Sergio
+given	es	Elena
+given	es	Alberto
+given	es	Rosa
+given	es	Jorge
+given	es	Cristina
+given	es	Raúl
+given	es	Dolores
+family	es	García
+family	es	Rodríguez
+family	es	González
+family	es	Fernández
+family	es	López
+family	es	Martínez
+family	es	Sánchez
+family	es	Pérez
+family	es	Gómez
+family	es	Martín
+family	es	Jiménez
+family	es	Ruiz
+family	es	Hernández
+family	es	Díaz
+family	es	Moreno
+family	es	Muñoz
+family	es	Álvarez
+family	es	Romero
+family	es	Alonso
+family	es	Gutiérrez
+family	es	Navarro
+family	es	Torres
+family	es	Domínguez
+family	es	Vázquez
+family	es	Ramos
+family	es	Gil
+word	es	Mediterráneo
+word	es	Castilla
+word	es	Levante
+word	es	Iberia
+word	es	Sol
+word	es	Norte
+word	es	Central
+word	es	Sierra
+word	es	Atlántico
+word	es	Ebro
+word	es	Duero
+word	es	Mayor
+org	es	{fam} y Hermanos S.L.
+org	es	Talleres {fam} S.A.
+org	es	Farmacia {fam}
+org	es	Asesoría {fam}
+org	es	Clínica Dental {word}
+org	es	{word} Construcciones S.L.
+org	es	Restaurante {word}
+org	es	Ferretería {fam}
+org	es	Gestoría {word}
+org	es	Comunidad de Propietarios {word}
+given	ca	Jordi
+given	ca	Montserrat
+given	ca	Joan
+given	ca	Núria
+given	ca	Pere
+given	ca	Marta
+given	ca	Josep
+given	ca	Carme
+given	ca	Albert
+given	ca	Laia
+given	ca	Xavier
+given	ca	Neus
+given	ca	Marc
+given	ca	Anna
+given	ca	Oriol
+given	ca	Mireia
+given	ca	Jaume
+given	ca	Maria
+family	ca	Puig
+family	ca	Soler
+family	ca	Vila
+family	ca	Serra
+family	ca	Ferrer
+family	ca	Roca
+family	ca	Pujol
+family	ca	Vidal
+family	ca	Sala
+family	ca	Costa
+family	ca	Casas
+family	ca	Font
+family	ca	Mas
+family	ca	Bosch
+family	ca	Pons
+family	ca	Riera
+word	ca	Pirineu
+word	ca	Mar
+word	ca	Vall
+word	ca	Muntanya
+word	ca	Cadí
+word	ca	Ebre
+word	ca	Montseny
+word	ca	Llobregat
+org	ca	{fam} i Fills S.L.
+org	ca	Fusteria {fam}
+org	ca	Farmàcia {fam}
+org	ca	Clínica {word} S.L.
+org	ca	Assessoria {fam}
+org	ca	Restaurant {word}
+given	it	Giuseppe
+given	it	Maria
+given	it	Giovanni
+given	it	Anna
+given	it	Antonio
+given	it	Francesca
+given	it	Marco
+given	it	Laura
+given	it	Luca
+given	it	Paola
+given	it	Andrea
+given	it	Giulia
+given	it	Roberto
+given	it	Elena
+given	it	Stefano
+given	it	Chiara
+given	it	Alessandro
+given	it	Sara
+given	it	Davide
+given	it	Valentina
+given	it	Franco
+given	it	Silvia
+given	it	Matteo
+given	it	Elisa
+family	it	Rossi
+family	it	Russo
+family	it	Ferrari
+family	it	Esposito
+family	it	Bianchi
+family	it	Romano
+family	it	Colombo
+family	it	Ricci
+family	it	Marino
+family	it	Greco
+family	it	Bruno
+family	it	Gallo
+family	it	Conti
+family	it	De
+family	it	Luca
+family	it	Mancini
+family	it	Costa
+family	it	Giordano
+family	it	Rizzo
+family	it	Lombardi
+family	it	Moretti
+family	it	Barbieri
+family	it	Fontana
+family	it	Santoro
+family	it	Mariani
+word	it	Adriatico
+word	it	Tirreno
+word	it	Alpi
+word	it	Lombardia
+word	it	Etna
+word	it	Sole
+word	it	Italia
+word	it	Centrale
+word	it	Nuova
+word	it	Garibaldi
+word	it	Roma
+word	it	Appennino
+org	it	{fam} S.r.l.
+org	it	Studio {fam}
+org	it	Farmacia {fam}
+org	it	Ristorante {word}
+org	it	Autofficina {fam}
+org	it	{word} S.p.A.
+org	it	Studio Legale {fam}
+org	it	Condominio {word}
+org	it	Panificio {fam}
+org	it	{fam} & Figli S.n.c.
+given	pt	João
+given	pt	Maria
+given	pt	José
+given	pt	Ana
+given	pt	António
+given	pt	Manuel
+given	pt	Joana
+given	pt	Pedro
+given	pt	Catarina
+given	pt	Miguel
+given	pt	Sofia
+given	pt	Rui
+given	pt	Teresa
+given	pt	Carlos
+given	pt	Inês
+given	pt	Paulo
+given	pt	Marta
+given	pt	Luís
+given	pt	Helena
+given	pt	Tiago
+given	pt	Rita
+given	pt	Nuno
+given	pt	Beatriz
+given	pt	Fernando
+given	pt	Isabel
+family	pt	Silva
+family	pt	Santos
+family	pt	Ferreira
+family	pt	Pereira
+family	pt	Oliveira
+family	pt	Costa
+family	pt	Rodrigues
+family	pt	Martins
+family	pt	Jesus
+family	pt	Sousa
+family	pt	Fernandes
+family	pt	Gonçalves
+family	pt	Gomes
+family	pt	Lopes
+family	pt	Marques
+family	pt	Alves
+family	pt	Almeida
+family	pt	Ribeiro
+family	pt	Pinto
+family	pt	Carvalho
+family	pt	Teixeira
+family	pt	Moreira
+family	pt	Correia
+family	pt	Mendes
+family	pt	Nunes
+word	pt	Atlântico
+word	pt	Douro
+word	pt	Tejo
+word	pt	Lusitânia
+word	pt	Alentejo
+word	pt	Minho
+word	pt	Algarve
+word	pt	Central
+word	pt	Norte
+word	pt	Sul
+word	pt	Mondego
+org	pt	{fam} & Filhos Lda
+org	pt	Farmácia {fam}
+org	pt	Clínica {word} Lda
+org	pt	Restaurante {word}
+org	pt	{word} Construções Lda
+org	pt	Papelaria {fam}
+org	pt	Oficina {fam}
+org	pt	Associação {word}
+org	pt	Escritório de Advogados {fam}
+org	pt	Mercearia {fam}
+given	mt	Joseph
+given	mt	Mario
+given	mt	Carmel
+given	mt	Anthony
+given	mt	Maria
+given	mt	Josephine
+given	mt	Charles
+given	mt	Rita
+given	mt	Paul
+given	mt	Doris
+given	mt	Michael
+given	mt	Marthese
+given	mt	Joe
+given	mt	Mary
+given	mt	Frank
+given	mt	Anna
+family	mt	Borg
+family	mt	Camilleri
+family	mt	Vella
+family	mt	Grech
+family	mt	Zammit
+family	mt	Farrugia
+family	mt	Azzopardi
+family	mt	Galea
+family	mt	Spiteri
+family	mt	Micallef
+family	mt	Attard
+family	mt	Cassar
+family	mt	Debono
+family	mt	Mifsud
+family	mt	Fenech
+family	mt	Caruana
+family	mt	Xuereb
+family	mt	Muscat
+family	mt	Portelli
+family	mt	Agius
+word	mt	Mediterranean
+word	mt	Gozo
+word	mt	Island
+word	mt	Harbour
+word	mt	Sliema
+word	mt	Mdina
+word	mt	Victory
+word	mt	Melita
+word	mt	Marsa
+word	mt	Saint
+org	mt	{fam} & Sons Ltd
+org	mt	{fam} Pharmacy
+org	mt	{word} Consulting Ltd
+org	mt	{word} Bakery
+org	mt	{fam} Notary
+org	mt	{word} Hotel Ltd

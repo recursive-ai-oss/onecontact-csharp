@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Turns the open address registers of Norway, the Czech Republic, Latvia and Estonia into labelled free-text training examples
+       through our own templates. It shares the tokenizer, random generator, example type and span rules with the United States and
+       Canada tool, and the delimited-text reader with the group A tool. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>OneContact.Data.AddressTier2C</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <NoWarn>$(NoWarn);CA1303;CA1848;CA1307;CA1305;CA1310;CA1304;CA1311;CA1834;CA1861;CA1862;CA1865;CA1866;CA1867;CA1869</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../AddressUsCa/Prng.cs" Link="Shared/Prng.cs" />
+    <Compile Include="../AddressUsCa/Model.cs" Link="Shared/Model.cs" />
+    <Compile Include="../AddressUsCa/Tokenizer.cs" Link="Shared/Tokenizer.cs" />
+    <Compile Include="../AddressUsCa/SpanCheck.cs" Link="Shared/SpanCheck.cs" />
+    <Compile Include="../AddressTier2A/Csv.cs" Link="Shared/Csv.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../templates/tier2c-*" Link="templates/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../pins/*.pin" Link="pins/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

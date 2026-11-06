@@ -1,0 +1,311 @@
+# kind	country	language	A|B; street names for the countries with no open street list, written for these templates. A is the type word and B the name, except for IE, UKI (Jersey, Guernsey, Isle of Man) and MT in English, where A is the name and B the type
+street	PT	pt	Rua|Direita
+street	PT	pt	Rua|da Igreja
+street	PT	pt	Rua|do Comércio
+street	PT	pt	Rua|25 de Abril
+street	PT	pt	Rua|1.º de Maio
+street	PT	pt	Rua|5 de Outubro
+street	PT	pt	Rua|Dr. António José de Almeida
+street	PT	pt	Rua|de Camilo Castelo Branco
+street	PT	pt	Rua|Luís de Camões
+street	PT	pt	Rua|Almeida Garrett
+street	PT	pt	Rua|Eng. Ferreira Dias
+street	PT	pt	Rua|da Liberdade
+street	PT	pt	Rua|de Santa Catarina
+street	PT	pt	Rua|do Norte
+street	PT	pt	Rua|das Flores
+street	PT	pt	Rua|da Escola
+street	PT	pt	Rua|do Mercado
+street	PT	pt	Rua|da Fonte
+street	PT	pt	Rua|São João
+street	PT	pt	Rua|São Pedro
+street	PT	pt	Rua|Nossa Senhora de Fátima
+street	PT	pt	Rua|Vasco da Gama
+street	PT	pt	Rua|Bernardim Ribeiro
+street	PT	pt	Rua|Padre Américo
+street	PT	pt	Rua|da República
+street	PT	pt	Rua|Principal
+street	PT	pt	Rua|do Moinho
+street	PT	pt	Rua|das Acácias
+street	PT	pt	Rua|dos Combatentes da Grande Guerra
+street	PT	pt	Rua|Fernando Pessoa
+street	PT	pt	Rua|Miguel Torga
+street	PT	pt	Rua|Sophia de Mello Breyner
+street	PT	pt	Avenida|da Liberdade
+street	PT	pt	Avenida|da República
+street	PT	pt	Avenida|Almirante Reis
+street	PT	pt	Avenida|dos Aliados
+street	PT	pt	Avenida|Marginal
+street	PT	pt	Avenida|do Brasil
+street	PT	pt	Avenida|de França
+street	PT	pt	Avenida|da Boavista
+street	PT	pt	Avenida|Infante Dom Henrique
+street	PT	pt	Avenida|25 de Abril
+street	PT	pt	Avenida|Dr. Francisco Sá Carneiro
+street	PT	pt	Avenida|João XXI
+street	PT	pt	Avenida|Central
+street	PT	pt	Avenida|do Atlântico
+street	PT	pt	Travessa|da Igreja
+street	PT	pt	Travessa|do Poço
+street	PT	pt	Travessa|da Fonte
+street	PT	pt	Travessa|São Domingos
+street	PT	pt	Travessa|do Comércio
+street	PT	pt	Travessa|das Flores
+street	PT	pt	Largo|do Rossio
+street	PT	pt	Largo|da Igreja
+street	PT	pt	Largo|do Chafariz
+street	PT	pt	Largo|Dr. Oliveira Salazar
+street	PT	pt	Largo|do Mercado
+street	PT	pt	Largo|da Feira
+street	PT	pt	Praça|da República
+street	PT	pt	Praça|do Município
+street	PT	pt	Praça|do Comércio
+street	PT	pt	Praça|Luís de Camões
+street	PT	pt	Praça|da Liberdade
+street	PT	pt	Estrada|Nacional 1
+street	PT	pt	Estrada|da Circunvalação
+street	PT	pt	Estrada|de Benfica
+street	PT	pt	Estrada|Velha
+street	PT	pt	Estrada|Municipal 502
+street	PT	pt	Alameda|Dom Afonso Henriques
+street	PT	pt	Alameda|dos Oceanos
+street	PT	pt	Alameda|das Linhas de Torres
+street	PT	pt	Calçada|da Glória
+street	PT	pt	Calçada|do Combro
+street	PT	pt	Beco|do Forno
+street	PT	pt	Beco|dos Ferreiros
+street	PT	pt	Caminho|do Monte
+street	PT	pt	Caminho|Velho
+street	PT	pt	Caminho|das Quintas
+street	PT	pt	Urbanização|Quinta da Torre
+street	PT	pt	Urbanização|Vale Formoso
+street	PT	pt	Bairro|da Boavista
+street	PT	pt	Bairro|Social
+street	PT	pt	Azinhaga|dos Lameiros
+street	PT	pt	Rotunda|da República
+street	PT	pt	Cais|do Sodré
+street	IE	en	Main|Street
+street	IE	en	Church|Road
+street	IE	en	Church|Street
+street	IE	en	Station|Road
+street	IE	en	Mill|Lane
+street	IE	en	Bridge|Street
+street	IE	en	Castle|Street
+street	IE	en	Market|Square
+street	IE	en	The|Mall
+street	IE	en	Chapel|Lane
+street	IE	en	High|Street
+street	IE	en	Barrack|Street
+street	IE	en	O'Connell|Street
+street	IE	en	Patrick|Street
+street	IE	en	William|Street
+street	IE	en	Quay|Street
+street	IE	en	New|Road
+street	IE	en	Old|Road
+street	IE	en	Convent|Road
+street	IE	en	Strand|Road
+street	IE	en	Sea|Road
+street	IE	en	Harbour|Road
+street	IE	en	School|Road
+street	IE	en	Abbey|Road
+street	IE	en	Dublin|Road
+street	IE	en	Cork|Road
+street	IE	en	Limerick|Road
+street	IE	en	Galway|Road
+street	IE	en	Thomas|Street
+street	IE	en	Francis|Street
+street	IE	en	Park|Avenue
+street	IE	en	Oakwood|Drive
+street	IE	en	Willow|Park
+street	IE	en	Meadow|Court
+street	IE	en	Riverside|Close
+street	IE	en	Elm|Grove
+street	IE	en	Beechwood|Avenue
+street	IE	en	Rosewood|Crescent
+street	IE	en	Hazelwood|Lawn
+street	IE	en	Cherry|Walk
+street	IE	en	Fairview|Heights
+street	IE	en	Woodview|Lawns
+street	IE	en	Castlepark|Road
+street	IE	en	Seapoint|Avenue
+street	IE	en	Kilmore|Road
+street	IE	en	Ballymun|Road
+street	IE	en	Glen|Road
+street	IE	en	Mountain|View
+street	IE	en	Green|Lane
+street	IE	en	Orchard|Way
+street	IE	en	Pearse|Street
+street	IE	en	Parnell|Street
+street	IE	en	Emmet|Street
+street	IE	en	Wolfe Tone|Street
+street	IE	en	Main|Road
+street	IE	en	The|Square
+street	IE	en	Chapel|Street
+street	IE	en	Cathedral|Road
+street	IE	en	Distillery|Road
+street	IE	en	Rathmines|Road
+street	IE	en	Clonskeagh|Road
+street	IE	en	Templeogue|Road
+street	IE	en	Ashbourne|Avenue
+street	IE	en	Greenfield|Park
+street	IE	en	Clonmel|Road
+street	IE	en	Tuam|Road
+street	IE	en	Westport|Road
+street	IE	en	Sligo|Road
+street	IE	en	Dundalk|Road
+street	IE	en	Bray|Road
+street	MT	mt	Triq|ir-Repubblika
+street	MT	mt	Triq|San Pawl
+street	MT	mt	Triq|il-Kbira
+street	MT	mt	Triq|San Gorg
+street	MT	mt	Triq|Sant'Anna
+street	MT	mt	Triq|it-Torri
+street	MT	mt	Triq|il-Knisja
+street	MT	mt	Triq|l-Indipendenza
+street	MT	mt	Triq|Marsamxett
+street	MT	mt	Triq|Santu Wistin
+street	MT	mt	Triq|il-Vitorja
+street	MT	mt	Triq|San Frangisk
+street	MT	mt	Triq|Dun Karm
+street	MT	mt	Triq|il-Merkanti
+street	MT	mt	Triq|Mikiel Anton Vassalli
+street	MT	mt	Triq|San Duminku
+street	MT	mt	Triq|ix-Xatt
+street	MT	mt	Triq|il-Mosta
+street	MT	mt	Triq|Censu Tabone
+street	MT	mt	Triq|Għar id-Dud
+street	MT	mt	Triq|Valletta
+street	MT	mt	Triq|Sant'Antnin
+street	MT	mt	Triq|Nazzarenu
+street	MT	mt	Triq|il-Port
+street	MT	mt	Pjazza|San Ġorġ
+street	MT	mt	Pjazza|Indipendenza
+street	MT	mt	Pjazza|Santa Marija
+street	MT	mt	Pjazza|il-Knisja
+street	MT	mt	Vjal|ir-Re Ġorġ V
+street	MT	mt	Vjal|Kottoner
+street	MT	mt	Vjal|il-Kbira
+street	MT	mt	Misraħ|il-Barrieri
+street	MT	mt	Sqaq|Numru 3
+street	MT	mt	Telgħa|tal-Imdina
+street	MT	en	Main|Street
+street	MT	en	Saint Paul|Street
+street	MT	en	Republic|Street
+street	MT	en	Marina|Street
+street	MT	en	Church|Street
+street	MT	en	Independence|Avenue
+street	MT	en	Victory|Square
+street	MT	en	Harbour|Road
+street	MT	en	Archbishop|Street
+street	MT	en	Strait|Street
+street	MT	en	Merchants|Street
+street	MT	en	Old Bakery|Street
+street	MT	en	Sliema|Road
+street	MT	en	Tower|Road
+street	MT	en	Valley|Road
+street	MT	en	Bay|Street
+street	MT	en	Mediterranean|Street
+street	MT	en	Gorg Borg Olivier|Street
+street	SM	it	Via|del Voltone
+street	SM	it	Via|Giacomo Matteotti
+street	SM	it	Via|Eugippo
+street	SM	it	Via|Salita alla Rocca
+street	SM	it	Via|Ventotto Luglio
+street	SM	it	Viale|Antonio Onofri
+street	SM	it	Viale|Federico Engels
+street	SM	it	Via|Cinque Febbraio
+street	SM	it	Via|Oliva Balducci
+street	SM	it	Via|del Serrone
+street	SM	it	Via|Consiglio dei Sessanta
+street	SM	it	Via|Tre Settembre
+street	SM	it	Strada|della Croce
+street	SM	it	Strada|di Montecchio
+street	SM	it	Via|Piana
+street	SM	it	Via|Rovereta
+street	SM	it	Via|Gino Giacomini
+street	SM	it	Via|Cinque Gennaio
+street	SM	it	Via|Tommaso Cocchi
+street	SM	it	Contrada|Omagnano
+street	SM	it	Piazza|della Libertà
+street	SM	it	Piazza|Sant'Agata
+street	SM	it	Piazza|Titano
+street	SM	it	Via|Capanne
+street	VA	it	Via|del Pellegrino
+street	VA	it	Viale|Vaticano
+street	VA	it	Piazza|San Pietro
+street	VA	it	Via|di Porta Angelica
+street	VA	it	Via|della Posta
+street	VA	it	Via|della Fondamenta
+street	VA	it	Via|dei Giardini
+street	VA	it	Via|Sant'Anna
+street	VA	it	Via|della Stazione Vaticana
+street	VA	it	Via|del Governatorato
+street	VA	it	Viale|del Giardino Quadrato
+street	VA	it	Piazza|Santa Marta
+street	VA	it	Via|delle Fondamenta
+street	AD	ca	Carrer|Prat de la Creu
+street	AD	ca	Carrer|de la Vall
+street	AD	ca	Avinguda|Meritxell
+street	AD	ca	Avinguda|Carlemany
+street	AD	ca	Carrer|Doctor Nequi
+street	AD	ca	Carrer|del Roc de l'Oral
+street	AD	ca	Carrer|Maria Pla
+street	AD	ca	Carrer|de la Unió
+street	AD	ca	Carrer|Prat del Rull
+street	AD	ca	Avinguda|Tarragona
+street	AD	ca	Avinguda|de Fiter i Rossell
+street	AD	ca	Avinguda|Sant Antoni
+street	AD	ca	Carrer|de la Roureda
+street	AD	ca	Carrer|Major
+street	AD	ca	Carrer|de la Plana
+street	AD	ca	Plaça|del Poble
+street	AD	ca	Plaça|Rebes
+street	AD	ca	Plaça|de la Germandat
+street	AD	ca	Carrer|Verge del Pilar
+street	AD	ca	Camí|Ral
+street	AD	ca	Camí|de la Margineda
+street	AD	ca	Avinguda|del Pessebre
+street	AD	ca	Carretera|General 2
+street	AD	ca	Carrer|dels Escalls
+street	AD	ca	Carrer|Bisbe Iglesias
+street	AD	ca	Avinguda|de Santa Coloma
+street	AD	ca	Carrer|Joan Maragall
+street	AD	ca	Carrer|Mossèn Cinto Verdaguer
+street	AD	ca	Plaça|Guillemó
+street	AD	ca	Carrer|de la Fontanella
+street	AD	ca	Avinguda|Príncep Benlloch
+street	AD	ca	Passeig|del Riu
+street	UKI	en	Bath|Street
+street	UKI	en	Halkett|Place
+street	UKI	en	Victoria|Avenue
+street	UKI	en	Queen|Street
+street	UKI	en	King|Street
+street	UKI	en	Hill|Street
+street	UKI	en	Mill|Road
+street	UKI	en	Church|Road
+street	UKI	en	Beach|Road
+street	UKI	en	Harbour|Road
+street	UKI	en	Esplanade|Road
+street	UKI	en	Station|Road
+street	UKI	en	Parade|Road
+street	UKI	en	Castle|Street
+street	UKI	en	Market|Street
+street	UKI	en	High|Street
+street	UKI	en	Strand|Street
+street	UKI	en	Prospect|Hill
+street	UKI	en	Ramsey|Road
+street	UKI	en	Peel|Road
+street	UKI	en	Douglas|Road
+street	UKI	en	Athol|Street
+street	UKI	en	Duke|Street
+street	UKI	en	Loch|Road
+street	UKI	en	Glencrutchery|Road
+street	UKI	en	The|Crescent
+street	UKI	en	Oaklands|Close
+street	UKI	en	Mount|Pleasant
+street	UKI	en	Ann|Court
+street	UKI	en	Rosemount|Lane
+street	UKI	en	St Aubin's|Road
+street	UKI	en	Colomberie|Road
+street	UKI	en	Don|Road
+street	UKI	en	Georgetown|Road

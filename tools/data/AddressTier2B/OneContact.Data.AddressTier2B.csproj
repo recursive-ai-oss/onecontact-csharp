@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Turns OS Open Names (United Kingdom), the Catastro's INSPIRE addresses (Spain) and the ANNCSU (Italy), and for Portugal, Ireland, Malta,
+       San Marino, the Vatican, Andorra, Jersey, Guernsey and the Isle of Man postcode lists plus our own street vocabulary, into labelled
+       free-text training examples through our own templates. It shares the tokenizer, random generator, example type, span rules, delimited-text
+       reader and rule-parser sample with the other address tools. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>OneContact.Data.AddressTier2B</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <NoWarn>$(NoWarn);CA1303;CA1848;CA1307;CA1305;CA1310;CA1304;CA1311;CA1834;CA1861;CA1862;CA1865;CA1866;CA1867;CA1869;CA1822;CA1859;CA1860;CA1851;CA1853;CA1805</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../AddressUsCa/Prng.cs" Link="Shared/Prng.cs" />
+    <Compile Include="../AddressUsCa/Model.cs" Link="Shared/Model.cs" />
+    <Compile Include="../AddressUsCa/Tokenizer.cs" Link="Shared/Tokenizer.cs" />
+    <Compile Include="../AddressUsCa/SpanCheck.cs" Link="Shared/SpanCheck.cs" />
+    <Compile Include="../AddressTier2A/Csv.cs" Link="Shared/Csv.cs" />
+    <Compile Include="../AddressTier2A/RuleSample.cs" Link="Shared/RuleSample.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Used only to run the rule parser over a sample of rendered examples (what the rules and country inference do with them). -->
+    <ProjectReference Include="../../../src/OneContact/OneContact.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../templates/tier2b-*" Link="templates/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../pins/osopennames.pin;../pins/catastro.pin;../pins/anncsu.pin;../pins/istat.pin;../pins/geonames.pin" Link="pins/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

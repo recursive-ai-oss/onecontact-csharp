@@ -37,6 +37,15 @@ internal enum PostcodeForm
 
     /// <summary>Four digits after the state abbreviation on the last line (<c>NORTH SYDNEY NSW 2060</c>): Australia.</summary>
     Australian,
+
+    /// <summary>Three digits (Iceland, <c>220</c>).</summary>
+    ThreeDigits,
+
+    /// <summary>Five digits with a space after the third (Sweden, <c>123 45</c>).</summary>
+    Swedish,
+
+    /// <summary><c>LV-</c> and four digits, after the locality and a comma (Latvia, <c>RIGA, LV-1050</c>).</summary>
+    Latvian,
 }
 
 /// <summary>The rules of one country of the first Tier 2 group, read from <c>t2-countries.tsv</c>.</summary>
@@ -61,7 +70,10 @@ internal sealed record T2Country(
     internal bool IsCentral => Profile is "pl" or "cz" or "sk" or "si" or "hr" or "hu" or "ro" or "mx" or "au";
 
     /// <summary>Gets whether the postcode follows the locality (the United Kingdom, Ireland, Malta).</summary>
-    internal bool PostcodeLast => Postcode is PostcodeForm.Uk or PostcodeForm.Eircode or PostcodeForm.Maltese;
+    internal bool PostcodeLast => Postcode is PostcodeForm.Uk or PostcodeForm.Eircode or PostcodeForm.Maltese or PostcodeForm.Latvian;
+
+    /// <summary>Gets whether the country is one of the northern group (Denmark, Sweden, Finland, Norway, Iceland, Estonia, Latvia, Lithuania): street name first, then the number.</summary>
+    internal bool IsNorth => Profile is "dk" or "se" or "fi" or "no" or "is" or "ee" or "lv" or "lt";
 }
 
 /// <summary>A street type or its abbreviation as an authority lists it.</summary>
@@ -74,7 +86,7 @@ internal sealed record T2Delivery(string Role, string Printed);
 /// The rule tables of the first Tier 2 group (France with its overseas departments, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria,
 /// Switzerland, Liechtenstein), loaded once from the embedded data files under <c>Addresses/Data/T2</c>. Keys are upper case without accents.
 /// </summary>
-internal static class T2Rules
+internal static partial class T2Rules
 {
     private static readonly Lazy<Tables> Loaded = new(Load, LazyThreadSafetyMode.ExecutionAndPublication);
 
@@ -307,6 +319,7 @@ internal static class T2Rules
             t.Cantons.Add(r[0]);
         }
 
+        LoadNorth(t);
         return t;
     }
 

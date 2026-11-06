@@ -77,8 +77,8 @@ internal static class T2Text
     // Words that stay in capitals in the display style: acronyms the authorities print so, and Roman numerals.
     private static readonly HashSet<string> Capitals = new(StringComparer.Ordinal)
     {
-        "CEDEX", "BP", "CS", "TSA", "PF", "PB", "ZI", "ZA", "ZAC", "ZAD", "CCAL", "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII", "CCI", "RC", "AP", "NV", "SA", "AG", "BV", "GMBH", "SARL", "SAS", "SPRL", "CVBA", "VZW", "ASBL",
-        "PO", "GPO", "RMB", "RMS", "RSD", "CMB", "CMA", "CPA", "CDMX", "BC", "DC",
+        "CEDEX", "BP", "CS", "TSA", "PF", "PB", "PL", "PO", "AB", "AS", "ASA", "OY", "OYJ", "ZI", "ZA", "ZAC", "ZAD", "CCAL", "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII", "CCI", "RC", "AP", "NV", "SA", "AG", "BV", "GMBH", "SARL", "SAS", "SPRL", "CVBA", "VZW", "ASBL",
+        "GPO", "RMB", "RMS", "RSD", "CMB", "CMA", "CPA", "CDMX", "BC", "DC",
     };
 
     // Particles that are written in lower case inside a name.
