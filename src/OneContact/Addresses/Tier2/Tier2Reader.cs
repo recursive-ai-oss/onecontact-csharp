@@ -136,6 +136,9 @@ internal static partial class Tier2Reader
         private List<Tok>? _county;
         private List<Tok>? _province;
 
+        // Whether the post town stood on the postcode's own line ("Birmingham B6 5BA"); then no line above it can be taken for it.
+        private bool _localityInline;
+
         private ParseDetail _failure = ParseDetail.Failure(ReasonCode.AddressNoLastLine, default);
 
         private bool TryBuild(List<Unit> units, (string Code, SourceSpan Span, string Written)? named, out ParsedAddress? address, out ParseDetail detail)
@@ -150,6 +153,7 @@ internal static partial class Tier2Reader
             string? known = named?.Code ?? (!hint.IsUnknown && T2Rules.Handles(hint) ? hint.Code : null);
             _county = null;
             _province = null;
+            _localityInline = false;
             _state = null;
             _stateAbbreviation = string.Empty;
             _huLocalityIndex = -1;
@@ -287,7 +291,7 @@ internal static partial class Tier2Reader
 
             // Britain and Ireland: with two lines between the street and the postcode, either may be the post town (a dependent locality above it, or a county below it).
             // The Royal Mail convention that the post town is in capitals settles it when the other line is not; anything else is left to the model.
-            if (country.Code is "GB" or "IE" && !bulk && _county is null)
+            if (country.Code is "GB" or "IE" && !bulk && _county is null && !_localityInline)
             {
                 List<Tok>[] extra = [.. Enumerable.Range(first + 1, Math.Max(0, before.Count - first - 1)).Where(i => parsed[i] is null).Select(i => before[i].Toks)];
                 string loc = Join(localityToks);
@@ -661,6 +665,7 @@ internal static partial class Tier2Reader
                 }
             }
 
+            _localityInline = locality.Count > 0;
             int prev = u - 1;
             if (locality.Count == 0)
             {
