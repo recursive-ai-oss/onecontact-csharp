@@ -77,7 +77,7 @@ Measured on the register dev examples (2000 per country, rules alone, with the c
 | HU | 92.6 | 92.6 | no-last-line 128 |
 | AU | 56.8 | 90.6 | no-last-line 160, model-required 24, country-conflict 4 |
 
-Without a hint the Czech, Croatian and Hungarian forms are shared with other countries, so most text is refused as `address.country-undetermined` by design (CZ 1594, HR 1181, HU 955 of 2000); Romania and Australia read without a hint as well as with it.
+Without a hint the Czech, Croatian and Hungarian forms are shared with other countries, so text is refused as `address.country-undetermined` unless country inference finds evidence (see the north rules, "Country inference"; the figures here were measured before it); Romania and Australia read without a hint as well as with it.
 
 ### Second recovery round: Mexico, Poland, Slovenia, Slovakia
 
@@ -94,7 +94,7 @@ Same measurement (2000 register dev examples per country, rules alone). Both col
 | SK | yes | 89.3 → 91.3 | 93.7 → 94.4 | no-last-line 108, model-required 4 |
 | SK | no | 13.2 → 13.5 | 16.8 → 16.9 | country-undetermined 1592, no-last-line 123 |
 
-Without a hint the four-digit (SI) and `NNN NN` (SK) forms are shared with other countries and stay `address.country-undetermined` by design. A refusal as `no-last-line` is mostly text without a postcode, which the rules never invent.
+Without a hint the four-digit (SI) and `NNN NN` (SK) forms are shared with other countries and stay `address.country-undetermined` unless country inference finds evidence (SI and SK now read about half of the register text without a hint). A refusal as `no-last-line` is mostly text without a postcode, which the rules never invent.
 
 What the rules read now, each from the guide named:
 

@@ -84,7 +84,7 @@ Royal Mail PAF Programmers' Guide Ed. 7 v6 (e74e47fa…; guide only, no PAF data
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 8.4 → 62.6 | 0.5 → 73.6 | 1.4 → 73.4 | 0 → 75.5 | 1.6 → 87.0 | 52.0 → 88.7 | 68.7 → 89.1 | 36.7 → 83.0 | 69.9 → 92.0 | 61.7 → 96.7 | 29.4 → 85.8 | 62.4 → 79.8 |
 
-Samples of 2000 (all of them when fewer: JE 220, GG 207, IM 192, SM 163, VA 60, MT 855, AD 367). The GB figure was measured before the inline post town fix above and counts 443 refusals for the county ambiguity. Without a hint, Spanish and Italian text with a five-digit postcode and no province evidence is refused as `address.country-undetermined` by design. The remaining refusals are mostly single-line text without a comma between street and locality. Known gaps for the model: county-ambiguous GB lines, typos in road types, Welsh and Gaelic bilingual names, the Italian dependent-locality line.
+Samples of 2000 (all of them when fewer: JE 220, GG 207, IM 192, SM 163, VA 60, MT 855, AD 367). The GB figure was measured before the inline post town fix above and counts 443 refusals for the county ambiguity. Without a hint, Spanish and Italian text with a five-digit postcode and no province evidence is refused as `address.country-undetermined` unless country inference finds evidence. The remaining refusals are mostly single-line text without a comma between street and locality. Known gaps for the model: county-ambiguous GB lines, typos in road types, Welsh and Gaelic bilingual names, the Italian dependent-locality line.
 
 ## Sources
 

@@ -36,6 +36,13 @@ internal static partial class Tier2Reader
         Reader r = new(text, hint);
         OperationStatus status = r.Run(out address, out detail);
         decided = r.DecidedCountry;
+        if (status != OperationStatus.Done && hint.IsUnknown && TryInfer(text, detail, out ParsedAddress? inferred, out ParseDetail inferredDetail))
+        {
+            address = inferred;
+            detail = inferredDetail;
+            status = OperationStatus.Done;
+        }
+
         if (address is not null)
         {
             address.SourceText = text;
@@ -57,6 +64,9 @@ internal static partial class Tier2Reader
     private sealed class Unit(List<Tok> toks)
     {
         internal List<Tok> Toks { get; set; } = toks;
+
+        // A line that is kept as written above the delivery lines and never read as a street line (a Swedish company registration number with its label).
+        internal bool Leading { get; init; }
     }
 
     // One piece of a delivery line with both renderings.
@@ -99,6 +109,9 @@ internal static partial class Tier2Reader
 
     private sealed partial class Reader(string text, Region hint)
     {
+        // Set when the reader is one of the trial reads of country inference: the hint is then a candidate, not something the caller said, so the country is reported as inferred.
+        internal bool Inferring { get; init; }
+
         private readonly List<ParseIssue> _issues = [];
 
         internal OperationStatus Run(out ParsedAddress? address, out ParseDetail detail)
@@ -141,6 +154,9 @@ internal static partial class Tier2Reader
         // The country the last attempt decided on, even when the attempt then refused the address.
         internal T2Country? DecidedCountry { get; private set; }
 
+        // Whether words stood before the postcode on its own line and were split off as a line of their own ("Tallinn 10111 Harju maakond").
+        private bool _headSplit;
+
         // Group B: the county line of an Irish address and the province line of a Spanish one, taken off the units before the last line is read.
         private List<Tok>? _county;
         private List<Tok>? _province;
@@ -175,6 +191,7 @@ internal static partial class Tier2Reader
                 && !FindLastLine(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindMexicanPostcodeWord(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindPostcodeLast(units, known, out unitIndex, out tokenIndex, out match)
+                && !FindEstonianPostcodeLast(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindProvinceLine(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindHungarian(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindStateLine(units, known, out unitIndex, out tokenIndex, out match))
@@ -185,6 +202,7 @@ internal static partial class Tier2Reader
 
             // Words before the postcode on the same line are a line of their own: "12 rue X 75011 PARIS".
             Unit lastUnit = units[unitIndex];
+            _headSplit = tokenIndex > 0;
             if (tokenIndex > 0)
             {
                 units[unitIndex] = new Unit(lastUnit.Toks.GetRange(tokenIndex, lastUnit.Toks.Count - tokenIndex));
@@ -243,6 +261,11 @@ internal static partial class Tier2Reader
             List<Tok>? northDependent = null;
             if (country.IsNorth)
             {
+                if (country.Profile == "se")
+                {
+                    SplitOrganizationNumber(before);
+                }
+
                 SplitCompanyPrefix(before, country);
                 SplitHouseNameAndParish(before, country);
                 SplitLithuanianPlaces(before, country);
@@ -288,7 +311,7 @@ internal static partial class Tier2Reader
             List<Line?> parsed = [];
             for (int i = 0; i < before.Count; i++)
             {
-                Line? line = ParseDeliveryLine(before[i].Toks, ruleCode, country, allowStreet: true);
+                Line? line = before[i].Leading ? null : ParseDeliveryLine(before[i].Toks, ruleCode, country, allowStreet: true);
                 parsed.Add(line);
                 if (first < 0 && line is not null && line.Kind != StreetLineKind.SecondaryOnly)
                 {
@@ -759,6 +782,18 @@ internal static partial class Tier2Reader
                         i--;
                     }
 
+                    // The country letters and the dash may stand apart from the digits ("LT- 08237", "D- 12345"): the prefix and the postcode are one postcode field.
+                    if (i > 0 && m.PrefixCountry is null && SpacedPrefix(toks[i - 1].Text) is { } letters && toks[i - 1].End <= toks[i].Start)
+                    {
+                        string? owner = T2Rules.Countries.Values.FirstOrDefault(c => c.Prefixes[0].Length > 0 && Array.IndexOf(c.Prefixes, letters) >= 0)?.Code;
+                        PostcodeMatch? own = owner is null ? null : MatchAt(toks, i, owner);
+                        if (owner is not null && own is not null && own.PrefixCountry is null && own.Length == m.Length && own.Candidates.Contains(owner))
+                        {
+                            m = new PostcodeMatch(m.Length + 1, own.Standard, [owner], owner);
+                            i--;
+                        }
+                    }
+
                     unitIndex = u;
                     tokenIndex = i;
                     match = m;
@@ -1034,6 +1069,14 @@ internal static partial class Tier2Reader
             return new SourceSpan(start, end - start);
         }
 
+        // One or two capital letters, with a dash after them when there is one letter ("L-", "LT-", "LT"); null otherwise.
+        private static string? SpacedPrefix(string t)
+        {
+            string letters = t.TrimEnd('-');
+            bool dash = letters.Length < t.Length;
+            return letters.Length is >= 1 and <= 2 && letters.All(char.IsAsciiLetterUpper) && (dash || letters.Length == 2) && t.Length - letters.Length <= 1 ? letters : null;
+        }
+
         private static PostcodeMatch? MatchAt(List<Tok> toks, int i, string? known)
         {
             string t = toks[i].Text;
@@ -1198,8 +1241,8 @@ internal static partial class Tier2Reader
             if (hintCode is not null)
             {
                 code = hintCode;
-                confidence = 0.99f;
-                inferred = false;
+                confidence = Inferring ? 0.97f : 0.99f;
+                inferred = Inferring;
                 return true;
             }
 
