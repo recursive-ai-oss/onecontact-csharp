@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Publishes with NativeAOT and warnings as errors: proves the Tier 1 + Tier 2 model package loads its embedded weights and runs after trimming.
+       Build it with ONECONTACT_MODELS_WEIGHTS set to the folder holding the weights file listed in the package's manifest. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <PublishAot>true</PublishAot>
+    <IsAotCompatible>true</IsAotCompatible>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/OneContact.Models/OneContact.Models.csproj" />
+    <ProjectReference Include="../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
+    <!-- A package reference adds this file to the project by itself; a project reference does not. -->
+    <Compile Include="../../src/OneContact.Models/contentFiles/OneContactModelsRegistration.cs" Link="OneContactModelsRegistration.cs" />
+  </ItemGroup>
+
+</Project>

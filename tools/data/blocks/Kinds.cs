@@ -26,6 +26,7 @@ internal sealed class Logical
     internal Phone? Mobile;
     internal string MainEmail = "";
     internal string RoleEmail = "";
+    internal string Country = "";
 }
 
 internal static class Kind
@@ -103,6 +104,14 @@ internal sealed class Renderer
         bool crmish = kind is Kind.Note or Kind.Ugc or Kind.Signature;
         double noisy = kind is Kind.Note or Kind.Ugc ? 0.25 : 0.04;
         Logical l = new() { Loc = loc };
+        AddressRec? first = null;
+        if (loc == Loc.T2)
+        {
+            first = PickFrom(_pools.Addresses, split, loc, r);
+            l.Country = first.Country;
+        }
+
+        Phone NewPhone(bool ext) => loc == Loc.T2 ? _fg.PhoneT2(r, l.Country, ext) : _fg.Phone(r, loc, ext);
         l.Co = PickFrom(_pools.Companies, split, loc, r, c => !c.Noisy || r.Chance(noisy));
         l.Domain = _fg.Domain(r, loc, l.Co.Base);
         l.Slug = FieldGen.Fold(l.Co.Base.Split(' ')[0]) + (r.Chance(0.3) ? "-" + FieldGen.Fold(l.Co.Base.Split(' ')[^1]) : "");
@@ -123,19 +132,19 @@ internal sealed class Renderer
             m.FreeMail = r.Chance(crmish ? 0.35 : 0.04);
             string mailbox = _fg.Mailbox(r, m.P, m.FreeMail);
             m.Email = mailbox + "@" + (m.FreeMail ? _fg.FreeDomain(r, loc) : l.Domain);
-            m.Phone = _fg.Phone(r, loc, r.Chance(0.15));
+            m.Phone = NewPhone(r.Chance(0.15));
             l.People.Add(m);
         }
 
         int addrs = kind == Kind.Multi ? 2 + r.Int(4) : (r.Chance(0.2) ? 2 : 1);
         for (int i = 0; i < addrs; i++)
         {
-            l.Addrs.Add(PickFrom(_pools.Addresses, split, loc, r));
+            l.Addrs.Add(i == 0 && first is not null ? first : PickFrom(_pools.Addresses, split, loc, r));
         }
 
-        l.Main = _fg.Phone(r, loc, r.Chance(0.1));
-        l.Fax = r.Chance(0.3) ? _fg.Phone(r, loc, false) : null;
-        l.Mobile = r.Chance(0.3) ? _fg.Phone(r, loc, false) : null;
+        l.Main = NewPhone(r.Chance(0.1));
+        l.Fax = r.Chance(0.3) ? NewPhone(false) : null;
+        l.Mobile = r.Chance(0.3) ? NewPhone(false) : null;
         LexSet lx = LexSet.Of(loc);
         l.RoleEmail = r.Pick(lx.Roles) + "@" + l.Domain;
         l.MainEmail = l.RoleEmail;
@@ -583,10 +592,10 @@ internal sealed class Renderer
             }
 
             AddressItem(d, l, a, 0.2, inline: true);
-            PhoneItem(d, l, _fg.Phone(r, l.Loc, false), labelChance: 0.7);
+            PhoneItem(d, l, (l.Loc == Loc.T2 ? _fg.PhoneT2(r, l.Country, false) : _fg.Phone(r, l.Loc, false)), labelChance: 0.7);
             if (r.Chance(0.3))
             {
-                PhoneItem(d, l, _fg.Phone(r, l.Loc, false), fax: true);
+                PhoneItem(d, l, (l.Loc == Loc.T2 ? _fg.PhoneT2(r, l.Country, false) : _fg.Phone(r, l.Loc, false)), fax: true);
             }
 
             if (r.Chance(0.35))

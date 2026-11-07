@@ -42,7 +42,14 @@ if (Environment.GetEnvironmentVariable("ONECONTACT_WEB_MODEL") == "1")
     TextFieldReader.ModelOnWeb = true;
 }
 
-if (Environment.GetEnvironmentVariable("ONECONTACT_TIER1_MODEL") is { Length: > 0 } modelPath)
+// ONECONTACT_MODELS_MODEL names the saved Tier 1 + Tier 2 pipeline (registered at rank 2); otherwise ONECONTACT_TIER1_MODEL the Tier 1 one.
+if (Environment.GetEnvironmentVariable("ONECONTACT_MODELS_MODEL") is { Length: > 0 } supersetPath)
+{
+    using FileStream supersetStream = File.OpenRead(supersetPath);
+    var superset = RecursiveAI.OneContact.Models.Superset.SupersetModel.Load(supersetStream);
+    RecursiveAI.OneContact.Models.ContactModels.Register(RecursiveAI.OneContact.Models.Superset.SupersetModel.PackageId, 2, superset, superset, superset);
+}
+else if (Environment.GetEnvironmentVariable("ONECONTACT_TIER1_MODEL") is { Length: > 0 } modelPath)
 {
     using FileStream modelStream = File.OpenRead(modelPath);
     var tier1 = RecursiveAI.OneContact.Models.Tier1.Tier1Model.Load(modelStream);

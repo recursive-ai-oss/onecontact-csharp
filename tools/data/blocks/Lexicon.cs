@@ -159,5 +159,37 @@ internal sealed class LexSet
         OfficeNames = ["Siège social", "Bureau principal", "Centre-ville", "Succursale nord", "Entrepôt", "Salle de montre", "Centre de service", "Bureau régional"],
     };
 
-    internal static LexSet Of(Loc loc) => loc == Loc.CaFr ? Fr : En;
+    internal static LexSet Of(Loc loc) => loc == Loc.CaFr ? Fr : loc == Loc.T2 ? T2 : En;
+
+    private static string[] Plus(string[] english, params string[] more) => [.. english, .. more];
+
+    /// <summary>Tier 2 pages: the English words, then the labels, headings, titles and boilerplate of the Tier 2 languages appended (the English entries keep their positions, which some templates index).</summary>
+    internal static readonly LexSet T2 = new()
+    {
+        Rights = En.Rights,
+        PhoneLabels = Plus(En.PhoneLabels, "Telefon", "Tel.:", "Telefono", "Teléfono", "Telefone", "Telefoon", "Puhelin", "Tālrunis", "Telefonas", "Tlf.", "Phone/Telefon", "Mobil", "Handy", "Portable", "Móvil", "Cellulare", "Komórka", "Mobiel", "Mobilní telefon"),
+        FaxLabels = Plus(En.FaxLabels, "Telefax", "Téléc.", "Faks", "Telefaks"),
+        EmailLabels = Plus(En.EmailLabels, "E-Mail", "Courriel", "Correo electrónico", "Posta elettronica", "E-post", "Sähköposti", "E-pasts", "El. paštas", "E-mail:", "Correio eletrónico", "Elektronická pošta", "E-pošta"),
+        WebLabels = Plus(En.WebLabels, "Webseite", "Internet", "Site web", "Sitio web", "Sito web", "Página web", "Strona www", "Webové stránky", "Weboldal", "Spletna stran"),
+        AddressLabels = Plus(En.AddressLabels, "Adresse", "Anschrift", "Adres", "Dirección", "Indirizzo", "Morada", "Adress", "Osoite", "Adrese", "Cím", "Adresa", "Besuchsadresse", "Postanschrift", "Siège social", "Sede"),
+        ExtLabels = Plus(En.ExtLabels, " Durchwahl ", " DW ", " poste ", " int. ", " wew. ", " klapka "),
+        Titles = Plus(En.Titles, "Geschäftsführer", "Vertriebsleiter", "Leiter Kundenservice", "Directeur général", "Responsable commercial", "Gerente", "Director comercial", "Responsabile vendite", "Amministratore delegato", "Directeur", "Dyrektor", "Kierownik sprzedaży", "Jednatel", "Obchodní ředitel", "Ügyvezető", "Director de vânzări", "Verkoopleider", "Directie", "Direktör", "Daglig leder", "Toimitusjohtaja"),
+        Departments = Plus(En.Departments, "Vertrieb", "Kundendienst", "Buchhaltung", "Ventes", "Comptabilité", "Ventas", "Contabilidad", "Vendite", "Amministrazione", "Dział sprzedaży", "Obchodní oddělení", "Verkoop"),
+        Nav = Plus(En.Nav, "Startseite", "Über uns", "Kontakt", "Leistungen", "Accueil", "À propos", "Nos services", "Inicio", "Nosotros", "Servicios", "Contacto", "Chi siamo", "Servizi", "Contatti", "O nas", "Usługi", "Kontakty", "Úvod", "O nás", "Home", "Over ons", "Diensten"),
+        Legal = Plus(En.Legal, "Impressum", "Datenschutz", "AGB", "Mentions légales", "Politique de confidentialité", "Aviso legal", "Política de privacidad", "Privacy", "Note legali", "Polityka prywatności", "Ochrana osobních údajů", "Algemene voorwaarden", "Integritetspolicy", "Privatlivspolitik", "Tietosuoja"),
+        Headings = Plus(En.Headings, "Kontakt", "Kontaktieren Sie uns", "Nous contacter", "Contactez-nous", "Contacto", "Contáctenos", "Contattaci", "Contatti", "Skontaktuj się z nami", "Kontaktujte nás", "Neem contact op", "Kapcsolat", "Contact us / Kontakt"),
+        TeamHeadings = Plus(En.TeamHeadings, "Unser Team", "Ansprechpartner", "Notre équipe", "Nuestro equipo", "Il nostro team", "Nasz zespół", "Náš tým", "Ons team", "Vårt team"),
+        LocationHeadings = Plus(En.LocationHeadings, "Standorte", "Niederlassungen", "Nos agences", "Sucursales", "Sedi", "Oddziały", "Pobočky", "Vestigingen"),
+        Closings = Plus(En.Closings, "Mit freundlichen Grüßen", "Freundliche Grüße", "Cordialement", "Bien cordialement", "Saludos cordiales", "Un saludo", "Cordiali saluti", "Distinti saluti", "Z poważaniem", "S pozdravem", "Met vriendelijke groet", "Med venlig hilsen", "Med vänliga hälsningar", "Terveisin", "Com os melhores cumprimentos"),
+        Greetings = Plus(En.Greetings, "Sehr geehrte", "Guten Tag", "Bonjour", "Estimado", "Buongiorno", "Szanowny", "Dobrý den", "Beste"),
+        Notes = En.Notes,
+        Ugc = En.Ugc,
+        Subjects = En.Subjects,
+        Predicates = En.Predicates,
+        Topics = En.Topics,
+        Facts = En.Facts,
+        Months = En.Months,
+        Roles = Plus(En.Roles, "kontakt", "vertrieb", "buero", "kundenservice", "contacto", "ventas", "contatti", "biuro", "recepcja", "klantenservice"),
+        OfficeNames = Plus(En.OfficeNames, "Zentrale", "Hauptsitz", "Niederlassung", "Siège", "Agence", "Oficina central", "Sede centrale", "Biuro główne", "Centrála"),
+    };
 }

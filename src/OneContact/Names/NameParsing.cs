@@ -53,7 +53,7 @@ public static class NameParsing
     public static NameClass Classify(ReadOnlySpan<char> text, NameHints hints = default)
     {
         Analysis analysis = NameAnalyzer.Analyze(text, hints);
-        return analysis.Class is NameClass.Unknown or NameClass.Person ? ModelNameReader.Classify(text, analysis) : analysis.Class;
+        return analysis.Class is NameClass.Unknown or NameClass.Person ? ModelNameReader.Classify(text, analysis, hints) : analysis.Class;
     }
 
     /// <summary>Reads a name string of unknown kind.</summary>

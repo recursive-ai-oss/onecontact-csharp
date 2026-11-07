@@ -1108,7 +1108,7 @@ internal static partial class Tier2Reader
         }
 
         // Writes the last line of a country of this group; returns false for the other countries.
-        private static bool CentralLast(T2Country country, string postcode, string localityPostal, string localityDisplay, string adminInline, string adminInlineDisplay, out string postal, out string display)
+        internal static bool CentralLast(T2Country country, string postcode, string localityPostal, string localityDisplay, string adminInline, string adminInlineDisplay, out string postal, out string display)
         {
             switch (country.Profile)
             {

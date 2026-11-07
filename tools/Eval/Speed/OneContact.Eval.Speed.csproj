@@ -14,6 +14,7 @@
     <PackageReference Include="AddressParser" />
     <PackageReference Include="NameParserSharp" />
     <ProjectReference Include="../../../src/OneContact.Models.Tier1/OneContact.Models.Tier1.csproj" />
+    <ProjectReference Include="../../../src/OneContact.Models/OneContact.Models.csproj" />
   </ItemGroup>
 
 </Project>

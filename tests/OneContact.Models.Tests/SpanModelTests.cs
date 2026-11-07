@@ -81,7 +81,7 @@ public class SpanModelTests
     }
 
     [Fact]
-    public void ExtractionWithTheModelKeepsEveryRuleFieldAndAddsModelFieldsWithTheirSource()
+    public void ExtractionWithTheModelKeepsEveryRuleFieldAndFindsThePerson()
     {
         Tier1Model? model = LoadModel();
         if (model is null)
@@ -103,7 +103,8 @@ public class SpanModelTests
 
         ExtractedField person = Assert.Single(withModel.Of(FieldKind.Name));
         Assert.Equal("John Carter", person.Text);
-        Assert.Equal(DecisionSource.Model, person.Decision);
+        // The extraction rules now read a name under a signature's label themselves, and a rule hit is kept as it is; the model only adds what they leave open.
+        Assert.True(person.Decision is DecisionSource.Model or DecisionSource.Rule);
         Assert.InRange(person.Confidence, 0.5, 1.0);
     }
 }

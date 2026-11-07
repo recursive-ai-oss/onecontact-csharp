@@ -19,9 +19,14 @@ internal static partial class Tier2Reader
 {
     internal static bool Handles(Region region) => T2Rules.Handles(region);
 
-    internal static OperationStatus TryParse(string text, Region hint, out ParsedAddress? address, out ParseDetail detail)
+    internal static OperationStatus TryParse(string text, Region hint, out ParsedAddress? address, out ParseDetail detail) =>
+        TryParse(text, hint, out address, out detail, out _);
+
+    /// <summary>Reads an address by rules; when the rules refuse after they have decided the country, <paramref name="decided"/> says which, so a model can finish the read.</summary>
+    internal static OperationStatus TryParse(string text, Region hint, out ParsedAddress? address, out ParseDetail detail, out T2Country? decided)
     {
         address = null;
+        decided = null;
         if (string.IsNullOrWhiteSpace(text))
         {
             detail = ParseDetail.Failure(ReasonCode.Empty, new SourceSpan(0, text.Length));
@@ -30,12 +35,14 @@ internal static partial class Tier2Reader
 
         Reader r = new(text, hint);
         OperationStatus status = r.Run(out address, out detail);
+        decided = r.DecidedCountry;
         if (status != OperationStatus.Done && hint.IsUnknown && TryInfer(text, detail, out ParsedAddress? inferred, out ParseDetail inferredDetail))
         {
             address = inferred;
             detail = inferredDetail;
             status = OperationStatus.Done;
         }
+
         if (address is not null)
         {
             address.SourceText = text;
@@ -144,6 +151,9 @@ internal static partial class Tier2Reader
 
         private bool _multiLine;
 
+        // The country the last attempt decided on, even when the attempt then refused the address.
+        internal T2Country? DecidedCountry { get; private set; }
+
         // Whether words stood before the postcode on its own line and were split off as a line of their own ("Tallinn 10111 Harju maakond").
         private bool _headSplit;
 
@@ -241,6 +251,7 @@ internal static partial class Tier2Reader
             }
 
             T2Country country = T2Rules.Countries[code];
+            DecidedCountry = country;
             string ruleCode = code;
             if (code == "IT" && localityToks.Count == 1 && localityToks[0].Text.StartsWith('(') && ItProvinceCode(localityToks[0]) is not null)
             {

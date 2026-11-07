@@ -174,7 +174,7 @@ internal sealed class ElfList
 /// <summary>Loaders for the company registers. Each returns records in a fixed order, de-duplicated by folded name.</summary>
 internal static class Registers
 {
-    private static readonly HashSet<string> GleifCountries = new(StringComparer.Ordinal) { "US", "CA", "GB", "FR", "IE" };
+    internal static readonly HashSet<string> GleifCountries = new(StringComparer.Ordinal) { "US", "CA", "GB", "FR", "IE" };
 
     /// <summary>GLEIF Level 1 golden copy (CC0). Keeps legal entities of the countries in scope; sole proprietors (real individuals) are dropped.</summary>
     internal static List<CompanyRecord> LoadGleif(string path, HashSet<string> seen, out SortedDictionary<string, long> stats)

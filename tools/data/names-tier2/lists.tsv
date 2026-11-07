@@ -1,0 +1,182 @@
+# Name lists for the Tier 2 languages: our own, written from general knowledge of common names and forms of address. They are lists of
+# common words, not records: given names and family names are drawn independently, so no string is a real person's name by construction.
+# lang <TAB> kind <TAB> comma-separated items. Kinds: givenM, givenF, family (a leading particle goes in the particle kind), title, particle,
+# prof (professional suffix), conn (the word that joins two people: "Anna und Peter Weber"), unknown (strings that are neither person nor company),
+# order (given-first or family-first for the plain form of the language).
+de	order	given-first
+de	givenM	Hans,Peter,Michael,Thomas,Andreas,Stefan,Markus,Wolfgang,Jürgen,Klaus,Matthias,Christian,Martin,Frank,Uwe,Dieter,Tobias,Florian,Lukas,Felix,Jan,Sebastian,Bernd,Günter,Rainer
+de	givenF	Anna,Maria,Petra,Sabine,Monika,Claudia,Susanne,Birgit,Andrea,Katharina,Julia,Sandra,Nicole,Ursula,Gabriele,Heike,Stefanie,Christina,Renate,Elisabeth,Lena,Sophie,Laura,Ingrid,Karin
+de	family	Müller,Schmidt,Schneider,Fischer,Weber,Meyer,Wagner,Becker,Schulz,Hoffmann,Schäfer,Koch,Bauer,Richter,Klein,Wolf,Schröder,Neumann,Schwarz,Zimmermann,Braun,Krüger,Hofmann,Hartmann,Lange,Schmitt,Werner,Krause,Meier,Lehmann,Huber,Mayer,Berger,Steiner,Gruber,Bachmann,Keller,Brunner,Baumann,Frei,Moser,Hofer,Wimmer,Leitner
+de	title	Herr,Frau,Dr.,Prof.,Prof. Dr.,Dipl.-Ing.,Mag.,Ing.
+de	particle	von,zu,von der,vom
+de	prof	MBA,Dr. med.,M.Sc.
+de	conn	und
+de	unknown	Kundenservice,Geschäftsführung,Sekretariat,Buchhaltung,Personalabteilung,Vertrieb,Empfang,Verwaltung,Technischer Support,Postfach,keine Angabe,Info
+nl	order	given-first
+nl	givenM	Jan,Pieter,Johannes,Willem,Hendrik,Cornelis,Kees,Henk,Mark,Tom,Daan,Sander,Bas,Joost,Maarten,Rob,Erik,Dirk,Wouter,Jeroen,Thijs,Ruud,Niels,Bart,Gerrit
+nl	givenF	Maria,Johanna,Anna,Sophie,Emma,Lisa,Eva,Marieke,Anneke,Ingrid,Petra,Linda,Sanne,Femke,Marloes,Annemarie,Ilse,Karin,Lotte,Fleur,Nienke,Jolanda,Els,Saskia,Wilma
+nl	family	de Jong,Jansen,de Vries,van den Berg,van Dijk,Bakker,Janssen,Visser,Smit,Meijer,de Boer,Mulder,de Groot,Bos,Vos,Peters,Hendriks,van Leeuwen,Dekker,Brouwer,de Wit,Dijkstra,Smits,de Graaf,van der Meer,Kuipers,Maes,Peeters,Claes,Wouters,Willems,Mertens,Goossens,Jacobs,Hermans,Pauwels
+nl	title	Dhr.,Mevr.,Mw.,Dr.,Prof.,Ir.,Drs.,Mr.,Ing.
+nl	particle	van,van der,van den,de,ten,ter
+nl	prof	MBA,MSc,RA
+nl	conn	en
+nl	unknown	Klantenservice,Directie,Secretariaat,Boekhouding,Administratie,Verkoop,Receptie,Technische dienst,Postbus,geen,Info
+it	order	given-first
+it	givenM	Giuseppe,Giovanni,Antonio,Mario,Luigi,Francesco,Marco,Alessandro,Andrea,Roberto,Stefano,Paolo,Luca,Davide,Matteo,Simone,Fabio,Massimo,Claudio,Enrico,Pietro,Vincenzo,Salvatore,Carlo,Daniele
+it	givenF	Maria,Anna,Giuseppina,Rosa,Angela,Giovanna,Teresa,Lucia,Carmela,Caterina,Francesca,Paola,Laura,Elena,Chiara,Sara,Silvia,Valentina,Giulia,Martina,Alessandra,Federica,Roberta,Monica,Daniela
+it	family	Rossi,Russo,Ferrari,Esposito,Bianchi,Romano,Colombo,Ricci,Marino,Greco,Bruno,Gallo,Conti,De Luca,Mancini,Costa,Giordano,Rizzo,Lombardi,Moretti,Barbieri,Fontana,Santoro,Mariani,Rinaldi,Caruso,Ferrara,Galli,Martini,Leone,Longo,Gentile,Martinelli,Vitale,Lombardo,Serra,Coppola,De Santis,D'Angelo,Marchetti
+it	title	Sig.,Sig.ra,Dott.,Dott.ssa,Ing.,Avv.,Prof.,Prof.ssa,Geom.,Arch.,Rag.
+it	particle	di,de,del,della,da
+it	prof	PhD,MBA
+it	conn	e
+it	unknown	Servizio clienti,Amministrazione,Segreteria,Direzione,Ufficio acquisti,Ufficio vendite,Contabilità,Reception,Assistenza tecnica,Casella postale,non indicato,Info
+pt	order	given-first
+pt	givenM	João,José,António,Manuel,Francisco,Carlos,Paulo,Pedro,Luís,Miguel,Rui,Nuno,Ricardo,Tiago,Bruno,André,Diogo,Fernando,Jorge,Sérgio,Hugo,Marco,Gonçalo,Rafael,Filipe
+pt	givenF	Maria,Ana,Isabel,Teresa,Catarina,Sofia,Inês,Marta,Beatriz,Joana,Carla,Sandra,Paula,Helena,Rita,Patrícia,Sónia,Cláudia,Fátima,Susana,Lúcia,Mariana,Filipa,Raquel,Cristina
+pt	family	Silva,Santos,Ferreira,Pereira,Oliveira,Costa,Rodrigues,Martins,Jesus,Sousa,Fernandes,Gonçalves,Gomes,Lopes,Marques,Alves,Almeida,Ribeiro,Pinto,Carvalho,Teixeira,Moreira,Correia,Mendes,Nunes,Soares,Vieira,Monteiro,Cardoso,Rocha,Ramos,Cunha,Machado
+pt	title	Sr.,Sra.,Dr.,Dra.,Eng.,Engª,Prof.,Arq.,Exmo. Sr.
+pt	particle	da,de,do,dos,das
+pt	prof	MBA
+pt	conn	e
+pt	unknown	Apoio ao cliente,Administração,Secretaria,Direção,Contabilidade,Recursos humanos,Receção,Assistência técnica,Apartado,sem indicação,Info
+es	order	given-first
+es	title	Sr.,Sra.,Dr.,Dra.,Ing.,Lic.,Prof.,Don,Doña
+es	prof	MBA
+es	conn	y
+es	unknown	Atención al cliente,Administración,Secretaría,Dirección,Contabilidad,Recursos humanos,Recepción,Soporte técnico,Apartado de correos,sin indicar,Info
+ca	order	given-first
+ca	givenM	Jordi,Josep,Joan,Pere,Marc,Albert,Xavier,Oriol,Pau,Jaume,Ferran,Ramon,Enric,Lluís,Martí,Arnau,Roger,Biel,Guillem,Àlex
+ca	givenF	Maria,Montserrat,Núria,Marta,Anna,Laura,Mercè,Carme,Roser,Júlia,Queralt,Laia,Georgina,Neus,Anna,Meritxell,Berta,Cristina,Ariadna,Judit
+ca	family	Garcia,Martínez,Puig,Serra,Ferrer,Vila,Roca,Soler,Pujol,Casals,Vidal,Mas,Font,Sala,Costa,Bosch,Pons,Riera,Camps,Grau,Moliner,Tor,Cerqueda,Marsol,Areny
+ca	title	Sr.,Sra.,Dr.,Dra.,Il·lm. Sr.
+ca	prof	MBA
+ca	conn	i
+ca	unknown	Atenció al client,Administració,Secretaria,Direcció,Comptabilitat,Recepció,Suport tècnic,Apartat de correus,Info
+pl	order	given-first
+pl	givenM	Piotr,Krzysztof,Andrzej,Tomasz,Paweł,Jan,Michał,Marcin,Stanisław,Jakub,Adam,Marek,Łukasz,Grzegorz,Mateusz,Wojciech,Mariusz,Dariusz,Zbigniew,Jerzy,Rafał,Kamil,Maciej,Robert,Karol
+pl	givenF	Anna,Maria,Katarzyna,Małgorzata,Agnieszka,Barbara,Krystyna,Ewa,Elżbieta,Zofia,Magdalena,Joanna,Monika,Teresa,Beata,Dorota,Aleksandra,Natalia,Marta,Justyna,Karolina,Izabela,Halina,Renata,Jolanta
+pl	family	Nowak,Kowalski,Wiśniewski,Wójcik,Kowalczyk,Kamiński,Lewandowski,Zieliński,Szymański,Woźniak,Dąbrowski,Kozłowski,Jankowski,Mazur,Kwiatkowski,Krawczyk,Piotrowski,Grabowski,Pawłowski,Michalski,Zając,Król,Wieczorek,Jabłoński,Wróbel,Majewski,Olszewski,Stępień,Malinowski,Jaworski,Adamczyk,Dudek,Nowicki,Pawlak,Górski,Witkowski,Walczak,Sikora,Baran,Rutkowski
+pl	title	Pan,Pani,Dr,Mgr,Inż.,Prof.,Dr hab.,Mec.,Ks.
+pl	prof	PhD,MBA
+pl	conn	i
+pl	unknown	Biuro obsługi klienta,Sekretariat,Księgowość,Dział sprzedaży,Zarząd,Dyrekcja,Recepcja,Pomoc techniczna,Skrytka pocztowa,brak danych,Info
+cs	order	given-first
+cs	givenM	Jan,Petr,Josef,Pavel,Martin,Tomáš,Jaroslav,Miroslav,Zdeněk,František,Václav,Michal,Jiří,Lukáš,Ondřej,Marek,David,Jakub,Filip,Roman,Karel,Vladimír,Radek,Milan,Aleš
+cs	givenF	Marie,Jana,Eva,Hana,Anna,Lenka,Kateřina,Lucie,Věra,Alena,Petra,Veronika,Jaroslava,Martina,Tereza,Monika,Zuzana,Markéta,Jitka,Ivana,Barbora,Michaela,Dagmar,Helena,Božena
+cs	family	Novák,Svoboda,Novotný,Dvořák,Černý,Procházka,Kučera,Veselý,Horák,Němec,Marek,Pospíšil,Pokorný,Hájek,Král,Jelínek,Růžička,Beneš,Fiala,Sedláček,Doležal,Zeman,Kolář,Navrátil,Čermák,Urban,Vaněk,Blažek,Kříž,Kovář,Bartoš,Vlček,Polák,Musil,Kopecký,Šimek,Konečný,Malý,Holub,Štěpánek
+cs	title	Pan,Paní,Ing.,Mgr.,Bc.,JUDr.,MUDr.,RNDr.,PhDr.,Doc.,Prof.,Ing. arch.
+cs	prof	Ph.D.,MBA,CSc.,DiS.
+cs	conn	a
+cs	unknown	Zákaznický servis,Sekretariát,Účtárna,Obchodní oddělení,Vedení,Ředitelství,Recepce,Technická podpora,Poštovní schránka,neuvedeno,Info
+sk	order	given-first
+sk	givenM	Ján,Peter,Jozef,Martin,Milan,Marián,Štefan,Michal,Ľubomír,Miroslav,Pavol,Tomáš,Juraj,Marek,Róbert,Dušan,Vladimír,Ivan,Branislav,Rastislav,Jaroslav,Igor,Adam,Samuel,Lukáš
+sk	givenF	Mária,Anna,Jana,Eva,Katarína,Zuzana,Alena,Marta,Monika,Helena,Lucia,Petra,Martina,Ivana,Daniela,Andrea,Veronika,Gabriela,Jozefína,Mária,Dana,Silvia,Miroslava,Renáta,Beáta
+sk	family	Horváth,Kováč,Varga,Tóth,Nagy,Baláž,Szabó,Molnár,Balog,Lukáč,Novák,Kráľ,Hudák,Kuchár,Mikula,Šimko,Oravec,Polák,Gajdoš,Kollár,Hrušovský,Mazúr,Sedlák,Lacko,Bielik,Slobodník,Greguš,Čech,Ďurica,Vrabel
+sk	title	Pán,Pani,Ing.,Mgr.,Bc.,JUDr.,MUDr.,RNDr.,PhDr.,Doc.,Prof.
+sk	prof	PhD.,MBA,CSc.
+sk	conn	a
+sk	unknown	Zákaznícky servis,Sekretariát,Účtovníctvo,Obchodné oddelenie,Vedenie,Riaditeľstvo,Recepcia,Technická podpora,Poštový priečinok,neuvedené,Info
+sl	order	given-first
+sl	givenM	Janez,Franc,Marko,Anton,Ivan,Andrej,Jožef,Luka,Peter,Marjan,Matej,Tomaž,Aleš,Igor,Branko,Boštjan,Miha,Gregor,Rok,Simon,Jure,Žiga,Matic,Uroš,Blaž
+sl	givenF	Marija,Ana,Maja,Irena,Mojca,Mateja,Nina,Nataša,Petra,Barbara,Tanja,Jožica,Anja,Katja,Sara,Eva,Tina,Urška,Špela,Polona,Maša,Lara,Jasna,Alenka,Vesna
+sl	family	Novak,Horvat,Kovačič,Krajnc,Zupančič,Potočnik,Kovač,Mlakar,Vidmar,Kos,Golob,Turk,Kralj,Božič,Korošec,Bizjak,Zupan,Hribar,Kotnik,Kavčič,Rozman,Kastelic,Oblak,Petek,Žagar,Hočevar,Kolar,Košir,Koren,Klemenčič
+sl	title	g.,ga.,dr.,mag.,prof.,dipl. ing.,univ. dipl. inž.
+sl	prof	PhD,MBA
+sl	conn	in
+sl	unknown	Služba za stranke,Tajništvo,Računovodstvo,Prodaja,Uprava,Direktor,Recepcija,Tehnična podpora,Poštni predal,ni podatka,Info
+hr	order	given-first
+hr	givenM	Ivan,Marko,Josip,Ante,Luka,Stjepan,Mario,Tomislav,Davor,Ivica,Zoran,Mihael,Petar,Nikola,Dario,Matija,Filip,Damir,Goran,Željko,Hrvoje,Tin,Krešimir,Domagoj,Antun
+hr	givenF	Marija,Ana,Ivana,Katarina,Mateja,Petra,Marina,Nikolina,Jelena,Maja,Sanja,Martina,Dragana,Kristina,Tena,Ivona,Lucija,Nada,Vesna,Branka,Mirjana,Dubravka,Lana,Iva,Ružica
+hr	family	Horvat,Kovačević,Babić,Marić,Jurić,Novak,Knežević,Vuković,Marković,Petrović,Matić,Tomić,Kovač,Pavlović,Božić,Blažević,Grgić,Pavić,Radić,Perić,Filipović,Šarić,Lovrić,Vidović,Perković,Bošnjak,Mikulić,Barišić,Jukić,Lukić
+hr	title	g.,gđa,dr.,dr. sc.,mag.,prof.,ing.,dipl. ing.
+hr	prof	PhD,MBA,mag. oec.
+hr	conn	i
+hr	unknown	Služba za korisnike,Tajništvo,Računovodstvo,Prodaja,Uprava,Direktor,Recepcija,Tehnička podrška,Poštanski pretinac,nema podataka,Info
+hu	order	family-first
+hu	givenM	István,János,László,Zoltán,József,Sándor,Gábor,Ferenc,Attila,Péter,Tamás,Zsolt,Tibor,András,Csaba,Imre,Lajos,Gergely,Balázs,Bence,Dávid,Máté,Ádám,Levente,Miklós
+hu	givenF	Mária,Erzsébet,Katalin,Ilona,Éva,Anna,Zsuzsanna,Margit,Judit,Ágnes,Mónika,Andrea,Edit,Réka,Dóra,Eszter,Nóra,Szilvia,Krisztina,Orsolya,Zsófia,Hajnalka,Gabriella,Tímea,Viktória
+hu	family	Nagy,Kovács,Tóth,Szabó,Horváth,Varga,Kiss,Molnár,Németh,Farkas,Balogh,Papp,Takács,Juhász,Lakatos,Mészáros,Oláh,Simon,Rácz,Fekete,Szilágyi,Török,Fehér,Balázs,Gál,Kis,Szűcs,Kocsis,Pintér,Fodor,Orsós,Szalai,Sipos,Magyar,Lukács,Gulyás,Biró,Király,Katona,László
+hu	title	Dr.,Prof.,Ifj.,Id.,Özv.,Mérnök
+hu	prof	PhD,MBA
+hu	conn	és
+hu	unknown	Ügyfélszolgálat,Titkárság,Könyvelés,Értékesítés,Vezetőség,Igazgatóság,Recepció,Műszaki támogatás,Postafiók,nincs megadva,Info
+ro	order	given-first
+ro	givenM	Ion,Andrei,Alexandru,Mihai,Gheorghe,Constantin,Ștefan,Vasile,Nicolae,Marius,Cristian,Daniel,Florin,Adrian,Bogdan,Radu,Ionuț,Dan,Sorin,Cătălin,Răzvan,Dorin,Claudiu,Lucian,Emil
+ro	givenF	Maria,Elena,Ana,Ioana,Mihaela,Andreea,Cristina,Daniela,Gabriela,Alexandra,Raluca,Simona,Camelia,Carmen,Georgiana,Roxana,Diana,Monica,Oana,Laura,Florentina,Irina,Adriana,Loredana,Nicoleta
+ro	family	Popescu,Ionescu,Popa,Pop,Radu,Dumitru,Stan,Stoica,Gheorghe,Matei,Ciobanu,Constantin,Marin,Tudor,Dobre,Barbu,Nistor,Florea,Frățilă,Alexandru,Diaconu,Munteanu,Moldovan,Vasile,Preda,Serban,Lungu,Cristea,Dinu,Ene
+ro	title	Dl.,Dna,Dr.,Ing.,Prof.,Av.,Conf. univ.,Jr.
+ro	prof	PhD,MBA
+ro	conn	și
+ro	unknown	Serviciu clienți,Secretariat,Contabilitate,Departament vânzări,Conducere,Direcțiune,Recepție,Suport tehnic,Căsuță poștală,nespecificat,Info
+da	order	given-first
+da	givenM	Jens,Peter,Lars,Michael,Henrik,Thomas,Søren,Jan,Niels,Christian,Morten,Martin,Anders,Mads,Rasmus,Jesper,Mikkel,Kasper,Frederik,Emil,Oliver,Mathias,Jacob,Ole,Kim
+da	givenF	Anne,Mette,Kirsten,Hanne,Lone,Susanne,Camilla,Maria,Anna,Louise,Pernille,Charlotte,Helle,Birgit,Lene,Tina,Sofie,Emma,Ida,Julie,Karen,Marianne,Gitte,Dorthe,Trine
+da	family	Jensen,Nielsen,Hansen,Pedersen,Andersen,Christensen,Larsen,Sørensen,Rasmussen,Jørgensen,Petersen,Madsen,Kristensen,Olsen,Thomsen,Christiansen,Poulsen,Johansen,Møller,Mortensen,Knudsen,Jakobsen,Jacobsen,Mikkelsen,Olesen,Frederiksen,Laursen,Henriksen,Lund,Schmidt
+da	title	Hr.,Fru,Dr.,Prof.,Cand.,Ing.,Direktør
+da	prof	PhD,MBA
+da	conn	og
+da	unknown	Kundeservice,Sekretariat,Regnskab,Salgsafdeling,Direktion,Ledelse,Reception,Teknisk support,Postboks,ikke oplyst,Info
+sv	order	given-first
+sv	givenM	Lars,Anders,Johan,Erik,Per,Karl,Mikael,Jan,Peter,Thomas,Fredrik,Mats,Daniel,Magnus,Stefan,Henrik,Andreas,Oscar,Gustav,Viktor,Emil,Hugo,Axel,Nils,Björn
+sv	givenF	Anna,Maria,Karin,Eva,Kristina,Birgitta,Elisabeth,Ingrid,Marie,Sofia,Emma,Linda,Lena,Hanna,Malin,Cecilia,Elin,Johanna,Ida,Sara,Camilla,Helena,Maja,Ulrika,Åsa
+sv	family	Andersson,Johansson,Karlsson,Nilsson,Eriksson,Larsson,Olsson,Persson,Svensson,Gustafsson,Pettersson,Jonsson,Jansson,Hansson,Bengtsson,Jönsson,Lindberg,Jakobsson,Magnusson,Olofsson,Lindström,Lindqvist,Lindgren,Axelsson,Berg,Bergström,Lundberg,Lind,Lundgren,Mattsson
+sv	title	Hr,Fru,Dr,Prof.,Civ.ing.,Fil.dr,Jur.kand.
+sv	prof	PhD,MBA
+sv	conn	och
+sv	unknown	Kundtjänst,Sekretariat,Ekonomi,Försäljning,Ledning,Företagsledning,Reception,Teknisk support,Postbox,uppgift saknas,Info
+fi	order	given-first
+fi	givenM	Juha,Mikko,Antti,Timo,Jari,Matti,Kari,Hannu,Pekka,Markku,Jukka,Heikki,Tuomas,Janne,Ville,Petri,Sami,Lauri,Eero,Olli,Aleksi,Joonas,Elias,Oskari,Risto
+fi	givenF	Maria,Anna,Johanna,Kaarina,Helena,Liisa,Sari,Anne,Marja,Tuulikki,Päivi,Katja,Minna,Laura,Emilia,Sanna,Hanna,Riitta,Tiina,Eeva,Satu,Pirkko,Leena,Aino,Salla
+fi	family	Korhonen,Virtanen,Mäkinen,Nieminen,Mäkelä,Hämäläinen,Laine,Heikkinen,Koskinen,Järvinen,Lehtonen,Lehtinen,Saarinen,Salminen,Heinonen,Niemi,Heikkilä,Kinnunen,Salonen,Turunen,Salo,Laitinen,Tuominen,Rantanen,Karjalainen,Jokinen,Mattila,Savolainen,Lahtinen,Ahonen
+fi	title	Hra,Rouva,Tri,Prof.,DI,FM,KTM,Ins.
+fi	prof	PhD,MBA
+fi	conn	ja
+fi	unknown	Asiakaspalvelu,Sihteeristö,Taloushallinto,Myynti,Johto,Toimitusjohtaja,Vastaanotto,Tekninen tuki,Postilokero,ei ilmoitettu,Info
+nb	order	given-first
+nb	givenM	Jan,Per,Bjørn,Ole,Lars,Kjell,Knut,Arne,Svein,Thomas,Hans,Geir,Tor,Morten,Anders,Erik,Magnus,Jonas,Henrik,Håkon,Sander,Kristian,Even,Sindre,Terje
+nb	givenF	Anne,Inger,Kari,Marit,Ingrid,Liv,Eva,Berit,Astrid,Bjørg,Hilde,Nina,Anna,Marianne,Silje,Ida,Emma,Nora,Kristin,Randi,Solveig,Tone,Camilla,Ragnhild,Siri
+nb	family	Hansen,Johansen,Olsen,Larsen,Andersen,Pedersen,Nilsen,Kristiansen,Jensen,Karlsen,Johnsen,Pettersen,Eriksen,Berg,Haugen,Hagen,Johannessen,Andreassen,Jacobsen,Dahl,Jørgensen,Halvorsen,Henriksen,Lund,Sørensen,Moen,Gundersen,Iversen,Strand,Solberg
+nb	title	Hr.,Fru,Dr.,Prof.,Siv.ing.,Cand.,Advokat
+nb	prof	PhD,MBA
+nb	conn	og
+nb	unknown	Kundeservice,Sekretariat,Regnskap,Salg,Ledelse,Daglig leder,Resepsjon,Teknisk support,Postboks,ikke oppgitt,Info
+is	order	given-first
+is	givenM	Jón,Sigurður,Guðmundur,Gunnar,Ólafur,Einar,Kristján,Magnús,Stefán,Björn,Ágúst,Árni,Helgi,Ragnar,Þorsteinn,Pétur,Haukur,Birgir,Arnar,Daníel,Atli,Brynjar,Hilmar,Víðir,Egill
+is	givenF	Guðrún,Anna,Sigríður,Kristín,Margrét,Helga,Sara,Elín,Ingibjörg,Katrín,Eva,Rakel,Björk,Hildur,Þórunn,Ragnheiður,Auður,Halla,Birna,Dagný,Salka,Vigdís,Embla,Sunna,Freyja
+is	family	Jónsson,Sigurðsson,Guðmundsson,Gunnarsson,Ólafsson,Einarsson,Magnússon,Kristjánsson,Stefánsson,Björnsson,Árnason,Helgason,Ragnarsson,Pétursson,Jónsdóttir,Sigurðardóttir,Guðmundsdóttir,Gunnarsdóttir,Ólafsdóttir,Einarsdóttir,Magnúsdóttir,Kristjánsdóttir,Stefánsdóttir,Björnsdóttir,Árnadóttir,Helgadóttir,Þórðarson,Haraldsson,Eiríksson,Hallgrímsson
+is	title	Hr.,Frú,Dr.,Prófessor,Verkfr.
+is	prof	PhD,MBA
+is	conn	og
+is	unknown	Þjónustuver,Skrifstofa,Bókhald,Sala,Stjórn,Framkvæmdastjóri,Móttaka,Tæknilegur stuðningur,Pósthólf,ekki gefið upp,Info
+et	order	given-first
+et	givenM	Jüri,Tõnu,Andres,Mati,Peeter,Toomas,Kristjan,Margus,Rein,Priit,Mart,Siim,Rasmus,Karl,Martin,Marko,Indrek,Aivar,Heiki,Raivo,Taavi,Urmas,Madis,Oliver,Kaido
+et	givenF	Maria,Anna,Kristina,Mari,Liis,Tiina,Katrin,Kadri,Merle,Helen,Laura,Piret,Anu,Külli,Marika,Evelin,Jana,Eve,Ene,Reet,Sirje,Maarja,Tiiu,Hanna,Triin
+et	family	Tamm,Saar,Sepp,Mägi,Kask,Kukk,Rebane,Ilves,Pärn,Koppel,Oja,Luik,Kaasik,Lepik,Ots,Raud,Kuusk,Mölder,Vaher,Teder,Põder,Kallas,Karu,Lepp,Laine,Soo,Kuusik,Jõgi,Aas,Pukk
+et	title	Hr,Pr,Dr,Prof,Mag
+et	prof	PhD,MBA
+et	conn	ja
+et	unknown	Klienditeenindus,Sekretariaat,Raamatupidamine,Müük,Juhtkond,Juhatus,Vastuvõtt,Tehniline tugi,Postkast,märkimata,Info
+lv	order	given-first
+lv	givenM	Jānis,Andris,Aivars,Juris,Māris,Ivars,Edgars,Roberts,Kristaps,Mārtiņš,Artūrs,Dainis,Raimonds,Gatis,Valdis,Normunds,Oskars,Rihards,Toms,Pēteris,Ilmārs,Guntis,Uldis,Jēkabs,Kārlis
+lv	givenF	Anna,Māra,Ilze,Inese,Dace,Sandra,Laima,Zane,Liene,Baiba,Anita,Elīna,Kristīne,Gunta,Ieva,Marta,Līga,Evija,Santa,Ilona,Daiga,Aija,Agnese,Jolanta,Rūta
+lv	family	Bērziņš,Kalniņš,Ozoliņš,Jansons,Liepiņš,Krūmiņš,Balodis,Eglītis,Zariņš,Pētersons,Vītoliņš,Siliņš,Kļaviņš,Ozols,Kalniņa,Bērziņa,Ozoliņa,Liepa,Zālīte,Krastiņš,Sproģis,Vilks,Lācis,Rozītis,Dzenis,Straume,Apsītis,Ābele,Ceplis,Mežs
+lv	title	Kungs,Kundze,Dr.,Prof.,Mg.,Ing.
+lv	prof	PhD,MBA
+lv	conn	un
+lv	unknown	Klientu apkalpošana,Sekretariāts,Grāmatvedība,Pārdošana,Vadība,Valde,Reģistratūra,Tehniskais atbalsts,Pasta kaste,nav norādīts,Info
+lt	order	given-first
+lt	givenM	Jonas,Antanas,Petras,Juozas,Algirdas,Vytautas,Kęstutis,Darius,Mindaugas,Andrius,Tomas,Rimantas,Saulius,Marius,Paulius,Gediminas,Arūnas,Ričardas,Žydrūnas,Lukas,Mantas,Dainius,Edvinas,Povilas,Rokas
+lt	givenF	Ona,Marija,Elena,Birutė,Jūratė,Rasa,Daiva,Ieva,Aistė,Giedrė,Laima,Nijolė,Vida,Dalia,Rūta,Jolanta,Inga,Agnė,Kristina,Gintarė,Loreta,Vilma,Eglė,Lina,Monika
+lt	family	Kazlauskas,Petrauskas,Jankauskas,Stankevičius,Vasiliauskas,Žukauskas,Butkus,Paulauskas,Urbonas,Navickas,Kavaliauskas,Sakalauskas,Balčiūnas,Ramanauskas,Rimkus,Kazlauskienė,Petrauskienė,Jankauskienė,Stankevičienė,Vasiliauskienė,Žukauskienė,Butkienė,Paulauskienė,Urbonienė,Navickienė,Šimkus,Grigaitis,Mockus,Pocius,Baranauskas
+lt	title	P.,Ponia,Dr.,Prof.,Mgr.,Ing.
+lt	prof	PhD,MBA
+lt	conn	ir
+lt	unknown	Klientų aptarnavimas,Sekretoriatas,Buhalterija,Pardavimai,Vadovybė,Direktorius,Registratūra,Techninė pagalba,Pašto dėžutė,nenurodyta,Info
+mt	order	given-first
+mt	givenM	Joseph,Carmel,Mario,Paul,Charles,John,Anthony,Michael,George,Joe,Mark,Kevin,Daniel,Matthew,Josef,Albert,Reuben,Karl,Jean,Ivan,Clayton,Brian,Noel,Ryan,Julian
+mt	givenF	Maria,Marthese,Josephine,Anna,Rose,Doris,Carmen,Joanne,Rita,Mary,Anne,Charlene,Claire,Nicola,Roberta,Sharon,Lorraine,Michelle,Kelly,Ruth,Jessica,Daniela,Therese,Ylenia,Pauline
+mt	family	Borg,Camilleri,Vella,Farrugia,Zammit,Galea,Micallef,Grech,Attard,Spiteri,Pace,Cassar,Azzopardi,Agius,Debono,Sciberras,Fenech,Mifsud,Calleja,Cutajar,Xuereb,Bonnici,Muscat,Portelli,Schembri
+mt	title	Sur,Sinjura,Dr.,Prof.,Perit,Av.
+mt	prof	PhD,MBA
+mt	conn	u
+mt	unknown	Servizz lill-klijenti,Segretarjat,Kontabilità,Bejgħ,Maniġment,Direttur,Reception,Appoġġ tekniku,Kaxxa postali,mhux indikat,Info

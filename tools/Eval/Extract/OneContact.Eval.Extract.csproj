@@ -19,6 +19,7 @@
     <ProjectReference Include="../../../src/OneContact/OneContact.csproj" />
     <ProjectReference Include="../../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
     <ProjectReference Include="../../../src/OneContact.Models.Tier1/OneContact.Models.Tier1.csproj" />
+    <ProjectReference Include="../../../src/OneContact.Models/OneContact.Models.csproj" />
   </ItemGroup>
 
 </Project>
