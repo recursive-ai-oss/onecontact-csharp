@@ -232,8 +232,8 @@ public sealed class ShortcutEquivalenceTests
             inputs.Add(t.Element("address")?.Value ?? string.Empty);
         }
 
-        string[] locals = ["a", "john.smith", "J.Smith+crm", "a..b", ".a", "a.", "a b", "\"a b\"", "a(c)", "Ünï", "a!#$%&'*+-/=?^_`{|}~", "x@y", "", "a\u00a0", "1", new string('a', 70)];
-        string[] domains = ["example.com", "GoogleMail.com", "a-b.example", "-a.com", "a-.com", "a..com", "a.com.", ".com", "com", "1.2.3.4", "[1.2.3.4]", "münchen.de", "xn--bcher-kva.de", "a_b.com", "e.c", "example.123", new string('b', 70) + ".com", "mailinator.com", "gmial.com", "x.co.uk"];
+        string[] locals = ["a", "john.smith", "J.Smith+crm", "a..b", ".a", "a.", "a b", "\"a b\"", "a(c)", "Ünï", "a!#$%&'*+-/=?^_`{|}~", "x@y", "", "a\u00a0", "1", "ユーザー", "名前.名", "a\ud800", "a\U0001F600", "é.é", "a\u0301", new string('a', 70)];
+        string[] domains = ["example.com", "GoogleMail.com", "a-b.example", "-a.com", "a-.com", "a..com", "a.com.", ".com", "com", "1.2.3.4", "[1.2.3.4]", "münchen.de", "xn--bcher-kva.de", "a_b.com", "e.c", "example.123", "例え.jp", "bücher.de", "ünï.de", "a.é", "ÅÄ.COM", "xn--p1ai", "xn--.com", "a.\u0301b.com", "b\ud800.com", "d\U0001F600.com", "xn--bcher-kva.example", "STRASSE.de", "straße.de", "a.b\u200d", "münchen", "ü.ü", new string('b', 70) + ".com", "mailinator.com", "gmial.com", "x.co.uk"];
         foreach (string l in locals)
         {
             foreach (string d in domains)

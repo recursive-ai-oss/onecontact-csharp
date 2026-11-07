@@ -201,9 +201,10 @@ internal static class EmailAddressParser
             return true;
         }
 
-        // The usual address: a dot-atom local part, "@" and a domain of letters, digits, hyphens and dots, all ASCII, with no comment, quote,
-        // angle bracket or white space. For this shape the grammar reduces to splitting at the "@"; the domain still goes through the same
-        // normalization. Anything else, including every failure, is left to the full grammar, which also reports it.
+        // The usual address: a dot-atom local part, "@" and a domain of letters, digits, hyphens and dots, with no comment, quote, angle
+        // bracket or white space. Non-ASCII characters are atext too (RFC 6532 section 3.2), so internationalized addresses take this
+        // route. For this shape the grammar reduces to splitting at the "@"; the domain still goes through the same normalization.
+        // Anything else, including every failure, is left to the full grammar, which also reports it.
         private bool TryReadPlainAddrSpec(int start, int end)
         {
             ReadOnlySpan<char> text = _s[start..end];
@@ -218,8 +219,8 @@ internal static class EmailAddressParser
 
             // A dot-atom local part: atext and dots, but no leading, trailing or doubled dot. The domain's characters are letters, digits,
             // hyphens and dots; its dots and hyphens are checked by its normalization.
-            if (local.IndexOfAnyExcept(LocalPartChars) >= 0 || local[0] == '.' || local[^1] == '.' || local.Contains("..", StringComparison.Ordinal)
-                || domainPart.IndexOfAnyExcept(DomainChars) >= 0)
+            if (local[0] == '.' || local[^1] == '.' || !IsPlainText(local, LocalPartChars, out bool internationalizedLocal)
+                || local.Contains("..", StringComparison.Ordinal) || !IsPlainText(domainPart, DomainChars, out _))
             {
                 return false;
             }
@@ -228,7 +229,8 @@ internal static class EmailAddressParser
             string ascii;
             if (!EmailDomain.TryNormalizePlainAscii(_s[(at + 1)..end], out ascii!))
             {
-                // Not the plain shape (a single label, a long label, a Punycode label, a numeric last label): the general normalization decides.
+                // Not the plain shape (a single label, a long label, a Punycode label, a numeric last label, non-ASCII): the general
+                // normalization decides.
                 EmailFacts facts = _facts;
                 if (!EmailDomain.TryNormalize(_s[(at + 1)..end].ToString(), ref facts, out ascii, out _))
                 {
@@ -238,10 +240,42 @@ internal static class EmailAddressParser
                 _facts = facts;
             }
 
+            if (internationalizedLocal)
+            {
+                _facts |= EmailFacts.InternationalizedLocalPart;
+            }
+
             _local = _s[start..at].ToString();
             _domain = ascii;
             _localSpan = new SourceSpan(start, at - start);
             _domainSpan = new SourceSpan(at + 1, end - at - 1);
+            return true;
+        }
+
+        // True when every character is one of the ASCII ones given or a non-ASCII character that is not part of a surrogate pair
+        // (a pair or a lone surrogate is left to the full grammar, which reads pairs and refuses lone ones).
+        private static bool IsPlainText(ReadOnlySpan<char> text, SearchValues<char> ascii, out bool nonAscii)
+        {
+            nonAscii = false;
+            int i = 0;
+            while (i < text.Length)
+            {
+                int bad = text[i..].IndexOfAnyExcept(ascii);
+                if (bad < 0)
+                {
+                    return true;
+                }
+
+                char c = text[i + bad];
+                if (c < 0x80 || char.IsSurrogate(c))
+                {
+                    return false;
+                }
+
+                nonAscii = true;
+                i += bad + 1;
+            }
+
             return true;
         }
 

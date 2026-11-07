@@ -142,7 +142,9 @@ internal static class EmailFinder
         List<Token>? ats = null;
         for (int p = start; p < end; p++)
         {
-            if (TryAtToken(text, p, end, out Token a))
+            // A token inside an address that was written plainly would be skipped below anyway; leaving it out here saves the
+            // dot-token tables for the lines that are only plain addresses.
+            if (TryAtToken(text, p, end, out Token a) && !Overlaps(sink, firstPlain, a.Start, a.End))
             {
                 (ats ??= []).Add(a);
             }
