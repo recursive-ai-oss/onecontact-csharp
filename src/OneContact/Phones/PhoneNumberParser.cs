@@ -39,6 +39,46 @@ public sealed partial class PhoneNumberParser
     internal static OperationStatus TryParse(string input, Region defaultRegion, out PhoneNumber value, out ParseDetail detail) =>
         Default.TryParseCore(input, defaultRegion, input, out value, out detail);
 
+    // The bool-returning parse needs no ParseDetail, so none is built.
+    internal static bool TryParseQuick(string input, Region defaultRegion, out PhoneNumber value)
+    {
+        ReasonCode reason = Default.ParseNumber(input, defaultRegion, input, out value, out _);
+        if (!reason.IsNone)
+        {
+            value = default;
+            return false;
+        }
+
+        return true;
+    }
+
+    internal static bool TryParseQuick(ReadOnlySpan<char> input, Region defaultRegion, out PhoneNumber value) =>
+        TryParseQuick(input.ToString(), defaultRegion, null, out value);
+
+    private static bool TryParseQuick(string input, Region defaultRegion, string? rawInput, out PhoneNumber value)
+    {
+        ReasonCode reason = Default.ParseNumber(input, defaultRegion, rawInput, out value, out _);
+        if (!reason.IsNone)
+        {
+            value = default;
+            return false;
+        }
+
+        return true;
+    }
+
+    // The matcher's parse of a candidate it already holds as a string: the string itself is kept as the raw input, and no detail is built.
+    internal bool TryParseKeepingRaw(string input, Region defaultRegion, out PhoneNumber value)
+    {
+        if (!ParseNumber(input, defaultRegion, input, out value, out _).IsNone)
+        {
+            value = default;
+            return false;
+        }
+
+        return true;
+    }
+
     /// <summary>Parses a phone number.</summary>
     /// <param name="input">The text. Surrounding white space, and any text before the first digit or plus sign, is ignored.</param>
     /// <param name="defaultRegion">The region that national numbers belong to; <see cref="Region.Unknown"/> accepts only numbers that start with a plus sign.</param>
@@ -102,53 +142,67 @@ public sealed partial class PhoneNumberParser
             return ReasonCode.PhoneTooLong;
         }
 
-        // Building the number text: an RFC 3966 phone-context contributes its digits; otherwise the possible number is cut out of the text.
         string national;
         SourceSpan numberSpan;
-        string? phoneContext = ExtractPhoneContext(input);
-        if (!IsPhoneContextValid(phoneContext))
+        string extension;
+        bool vanity;
+        if (TryReadPlainNumber(input, out national, out numberSpan))
         {
-            return ReasonCode.PhoneNotANumber;
-        }
-
-        if (phoneContext is not null)
-        {
-            StringBuilder sb = new();
-            if (phoneContext[0] == '+')
-            {
-                sb.Append(phoneContext);
-            }
-
-            int tel = input.IndexOf("tel:", StringComparison.Ordinal);
-            int begin = tel >= 0 ? tel + 4 : 0;
-            int contextAt = input.IndexOf(";phone-context=", StringComparison.Ordinal);
-            if (contextAt >= begin)
-            {
-                sb.Append(input, begin, contextAt - begin);
-            }
-
-            national = sb.ToString();
-            ReadOnlySpan<char> trimmed = input.AsSpan().Trim();
-            numberSpan = new SourceSpan(input.Length - input.AsSpan().TrimStart().Length, trimmed.Length);
+            // Digits with the usual punctuation have no phone-context, extension, second number or letters to look for.
+            extension = "";
+            vanity = false;
         }
         else
         {
-            ReadOnlySpan<char> possible = PhoneText.ExtractPossibleNumber(input, out int possibleStart);
-            national = possible.ToString();
-            numberSpan = new SourceSpan(possibleStart, possible.Length);
-        }
+            // Building the number text: an RFC 3966 phone-context contributes its digits; otherwise the possible number is cut out of the text.
+            string? phoneContext = ExtractPhoneContext(input);
+            if (!IsPhoneContextValid(phoneContext))
+            {
+                return ReasonCode.PhoneNotANumber;
+            }
 
-        // The ISDN sub-address and everything after it is not part of the number.
-        int isub = national.IndexOf(";isub=", StringComparison.Ordinal);
-        if (isub > 0)
-        {
-            national = national[..isub];
-        }
+            if (phoneContext is not null)
+            {
+                StringBuilder sb = new();
+                if (phoneContext[0] == '+')
+                {
+                    sb.Append(phoneContext);
+                }
 
-        if (!PhoneText.IsViable(national))
-        {
-            errorSpan = numberSpan;
-            return ReasonCode.PhoneNotANumber;
+                int tel = input.IndexOf("tel:", StringComparison.Ordinal);
+                int begin = tel >= 0 ? tel + 4 : 0;
+                int contextAt = input.IndexOf(";phone-context=", StringComparison.Ordinal);
+                if (contextAt >= begin)
+                {
+                    sb.Append(input, begin, contextAt - begin);
+                }
+
+                national = sb.ToString();
+                ReadOnlySpan<char> trimmed = input.AsSpan().Trim();
+                numberSpan = new SourceSpan(input.Length - input.AsSpan().TrimStart().Length, trimmed.Length);
+            }
+            else
+            {
+                ReadOnlySpan<char> possible = PhoneText.ExtractPossibleNumber(input, out int possibleStart);
+                national = possible.ToString();
+                numberSpan = new SourceSpan(possibleStart, possible.Length);
+            }
+
+            // The ISDN sub-address and everything after it is not part of the number.
+            int isub = national.IndexOf(";isub=", StringComparison.Ordinal);
+            if (isub > 0)
+            {
+                national = national[..isub];
+            }
+
+            if (!PhoneText.IsViable(national))
+            {
+                errorSpan = numberSpan;
+                return ReasonCode.PhoneNotANumber;
+            }
+
+            extension = null!;
+            vanity = false;
         }
 
         bool startsWithPlus = national.Length > 0 && national[0] is '+' or '\uFF0B';
@@ -158,10 +212,13 @@ public sealed partial class PhoneNumberParser
             return defaultRegion.IsUnknown ? ReasonCode.PhoneRegionRequired : ReasonCode.PhoneUnknownRegion;
         }
 
-        // Letters of the extension label ("ext", ";ext=") are not part of the number, so they do not make it a vanity number.
-        string extension = PhoneText.StripExtension(national, out int cut);
-        national = national[..cut];
-        bool vanity = PhoneText.ValidAlpha.IsMatch(national);
+        if (extension is null)
+        {
+            // Letters of the extension label ("ext", ";ext=") are not part of the number, so they do not make it a vanity number.
+            extension = PhoneText.StripExtension(national, out int cut);
+            national = national[..cut];
+            vanity = PhoneText.IsVanityShape(national);
+        }
 
         CountryCodeSource source = CountryCodeSource.FromDefaultCountry;
         ReasonCode reason = MaybeExtractCountryCode(national, regionMetadata, out string nsn, out int countryCode, ref source);
@@ -269,6 +326,17 @@ public sealed partial class PhoneNumberParser
             flags |= PhoneFacts.InternationalInput;
         }
 
+        // Validity is settled before the value is built so the value is built once, with its facts and type.
+        RegionMetadata? located = RegionMetadataFor(countryCode, nsn, out PhoneNumberType lineType);
+        if (located is not null && lineType != PhoneNumberType.Unknown)
+        {
+            flags |= PhoneFacts.Valid;
+            if (located.Id == RegionMetadata.NonGeographicId)
+            {
+                flags |= PhoneFacts.NonGeographic;
+            }
+        }
+
         PhoneNumber number = new(
             countryCode,
             nationalNumber,
@@ -278,21 +346,75 @@ public sealed partial class PhoneNumberParser
             rawInput is null ? CountryCodeSource.Unspecified : source,
             carrier,
             numberSpan,
-            flags);
-        RegionMetadata? located = RegionMetadataFor(number);
-        if (located is not null && TypeOf(GetNsn(number), located) != PhoneNumberType.Unknown)
-        {
-            flags |= PhoneFacts.Valid;
-            if (located.Id == RegionMetadata.NonGeographicId)
-            {
-                flags |= PhoneFacts.NonGeographic;
-            }
-
-            number = new PhoneNumber(countryCode, nationalNumber, zeros, extension, rawInput, rawInput is null ? CountryCodeSource.Unspecified : source, carrier, numberSpan, flags);
-        }
-
+            flags,
+            ReferenceEquals(_metadata, PhoneMetadata.Default) ? lineType : null);
         value = number;
         return default;
+    }
+
+    // The common shape of typed numbers: digits, an optional leading plus, and the punctuation people put between groups. For this shape the
+    // text rules reduce to cutting from the first digit or plus to the last digit: there is no phone-context, extension label, second
+    // number or letter in it (those all need a character outside this set). Anything else, and anything with fewer than three digits
+    // (whose errors carry spans the full path computes), is left to the full rules.
+    private static bool TryReadPlainNumber(string input, out string national, out SourceSpan span)
+    {
+        national = "";
+        span = default;
+        if (input.Length > PhoneText.MaxInputLength)
+        {
+            return false;
+        }
+
+        int first = -1;
+        int last = -1;
+        int digits = 0;
+        bool inLeadingPlus = false;
+        for (int i = 0; i < input.Length; i++)
+        {
+            char c = input[i];
+            if (c is >= '0' and <= '9')
+            {
+                if (first < 0)
+                {
+                    first = i;
+                }
+
+                last = i;
+                inLeadingPlus = false;
+                digits++;
+            }
+            else if (c == '+')
+            {
+                if (first >= 0 && !inLeadingPlus)
+                {
+                    return false;
+                }
+
+                if (first < 0)
+                {
+                    first = i;
+                }
+
+                inLeadingPlus = true;
+            }
+            else if (c is ' ' or '-' or '(' or ')' or '.' or '/')
+            {
+                inLeadingPlus = false;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        if (digits < 3)
+        {
+            return false;
+        }
+
+        national = input.Substring(first, last + 1 - first);
+        span = new SourceSpan(first, last + 1 - first);
+        return true;
     }
 
     // RFC 3966 section 5.1.2: the phone-context parameter is either a global number (digits after a plus) or a domain name.

@@ -134,7 +134,7 @@ internal static class Uts46
         bool transitional = (options & Uts46Options.TransitionalProcessing) != 0;
 
         // Step 1, map.
-        var mapped = new List<int>(domain.Length);
+        var mapped = new CodePointBuffer(domain.Length);
         for (int i = 0; i < domain.Length; i++)
         {
             int cp = domain[i];
@@ -162,12 +162,12 @@ internal static class Uts46
                         break;
                     }
 
-                    AppendCodePoints(mapped, mapping);
+                    mapped.AddAll(mapping);
                     break;
                 case IdnaStatus.Deviation:
                     if (transitional)
                     {
-                        AppendCodePoints(mapped, mapping);
+                        mapped.AddAll(mapping);
                     }
                     else
                     {
@@ -183,23 +183,26 @@ internal static class Uts46
         }
 
         // Step 2, normalize; step 3, break into labels.
-        int[] normalized = NormalizationC.Normalize(mapped.ToArray());
-        labels = [];
-        var current = new List<int>();
+        int[] normalized = NormalizationC.NormalizeOwned(mapped.ToArray());
+        int dots = 0;
         foreach (int cp in normalized)
         {
             if (cp == '.')
             {
-                labels.Add([.. current]);
-                current.Clear();
-            }
-            else
-            {
-                current.Add(cp);
+                dots++;
             }
         }
 
-        labels.Add([.. current]);
+        labels = new List<int[]>(dots + 1);
+        int labelStart = 0;
+        for (int i = 0; i <= normalized.Length; i++)
+        {
+            if (i == normalized.Length || normalized[i] == '.')
+            {
+                labels.Add(normalized[labelStart..i]);
+                labelStart = i + 1;
+            }
+        }
 
         // Step 4, convert xn-- labels; validation comes after, because the Bidi rule looks at the whole domain.
         var fromPunycode = new bool[labels.Count];
@@ -251,15 +254,19 @@ internal static class Uts46
             }
         }
 
+        // Only the Bidi rule reads this, so it is looked for only when that rule is on.
         bool bidiDomain = false;
-        foreach (int[] label in labels)
+        if ((options & Uts46Options.CheckBidi) != 0)
         {
-            foreach (int cp in label)
+            foreach (int[] label in labels)
             {
-                BidiClass b = IdnaTables.GetBidiClass(cp);
-                if (b is BidiClass.R or BidiClass.AL or BidiClass.AN)
+                foreach (int cp in label)
                 {
-                    bidiDomain = true;
+                    BidiClass b = IdnaTables.GetBidiClass(cp);
+                    if (b is BidiClass.R or BidiClass.AL or BidiClass.AN)
+                    {
+                        bidiDomain = true;
+                    }
                 }
             }
         }
@@ -272,20 +279,43 @@ internal static class Uts46
         return ok;
     }
 
-    private static void AppendCodePoints(List<int> target, ReadOnlySpan<char> text)
+    // The mapped code points of step 1. The array starts at the length of the input, which is the final length when nothing is ignored or
+    // expanded (the usual case), so it is then handed on as it is.
+    private sealed class CodePointBuffer
     {
-        for (int i = 0; i < text.Length; i++)
+        private int[] _items;
+        private int _count;
+
+        internal CodePointBuffer(int capacity) => _items = new int[Math.Max(capacity, 4)];
+
+        internal void Add(int cp)
         {
-            if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+            if (_count == _items.Length)
             {
-                target.Add(char.ConvertToUtf32(text[i], text[i + 1]));
-                i++;
+                Array.Resize(ref _items, _items.Length * 2);
             }
-            else
+
+            _items[_count++] = cp;
+        }
+
+        // Code points of UTF-16 text; a lone surrogate reads as U+FFFD.
+        internal void AddAll(ReadOnlySpan<char> text)
+        {
+            for (int i = 0; i < text.Length; i++)
             {
-                target.Add(char.IsSurrogate(text[i]) ? 0xFFFD : text[i]);
+                if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+                {
+                    Add(char.ConvertToUtf32(text[i], text[i + 1]));
+                    i++;
+                }
+                else
+                {
+                    Add(char.IsSurrogate(text[i]) ? 0xFFFD : text[i]);
+                }
             }
         }
+
+        internal int[] ToArray() => _count == _items.Length ? _items : _items[.._count];
     }
 
     // UTS #46 section 4.1, "Validity Criteria". A label that came from Punycode is validated for non-transitional processing.
@@ -299,7 +329,7 @@ internal static class Uts46
         bool transitional = (options & Uts46Options.TransitionalProcessing) != 0 && !fromPunycode;
 
         // 1. NFC. Mapping and normalization already did this for labels that were not Punycode.
-        if (fromPunycode)
+        if (fromPunycode && !AllBelowNfcLimit(label))
         {
             int[] nfc = NormalizationC.Normalize(label);
             if (!nfc.AsSpan().SequenceEqual(label))
@@ -367,6 +397,20 @@ internal static class Uts46
         if ((options & Uts46Options.CheckBidi) != 0 && bidiDomain && !BidiRule(label))
         {
             return false;
+        }
+
+        return true;
+    }
+
+    // Code points below IdnaTables.NfcStableLimit never change under NFC, so a label made only of them is in NFC.
+    private static bool AllBelowNfcLimit(int[] label)
+    {
+        foreach (int cp in label)
+        {
+            if (cp >= IdnaTables.NfcStableLimit)
+            {
+                return false;
+            }
         }
 
         return true;

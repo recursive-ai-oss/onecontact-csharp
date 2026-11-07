@@ -1,5 +1,8 @@
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Toolchains.InProcess.NoEmit;
 using System.Text.RegularExpressions;
 using RecursiveAI.OneContact;
 using RecursiveAI.OneContact.Phones;
@@ -98,5 +101,50 @@ public class PhoneRow
 
 internal static class Program
 {
-    private static void Main(string[] args) => BenchmarkSwitcher.FromAssembly(typeof(RegionRow).Assembly).Run(args);
+    private static int Main(string[] args)
+    {
+        if (args.Length > 0 && args[0] == "profile-extract")
+        {
+            return Profiles.Extract();
+        }
+
+        if (args.Length > 0 && args[0] == "profile-names")
+        {
+            return Profiles.Names();
+        }
+
+        if (args.Length > 0 && args[0] == "profile-phone")
+        {
+            return PhoneProfile.Run();
+        }
+
+        if (args.Length == 3 && args[0] == "dump-matcher")
+        {
+            // dump-matcher <text file> <matches file>: the matcher row's text and where our matcher finds numbers in it (start, length).
+            string text = PhoneMatcherRow.MakeText();
+            File.WriteAllText(args[1], text, new System.Text.UTF8Encoding(false));
+            File.WriteAllLines(args[2], PhoneNumber.FindAll(text, Region.US, PhoneMatchLeniency.Valid).Select(m => $"{m.Start}\t{m.RawString.Length}"));
+            return 0;
+        }
+
+        if (args.Length > 0 && args[0] == "profile-compare")
+        {
+            return CompareProfile.Run();
+        }
+
+        if (args.Length > 0 && args[0] == "profile-find")
+        {
+            return PhoneFindProfile.Run();
+        }
+
+        if (args.Length > 0 && args[0] == "accuracy")
+        {
+            return Accuracy.Run();
+        }
+
+        // The in-process toolchain: the assembly name differs from the project name, so a generated child project cannot find it.
+        ManualConfig config = DefaultConfig.Instance.AddJob((Environment.GetEnvironmentVariable("ONECONTACT_BENCH_JOB") == "default" ? Job.Default : Job.ShortRun).WithToolchain(InProcessNoEmitToolchain.Instance));
+        BenchmarkSwitcher.FromAssembly(typeof(RegionRow).Assembly).Run(args, config);
+        return 0;
+    }
 }

@@ -118,7 +118,7 @@ public readonly partial struct WebAddress :
             return false;
         }
 
-        return TryParse(s.AsSpan(), out result);
+        return WebAddressParser.TryParseValue(s, out result);
     }
 
     /// <summary>Tries to parse a value.</summary>
@@ -126,7 +126,7 @@ public readonly partial struct WebAddress :
     /// <param name="result">The parsed value, or the default value when parsing fails.</param>
     /// <returns><see langword="true"/> when the text was parsed.</returns>
     public static bool TryParse(ReadOnlySpan<char> s, out WebAddress result) =>
-        TryParse(s, out result, out _) == OperationStatus.Done;
+        WebAddressParser.TryParseValue(s, out result);
 
     /// <summary>The low-level parse: returns a status and a <see cref="ParseDetail"/> instead of throwing.</summary>
     /// <param name="s">The text to parse.</param>

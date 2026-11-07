@@ -169,10 +169,33 @@ internal static class PhoneText
         };
     }
 
+    /// <summary>
+    /// Whether a text has three or more ASCII letters and no line terminator, which is exactly when <see cref="ValidAlpha"/> matches it: its
+    /// dots stand for any character but a line terminator, and the whole text must be consumed.
+    /// </summary>
+    internal static bool IsVanityShape(ReadOnlySpan<char> text)
+    {
+        int letters = 0;
+        foreach (char c in text)
+        {
+            if (c is '\n' or '\r' or '\u0085' or '\u2028' or '\u2029')
+            {
+                return false;
+            }
+
+            if (char.IsAsciiLetter(c))
+            {
+                letters++;
+            }
+        }
+
+        return letters >= 3;
+    }
+
     /// <summary>Normalizes a number for parsing: a number with three or more letters is a vanity number and its letters become digits; otherwise only digits are kept.</summary>
     internal static string Normalize(ReadOnlySpan<char> text)
     {
-        if (ValidAlpha.IsMatch(text))
+        if (IsVanityShape(text))
         {
             StringBuilder sb = new(text.Length);
             foreach (char c in text)

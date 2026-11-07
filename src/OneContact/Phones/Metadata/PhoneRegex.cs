@@ -45,15 +45,54 @@ internal sealed class PhoneRegex
     private readonly CharSet[] _sets;
     private readonly CaseMode _case;
 
+    // The characters a match can begin with, so a search skips start positions that cannot match. Unused when the pattern can match
+    // the empty string. Over-approximate: a position the table allows may still fail.
+    private readonly ulong _firstLow;
+    private readonly ulong _firstHigh;
+    private readonly bool _firstNonAscii;
+    private readonly bool _canStartEmpty;
+
+    private const int DfaAfterCalls = 4;
+
+    private readonly bool _dfaEligible;
+    private Dfa? _dfa;
+    private int _isMatchCalls;
+
     [ThreadStatic]
     private static int[]? s_stack;
 
     private PhoneRegex(Inst[] program, CharSet[] sets, int groupCount, CaseMode caseMode)
     {
+        if (caseMode == CaseMode.Exact)
+        {
+            // Exact patterns never fold case, so the other-case letter of the ASCII fast path is dropped.
+            for (int i = 0; i < program.Length; i++)
+            {
+                if (program[i].Op == Op.Char)
+                {
+                    program[i] = new Inst(Op.Char, program[i].Cp, 0, 0, fold: false);
+                }
+            }
+        }
+
         _program = program;
         _sets = sets;
         GroupCount = groupCount;
         _case = caseMode;
+        foreach (CharSet set in sets)
+        {
+            set.Freeze(caseMode);
+        }
+
+        ComputeFirst(out _firstLow, out _firstHigh, out _firstNonAscii, out _canStartEmpty);
+        _dfaEligible = true;
+        foreach (Inst inst in program)
+        {
+            if (inst.Op is Op.AssertStart or Op.AssertEnd)
+            {
+                _dfaEligible = false;
+            }
+        }
     }
 
     /// <summary>Gets the number of capturing groups.</summary>
@@ -83,7 +122,22 @@ internal sealed class PhoneRegex
     /// <summary>Tests whether the whole of <paramref name="input"/> matches.</summary>
     /// <param name="input">The text.</param>
     /// <returns><see langword="true"/> when the pattern matches all of it.</returns>
-    internal bool IsMatch(ReadOnlySpan<char> input) => Run(input, 0, true, default, out _);
+    internal bool IsMatch(ReadOnlySpan<char> input)
+    {
+        // A pattern asked a few times is worth a DFA: the answer is the same, but each character costs one table step.
+        Dfa? dfa = _dfa;
+        if (dfa is null && _dfaEligible && Interlocked.Increment(ref _isMatchCalls) == DfaAfterCalls)
+        {
+            _dfa = dfa = new Dfa(this);
+        }
+
+        if (dfa is not null && dfa.TryIsMatch(input, out bool result))
+        {
+            return result;
+        }
+
+        return Run(input, 0, true, default, out _);
+    }
 
     /// <summary>Tests whether the pattern matches at the start of <paramref name="input"/>, taking the first match in priority order.</summary>
     /// <param name="input">The text.</param>
@@ -103,6 +157,138 @@ internal sealed class PhoneRegex
     /// <returns><see langword="true"/> when there is a match at the start.</returns>
     internal bool MatchPrefix(ReadOnlySpan<char> input, Span<int> groups) => Run(input, 0, false, groups, out _);
 
+    // Whether the instruction at pc is a character instruction that accepts this ASCII character. The same tests the matcher applies.
+    private bool Consumes(int pc, char c)
+    {
+        Inst inst = _program[pc];
+        switch (inst.Op)
+        {
+            case Op.Char:
+                return c == inst.X || (_case != CaseMode.Exact && FoldEqual(c, inst.X, _case));
+            case Op.Set:
+                return _sets[inst.X].AsciiHas(c);
+            case Op.Any:
+                return c is not ('\n' or '\r');
+            default:
+                return false;
+        }
+    }
+
+    private void ComputeFirst(out ulong low, out ulong high, out bool nonAscii, out bool canStartEmpty)
+    {
+        low = 0;
+        high = 0;
+        nonAscii = false;
+        canStartEmpty = false;
+        bool[] seen = new bool[_program.Length];
+        Stack<int> todo = new();
+        todo.Push(0);
+        while (todo.Count > 0)
+        {
+            int pc = todo.Pop();
+            if (seen[pc])
+            {
+                continue;
+            }
+
+            seen[pc] = true;
+            Inst inst = _program[pc];
+            switch (inst.Op)
+            {
+                case Op.Char:
+                    for (int a = 0; a < 128; a++)
+                    {
+                        if (a == inst.X || (_case != CaseMode.Exact && FoldEqual(a, inst.X, _case)))
+                        {
+                            AddAscii(ref low, ref high, a);
+                        }
+                    }
+
+                    nonAscii |= inst.X >= 128 || _case == CaseMode.Unicode;
+                    break;
+                case Op.Set:
+                    CharSet set = _sets[inst.X];
+                    for (int a = 0; a < 128; a++)
+                    {
+                        if (set.AsciiHas(a))
+                        {
+                            AddAscii(ref low, ref high, a);
+                        }
+                    }
+
+                    nonAscii = true;
+                    break;
+                case Op.Any:
+                    low = ulong.MaxValue;
+                    high = ulong.MaxValue;
+                    nonAscii = true;
+                    break;
+                case Op.Split:
+                    todo.Push(inst.X);
+                    todo.Push(inst.Y);
+                    break;
+                case Op.Jump:
+                    todo.Push(inst.X);
+                    break;
+                case Op.Match:
+                    canStartEmpty = true;
+                    break;
+                default: // Save and the anchors consume nothing
+                    todo.Push(pc + 1);
+                    break;
+            }
+        }
+    }
+
+    private static void AddAscii(ref ulong low, ref ulong high, int c)
+    {
+        if (c < 64)
+        {
+            low |= 1UL << c;
+        }
+        else
+        {
+            high |= 1UL << (c - 64);
+        }
+    }
+
+    private System.Buffers.SearchValues<char>? _nonStartAscii;
+
+    /// <summary>
+    /// Makes <see cref="Find"/> skip stretches of ASCII that cannot begin a match with a vectorized search. Worth it only for a pattern
+    /// that scans long texts; the table costs a little to build.
+    /// </summary>
+    /// <returns>This pattern.</returns>
+    internal PhoneRegex WithVectorSkip()
+    {
+        if (!_canStartEmpty)
+        {
+            var nonStart = new List<char>();
+            for (char c = '\0'; c < 128; c++)
+            {
+                if (!CanStartWith(c))
+                {
+                    nonStart.Add(c);
+                }
+            }
+
+            _nonStartAscii = System.Buffers.SearchValues.Create(nonStart.ToArray());
+        }
+
+        return this;
+    }
+
+    // Whether a match could begin with this character.
+    private bool CanStartWith(char c)
+    {
+        if (c >= 128)
+        {
+            return _firstNonAscii;
+        }
+
+        return c < 64 ? (_firstLow & (1UL << c)) != 0 : (_firstHigh & (1UL << (c - 64))) != 0;
+    }
+
     /// <summary>Finds the leftmost match.</summary>
     /// <param name="input">The text.</param>
     /// <param name="from">Where to start looking, in UTF-16 units.</param>
@@ -115,6 +301,26 @@ internal sealed class PhoneRegex
         int pos = from;
         while (pos <= input.Length)
         {
+            if (!_canStartEmpty && (pos == input.Length || !CanStartWith(input[pos])))
+            {
+                if (pos == input.Length)
+                {
+                    break;
+                }
+
+                // Over a long stretch of ASCII that cannot begin a match, one vectorized search finds the next character that might: an
+                // ASCII starter, or anything outside ASCII (which the per-character test above then judges).
+                if (_nonStartAscii is { } skip && input[pos] < 128)
+                {
+                    int next = input[pos..].IndexOfAnyExcept(skip);
+                    pos = next < 0 ? input.Length : pos + next;
+                    continue;
+                }
+
+                pos += char.IsHighSurrogate(input[pos]) && pos + 1 < input.Length && char.IsLowSurrogate(input[pos + 1]) ? 2 : 1;
+                continue;
+            }
+
             if (Run(input, pos, false, groups, out end))
             {
                 start = pos;
@@ -203,6 +409,11 @@ internal sealed class PhoneRegex
     private bool Run(ReadOnlySpan<char> input, int startPos, bool full, Span<int> groups, out int end)
     {
         end = 0;
+        if (!_canStartEmpty && (startPos >= input.Length || !CanStartWith(input[startPos])))
+        {
+            return false;
+        }
+
         int slots = 2 * (GroupCount + 1);
         if (!groups.IsEmpty)
         {
@@ -236,6 +447,21 @@ internal sealed class PhoneRegex
                 case Op.Char:
                     if (pos < input.Length)
                     {
+                        // ASCII fast path: Y holds the other-case letter, or -1.
+                        char ch = input[pos];
+                        if (ch < 128 && inst.X < 128)
+                        {
+                            if (ch == inst.X || ch == inst.Y)
+                            {
+                                pos++;
+                                pc++;
+                                break;
+                            }
+
+                            fail = true;
+                            break;
+                        }
+
                         int cp = ReadCodePoint(input, pos, out int len);
                         if (cp == inst.X || (_case != CaseMode.Exact && FoldEqual(cp, inst.X, _case)))
                         {
@@ -250,6 +476,20 @@ internal sealed class PhoneRegex
                 case Op.Set:
                     if (pos < input.Length)
                     {
+                        char ch = input[pos];
+                        if (ch < 128)
+                        {
+                            if (_sets[inst.X].AsciiHas(ch))
+                            {
+                                pos++;
+                                pc++;
+                                break;
+                            }
+
+                            fail = true;
+                            break;
+                        }
+
                         int cp = ReadCodePoint(input, pos, out int len);
                         if (_sets[inst.X].Contains(cp, _case))
                         {
@@ -397,15 +637,225 @@ internal sealed class PhoneRegex
         return rest == 2 && input[pos] == '\r' && input[pos + 1] == '\n';
     }
 
+    /// <summary>
+    /// A lazily built deterministic automaton for whole-input yes/no matching of ASCII text. States are sets of program positions; the
+    /// characters 0 to 127 are grouped into classes that no instruction tells apart, and each (state, class) step is computed once, on
+    /// first use. Text with a character beyond ASCII, or a pattern whose automaton grows past a fixed size, is left to the backtracking
+    /// matcher, which gives the same answer.
+    /// </summary>
+    private sealed class Dfa
+    {
+        private const int MaxStates = 512;
+        private const int Unknown = -1;
+        private const int Dead = -2;
+
+        private readonly PhoneRegex _re;
+        private readonly byte[] _classOf = new byte[128];
+        private readonly char[] _representative;
+        private readonly int _classCount;
+        private readonly int[] _next;
+        private readonly bool[] _accept = new bool[MaxStates];
+        private readonly int[][] _members = new int[MaxStates][];
+        private readonly Dictionary<string, int> _index = new(StringComparer.Ordinal);
+        private readonly object _gate = new();
+        private readonly int _start;
+        private int _count;
+        private volatile bool _overflow;
+
+        internal Dfa(PhoneRegex re)
+        {
+            _re = re;
+            // Characters with the same answer from every consuming instruction behave alike.
+            Dictionary<string, int> classes = new(StringComparer.Ordinal);
+            List<char> reps = [];
+            char[] signature = new char[re._program.Length];
+            for (int a = 0; a < 128; a++)
+            {
+                for (int pc = 0; pc < signature.Length; pc++)
+                {
+                    signature[pc] = re.Consumes(pc, (char)a) ? '1' : '0';
+                }
+
+                string key = new(signature);
+                if (!classes.TryGetValue(key, out int cls))
+                {
+                    cls = reps.Count;
+                    classes[key] = cls;
+                    reps.Add((char)a);
+                }
+
+                _classOf[a] = (byte)Math.Min(cls, 255);
+                if (cls > 254)
+                {
+                    _overflow = true;
+                }
+            }
+
+            _representative = [.. reps];
+            _classCount = reps.Count;
+            _next = new int[MaxStates * Math.Max(_classCount, 1)];
+            Array.Fill(_next, Unknown);
+            _start = _overflow ? 0 : Intern(Closure(new List<int> { 0 }));
+        }
+
+        /// <summary>Tells whether the whole input matches, when the automaton can say.</summary>
+        /// <param name="input">The text.</param>
+        /// <param name="result">The answer when this returns true.</param>
+        /// <returns>false when the input has a character beyond ASCII or the automaton is too large: ask the backtracking matcher.</returns>
+        internal bool TryIsMatch(ReadOnlySpan<char> input, out bool result)
+        {
+            result = false;
+            if (_overflow)
+            {
+                return false;
+            }
+
+            int state = _start;
+            foreach (char c in input)
+            {
+                if (c >= 128)
+                {
+                    return false;
+                }
+
+                int slot = (state * _classCount) + _classOf[c];
+                int next = Volatile.Read(ref _next[slot]);
+                if (next == Unknown)
+                {
+                    next = Step(state, slot, _classOf[c]);
+                    if (_overflow)
+                    {
+                        return false;
+                    }
+                }
+
+                if (next == Dead)
+                {
+                    return true;
+                }
+
+                state = next;
+            }
+
+            result = _accept[state];
+            return true;
+        }
+
+        private int Step(int state, int slot, int cls)
+        {
+            lock (_gate)
+            {
+                int known = _next[slot];
+                if (known != Unknown)
+                {
+                    return known;
+                }
+
+                char rep = _representative[cls];
+                List<int> moved = [];
+                foreach (int pc in _members[state])
+                {
+                    if (_re.Consumes(pc, rep))
+                    {
+                        moved.Add(pc + 1);
+                    }
+                }
+
+                int[] set = Closure(moved);
+                int target = set.Length == 0 ? Dead : Intern(set);
+                if (!_overflow)
+                {
+                    Volatile.Write(ref _next[slot], target);
+                }
+
+                return target;
+            }
+        }
+
+        // The consuming instructions (and the final Match) reachable from the given positions without reading a character.
+        private int[] Closure(List<int> from)
+        {
+            bool[] seen = new bool[_re._program.Length];
+            List<int> found = [];
+            Stack<int> todo = new();
+            for (int i = from.Count - 1; i >= 0; i--)
+            {
+                todo.Push(from[i]);
+            }
+
+            while (todo.Count > 0)
+            {
+                int pc = todo.Pop();
+                if (seen[pc])
+                {
+                    continue;
+                }
+
+                seen[pc] = true;
+                Inst inst = _re._program[pc];
+                switch (inst.Op)
+                {
+                    case Op.Split:
+                        todo.Push(inst.Y);
+                        todo.Push(inst.X);
+                        break;
+                    case Op.Jump:
+                        todo.Push(inst.X);
+                        break;
+                    case Op.Save:
+                        todo.Push(pc + 1);
+                        break;
+                    default: // Char, Set, Any, Match
+                        found.Add(pc);
+                        break;
+                }
+            }
+
+            found.Sort();
+            return [.. found];
+        }
+
+        private int Intern(int[] set)
+        {
+            char[] chars = new char[set.Length];
+            for (int i = 0; i < set.Length; i++)
+            {
+                chars[i] = (char)set[i];
+            }
+
+            string key = new(chars);
+            if (_index.TryGetValue(key, out int existing))
+            {
+                return existing;
+            }
+
+            if (_count >= MaxStates)
+            {
+                _overflow = true;
+                return 0;
+            }
+
+            int id = _count++;
+            _members[id] = set;
+            _accept[id] = Array.Exists(set, pc => _re._program[pc].Op == Op.Match);
+            _index[key] = id;
+            return id;
+        }
+    }
+
     private readonly struct Inst
     {
-        internal Inst(Op op, int cp, int x, int y)
+        internal Inst(Op op, int cp, int x, int y, bool fold = true)
         {
             Op = op;
             Cp = cp;
-            Y = y;
+            Y = op == Op.Char ? (fold ? OtherCase(cp) : -1) : y;
             X = op == Op.Char ? cp : x;
         }
+
+        // The other-case form of an ASCII letter; -1 for everything else. Whether letters fold at all is decided by the mode at match
+        // time through the same lookup, so Exact patterns get the letter too and the fast path checks the mode once at construction.
+        private static int OtherCase(int cp) => cp is >= 'a' and <= 'z' ? cp - 32 : cp is >= 'A' and <= 'Z' ? cp + 32 : -1;
 
         internal Op Op { get; }
 
@@ -426,7 +876,26 @@ internal sealed class PhoneRegex
         private bool _letter;
         private bool _separator;
 
+        private ulong _asciiLow;
+        private ulong _asciiHigh;
+
         internal bool Negated { get; set; }
+
+        // Computes the answer for every ASCII character once, with the regex's case mode applied, so matching ASCII text is a bit test.
+        internal void Freeze(CaseMode mode)
+        {
+            _asciiLow = 0;
+            _asciiHigh = 0;
+            for (int c = 0; c < 128; c++)
+            {
+                if (Contains(c, mode))
+                {
+                    AddAscii(ref _asciiLow, ref _asciiHigh, c);
+                }
+            }
+        }
+
+        internal bool AsciiHas(int c) => c < 64 ? (_asciiLow & (1UL << c)) != 0 : (_asciiHigh & (1UL << (c - 64))) != 0;
 
         internal bool Contains(int cp, CaseMode mode)
         {

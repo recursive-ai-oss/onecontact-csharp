@@ -23,9 +23,13 @@ public sealed partial class PhoneNumberParser
     internal static string GetNsn(in PhoneNumber number) => number.NationalSignificantNumber;
 
     /// <summary>Finds the region metadata a number belongs to: the only one for its calling code, or the first whose plan accepts the number.</summary>
-    internal RegionMetadata? RegionMetadataFor(in PhoneNumber number)
+    internal RegionMetadata? RegionMetadataFor(in PhoneNumber number) => RegionMetadataFor(number.CountryCode, GetNsn(number), out _);
+
+    /// <summary>As above, for a calling code and national significant number already in hand; also gives the line type found on the way.</summary>
+    internal RegionMetadata? RegionMetadataFor(int callingCode, string nsn, out PhoneNumberType type)
     {
-        RegionMetadata[]? regions = _metadata.GetByCallingCode(number.CountryCode);
+        type = PhoneNumberType.Unknown;
+        RegionMetadata[]? regions = _metadata.GetByCallingCode(callingCode);
         if (regions is null)
         {
             return null;
@@ -33,22 +37,28 @@ public sealed partial class PhoneNumberParser
 
         if (regions.Length == 1)
         {
+            type = TypeOf(nsn, regions[0]);
             return regions[0];
         }
 
-        string nsn = GetNsn(number);
         foreach (RegionMetadata r in regions)
         {
             if (r.LeadingDigits is not null)
             {
                 if (r.LeadingDigits.Get().LookingAt(nsn, out _))
                 {
+                    type = TypeOf(nsn, r);
                     return r;
                 }
             }
-            else if (TypeOf(nsn, r) != PhoneNumberType.Unknown)
+            else
             {
-                return r;
+                PhoneNumberType t = TypeOf(nsn, r);
+                if (t != PhoneNumberType.Unknown)
+                {
+                    type = t;
+                    return r;
+                }
             }
         }
 
@@ -204,6 +214,11 @@ public sealed partial class PhoneNumberParser
     /// <returns>The type; <see cref="PhoneNumberType.Unknown"/> when no region's plan has the number or the calling code is unknown.</returns>
     public PhoneNumberType GetNumberType(PhoneNumber number)
     {
+        if (number.CachedType is { } known && ReferenceEquals(_metadata, PhoneMetadata.Default))
+        {
+            return known;
+        }
+
         RegionMetadata? md = RegionMetadataFor(number);
         return md is null ? PhoneNumberType.Unknown : TypeOf(GetNsn(number), md);
     }
@@ -384,7 +399,7 @@ public sealed partial class PhoneNumberParser
         }
 
         _ = PhoneText.StripExtension(text, out int cut);
-        return PhoneText.ValidAlpha.IsMatch(text.AsSpan(0, cut));
+        return PhoneText.IsVanityShape(text.AsSpan(0, cut));
     }
 
     /// <summary>Gets the national prefix of a region: the digit(s) dialled before a national number inside the country.</summary>

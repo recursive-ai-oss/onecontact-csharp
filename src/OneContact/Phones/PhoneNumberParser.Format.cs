@@ -10,16 +10,21 @@ internal static class PhoneFormatter
     /// <summary>The canonical form: E.164, followed by <c>;ext=</c> and the extension when there is one (RFC 3966 writes the extension that way).</summary>
     internal static string Canonical(int countryCode, ulong nationalNumber, int leadingZeros, string? extension)
     {
-        StringBuilder sb = new(24);
-        sb.Append('+').Append(countryCode.ToString(CultureInfo.InvariantCulture));
-        sb.Append('0', leadingZeros);
-        sb.Append(nationalNumber.ToString(CultureInfo.InvariantCulture));
-        if (!string.IsNullOrEmpty(extension))
+        string cc = countryCode.ToString(CultureInfo.InvariantCulture);
+        string nn = nationalNumber.ToString(CultureInfo.InvariantCulture);
+        string ext = string.IsNullOrEmpty(extension) ? "" : ";ext=" + extension;
+        return string.Create(1 + cc.Length + leadingZeros + nn.Length + ext.Length, (cc, leadingZeros, nn, ext), static (span, parts) =>
         {
-            sb.Append(";ext=").Append(extension);
-        }
-
-        return sb.ToString();
+            span[0] = '+';
+            int at = 1;
+            parts.cc.CopyTo(span[at..]);
+            at += parts.cc.Length;
+            span.Slice(at, parts.leadingZeros).Fill('0');
+            at += parts.leadingZeros;
+            parts.nn.CopyTo(span[at..]);
+            at += parts.nn.Length;
+            parts.ext.CopyTo(span[at..]);
+        });
     }
 }
 
