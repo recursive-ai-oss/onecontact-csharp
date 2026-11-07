@@ -106,21 +106,21 @@ scored on them.
 
 How they differ from the first draw:
 
-- **No host or URL is reused.** `tools/Eval/u50/exclude.py build` lists every host and URL of every page store and exclusion list under the
+- **No host or URL is reused.** `tools/Eval/fresh/exclude.py build` lists every host and URL of every page store and exclusion list under the
   private evaluation folder (the Tier 1, extraction and all Tier 2 sets); the selection scripts skip those hosts (`EXCLUDE_HOSTS` for
   `select-pages.py`, the exclusion file argument of the Tier 2 selector). `exclude.py check` then reads each frozen set's gold items back to their
   pages and counts hosts and URLs found in the older stores or in another new set. The answer for all four new sets is 0 hosts and 0 URLs.
 - **Names:** two drafts from the same page pool (`extract-candidates.py`, seeds 5052 and 5054; the second excludes every string of the first
   and the fixed cap of two persons per host applies to each draft), then the same adjudication. Items were dropped when they were page furniture,
   glued strings, a single word, an organization written as a person or an obvious duplicate; nothing was padded to reach a count.
-- **Several people in one string** (`tools/Eval/u50/extract-multi.py`): short lines of the form `A and B Family`, `Mr. & Mrs. A Family`,
+- **Several people in one string** (`tools/Eval/fresh/extract-multi.py`): short lines of the form `A and B Family`, `Mr. & Mrs. A Family`,
   `Tom & Diane Family`, where each side opens with a title or a common given name (a short list of our own, extendable per language through
   `GIVEN_EXTRA`), so navigation labels such as "Boards & Committees" never reach the draft. Few pages write couples this way: the United
   States and Canada pages gave seven, Romanian pages nine and Mexican pages twelve, and those are all the sets hold. Labels: `G O G F` for
   `Tom & Diane Miller`-shaped strings, one label per word, `O` for the joining word. The Romanian and Mexican sets hold these strings only
   (class `multiple`); they have no person or company items.
 - **Addresses (Romania, Mexico):** the Tier 2 south selector and drafter (`select-pages.py`, `extract-candidates.py`, `draw.sh`), the rules'
-  hinted pre-label, then adjudication with `tools/Eval/u50/addcorr.py`, which turns a reviewer's short list into `labeling.py` corrections.
+  hinted pre-label, then adjudication with `tools/Eval/fresh/addcorr.py`, which turns a reviewer's short list into `labeling.py` corrections.
   Conventions are those of the first Romanian and Mexican sets: the road keeps its type; `nr.` and `C.P.` words are outside the house number
   and the postal code (digits only); a county is the state without `jud.`; sector, colonia and alcaldía text is unlabelled unless it is the only
   locality; a village given with a house number and no street is the road; `bl.`, `sc.`, `ap.`, `Piso`, `Int.` go to `unit`; `C.P. n` is a
@@ -128,6 +128,6 @@ How they differ from the first draw:
 - **Freezing:** `freeze-sets.py` writes each gold file in canonical form and a manifest with item counts and SHA-256 values; no model or
   reference system was run on a set before it was frozen.
 
-`tools/Eval/u50/score-fresh.sh` scores one set against the installed references (libpostal with its own model, libpostal with Senzing's model, probablepeople,
+`tools/Eval/fresh/score-fresh.sh` scores one set against the installed references (libpostal with its own model, libpostal with Senzing's model, probablepeople,
 python-nameparser, cleanco), the rules, and the rules with the shipped Tier 1 + Tier 2 model; it prints aggregates only. The libpostal and Senzing
 rows run without a country, as in the first rows of these sets; the rules and model rows are given both with and without the country hint.

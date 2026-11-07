@@ -3,7 +3,7 @@
 
 usage: select-pages.py <crawl-id> <out-dir> <seed> <blocks-us> <blocks-ca> [balanced]
 
-With EXCLUDE_HOSTS=<file> (one host per line, see ../u50/exclude.py) hosts listed there are skipped, so a host used by another evaluation
+With EXCLUDE_HOSTS=<file> (one host per line, see ../fresh/exclude.py) hosts listed there are skipped, so a host used by another evaluation
 set never appears in a new one. A leading `www.` is ignored when comparing.
 
 With `balanced` the United States blocks are drawn evenly across the host TLDs instead of in proportion to their size (a top-up draw:
