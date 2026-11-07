@@ -15,6 +15,19 @@ internal static class ModelNameReader
     // How sure the model must be to replace the rules' default reading of a name as a person; chosen on the development names (docs/models.md).
     internal const float DefaultOverrideConfidence = 0.6f;
 
+    // Language codes whose names the Tier 1 and the Tier 1 + Tier 2 models learned from large open lists (English, French, Spanish: the United States and Canada).
+    private static bool IsUsCaLanguage(string? language) => language is null || language.Length == 0 || language.Equals("en", StringComparison.OrdinalIgnoreCase)
+        || language.Equals("fr", StringComparison.OrdinalIgnoreCase) || language.Equals("es", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// True when the text is a Tier 2 country's or language's and the registered package is the Tier 1 + Tier 2 one. Its person names for those languages come from small
+    /// lists of our own, so there the model reads only what the rules leave open (<see cref="NameClass.Unknown"/>) and never replaces the rules' default reading of a
+    /// string as a person, which would drop person parts the rules found.
+    /// </summary>
+    private static bool OpenReadingsOnly(NameHints hints) =>
+        ContactModels.PackageId is { } package && package != ContactModels.Tier1PackageId
+        && (hints.Country.IsUnknown ? !IsUsCaLanguage(hints.Language) : hints.Country != Region.US && hints.Country != Region.CA);
+
     /// <summary>True when the rules took the string as one person only because nothing marked it as a company: no title, suffix, nickname, particle, comma order, initial or known given name proved it (the <c>person.no-evidence</c> issue).</summary>
     internal static bool IsDefaultPerson(Analysis rules)
     {
@@ -36,9 +49,9 @@ internal static class ModelNameReader
 
     /// <summary>Asks the model for the class of a string the rules could not classify, or whose person reading was only a default.</summary>
     /// <returns>The class, or the rules' own class when no model is registered or it is not confident enough.</returns>
-    internal static NameClass Classify(ReadOnlySpan<char> text, Analysis rules)
+    internal static NameClass Classify(ReadOnlySpan<char> text, Analysis rules, NameHints hints = default)
     {
-        if (IsDefaultPerson(rules) && ContactModels.Name is { } defaultModel)
+        if (IsDefaultPerson(rules) && !OpenReadingsOnly(hints) && ContactModels.Name is { } defaultModel)
         {
             NameModelResult m = defaultModel.Analyze(text.ToString());
             return m.Class != NameClass.Person && m.Class != NameClass.Multiple && m.ClassConfidence >= DefaultOverrideConfidence ? m.Class : rules.Class;
@@ -58,6 +71,11 @@ internal static class ModelNameReader
     internal static bool TryRead(ReadOnlySpan<char> text, NameHints hints, Analysis rules, out NameParseResult result)
     {
         result = null!;
+        if (IsDefaultPerson(rules) && OpenReadingsOnly(hints))
+        {
+            return false;
+        }
+
         if (IsDefaultPerson(rules) && ContactModels.Name is { } defaultModel)
         {
             string text0 = text.ToString();

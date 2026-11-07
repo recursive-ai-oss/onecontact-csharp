@@ -1,5 +1,7 @@
 # Models
 
+The Tier 1 + Tier 2 package `RecursiveAI.OneContact.Models` is described in `models-superset.md`.
+
 Normative notes on how trained models reach the parsers, what a model package carries, and how a model is trained. Rules first: a model only fills what the rules leave open.
 
 ## What a model does and does not do

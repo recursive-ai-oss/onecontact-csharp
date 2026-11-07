@@ -1,0 +1,8 @@
+# Tier 2 name and company examples (`names-tier2-v1`)
+
+Generator `tools/data/names-tier2` (seed 20261107), sharing its templates and noise with `tools/data/names`. 289,093 examples in all: 132,464 training persons, 123,948 training companies, 16,981 multiple-person strings, 657 unknown-class strings, plus a development split fixed by a hash of the name before rendering.
+
+- **Persons: our own lists.** `lists.tsv` holds, for each Tier 2 language, lists of common given names (male and female), family names, titles, particles, professional suffixes, joining words ("und", "en", "e") and strings that are neither person nor company. We wrote them ourselves from general knowledge; about 20 to 40 items per kind and language. Given and family names are drawn independently, so no generated string is a real person's name. No third-party name list is used for these languages, so no licence applies. English, French and Spanish persons come from `names-us-ca-v1` (Census, SSA, Retraite Québec, INSEE).
+- **Candidate open sources, not used and not licence-checked:** Poland dane.gov.pl name lists, the Czech Ministry of the Interior name statistics, Spain's INE, Italy dati.gov.it, Statistics Norway, Meertens (NL).
+- **Companies: GLEIF Level 1 golden copy of 2026-11-05** (CC0, sole proprietors dropped), 33 country codes, at most 7,000 per country, the legal form located at the end of the name through the ISO 20275 list v1.6 (CC0). Records per country: 7,000 for AT AU CH DE DK EE ES FI HU IT JE NL NO PL SE; 6,252 LI; 4,974 RO; 4,944 MT; 4,213 IS; 3,878 SI; 2,865 BE; 1,957 LU; 1,128 LT; 1,089 LV; 596 CZ; 505 HR; 182 GG; 135 SK; 49 MC; 48 MX; 8 IM; 6 SM; 4 PT. No Companies House or EDGAR rows.
+- Attribution: GLEIF, CC0 1.0 (credit given anyway).

@@ -32,7 +32,9 @@ public static class RuleAddressParser
         // offered to the Tier 2 rules, which read it only when the postcode and the content point to one country.
         if (Tier2.Tier2Reader.Handles(hint))
         {
-            return Tier2.Tier2Reader.TryParse(input.ToString(), hint, out address, out detail);
+            string hinted = input.ToString();
+            OperationStatus hintedStatus = Tier2.Tier2Reader.TryParse(hinted, hint, out address, out detail, out Tier2.T2Country? hintedCountry);
+            return hintedStatus == OperationStatus.Done ? hintedStatus : ReadTier2WithModel(hinted, hint, hintedCountry, hintedStatus, ref address, ref detail);
         }
 
         // A country name, a country letter before the postcode (L-1234) or a Dutch postcode names the country outright, so it is read before the United States rules
@@ -42,21 +44,49 @@ public static class RuleAddressParser
         OperationStatus otherStatus = OperationStatus.InvalidData;
         if (hint.IsUnknown)
         {
-            otherStatus = Tier2.Tier2Reader.TryParse(input.ToString(), hint, out other, out otherDetail);
+            otherStatus = Tier2.Tier2Reader.TryParse(input.ToString(), hint, out other, out otherDetail, out Tier2.T2Country? otherCountry);
             if (otherStatus == OperationStatus.Done && other is { CountryConfidence: >= 0.97f })
             {
                 address = other;
                 detail = otherDetail;
                 return OperationStatus.Done;
             }
+
+            // The Tier 2 rules decided the country and then refused the address: the Tier 2 model reads it, before the United States and Canada rules
+            // could take its postcode for a ZIP.
+            if (otherStatus != OperationStatus.Done && otherCountry is not null)
+            {
+                ParsedAddress? modelRead = null;
+                ParseDetail modelDetail = otherDetail;
+                if (ReadTier2WithModel(input.ToString(), hint, otherCountry, otherStatus, ref modelRead, ref modelDetail) == OperationStatus.Done)
+                {
+                    address = modelRead;
+                    detail = modelDetail;
+                    return OperationStatus.Done;
+                }
+            }
         }
 
         OperationStatus status = TryParseUsCa(input, hint, out address, out detail);
-        if (status != OperationStatus.Done && otherStatus == OperationStatus.Done)
+
+        // A United States or Canada reading made by the model never displaces a Tier 2 reading the rules made: the model fills what the rules leave open only.
+        bool usCaReadByModel = status == OperationStatus.Done && address is not null && detail.Fields.Count > 0 && detail.Fields.All(f => f.Source == DecisionSource.Model);
+        if ((status != OperationStatus.Done || usCaReadByModel) && otherStatus == OperationStatus.Done)
         {
             address = other;
             detail = otherDetail;
             return OperationStatus.Done;
+        }
+
+        // Text the rules could not place in any country is not made a United States or Canada address by the Tier 1 + Tier 2 model on a postal code alone, because the
+        // model labels fields and does not tell countries apart (a German or Spanish postcode looks like a ZIP): without a state or province the refusal stays, and says why.
+        // The Tier 1 package knows no other country, so it still reads it.
+        if (usCaReadByModel && !HasKnownUsCaAdmin(address!) && hint.IsUnknown && Models.ContactModels.PackageId is { } package && package != Models.ContactModels.Tier1PackageId
+            && (otherDetail.PrimaryReason.Equals(ReasonCode.AddressCountryUndetermined) || otherDetail.PrimaryReason.Equals(ReasonCode.AddressCountryConflict)))
+        {
+            address = null;
+            detail = otherDetail;
+            return OperationStatus.InvalidData;
         }
 
         // Text that has a postcode and a locality of a Tier 2 country but no way to tell which: the reason is more useful than "no last line".
@@ -68,6 +98,36 @@ public static class RuleAddressParser
 
         return status;
     }
+
+    // Input the Tier 2 rules refused for want of a decision is read from the model's labels, when the registered package carries Tier 2 models.
+    // The Tier 1 package does not (its weights know the United States and Canada only), so it never reads a Tier 2 address; the refusal stays.
+    private static OperationStatus ReadTier2WithModel(string text, Region hint, Tier2.T2Country? decided, OperationStatus status, ref ParsedAddress? address, ref ParseDetail detail)
+    {
+        Models.IAddressFieldModel? model = Models.ContactModels.Address;
+        string? package = Models.ContactModels.PackageId;
+        if (model is null || package is null || package == Models.ContactModels.Tier1PackageId)
+        {
+            return status;
+        }
+
+        ReasonCode reason = detail.PrimaryReason;
+        if (!(reason.Equals(ReasonCode.AddressModelRequired) || reason.Equals(ReasonCode.AddressNoLastLine) || reason.Equals(ReasonCode.AddressNoDeliveryLine)))
+        {
+            return status;
+        }
+
+        if (Tier2.Tier2Reader.TryReadModel(model, text, hint, decided, out ParsedAddress? read, out ParseDetail modelDetail) == OperationStatus.Done)
+        {
+            address = read;
+            detail = modelDetail;
+            return OperationStatus.Done;
+        }
+
+        return status;
+    }
+
+    private static bool HasKnownUsCaAdmin(ParsedAddress address) =>
+        address.AdminArea is { } f && (Standardization.UsCaRules.UsStateNames.ContainsKey(f.Standard.ToUpperInvariant()) || Standardization.UsCaRules.CaProvinceNames.ContainsKey(f.Standard.ToUpperInvariant()));
 
     private static OperationStatus TryParseUsCa(ReadOnlySpan<char> input, Region hint, out ParsedAddress? address, out ParseDetail detail)
     {

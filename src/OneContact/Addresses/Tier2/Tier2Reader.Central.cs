@@ -177,7 +177,8 @@ internal static partial class Tier2Reader
                 return end - 1;
             }
 
-            for (int n = Math.Min(3, end - 1); n >= 1; n--)
+            // A state written in full that opens its unit ("Victoria 3000" after a comma) has no locality in front of it yet; the caller joins the unit to the one before.
+            for (int n = Math.Min(3, end); n >= 1; n--)
             {
                 if (T2Rules.States.TryGetValue(("AU", T2Rules.Key(Join(toks.GetRange(end - n, n)))), out string? name) && !(n == 1 && toks[end - 1].Text.Length <= 3))
                 {
@@ -1108,7 +1109,7 @@ internal static partial class Tier2Reader
         }
 
         // Writes the last line of a country of this group; returns false for the other countries.
-        private static bool CentralLast(T2Country country, string postcode, string localityPostal, string localityDisplay, string adminInline, string adminInlineDisplay, out string postal, out string display)
+        internal static bool CentralLast(T2Country country, string postcode, string localityPostal, string localityDisplay, string adminInline, string adminInlineDisplay, out string postal, out string display)
         {
             switch (country.Profile)
             {

@@ -1,0 +1,54 @@
+# backlog forms and common web forms (written by hand)
+ES|28013 Madrid, Calle Mayor 5
+ES|Calle Mayor 5, 28013 Madrid
+ES|Calle Mayor 5 // 28013 Madrid // Madrid
+ES|Mayor 5, 28013 Madrid
+ES|Gran Vía 25, 28013 Madrid
+ES|Paseo de la Castellana 100, 28046 Madrid, España
+ES|C/ Alcalá 45, 3º B, 28014 Madrid
+ES|Plaza de España s/n, 41013 Sevilla
+ES|Avda. Diagonal 400, 08037 Barcelona (Barcelona)
+ES|08037 Barcelona, Avinguda Diagonal 400
+GB|10 Downing Street, London SW1A 2AA
+GB|12 High Street, Belfast, UK BT1 1GH
+GB|Belfast, UK BT1 1GH
+GB|The Old Mill, Mill Lane, Guildford, Surrey, England GU1 3AB
+GB|1 Station Road, Reading, Berkshire RG1 1AA
+GB|Unit 4, Park Way, Bristol, BS1 5AA, United Kingdom
+GB|High Street, Surrey, England GU1 1AA
+GB|Acme Ltd, 5 King Street, Manchester M2 4LQ
+GB|Acme Ltd // 5 King Street // Manchester // Greater Manchester // M2 4LQ
+GB|Flat 3, 22 Queens Road, Brighton, East Sussex BN1 3XA
+GB|Suite 2, Wharf House, Wharf Road, Leeds LS1 4AP
+IM|Douglas Business Centre, Peel Road, Douglas, Isle of Man IM1 1AA
+IM|12 Strand Street, Douglas IM1 2AB
+IM|Villa Marina, Harris Promenade, Douglas, IM1 2HH
+JE|La Rue de la Mare, St Helier, Jersey JE2 3AB
+JE|Rue du Pont, Trinity, Jersey JE3 5AA
+JE|Acme Ltd, 12 Broad Street, St Helier, Jersey JE2 3RR
+IE|12 Main Street, Dublin 2, D02 X285, Ireland
+IE|Main Street, Naas, Co. Kildare, W91 ABC1
+IE|3 Grafton Street, Dublin D02 AB12
+IE|Unit 5, Business Park, Cork
+HU|1051 Budapest, Széchenyi István tér 9.
+HU|Budapest, Váci utca 12., 1052
+HU|H-1051 Budapest, Nádor u. 22.
+HU|9400 Sopron, Fő tér 1.
+HU|Fő utca 12., Debrecen, 4024
+HU|Kossuth Lajos utca 5. 1/3., 1053 Budapest
+PL|ul. Marszałkowska 10/12, 00-590 Warszawa
+PL|Warszawa, ul. Złota 59, 00-120
+PL|al. Jerozolimskie 100, 00-807 Warszawa
+PL|ul. Długa 5 lok. 3, 31-147 Kraków, Polska
+PL|00-590 Warszawa, ul. Marszałkowska 10
+PL|Rynek 1, 50-101 Wrocław
+AU|Level 2, 100 George Street, Sydney NSW 2000
+AU|Suite 5/12 Smith St, Fitzroy VIC 3065
+AU|PO Box 123, Brisbane QLD 4001
+AU|12 Queen St, Melbourne, Victoria 3000, Australia
+AU|Shop 3, 45 High Street, Perth WA 6000
+AU|Unit 4, 12 Smith Road, Springvale South VIC 3172
+AU|100 George St, Sydney, NSW, 2000
+CZ|Nádražní 12, Kunčice, 739 61 Třinec
+RO|Str. Victoriei nr. 10, Sector 1, 010065 București
+HR|Ilica 5, 10000 Zagreb

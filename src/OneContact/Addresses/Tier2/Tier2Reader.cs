@@ -19,9 +19,14 @@ internal static partial class Tier2Reader
 {
     internal static bool Handles(Region region) => T2Rules.Handles(region);
 
-    internal static OperationStatus TryParse(string text, Region hint, out ParsedAddress? address, out ParseDetail detail)
+    internal static OperationStatus TryParse(string text, Region hint, out ParsedAddress? address, out ParseDetail detail) =>
+        TryParse(text, hint, out address, out detail, out _);
+
+    /// <summary>Reads an address by rules; when the rules refuse after they have decided the country, <paramref name="decided"/> says which, so a model can finish the read.</summary>
+    internal static OperationStatus TryParse(string text, Region hint, out ParsedAddress? address, out ParseDetail detail, out T2Country? decided)
     {
         address = null;
+        decided = null;
         if (string.IsNullOrWhiteSpace(text))
         {
             detail = ParseDetail.Failure(ReasonCode.Empty, new SourceSpan(0, text.Length));
@@ -30,12 +35,14 @@ internal static partial class Tier2Reader
 
         Reader r = new(text, hint);
         OperationStatus status = r.Run(out address, out detail);
+        decided = r.DecidedCountry;
         if (status != OperationStatus.Done && hint.IsUnknown && TryInfer(text, detail, out ParsedAddress? inferred, out ParseDetail inferredDetail))
         {
             address = inferred;
             detail = inferredDetail;
             status = OperationStatus.Done;
         }
+
         if (address is not null)
         {
             address.SourceText = text;
@@ -144,6 +151,9 @@ internal static partial class Tier2Reader
 
         private bool _multiLine;
 
+        // The country the last attempt decided on, even when the attempt then refused the address.
+        internal T2Country? DecidedCountry { get; private set; }
+
         // Whether words stood before the postcode on its own line and were split off as a line of their own ("Tallinn 10111 Harju maakond").
         private bool _headSplit;
 
@@ -165,6 +175,7 @@ internal static partial class Tier2Reader
 
             // The postcode and the locality after it end the address.
             // Two letters after four digits are a Dutch postcode unless the country is known to be another one ("9170 De Klinge" in Belgium); without any hint they must be capitals.
+            StripCountryBeforePostcode(units, ref named);
             string? known = named?.Code ?? (!hint.IsUnknown && T2Rules.Handles(hint) ? hint.Code : null);
             _county = null;
             _province = null;
@@ -187,6 +198,7 @@ internal static partial class Tier2Reader
                 && !FindHungarian(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindStateLine(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindPostcodeAlone(units, known, out unitIndex, out tokenIndex, out match)
+                && !FindPostcodeFirst(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindNoPostcode(units, known, out unitIndex, out tokenIndex, out match))
             {
                 detail = ParseDetail.Failure(ReasonCode.AddressNoLastLine, new SourceSpan(0, text.Length));
@@ -241,6 +253,7 @@ internal static partial class Tier2Reader
             }
 
             T2Country country = T2Rules.Countries[code];
+            DecidedCountry = country;
             string ruleCode = code;
             if (code == "IT" && localityToks.Count == 1 && localityToks[0].Text.StartsWith('(') && ItProvinceCode(localityToks[0]) is not null)
             {
@@ -1018,6 +1031,12 @@ internal static partial class Tier2Reader
         private static bool PlaceFits(List<Tok> toks, bool ireland, string family)
         {
             if (toks.Count == 0 || !LocalityFits(toks, ireland) || IsCountyWord(toks[0]))
+            {
+                return false;
+            }
+
+            // "Westside Business Park", "Mill House", "Harbour Centre": a building, estate or park name above the post town is a line of the address, not the post town.
+            if (toks.Count >= 2 && toks[^1].Key is "PARK" or "ESTATE" or "CENTRE" or "CENTER" or "HOUSE" or "BUILDING" or "BUILDINGS" or "TOWER" or "WORKS" or "CAMPUS" or "YARD")
             {
                 return false;
             }
@@ -2137,7 +2156,7 @@ internal static partial class Tier2Reader
 
             if (type is null && country.Profile == "es")
             {
-                return ParseTypeLast(toks, country);
+                return ParseTypeLast(toks, country) ?? ParseUntypedStreet(toks, country);
             }
 
             if (type is null || toks.Count <= typeWords)

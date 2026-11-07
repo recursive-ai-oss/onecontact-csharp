@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);xUnit1051</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+
+  <!-- Both model packages, to prove which one the parsers use when one or both are referenced. The registry is process-wide, so this project holds one
+       ordered test for it and nothing else registers models. -->
+  <ItemGroup>
+    <ProjectReference Include="../../src/OneContact.Models/OneContact.Models.csproj" />
+    <ProjectReference Include="../../src/OneContact.Models.Tier1/OneContact.Models.Tier1.csproj" />
+  </ItemGroup>
+
+</Project>

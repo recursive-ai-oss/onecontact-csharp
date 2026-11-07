@@ -9,6 +9,9 @@ internal enum Loc
     UsEn = 0,
     CaEn = 1,
     CaFr = 2,
+
+    /// <summary>Tier 2 blocks: people and companies of the Tier 2 languages, addresses of the Tier 2 registers, English page words plus the contact labels of the Tier 2 languages.</summary>
+    T2 = 3,
 }
 
 internal sealed record PersonRec(string Text, string Given, string Family, string Lang, bool Noisy);
@@ -16,7 +19,7 @@ internal sealed record PersonRec(string Text, string Given, string Family, strin
 internal sealed record CompanyRec(string Text, string Base, string? Form, string Lang, bool Noisy);
 
 /// <summary>An address example from a register rendering. <see cref="Text"/> is the whole example; the labelled address is the slice Start..End (recipient lines are never used).</summary>
-internal sealed record AddressRec(string Text, int Start, int End, string Lang)
+internal sealed record AddressRec(string Text, int Start, int End, string Lang, string Country = "")
 {
     internal string Value => Text.Substring(Start, End - Start);
 }
@@ -63,7 +66,41 @@ internal sealed class Pools
         return p;
     }
 
-    private void ReadNames(string path, string split)
+    /// <summary>Loads the Tier 2 pools: persons and companies of the Tier 2 name sets and a stride-sample of each Tier 2 address file (at most <paramref name="perFile"/> train and a tenth of that dev records each).</summary>
+    internal static Pools LoadTier2(string namesDir, IReadOnlyList<string> addressFiles, int perFile)
+    {
+        Pools p = new();
+        foreach (string split in new[] { "train", "dev" })
+        {
+            foreach (string f in Directory.GetFiles(Path.Combine(namesDir, split), "*.jsonl").OrderBy(x => x, StringComparer.Ordinal))
+            {
+                p.ReadNames(f, split, tier2: true);
+            }
+        }
+
+        p.InputManifests.Add(Path.Combine(namesDir, "manifest.json"));
+        foreach (string file in addressFiles)
+        {
+            string name = Path.GetFileName(file);
+            string split = name.Contains(".dev.", StringComparison.Ordinal) ? "dev" : "train";
+            long lines = File.ReadLines(file).LongCount();
+            long limit = split == "dev" ? Math.Max(1, perFile / 10) : perFile;
+            p.ReadAddresses(file, split, tier2: true, stride: (int)Math.Max(1, lines / limit));
+        }
+
+        foreach (string dir in addressFiles.Select(f => Path.GetDirectoryName(f)!).Distinct(StringComparer.Ordinal).OrderBy(x => x, StringComparer.Ordinal))
+        {
+            string m = Path.Combine(dir, "manifest.json");
+            if (File.Exists(m))
+            {
+                p.InputManifests.Add(m);
+            }
+        }
+
+        return p;
+    }
+
+    private void ReadNames(string path, string split, bool tier2 = false)
     {
         foreach (string line in File.ReadLines(path, Encoding.UTF8))
         {
@@ -71,7 +108,7 @@ internal sealed class Pools
             JsonElement e = doc.RootElement;
             string cls = e.GetProperty("class").GetString()!;
             string region = e.GetProperty("region").GetString()!;
-            if (region is not ("US" or "CA") || cls is not ("person" or "company"))
+            if (cls is not ("person" or "company") || (!tier2 && region is not ("US" or "CA")))
             {
                 continue;
             }
@@ -79,7 +116,7 @@ internal sealed class Pools
             string lang = e.GetProperty("lang").GetString()!;
             string text = e.GetProperty("text").GetString()!;
             bool noisy = e.TryGetProperty("noise", out _);
-            Loc loc = LocOf(region, lang);
+            Loc loc = tier2 ? Loc.T2 : LocOf(region, lang);
             if (text.Length > 70 || text.Contains('\n'))
             {
                 continue;
@@ -124,10 +161,16 @@ internal sealed class Pools
         }
     }
 
-    private void ReadAddresses(string path, string split)
+    private void ReadAddresses(string path, string split, bool tier2 = false, int stride = 1)
     {
+        long n = 0;
         foreach (string line in File.ReadLines(path, Encoding.UTF8))
         {
+            if (n++ % stride != 0)
+            {
+                continue;
+            }
+
             using JsonDocument doc = JsonDocument.Parse(line);
             JsonElement e = doc.RootElement;
             string text = e.GetProperty("text").GetString()!;
@@ -161,7 +204,7 @@ internal sealed class Pools
 
             string country = e.GetProperty("country").GetString()!;
             string lang = e.TryGetProperty("lang", out JsonElement l) ? l.GetString()! : "en";
-            Add(Addresses, split, LocOf(country, lang), new AddressRec(text, start, end, lang));
+            Add(Addresses, split, tier2 ? Loc.T2 : LocOf(country, lang), new AddressRec(text, start, end, lang, country));
         }
     }
 

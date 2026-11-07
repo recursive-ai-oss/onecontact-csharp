@@ -1,6 +1,9 @@
 using RecursiveAI.OneContact.Names;
 using RecursiveAI.OneNlp;
+using RecursiveAI.OneModel.Tensors;
 using RecursiveAI.OneNlp.Neural;
+using RecursiveAI.OneNlp.Neural.Components;
+using RecursiveAI.OneNlp.Neural.Encoders;
 
 namespace RecursiveAI.OneContact.Models.Tier1;
 
@@ -81,9 +84,11 @@ public sealed class Tier1Model : IAddressFieldModel, INameModel, IContactSpanMod
             return new NameModelResult(NameClass.Unknown, 0f, []);
         }
 
-        _nameClass.Process(doc);
-        (NameClass cls, float confidence) = Tier1Labels.Vote(doc);
-        _nameParts.Process(doc);
+        // One pass of the shared encoder serves both heads; calling each head's Process would encode the words twice.
+        // Both heads write the words' confidences, so the class vote is taken right after its head, before the parts head overwrites them.
+        NameClass cls = NameClass.Unknown;
+        float confidence = 0f;
+        PredictShared(doc, () => (cls, confidence) = Tier1Labels.Vote(doc), (TrainableHead)_nameClass, (TrainableHead)_nameParts);
         return new NameModelResult(cls, confidence, Tier1Labels.Spans(doc, TokenColumn.Pos));
     }
 
@@ -121,6 +126,32 @@ public sealed class Tier1Model : IAddressFieldModel, INameModel, IContactSpanMod
         }
 
         return new ContactSpanResult(spans, starts);
+    }
+
+    // Encodes the document once and lets each head write its labels from the same encoder output. This is what a head's Process does for itself
+    // (no gradients, activations released when done, the head's weights read one caller at a time), with the encoder pass shared.
+    private static void PredictShared(Doc doc, Action afterFirstHead, params TrainableHead[] heads)
+    {
+        IEncoder encoder = heads[0].Encoder;
+        encoder.Weights?.Eval();
+        using NoGradScope noGrad = GradMode.NoGrad();
+        using var scope = new ActivationScope();
+        EncodedBatch encoded = encoder.Encode([doc]);
+        bool first = true;
+        foreach (TrainableHead head in heads)
+        {
+            lock (head)
+            {
+                head.Weights.Eval();
+                head.Predict(encoded, [doc]);
+            }
+
+            if (first)
+            {
+                afterFirstHead();
+                first = false;
+            }
+        }
     }
 
     private Doc NewDoc(string text)

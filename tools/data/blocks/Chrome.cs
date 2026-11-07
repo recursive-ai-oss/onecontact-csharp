@@ -345,7 +345,7 @@ internal sealed class Chrome
     private static string Money(Prng r, Loc loc)
     {
         string v = (1 + r.Int(400)).ToString(CultureInfo.InvariantCulture) + (loc == Loc.CaFr ? "," : ".") + r.Int(100).ToString("D2", CultureInfo.InvariantCulture);
-        return loc == Loc.CaFr ? v + " $" : "$" + v;
+        return loc == Loc.CaFr ? v + " $" : loc == Loc.T2 ? v + " €" : "$" + v;
     }
 
     private static string DateText(Prng r, Loc loc)

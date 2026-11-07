@@ -36,6 +36,32 @@ public class ModelWiringTests
             new(cls, confidence, [.. parts.Select(p => new ModelSpan(text.IndexOf(p.Needle, StringComparison.Ordinal), p.Needle.Length, p.Label, 0.8f))]);
     }
 
+    private const string BritishRunOn = "58 Hordley Avenue Shrewsbury\nSY4 1AA";
+
+    [Fact]
+    public void ATier2AddressTheRulesRefuseIsReadFromTheModelsLabelsWithTheHintedCountry()
+    {
+        var model = new FixedAddressModel(("58", "street.house-number"), ("Hordley Avenue", "street.name"), ("Shrewsbury", "locality"), ("SY4 1AA", "postal-code"));
+        using IDisposable scope = ContactModels.Scope(model, null);
+        Assert.Equal(OperationStatus.Done, RuleAddressParser.TryParse(BritishRunOn, Region.Parse("GB"), out ParsedAddress? a, out ParseDetail d));
+        Assert.Equal(Region.Parse("GB"), a!.Country);
+        Assert.Equal("SHREWSBURY", a.Locality!.Value.Standard);
+        Assert.Equal("SY4 1AA", a.PostalCode!.Value.Standard);
+        Assert.All(d.Fields, f => Assert.Equal(DecisionSource.Model, f.Source));
+        Assert.Equal("58 HORDLEY AVENUE\nSHREWSBURY\nSY4 1AA", a.ToString(RecursiveAI.OneContact.Addresses.Standardization.AddressStyle.Postal));
+        Assert.Equal(BritishRunOn.IndexOf("Hordley", StringComparison.Ordinal), a.Fields.First(f => f.Name == "street.name").Span.Start);
+    }
+
+    [Fact]
+    public void ARuleParseOfATier2AddressIsNeverOverruledByTheModel()
+    {
+        var model = new FixedAddressModel(("Shrewsbury", "street.name"));
+        using IDisposable scope = ContactModels.Scope(model, null);
+        Assert.Equal(OperationStatus.Done, RuleAddressParser.TryParse("58 Hordley Avenue\nShrewsbury\nSY4 1AA", Region.Parse("GB"), out ParsedAddress? a, out ParseDetail d));
+        Assert.Equal("SHREWSBURY", a!.Locality!.Value.Standard);
+        Assert.All(d.Fields, f => Assert.Equal(DecisionSource.Rule, f.Source));
+    }
+
     private const string RunOn = "100 broadway new york ny 10001";
 
     [Fact]
@@ -131,6 +157,21 @@ public class ModelWiringTests
         using (ContactModels.Scope(null, new FixedNameModel(NameClass.Company, 0.4f, ("Bestline", "Base"))))
         {
             Assert.Equal(NameClass.Person, NameParsing.Split(plain).Class);
+        }
+    }
+
+    [Fact]
+    public void ForATier2TextThePackageWithTier2ModelsLeavesTheRulesDefaultPersonAlone()
+    {
+        // The Tier 1 + Tier 2 package learned Tier 2 person names from small lists, so there it reads only what the rules leave open; United States and Canada texts keep the override.
+        const string plain = "Bestline Imports";
+        using (ContactModels.Scope(null, new FixedNameModel(NameClass.Company, 0.9f, ("Bestline", "Base"))))
+        {
+            Assert.Equal(NameClass.Person, NameParsing.Split(plain, NameHints.ForCountry(Region.Parse("DE"))).Class);
+            Assert.Equal(NameClass.Person, NameParsing.Classify(plain, NameHints.ForCountry(Region.Parse("PL"))));
+            Assert.Equal(NameClass.Person, NameParsing.Split(plain, NameHints.ForLanguage("de")).Class);
+            Assert.Equal(NameClass.Company, NameParsing.Split(plain, NameHints.ForCountry(Region.US)).Class);
+            Assert.Equal(NameClass.Company, NameParsing.Split(plain, NameHints.ForCountry(Region.CA)).Class);
         }
     }
 }
