@@ -21,10 +21,21 @@ if [ "$kind" = address ]; then
   "$dn" "$MODELS_DLL" address "$g" "$p/model-hint-address.jsonl" hint > /dev/null
   PATH=$lp/mamba/envs/lp/bin:$PATH python "$repo/tools/Oracles/LibPostal/run-libpostal.py" "$g" "$p/libpostal-address.jsonl" "$lp/data-base" > /dev/null
   PATH=$lp/mamba/envs/lp/bin:$PATH python "$repo/tools/Oracles/LibPostal/run-libpostal.py" "$g" "$p/senzing-address.jsonl" "$lp/data-senzing" > /dev/null
+  # WITH_COUNTRY=1 also runs both parsers given the item's country two ways: the documented `country` keyword (libpostal-country / senzing-country; it
+  # changes nothing in the output) and the country name appended to the text (libpostal-name / senzing-name); see run-libpostal.py.
+  extra=()
+  if [ "${WITH_COUNTRY:-}" = 1 ]; then
+    PATH=$lp/mamba/envs/lp/bin:$PATH python "$repo/tools/Oracles/LibPostal/run-libpostal.py" "$g" "$p/libpostal-country-address.jsonl" "$lp/data-base" country > /dev/null
+    PATH=$lp/mamba/envs/lp/bin:$PATH python "$repo/tools/Oracles/LibPostal/run-libpostal.py" "$g" "$p/senzing-country-address.jsonl" "$lp/data-senzing" country > /dev/null
+    PATH=$lp/mamba/envs/lp/bin:$PATH python "$repo/tools/Oracles/LibPostal/run-libpostal.py" "$g" "$p/libpostal-name-address.jsonl" "$lp/data-base" country-text > /dev/null
+    PATH=$lp/mamba/envs/lp/bin:$PATH python "$repo/tools/Oracles/LibPostal/run-libpostal.py" "$g" "$p/senzing-name-address.jsonl" "$lp/data-senzing" country-text > /dev/null
+    extra=(--pred libpostal-country="$p/libpostal-country-address.jsonl" --pred senzing-country="$p/senzing-country-address.jsonl"
+           --pred libpostal-name="$p/libpostal-name-address.jsonl" --pred senzing-name="$p/senzing-name-address.jsonl")
+  fi
   echo "== addresses $cc"
   python3 "$repo/tools/Eval/score.py" address --gold "$g" --pred rules="$p/rules-address.jsonl" --pred rules-hint="$p/rules-hint-address.jsonl" \
     --pred model="$p/model-address.jsonl" --pred model-hint="$p/model-hint-address.jsonl" \
-    --pred libpostal="$p/libpostal-address.jsonl" --pred senzing="$p/senzing-address.jsonl" --reference libpostal --json "$p/scores-address.json"
+    --pred libpostal="$p/libpostal-address.jsonl" --pred senzing="$p/senzing-address.jsonl" "${extra[@]}" --reference ${REFERENCE:-libpostal} --json "$p/scores-address.json"
 else
   g=$dir/gold-name-$cc.jsonl
   "$dn" "$RULES_DLL" name "$g" "$p/rules-name.jsonl" > /dev/null

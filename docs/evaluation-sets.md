@@ -131,3 +131,48 @@ How they differ from the first draw:
 `tools/Eval/fresh/score-fresh.sh` scores one set against the installed references (libpostal with its own model, libpostal with Senzing's model, probablepeople,
 python-nameparser, cleanco), the rules, and the rules with the shipped Tier 1 + Tier 2 model; it prints aggregates only. The libpostal and Senzing
 rows run without a country, as in the first rows of these sets; the rules and model rows are given both with and without the country hint.
+
+## Fresh sets: addresses of eight countries tuned in development
+
+The first address sets of Spain, the Czech Republic, Slovakia, Belgium, Switzerland, Croatia, Germany and the Isle of Man were scored many
+times while the no-hint country rules were being developed, so their manifests carry `status: touched` for those files; they stay for history.
+Eight new sets were drawn for gating, from the same crawl (the Isle of Man set also from the crawl before it, `CC-MAIN-2026-39`, because the
+`.im` hosts of `CC-MAIN-2026-43` held only a handful of new addresses) and frozen before any rules, model or reference system was run on them.
+
+| Set | Items | Hosts | Blocks drawn (seed 5300 unless noted) |
+|---|---|---|---|
+| Spain | 132 | 127 | 50 `.es` |
+| Czech Republic | 131 | 127 | 60 `.cz` |
+| Slovakia | 134 | 130 | 60 `.sk` |
+| Croatia | 133 | 129 | 60 `.hr` |
+| Belgium | 112 | 110 | 45 `.be` |
+| Switzerland | 122 | 120 | 80 `.ch` |
+| Germany | 123 | 117 | 45 `.de` |
+| Isle of Man | 25 (7 + 18) | 24 | every `.im` block of `CC-MAIN-2026-43`, then of `CC-MAIN-2026-39` (seed 5301) |
+
+The Isle of Man set is small and its rows have wide intervals; nothing was added to reach a count.
+
+- **Tools:** `tools/Eval/fresh/draw-addresses.sh` (select, fetch, draft and pre-label; at most two fetch threads), `more-drafts.sh` (more
+  drafts from stored pages, with every earlier text filtered out), `gold.sh` (gold file from the first N reviewed drafts), `check-addresses.sh`
+  (overlap check) and `score-addresses.sh` / `summarize-addresses.py` (one baseline scoring).
+- **No host or URL is reused.** The exclusion list is built by `exclude.py build` over every page store and exclusion list of every older set
+  (Tier 1, extraction, all Tier 2 sets, the earlier fresh sets) plus the host list of another job that crawled the same index for training
+  text. `check-addresses.sh` then reads each gold item back to its page and counts hosts and URLs found in the older stores or in another new
+  set: **0 for all eight sets**. (The first check found two German pages: the Tier 2 selector compared hosts without removing a leading
+  `www.`; the selector now removes it, and the two items were dropped.) No set has more than two items from one host.
+- **Labelling:** agent adjudication over the rules' hinted pre-label, no hosted model. Each draft item was read; items that were page
+  furniture, a telephone or bank number, a foreign address, two addresses in one string, a sentence with an address inside, a repeat of
+  an address already kept, or mis-encoded text were dropped. Conventions are those of the older set of the same country: the road keeps its type
+  word; a village given with a house number and no street is the road; district, quarter and estate text is unlabelled unless it is the only
+  locality; building names are the recipient; a Spanish or Italian province written after the place is the state; a post-office box keeps its
+  label word; postcode digits only (the scorer drops a `CH-`, `D-`, `B-` letter prefix); the Belgian `bus`/`bte` and the Spanish floor and door
+  text are the unit.
+- **Rules seeded the gold:** the share of items whose gold equals the rules' pre-label is 59% (Spain) to 84% (Slovakia), and 44% for the Isle of Man, so rules rows are
+  optimistic in the same way as in the older sets.
+- **Baseline scoring** (`score-addresses.sh`): the rules and the rules with the shipped Tier 1 + Tier 2 model, each with and without the country as
+  a hint, against libpostal 1.1.4 and the same parser with Senzing's model, each run three ways: without a country, with the item's country in
+  the binding's documented `country` keyword, and with the country's English name appended to the text (not appended when the text already has
+  it; the country field of the parse is then the one parsed from the page's own text). Observed: the `country` keyword changes nothing in the
+  parser's output (identical output on every item of all eight sets), and the binding refuses a country given without a language, so the
+  language is passed as the empty string. No-hint rows are compared with the no-country parser, hinted rows with the country-name parser, and
+  also with the no-country parser, because appending the name sometimes lowers its score.
