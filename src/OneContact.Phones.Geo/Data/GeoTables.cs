@@ -43,7 +43,12 @@ internal sealed class GeoTables
     /// <exception cref="InvalidDataException">The file or the table is damaged.</exception>
     internal bool TryGetMap(string table, out PrefixMap map)
     {
-        PrefixMap? cached = _maps.GetOrAdd(table, name => _file.Value.TryGetTable(name, out ReadOnlyMemory<byte> bytes) ? new PrefixMap(bytes) : null);
+        // A plain read first: GetOrAdd with a lambda that captures this allocates a closure on every call.
+        if (!_maps.TryGetValue(table, out PrefixMap? cached))
+        {
+            cached = _maps.GetOrAdd(table, name => _file.Value.TryGetTable(name, out ReadOnlyMemory<byte> bytes) ? new PrefixMap(bytes) : null);
+        }
+
         if (cached is { } found)
         {
             map = found;

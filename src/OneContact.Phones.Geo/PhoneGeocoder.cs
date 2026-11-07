@@ -39,13 +39,13 @@ public sealed class PhoneGeocoder
     /// <returns>The description: the area for a place-bound number, the country name for any other valid number when the calling code says which country it is, an empty string otherwise (also when the number is not valid).</returns>
     public string GetDescription(PhoneNumber number, string languageTag)
     {
-        PhoneNumberType type = _parser.GetNumberType(number);
-        if (type == PhoneNumberType.Unknown)
+        // A geographic number has a known type, so asking that first classifies the number once; only the others need the type itself.
+        if (_parser.IsGeographical(number))
         {
-            return string.Empty;
+            return GetDescriptionForValidNumber(number, languageTag);
         }
 
-        return _parser.IsGeographical(number) ? GetDescriptionForValidNumber(number, languageTag) : CountryOfNumber(number, LanguageTag.Parse(languageTag));
+        return _parser.GetNumberType(number) == PhoneNumberType.Unknown ? string.Empty : CountryOfNumber(number, LanguageTag.Parse(languageTag));
     }
 
     /// <summary>Describes a number for a user in a region: the same description when the number belongs to the user's own region, and only the country name otherwise.</summary>
@@ -55,13 +55,13 @@ public sealed class PhoneGeocoder
     /// <returns>The description, as for <see cref="GetDescription(PhoneNumber, string)"/>; an empty string when the number is not valid.</returns>
     public string GetDescription(PhoneNumber number, string languageTag, Region userRegion)
     {
-        PhoneNumberType type = _parser.GetNumberType(number);
-        if (type == PhoneNumberType.Unknown)
+        // A geographic number has a known type, so asking that first classifies the number once; only the others need the type itself.
+        if (_parser.IsGeographical(number))
         {
-            return string.Empty;
+            return GetDescriptionForValidNumber(number, languageTag, userRegion);
         }
 
-        return _parser.IsGeographical(number) ? GetDescriptionForValidNumber(number, languageTag, userRegion) : CountryOfNumber(number, LanguageTag.Parse(languageTag));
+        return _parser.GetNumberType(number) == PhoneNumberType.Unknown ? string.Empty : CountryOfNumber(number, LanguageTag.Parse(languageTag));
     }
 
     /// <summary>Describes a number without checking its validity or type: the area its leading digits name, else the country when the calling code says which one.</summary>

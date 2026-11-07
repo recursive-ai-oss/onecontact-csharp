@@ -37,13 +37,13 @@ public sealed class PhoneTimeZoneMapper
     /// <returns>Zone identifiers in the data's order; <see cref="UnknownTimeZone"/> alone when nothing is known.</returns>
     public IReadOnlyList<string> GetTimeZones(PhoneNumber number)
     {
-        PhoneNumberType type = _parser.GetNumberType(number);
-        if (type == PhoneNumberType.Unknown)
+        // A geographic number has a known type, so asking that first classifies the number once; only the others need the type itself.
+        if (_parser.IsGeographical(number))
         {
-            return UnknownList;
+            return GetTimeZonesForGeographicalNumber(number);
         }
 
-        return _parser.IsGeographical(number) ? GetTimeZonesForGeographicalNumber(number) : ForCallingCode(number.CountryCode);
+        return _parser.GetNumberType(number) == PhoneNumberType.Unknown ? UnknownList : ForCallingCode(number.CountryCode);
     }
 
     /// <summary>Gets the time zones of the area a number's leading digits name, without checking the number's validity or type.</summary>
@@ -71,6 +71,14 @@ public sealed class PhoneTimeZoneMapper
         return UnknownList;
     }
 
-    private ReadOnlyCollection<string> Zones(PrefixMap map, int description) =>
-        _lists.GetOrAdd(description, d => new ReadOnlyCollection<string>(map.GetDescription(d).Split('&')));
+    private ReadOnlyCollection<string> Zones(PrefixMap map, int description)
+    {
+        // A plain read first: GetOrAdd with a lambda allocates a closure on every call, hits or not.
+        if (_lists.TryGetValue(description, out ReadOnlyCollection<string>? known))
+        {
+            return known;
+        }
+
+        return _lists.GetOrAdd(description, d => new ReadOnlyCollection<string>(map.GetDescription(d).Split('&')));
+    }
 }

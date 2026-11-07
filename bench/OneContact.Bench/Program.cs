@@ -173,13 +173,47 @@ internal static class Program
             return PhoneFindProfile.Run();
         }
 
+        if (args.Length == 2 && args[0] == "dump-matches")
+        {
+            // dump-matches <file>: where the matcher finds numbers in the matcher row's text at every leniency, and in a text of awkward candidates.
+            string[] texts = [PhoneMatcherRow.MakeText(), string.Concat(Enumerable.Repeat("(+1 (202) 456-1111 x12; 12/03/2021 +44 20 7946 0958 ext. 9, 1-800-FLOWERS 555-0100#4 (((5)) 2024561111\u00A0x77 ", 2000))];
+            using var writer = new StreamWriter(args[1], false, new System.Text.UTF8Encoding(false));
+            foreach (string text in texts)
+            {
+                foreach (PhoneMatchLeniency leniency in Enum.GetValues<PhoneMatchLeniency>())
+                {
+                    foreach (Region region in new[] { Region.US, Region.Parse("GB"), Region.Unknown })
+                    {
+                        foreach (PhoneNumberMatch m in PhoneNumber.FindAll(text, region, leniency))
+                        {
+                            writer.WriteLine($"{leniency}|{region.Code}|{m.Start}|{m.RawString.Length}|{m.Number.E164}");
+                        }
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+        if (args.Length == 2 && args[0] == "first-use")
+        {
+            return FirstUse.Run(args[1]);
+        }
+
+        if (args.Length == 2 && args[0] == "dump-geo")
+        {
+            return GeoDump.Run(args[1]);
+        }
+
         if (args.Length > 0 && args[0] == "accuracy")
         {
             return Accuracy.Run();
         }
 
         // The in-process toolchain: the assembly name differs from the project name, so a generated child project cannot find it.
-        ManualConfig config = DefaultConfig.Instance.AddJob((Environment.GetEnvironmentVariable("ONECONTACT_BENCH_JOB") == "default" ? Job.Default : Job.ShortRun).WithToolchain(InProcessNoEmitToolchain.Instance));
+        ManualConfig config = DefaultConfig.Instance.AddJob((Environment.GetEnvironmentVariable("ONECONTACT_BENCH_JOB") == "default" ? Job.Default : Job.ShortRun).WithToolchain(InProcessNoEmitToolchain.Instance))
+            // The AddressParser package is published as a debug build; the validator would refuse to time it. It is the comparator as shipped.
+            .WithOptions(ConfigOptions.DisableOptimizationsValidator);
         BenchmarkSwitcher.FromAssembly(typeof(RegionRow).Assembly).Run(args, config);
         return 0;
     }
