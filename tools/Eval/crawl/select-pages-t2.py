@@ -76,7 +76,7 @@ with open(path, "a", encoding="utf-8") as fo:
                 continue
             host, p = m.group(1).lower(), m.group(2) or "/"
             info = tier2.host_info(host)
-            if not info or host in exclude or url in done:
+            if not info or host in exclude or host.removeprefix("www.") in exclude or url in done:
                 continue
             if not (tier2.PATH.search(p) or p in tier2.ROOTS):
                 continue

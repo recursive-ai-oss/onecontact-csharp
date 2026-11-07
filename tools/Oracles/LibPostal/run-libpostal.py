@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 """Runs libpostal's address parser (a released binary distribution, only executed) over an address evaluation set.
 
-usage: run-libpostal.py <gold.jsonl> <predictions.jsonl> <data-dir>
+usage: run-libpostal.py <gold.jsonl> <predictions.jsonl> <data-dir> [country|country-text]
 
 <data-dir> is a libpostal data directory: the base model for "libpostal 1.1", or the base directory with the parser files replaced
 for the Senzing model (see setup.sh). The Python binding `postal` is called through its documented `parse_address`.
+With the optional fourth argument `country`, each item's `country` field (an ISO 3166 alpha-2 code, lower-cased) is passed as the documented
+`country` keyword of `parse_address`, which is how a caller who knows the country uses the parser; without it the parser gets the text alone.
+The binding rejects a country given with no language (TypeError, observed), so the language is passed as the empty string, meaning none.
+The keyword changes nothing in the parse (identical output on every item of a 122-item Swiss set, observed), so a second way to tell the parser
+the country is offered: `country-text` appends the country's English name to the text as a last component (unless the text already has it), the way a caller who knows the
+country would complete an address for libpostal. The country field of that parse is then replaced by the one parsed from the unextended text
+(the scorer must not be given a country the page never wrote).
 
 Label mapping (libpostal's documented component labels -> the scorer's coarse labels):
   house -> recipient          house_number -> house_number     road -> road
@@ -21,6 +28,13 @@ import os
 import sys
 
 gold_path, out_path, data_dir = sys.argv[1], sys.argv[2], sys.argv[3]
+mode = sys.argv[4] if len(sys.argv) > 4 else ""
+NAMES = {"US": "United States", "CA": "Canada", "MX": "Mexico", "AU": "Australia", "GB": "United Kingdom", "JE": "Jersey", "GG": "Guernsey",
+         "IM": "Isle of Man", "IE": "Ireland", "AT": "Austria", "BE": "Belgium", "HR": "Croatia", "CZ": "Czech Republic", "DK": "Denmark",
+         "EE": "Estonia", "FI": "Finland", "FR": "France", "DE": "Germany", "HU": "Hungary", "IT": "Italy", "LV": "Latvia", "LT": "Lithuania",
+         "LU": "Luxembourg", "MT": "Malta", "NL": "Netherlands", "PL": "Poland", "PT": "Portugal", "RO": "Romania", "SK": "Slovakia",
+         "SI": "Slovenia", "ES": "Spain", "SE": "Sweden", "CH": "Switzerland", "NO": "Norway", "IS": "Iceland", "LI": "Liechtenstein",
+         "AD": "Andorra", "MC": "Monaco", "SM": "San Marino", "VA": "Vatican City"}
 os.environ["LIBPOSTAL_DATA_DIR"] = data_dir
 from postal.parser import parse_address  # noqa: E402  (imported after the data directory is set)
 
@@ -34,7 +48,16 @@ with open(gold_path, encoding="utf-8") as f, open(out_path, "w", encoding="utf-8
             continue
         item = json.loads(line)
         text = ", ".join(x.strip() for x in item["text"].split("\n") if x.strip())
-        parsed = parse_address(text)
+        cc = (item.get("country") or "").upper()
+        if mode == "country" and cc:
+            parsed = parse_address(text, language="", country=cc.lower())
+        elif mode == "country-text" and cc in NAMES:
+            # Not appended when the text already names the country in English (a repeated country confuses the parser, which is no help to anyone).
+            more = "" if NAMES[cc].lower() in text.lower() else ", " + NAMES[cc]
+            parsed = [(v, l) for v, l in parse_address(text + more) if l != "country"]
+            parsed += [(v, l) for v, l in parse_address(text) if l == "country"]
+        else:
+            parsed = parse_address(text)
         fields = {}
         for value, label in parsed:
             key = DIRECT.get(label)
