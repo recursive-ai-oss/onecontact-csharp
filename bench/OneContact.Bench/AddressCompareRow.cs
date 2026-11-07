@@ -6,7 +6,7 @@ namespace RecursiveAI.OneContact.Bench;
 
 /// <summary>
 /// United States free-text addresses (the US rows of the synthetic gold set, set ONECONTACT_ADDRESS_GOLD to its path), rules only without a model
-/// package and without a country hint, against the AddressParser regex parser. The comparator gets the lines joined with commas. The accuracy
+/// package, with the country given as the United States (the comparator reads American addresses only) and, as a second row, without it, against the AddressParser regex parser. The comparator gets the lines joined with commas. The accuracy
 /// the clause needs comes from the address gold tool on the same file.
 /// </summary>
 [MemoryDiagnoser]
@@ -24,10 +24,24 @@ public class AddressCompareRow
         _theirs = new USAddress.AddressParser();
     }
 
-    /// <summary>This library.</summary>
+    /// <summary>This library told the addresses are American, which is what the comparator assumes.</summary>
     /// <returns>The number of addresses read.</returns>
     [Benchmark(OperationsPerInvoke = 100)]
     public int Ours()
+    {
+        int n = 0;
+        for (int i = 0; i < 100; i++)
+        {
+            n += RuleAddressParser.TryParse(_texts[i % _texts.Length], Region.US, out _, out _) == OperationStatus.Done ? 1 : 0;
+        }
+
+        return n;
+    }
+
+    /// <summary>This library with no country given, which also works out the country of each address.</summary>
+    /// <returns>The number of addresses read.</returns>
+    [Benchmark(OperationsPerInvoke = 100)]
+    public int OursNoHint()
     {
         int n = 0;
         for (int i = 0; i < 100; i++)
