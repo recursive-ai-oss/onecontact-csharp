@@ -1,4 +1,5 @@
 using System.Buffers;
+using RecursiveAI.OneContact.Addresses;
 using RecursiveAI.OneContact.Addresses.Parsing;
 using RecursiveAI.OneContact.Models;
 using RecursiveAI.OneContact.Models.Superset;
@@ -74,6 +75,15 @@ public class SupersetTests
         Assert.Equal(Region.Parse("GB"), read!.Country);
         Assert.Equal("SY4 1AA", read.PostalCode!.Value.Standard);
         Assert.Contains(withBoth.Fields, f => f.Source == DecisionSource.Model);
+
+        // Text the rules place in no country: the fields come back with the country left unknown (a five-digit postcode and no state is a ZIP, a
+        // German or a Spanish postcode alike), never as a United States address.
+        Assert.Equal(OperationStatus.Done, RuleAddressParser.TryParse("Museum Quartier Hof 3 12345 Musterstadt", Region.Unknown, out ParsedAddress? unknown, out ParseDetail unknownDetail));
+        Assert.True(unknown!.Country.IsUnknown);
+        Assert.True(unknown.Facts.HasFlag(AddressFacts.CountryUndetermined));
+        Assert.False(unknown.Facts.HasFlag(AddressFacts.CountryInferred));
+        Assert.Equal("12345", unknown.PostalCode!.Value.Text);
+        Assert.NotEmpty(unknownDetail.Fields);
 
         // Registering Tier 1 again afterwards changes nothing: the most specific package wins whatever the order.
         using (FileStream s = File.OpenRead(tier1!))

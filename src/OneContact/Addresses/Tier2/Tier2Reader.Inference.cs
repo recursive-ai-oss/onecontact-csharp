@@ -42,7 +42,7 @@ internal static partial class Tier2Reader
             return false;
         }
 
-        HashSet<string> chosen = Evidence(text, Universe(readable.Select(r => (r.Code, r.Address))), readable.ToDictionary(r => r.Code, r => ZoneOnlyDigit(r.Address, r.Code)));
+        HashSet<string> chosen = Evidence(text, Universe(readable.Select(r => (r.Code, r.Address)), text), readable.ToDictionary(r => r.Code, r => ZoneOnlyDigit(r.Address, r.Code)));
         if (chosen.Count != 1)
         {
             return false;
@@ -75,7 +75,7 @@ internal static partial class Tier2Reader
         {
             Reader trial = new(text, Region.Parse(code)) { Inferring = true };
             if (trial.Run(out ParsedAddress? read, out ParseDetail readDetail) == OperationStatus.Done && read is not null && read.Country == Region.Parse(code)
-                && !EndsWithOtherCountry(text, code) && ZoneAllows(read, code) && !LeavesAdminCode(read, code) && !LooksDutch(read, code))
+                && !EndsWithOtherCountry(text, code) && ZoneAllows(read, code) && !LeavesAdminCode(read, code) && !LooksDutch(read, code) && !LocalityStartsWithDigit(read))
             {
                 readable.Add((code, read, readDetail));
             }
@@ -89,6 +89,9 @@ internal static partial class Tier2Reader
         // letters in a locality is a Dutch postcode, not a Belgian town (the text is then refused rather than read as the wrong country).
         HashSet<string> taken = [.. readable.Where(r => r.Address.AdminArea is not null).Select(r => r.Address.AdminArea!.Value.Text)];
         readable.RemoveAll(r => r.Address.AdminArea is null && LastWord(r.Address.Locality) is { } word && word.Length == 2 && taken.Contains(word));
+
+        // A country that cannot write the letters or the words of the text is not a candidate.
+        readable.RemoveAll(r => !LettersHold(text, r.Code));
 
         return readable;
     }
@@ -110,15 +113,35 @@ internal static partial class Tier2Reader
         return true;
     }
 
-    // Whether every letter of the text outside Latin-1 belongs to the language of the country: a text with a letter the country does not use is not its text.
+    // Whether the text can be written in the country: every letter outside Latin-1 belongs to its language, and every word the tables know as a word of some language
+    // (a street type such as rue, calle, Strasse, straat) is a word of a language the country writes. A text with a letter or a word the country does not use is not its text.
     private static bool LettersHold(string text, string code)
     {
         InferenceTables.Instance.Letters.TryGetValue(code, out string? own);
         foreach (char raw in text)
         {
-            if ((raw >= '\u0100' || raw == 'ß') && char.IsLetter(raw) && (own is null || !own.Contains(char.ToLowerInvariant(raw), StringComparison.Ordinal)))
+            if ((raw >= 'Ā' || raw == 'ß') && char.IsLetter(raw) && (own is null || !own.Contains(char.ToLowerInvariant(raw), StringComparison.Ordinal)))
             {
                 return false;
+            }
+        }
+
+        return !T2Rules.Countries.TryGetValue(code, out T2Country? country) || LanguagesHold(text, country);
+    }
+
+    // A word of a street type, a unit or a place that only some language writes (t2-inference.tsv) says the text is in that language; the country must write one of the languages
+    // that own the word. A word owned by several languages (a Dutch and a German ending, say) is held by any of them.
+    private static bool LanguagesHold(string text, T2Country country)
+    {
+        foreach ((string key, bool numberAfter, bool numberBefore) in Words(text))
+        {
+            foreach (string part in key.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                HashSet<string>? owners = InferenceTables.Instance.LanguagesOf(part, numberAfter, numberBefore);
+                if (owners is not null && !owners.Overlaps(country.Languages))
+                {
+                    return false;
+                }
             }
         }
 
@@ -128,6 +151,12 @@ internal static partial class Tier2Reader
     // Whether the text has a letter, a word or a postcode zone that any country's evidence lists.
     private static bool HasAnyEvidence(string text)
     {
+        // A province in parentheses ("28013 Madrid (Madrid)") is read as the admin area by the Spanish reading, which is evidence in itself.
+        if (text.Contains('(', StringComparison.Ordinal))
+        {
+            return true;
+        }
+
         foreach (char raw in text)
         {
             if ((raw >= 'Ā' || raw == 'ß') && char.IsLetter(raw))
@@ -161,7 +190,7 @@ internal static partial class Tier2Reader
 
     // The countries a text may be: those that read it and every other country that writes a postcode in the same shape (four digits, five digits, three and two). A reader
     // can fail on text that is fine (a country's own odd line), so evidence is weighed against all the countries sharing the form, not only the ones that read it.
-    private static List<string> Universe(IEnumerable<(string Code, ParsedAddress Address)> readable)
+    private static List<string> Universe(IEnumerable<(string Code, ParsedAddress Address)> readable, string text)
     {
         List<(string Code, ParsedAddress Address)> reads = [.. readable];
         HashSet<string> codes = new(reads.Select(r => r.Code), StringComparer.Ordinal);
@@ -184,6 +213,8 @@ internal static partial class Tier2Reader
             }
         }
 
+        // A country whose alphabet cannot write a letter of the text is not a candidate, so its words and letters cannot count against the countries that can.
+        codes.RemoveWhere(code => !LettersHold(text, code));
         return [.. codes];
     }
 
@@ -218,12 +249,20 @@ internal static partial class Tier2Reader
         return zone.Contains(first, StringComparison.Ordinal);
     }
 
+    // Structural evidence a reading carries by itself: a Spanish province named in the text whose own two digits open the postcode (UPU Spain sheet, province list) is a Spanish
+    // text, and a Slovak postcode opens with a digit no Czech one does (the zone table).
     private static bool ZoneOnlyDigit(ParsedAddress read, string code) =>
+        code == "ES" && read.AdminArea is { Rule: "upu-spain-province" } ||
         read.PostalCode is { } pc && InferenceTables.Instance.ZoneOnly.TryGetValue(code, out string? only) && pc.Text.Contains(' ', StringComparison.Ordinal) && pc.Standard.FirstOrDefault(char.IsAsciiDigit) is var first && only.Contains(first, StringComparison.Ordinal);
 
     // Four digits and two capital letters ("4261 BK") are a Dutch postcode: a reading of another country that took the letters for the locality is not one.
     private static bool LooksDutch(ParsedAddress read, string code) =>
         code != "NL" && read.PostalCode is { Standard: { Length: 4 } } && read.Locality is { Text: { Length: 2 } letters } && letters.All(char.IsAsciiLetterUpper);
+
+    // A locality never begins with a digit: "110 00 Praha" read with a three-digit postcode (Iceland's form) leaves "00 Praha" as the locality, which is the Czech or Slovak
+    // postcode's second half, so that reading is another country's text read wrongly.
+    private static bool LocalityStartsWithDigit(ParsedAddress read) =>
+        read.Locality is { Text.Length: > 0 } locality && char.IsAsciiDigit(locality.Text[0]);
 
     // A locality that ends in a parenthesised or capital two-letter Italian province code, in a reading that is not Italian: the code was left in the locality.
     private static bool LeavesAdminCode(ParsedAddress read, string code)
@@ -382,6 +421,9 @@ internal static partial class Tier2Reader
         private readonly Dictionary<string, HashSet<string>> _after = new(StringComparer.Ordinal);
         private readonly Dictionary<string, HashSet<string>> _places = new(StringComparer.Ordinal);
         private readonly Dictionary<string, List<string>> _suffixes = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, string[]> _languageOf = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, HashSet<string>> _langWords = new(StringComparer.Ordinal);
+        private readonly List<(string Language, string Ending)> _langSuffixes = [];
 
         internal Dictionary<string, string> Letters { get; } = new(StringComparer.Ordinal);
 
@@ -395,7 +437,11 @@ internal static partial class Tier2Reader
         {
             foreach (string[] r in RuleFile.Read("t2-inference.tsv"))
             {
-                _countries.Add(r[1]);
+                if (r[0] is not ("lang" or "langsuffix"))
+                {
+                    _countries.Add(r[1]);
+                }
+
                 switch (r[0])
                 {
                     case "letters":
@@ -406,6 +452,15 @@ internal static partial class Tier2Reader
                         break;
                     case "zoneonly":
                         ZoneOnly[r[1]] = r[2];
+                        break;
+                    case "language":
+                        _languageOf[r[1]] = r[2].Split(',');
+                        break;
+                    case "lang":
+                        Add(_langWords, r[1], r[2]);
+                        break;
+                    case "langsuffix":
+                        _langSuffixes.Add((r[1], r[2]));
                         break;
                     case "word":
                         Add(_words, r[1], r[2]);
@@ -443,6 +498,49 @@ internal static partial class Tier2Reader
             }
 
             set.Add(word);
+        }
+
+        // The languages that own the word, or null when no table says the word belongs to a language. A country's own evidence words belong to the languages it writes
+        // (or to those a "language" row names, for countries that write several and whose words are one language's: Belgian Dutch endings), and "lang" and "langsuffix"
+        // rows name languages directly. Places and letters say nothing about a language, and an ending of fewer than four letters (Finnish tie, Danish vej) says nothing either:
+        // it ends too many words of other languages (Dutch Retie).
+        internal HashSet<string>? LanguagesOf(string key, bool numberAfter, bool numberBefore)
+        {
+            HashSet<string>? owners = null;
+            foreach (string country in _countries)
+            {
+                bool word = _words.TryGetValue(country, out HashSet<string>? w) && w.Contains(key)
+                    || numberAfter && _marked.TryGetValue(country, out HashSet<string>? m) && m.Contains(key)
+                    || numberBefore && _after.TryGetValue(country, out HashSet<string>? f) && f.Contains(key)
+                    || _suffixes.TryGetValue(country, out List<string>? ends) && ends.Exists(end => end.Length >= 4 && key.Length >= end.Length + 2 && key.EndsWith(end, StringComparison.Ordinal));
+                if (!word || !T2Rules.Countries.TryGetValue(country, out T2Country? c))
+                {
+                    continue;
+                }
+
+                owners ??= new HashSet<string>(StringComparer.Ordinal);
+                owners.UnionWith(_languageOf.TryGetValue(country, out string[]? own) ? own : c.Languages);
+            }
+
+            foreach ((string language, HashSet<string> words) in _langWords)
+            {
+                if (words.Contains(key))
+                {
+                    owners ??= new HashSet<string>(StringComparer.Ordinal);
+                    owners.Add(language);
+                }
+            }
+
+            foreach ((string language, string ending) in _langSuffixes)
+            {
+                if (key.Length >= ending.Length + 2 && key.EndsWith(ending, StringComparison.Ordinal))
+                {
+                    owners ??= new HashSet<string>(StringComparer.Ordinal);
+                    owners.Add(language);
+                }
+            }
+
+            return owners;
         }
 
         // Whether the word is evidence for any country.

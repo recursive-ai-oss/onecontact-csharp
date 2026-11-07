@@ -82,7 +82,7 @@ public static class RuleAddressParser
         // model labels fields and does not tell countries apart (a German or Spanish postcode looks like a ZIP): without a state or province the refusal stays, and says why.
         // The Tier 1 package knows no other country, so it still reads it.
         if (usCaReadByModel && !HasKnownUsCaAdmin(address!) && hint.IsUnknown && Models.ContactModels.PackageId is { } package && package != Models.ContactModels.Tier1PackageId
-            && (otherDetail.PrimaryReason.Equals(ReasonCode.AddressCountryUndetermined) || otherDetail.PrimaryReason.Equals(ReasonCode.AddressCountryConflict)))
+            && !IsUsCaPostalForm(address!))
         {
             // Several countries read the text and none is told from it: the fields are returned when they all agree, with the country left unknown.
             if (Tier2.Tier2Reader.TryReadUndetermined(input.ToString(), out ParsedAddress? agreed, out ParseDetail agreedDetail))
@@ -92,9 +92,18 @@ public static class RuleAddressParser
                 return OperationStatus.Done;
             }
 
-            address = null;
-            detail = otherDetail;
-            return OperationStatus.InvalidData;
+            // The model labels fields and does not tell countries apart: a five-digit postcode without a state is a ZIP, a German or a Spanish postcode alike. When the Tier 2 rules found
+            // no country either, the model's fields are returned with the country left unknown (the US would be a guess); a reading the rules made of the country's own form stays.
+            if (otherDetail.PrimaryReason.Equals(ReasonCode.AddressCountryConflict))
+            {
+                address = null;
+                detail = otherDetail;
+                return OperationStatus.InvalidData;
+            }
+
+            address = Tier2.Tier2Reader.AsUndetermined(address!, input.ToString());
+            detail = new ParseDetail([new ParseIssue(ReasonCode.AddressCountryUndetermined, default, IssueSeverity.Warning)], address.Fields.Select(f => new ParsedField(f.Name, f.Span, f.Confidence, f.Source)));
+            return OperationStatus.Done;
         }
 
         // The same for text the United States and Canada rules could not read at all.
@@ -143,6 +152,12 @@ public static class RuleAddressParser
 
         return status;
     }
+
+    // A Canadian postal code (letters and digits) or a ZIP+4 is written in the United States or Canada only; a plain five-digit ZIP is a postcode of other countries too.
+    private static bool IsUsCaPostalForm(ParsedAddress address) =>
+        address.PostalCode is { } p && (p.Standard.Any(char.IsAsciiLetter)
+            || p.Standard.Length == 10 && p.Standard[5] == '-' && p.Standard.Count(char.IsAsciiDigit) == 9
+            || p.Standard.Length == 9 && p.Standard.All(char.IsAsciiDigit));
 
     private static bool HasKnownUsCaAdmin(ParsedAddress address) =>
         address.AdminArea is { } f && (Standardization.UsCaRules.UsStateNames.ContainsKey(f.Standard.ToUpperInvariant()) || Standardization.UsCaRules.CaProvinceNames.ContainsKey(f.Standard.ToUpperInvariant()));

@@ -29,5 +29,26 @@ internal static partial class Tier2Reader
         // Jersey, Guernsey and the Isle of Man write the name of the island on the line above the postcode.
         private static bool IsIslandName(List<Tok> toks) =>
             toks.Count > 0 && T2Rules.Key(Join(toks)) is "JERSEY" or "GUERNSEY" or "ISLE OF MAN";
+        // The number of words at the end of the tokens that name any of the three islands, or 0.
+        private static int TrailingIslandAny(List<Tok> toks) =>
+            Math.Max(TrailingIslandWords(toks, "IM"), Math.Max(TrailingIslandWords(toks, "JE"), TrailingIslandWords(toks, "GG")));
+
+        // A street and a post town written with no commas before the postcode, nothing else on the line: "Victoria Road Douglas IM1 1AA", "Tromode Road Douglas Isle of Man IM2 5AA".
+        // The street ends at the last road type that leaves one to three words for the post town (Royal Mail PAF Programmers' Guide: the thoroughfare, then the post town).
+        private static bool SplitInlineStreet(List<Tok> locality, out int streetWords)
+        {
+            streetWords = 0;
+            int end = locality.Count - TrailingIslandAny(locality);
+            for (int i = end - 2; i >= 1; i--)
+            {
+                if (IsSplittingRoadType(locality[i]) && end - i - 1 <= 3 && PlaceFits(locality.GetRange(i + 1, end - i - 1), false, "GB"))
+                {
+                    streetWords = i + 1;
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

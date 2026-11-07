@@ -148,3 +148,7 @@ No row drops by more than 0.5 and no wrong-country count rises. The web forms ar
 ## Sources
 
 UPU country sheets (addressing unit, upu.int, `PostalEntitiesFiles/addressingUnit/<iso3>En.pdf`): United Kingdom 11/2011, Jersey 03/2005, Guernsey 03/2005, Isle of Man 03/2005, Ireland 06/2017, Spain 01/2013, Portugal 10/2024, Italy 04/2020, San Marino 10/2010, Vatican 03/2005, Malta, Andorra 09/2004. Facts and short examples only, cited by sheet and page; the examples used as tests are in `testdata/addresses/authority-examples-tier2b.tsv`. The libpostal dictionaries of `es`, `pt`, `ca`, `eu`, `gl`, `mt` and `ga` at the pinned tag, through the ingest tool.
+
+## Island lines without commas
+
+Jersey, Guernsey and the Isle of Man are also written on one line with no commas: `Victoria Road Douglas IM1 1AA`, `Tromode Road Douglas Isle of Man IM2 5AA`, `Hill Street Jersey JE4 7BR`, `Douglas Isle of Man IM1 2AB`. The street ends at the last road type that leaves one to three words for the post town (Royal Mail PAF Programmers' Guide: the thoroughfare, then the post town); the island's name after the town is the country text, and when only the island name follows the road it is read as the town. Nothing is added to the input.

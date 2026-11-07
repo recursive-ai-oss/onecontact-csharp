@@ -988,7 +988,10 @@ internal static partial class Tier2Reader
                     }
                 }
 
-                if (split >= 1 && locality.Count - split - 1 <= 3 && PlaceFits(locality.GetRange(split + 1, locality.Count - split - 1), ireland, family))
+                int island = TrailingIslandAny(locality);
+                // The island's name after the post town ("Mill Road Douglas Isle of Man") is not part of the town; when nothing else follows the road, the island name is the town ("Hill Street Jersey").
+                if (split >= 1 && ((locality.Count - split - 1 <= 3 && PlaceFits(locality.GetRange(split + 1, locality.Count - split - 1), ireland, family))
+                    || (locality.Count - island - split - 1 is >= 1 and <= 3 && PlaceFits(locality.GetRange(split + 1, locality.Count - island - split - 1), ireland, family))))
                 {
                     units[u] = new Unit([.. pc, .. locality.GetRange(split + 1, locality.Count - split - 1)]);
                     units.Insert(u, new Unit(locality.GetRange(0, split + 1)));
@@ -1005,6 +1008,25 @@ internal static partial class Tier2Reader
 
                 units[u] = new Unit(pc);
                 units.Insert(u, new Unit(locality));
+                unitIndex = u + 1;
+                match = m;
+                return true;
+            }
+            else if (u == 0 && british && county is null && locality.Count >= 3 && SplitInlineStreet(locality, out int streetWords))
+            {
+                // "Victoria Road Douglas IM1 1AA": the street and the post town share the line with no comma.
+                units[u] = new Unit([.. pc, .. locality.GetRange(streetWords, locality.Count - streetWords)]);
+                units.Insert(u, new Unit(locality.GetRange(0, streetWords)));
+                unitIndex = u + 1;
+                match = m;
+                return true;
+            }
+            else if (u == 0 && british && county is null && TrailingIslandAny(locality) is int islandWords and > 0 && locality.Count - islandWords is >= 1 and <= 3
+                && PlaceFits(locality.GetRange(0, locality.Count - islandWords), false, "GB"))
+            {
+                // "Douglas Isle of Man IM1 2AB": the post town and the island's name, no street.
+                units[u] = new Unit([.. pc, .. locality.GetRange(locality.Count - islandWords, islandWords)]);
+                units.Insert(u, new Unit(locality.GetRange(0, locality.Count - islandWords)));
                 unitIndex = u + 1;
                 match = m;
                 return true;
@@ -1897,8 +1919,9 @@ internal static partial class Tier2Reader
 
             // Andorra writes the number before the name at the French post office and after it at the Spanish one (UPU Andorra sheet): a number that ends the name belongs
             // to the name-then-number reading.
-            if (!numbered && country.Profile.Length > 0 && country.NumberLast && nameToks.Count > 0 && IsNumberToken(nameToks[^1].Text))
+            if (!numbered && country.NumberLast && nameToks.Count > 0 && (country.Profile.Length > 0 ? IsNumberToken(nameToks[^1].Text) : IsHouseNumber(nameToks[^1].Text)))
             {
+                // Luxembourg writes "Rue de la Loi 16" as often as "16, rue de la Loi": a type first and a number last is the name-then-number order.
                 return null;
             }
             if (type is not null)

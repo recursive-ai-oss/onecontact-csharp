@@ -51,5 +51,5 @@ foreach ((Region hint, string text, string original) in cases)
     }
 
     Console.WriteLine($"{original}\n   {a.Country}: " + string.Join("; ", a.LeadingLines.Select(l => "lead=" + l.Text))
-        + "; " + string.Join("; ", a.DeliveryLines.Select(l => "del=" + string.Join("+", l.Parts.Select(p => p.Role.ToString()[..3] + ":" + p.Text)))) + $"; loc={a.Locality?.Text}; adm={a.AdminArea?.Text}; pc={a.PostalCode?.Text}; cn={a.CountryName?.Text}");
+        + "; " + string.Join("; ", a.DeliveryLines.Select(l => "del=" + string.Join("+", l.Parts.Select(p => p.Role.ToString()[..3] + ":" + p.Text)))) + $"; loc={a.Locality?.Text}; adm={a.AdminArea?.Text}; pc={a.PostalCode?.Text}; cn={a.CountryName?.Text}; facts={a.Facts}; issues={string.Join("+", d.Issues.Select(i => i.Reason.ToString()))}");
 }

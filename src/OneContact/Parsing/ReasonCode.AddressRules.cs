@@ -22,4 +22,7 @@ public readonly partial struct ReasonCode
 
     /// <summary>Some words of a delivery line could not be placed; they are kept as written.</summary>
     public static ReasonCode AddressUnplacedText { get; } = new(ContactKind.Address, 116, "unplaced-text", "some words could not be placed");
+
+    /// <summary>Countries that can read the text read some parts of it differently (a house number and a flat, a street type), so those parts are left out and the rest is returned.</summary>
+    public static ReasonCode AddressFieldsDisputed { get; } = new(ContactKind.Address, 117, "fields-disputed", "the countries that can read the text read some parts of it differently, so those parts are left out");
 }
