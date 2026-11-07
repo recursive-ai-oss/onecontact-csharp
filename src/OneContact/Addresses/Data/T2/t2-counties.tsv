@@ -1,0 +1,145 @@
+# Counties and regions written on their own line between the post town and the postcode. Columns: country (GB = the United Kingdom, IE = Ireland), name (any case, accents and hyphens as usual).
+# A line is read as a county only when a post town stands before it; a name that is also a town of its own (Durham, Antrim, Armagh, Down) counts as a county only with "County" or "Co." in front (or, for the Irish
+# counties, on its own line after a place). Royal Mail's PAF Programmers' Guide calls the county optional and prints it after the post town; the UPU Ireland sheet prints "CO. CORK" on a line of its own.
+# The names are our own list of the ceremonial, preserved and historic counties of Britain and the counties of Ireland (geographic facts, no external file).
+GB	Bedfordshire
+GB	Berkshire
+GB	Buckinghamshire
+GB	Cambridgeshire
+GB	Cheshire
+GB	Cornwall
+GB	Cumbria
+GB	Derbyshire
+GB	Devon
+GB	Dorset
+GB	East Riding of Yorkshire
+GB	East Sussex
+GB	Essex
+GB	Gloucestershire
+GB	Greater London
+GB	Greater Manchester
+GB	Hampshire
+GB	Herefordshire
+GB	Hertfordshire
+GB	Isle of Wight
+GB	Kent
+GB	Lancashire
+GB	Leicestershire
+GB	Lincolnshire
+GB	Merseyside
+GB	Norfolk
+GB	North Yorkshire
+GB	Northamptonshire
+GB	Northumberland
+GB	Nottinghamshire
+GB	Oxfordshire
+GB	Rutland
+GB	Shropshire
+GB	Somerset
+GB	South Yorkshire
+GB	Staffordshire
+GB	Suffolk
+GB	Surrey
+GB	Tyne and Wear
+GB	Warwickshire
+GB	West Midlands
+GB	West Sussex
+GB	West Yorkshire
+GB	Wiltshire
+GB	Worcestershire
+GB	Middlesex
+GB	Cumberland
+GB	Westmorland
+GB	Huntingdonshire
+GB	Yorkshire
+GB	Humberside
+GB	Cleveland
+GB	Hereford and Worcester
+GB	Anglesey
+GB	Gwynedd
+GB	Conwy
+GB	Denbighshire
+GB	Flintshire
+GB	Powys
+GB	Ceredigion
+GB	Pembrokeshire
+GB	Carmarthenshire
+GB	Neath Port Talbot
+GB	Vale of Glamorgan
+GB	Rhondda Cynon Taf
+GB	Merthyr Tydfil
+GB	Blaenau Gwent
+GB	Torfaen
+GB	Monmouthshire
+GB	Mid Glamorgan
+GB	South Glamorgan
+GB	West Glamorgan
+GB	Glamorgan
+GB	Gwent
+GB	Dyfed
+GB	Clwyd
+GB	Aberdeenshire
+GB	Angus
+GB	Argyll and Bute
+GB	Argyll
+GB	Clackmannanshire
+GB	Dumfries and Galloway
+GB	East Ayrshire
+GB	East Dunbartonshire
+GB	East Lothian
+GB	East Renfrewshire
+GB	Fife
+GB	Highland
+GB	Inverclyde
+GB	Midlothian
+GB	Moray
+GB	North Ayrshire
+GB	North Lanarkshire
+GB	Orkney
+GB	Perth and Kinross
+GB	Renfrewshire
+GB	Scottish Borders
+GB	Shetland
+GB	South Ayrshire
+GB	South Lanarkshire
+GB	West Dunbartonshire
+GB	West Lothian
+GB	Western Isles
+GB	Ayrshire
+GB	Lanarkshire
+GB	Lothian
+GB	Perthshire
+GB	Kincardineshire
+GB	Banffshire
+GB	Fermanagh
+GB	Tyrone
+GB	Londonderry
+GB	England
+GB	Scotland
+GB	Wales
+GB	Northern Ireland
+IE	Carlow
+IE	Cavan
+IE	Clare
+IE	Cork
+IE	Donegal
+IE	Galway
+IE	Kerry
+IE	Kildare
+IE	Kilkenny
+IE	Laois
+IE	Leitrim
+IE	Limerick
+IE	Longford
+IE	Louth
+IE	Mayo
+IE	Meath
+IE	Monaghan
+IE	Offaly
+IE	Roscommon
+IE	Sligo
+IE	Tipperary
+IE	Waterford
+IE	Westmeath
+IE	Wexford
+IE	Wicklow

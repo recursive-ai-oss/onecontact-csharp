@@ -119,12 +119,19 @@ internal static partial class T2Rules
     /// <summary>Italian province codes.</summary>
     internal static IReadOnlySet<string> ItProvinces => Loaded.Value.ItProvinces;
 
+    /// <summary>Gets whether a line is the name of a county written on its own line (the United Kingdom: <c>GB</c>; Ireland: <c>IE</c>); <paramref name="key"/> is the line as <see cref="Key"/> writes it.</summary>
+    internal static bool IsCounty(string country, string key) => Loaded.Value.Counties.Contains((country, key));
+
     /// <summary>Gets whether a word names a unit inside a building in the country (<c>Flat</c>, <c>Interno</c>); a number or letter follows it.</summary>
     internal static bool IsUnitDesignator(string country, string key) => Loaded.Value.Designators.Contains((country, key));
 
     /// <summary>Finds the English road type that ends a name (<c>STREET</c>, <c>RD</c>), or <see langword="null"/>.</summary>
     internal static T2Type? FindTailType(string key) =>
         Loaded.Value.TypesBySetAndVariant.TryGetValue(("tail-en", key), out T2Type? type) ? type : null;
+
+    /// <summary>Finds the Basque road word that follows a name (<c>KALEA</c>), or <see langword="null"/>.</summary>
+    internal static T2Type? FindLastType(string key) =>
+        Loaded.Value.TypesBySetAndVariant.TryGetValue(("last-eu", key), out T2Type? type) ? type : null;
 
     /// <summary>Words that follow a house number and belong to it (staircase, floor, door).</summary>
     internal static IReadOnlySet<string> UnitWords => Loaded.Value.UnitWords;
@@ -338,6 +345,11 @@ internal static partial class T2Rules
             }
         }
 
+        foreach (string[] r in RuleFile.Read("t2-counties.tsv"))
+        {
+            t.Counties.Add((r[0], Key(r[1])));
+        }
+
         foreach (string[] r in RuleFile.Read("t2-cantons.tsv"))
         {
             t.Cantons.Add(r[0]);
@@ -376,5 +388,7 @@ internal static partial class T2Rules
         internal HashSet<string> UnitWords { get; } = new(StringComparer.Ordinal);
 
         internal HashSet<(string, string)> Designators { get; } = [];
+
+        internal HashSet<(string, string)> Counties { get; } = [];
     }
 }

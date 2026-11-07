@@ -370,7 +370,8 @@ internal static class PersonNameParser
                     continue;
                 }
 
-                bool betweenFamilies = text.Length == 1 && folded is "y" or "e" or "i" && words.Count == 1 && j > 0 && j < list.Count - 1 && !NameLexicon.FamilyFirst(langs);
+                // "Garcia y Lopez, Maria": the family block of a comma form may hold the connector too.
+                bool betweenFamilies = text.Length == 1 && folded is "y" or "e" or "i" && words.Count <= 2 && list == words[0] && j > 0 && j < list.Count - 1 && !NameLexicon.FamilyFirst(langs);
                 if (!betweenFamilies)
                 {
                     issues.Add(new ParseIssue(ReasonCode.PersonAmbiguousConnector, new SourceSpan(tokens[list[j]].Start, tokens[list[j]].Length)));
@@ -422,7 +423,8 @@ internal static class PersonNameParser
             return draft;
         }
 
-        if (NameLexicon.FamilyFirst(langs))
+        if (NameLexicon.FamilyFirst(langs)
+            || (t0.Count is 2 or 3 && NameLexicon.SurnameBeforeGiven(NameFolding.LettersAndDigits(tokens[t0[0]].Text(whole)), NameFolding.LettersAndDigits(tokens[t0[1]].Text(whole)), langs)))
         {
             // Hungarian and other family-first usage: "Family Given Middle".
             draft.Order = NameOrder.FamilyGiven;
@@ -469,6 +471,23 @@ internal static class PersonNameParser
         if (twoFamilies && t0.Count >= 3)
         {
             SplitSpanish(whole, tokens, t0, langs, draft);
+            return draft;
+        }
+
+        // Portuguese: "Ana Maria dos Santos Ferreira" keeps "dos Santos" together as the first family name when a particle stands two words from the end.
+        int pt = t0.Count - 3;
+        if (NameLexicon.Has(langs, "pt") && t0.Count >= 4 && NameLexicon.IsParticle(NameFolding.LettersAndDigits(tokens[t0[pt]].Text(whole)), langs)
+            && !NameLexicon.IsParticle(NameFolding.LettersAndDigits(tokens[t0[pt + 1]].Text(whole)), langs))
+        {
+            draft.Given = Part(whole, tokens, [t0[0]]);
+            if (pt > 1)
+            {
+                draft.Middle = Part(whole, tokens, t0.GetRange(1, pt - 1));
+            }
+
+            draft.Particle = Part(whole, tokens, [t0[pt]]);
+            draft.Family = Part(whole, tokens, [t0[pt + 1]]);
+            draft.SecondFamily = Part(whole, tokens, [t0[pt + 2]]);
             return draft;
         }
 
@@ -548,7 +567,24 @@ internal static class PersonNameParser
         }
 
         List<int> rest = words.GetRange(p, words.Count - p);
-        if (twoFamilies && rest.Count >= 2)
+        int joiner = -1;
+        for (int k = 1; k < rest.Count - 1; k++)
+        {
+            ReadOnlySpan<char> word = tokens[rest[k]].Text(whole);
+            if (word.Length == 1 && NameLexicon.IsConnector(word, NameFolding.LettersAndDigits(word), langs))
+            {
+                joiner = k;
+                break;
+            }
+        }
+
+        if (joiner > 0 && joiner < rest.Count - 1)
+        {
+            draft.Family = Part(whole, tokens, rest.GetRange(0, joiner));
+            draft.FamilyConnector = tokens[rest[joiner]].Text(whole).ToString();
+            draft.SecondFamily = Part(whole, tokens, rest.GetRange(joiner + 1, rest.Count - joiner - 1));
+        }
+        else if (twoFamilies && rest.Count >= 2)
         {
             draft.Family = Part(whole, tokens, [rest[0]]);
             draft.SecondFamily = Part(whole, tokens, rest.GetRange(1, rest.Count - 1));

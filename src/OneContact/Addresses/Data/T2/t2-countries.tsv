@@ -23,8 +23,8 @@ LI	LIECHTENSTEIN	plain	de	4d	FL,LI		last	0	1	bpost-de
 # A thirteenth column, written, prints the locality as the writer wrote it (Jersey Post asks for capitals on the postcode only; the Royal Mail, Guernsey Post and UPU sheets ask for the post town in capitals).
 # Profiles: uk, ie (delivery lines and locality in capitals, UPU Ireland examples), es (commas kept before the floor and door, UPU Spain sheet), pt (capitals, UPU Portugal sheet), it (capitals, no punctuation from the street line on, UPU Italy sheet), sm, va (Italian system, lines as written), mt, ad.
 GB	UNITED KINGDOM	plain	en	uk			first	0	1	-	uk
-JE	CHANNEL ISLANDS	plain	en	uk			first	0	1	-	uk	written
-GG	CHANNEL ISLANDS	plain	en	uk			first	0	1	-	uk
+JE	CHANNEL ISLANDS	plain	en	uk			first	0	1	road-ci	uk	written
+GG	CHANNEL ISLANDS	plain	en	uk			first	0	1	road-ci	uk
 IM	ISLE OF MAN	plain	en	uk			first	0	1	-	uk
 IE	IRELAND	plain	en,ga	eircode			first	0	1	-	ie
 ES	SPAIN	plain	es,ca,eu,gl	5d	E,ES		last	0	1	road-es	es
