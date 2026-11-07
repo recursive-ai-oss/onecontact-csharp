@@ -105,3 +105,9 @@ SCOTLAND	GB
 WALES	GB
 NORTHERN IRELAND	GB
 CYMRU	GB
+# Group B, forms of web pages: the vehicle code San Marino uses for itself.
+RSM	SM
+# Group B, forms of web pages: the islands as countries (Jersey Post and Guernsey Post write the island on the last line) and the "British Isles" line some Manx and Channel Islands pages add.
+JERSEY	JE
+GUERNSEY	GG
+BRITISH ISLES	BI

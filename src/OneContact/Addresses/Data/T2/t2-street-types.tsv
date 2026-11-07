@@ -280,3 +280,36 @@ road-pt	ESCADINHAS	-	ESCNH
 road-pt	LOTEAMENTO	-	LOTEAM
 road-pt	PROLONGAMENTO	-	PROLNG
 road-pt	CALCADINHA	-	CCNH
+# Group B, British Isles forms. road-ci: the French road words of Jersey and Guernsey roads, which start a street line (Jersey Post and Guernsey Post addresses: "La Rue de Haut", "Rue du Hocq", "La Route de St Aubin", "Le Mont Cochon", "Chemin des Pins"). The posts publish no abbreviation table for them, so none is rewritten.
+road-ci	LA GRANDE ROUTE	-	
+road-ci	LA GRANDE RUE	-	
+road-ci	LA ROUTE	-	
+road-ci	LA RUE	-	
+road-ci	LA RUELLE	-	
+road-ci	LE CHEMIN	-	
+road-ci	LE MONT	-	
+road-ci	LE CLOS	-	
+road-ci	LES CLOS	-	
+road-ci	ROUTE	-	
+road-ci	RUE	-	
+road-ci	CHEMIN	-	
+road-ci	CLOS	-	
+road-ci	MONT	-	
+road-ci	RUELLE	-	
+road-ci	VALE	-	
+# Group B, forms of web pages. Industrial estates written as the street of an address (Spanish polígono industrial and its abbreviations "P.I." and "Pol. Ind."; Portuguese zona industrial, "Z.I.") and the Basque road words that follow the name ("Nagusia Kalea", "Mayor Kalea"; Euskaltzaindia's usage: kalea, etorbidea, hiribidea, pasealekua, enparantza, bidea, auzoa).
+road-es	POLIGONO INDUSTRIAL	-	POL IND;PI
+road-pt	ZONA INDUSTRIAL	-	ZI
+last-eu	KALEA	-	
+last-eu	ETORBIDEA	-	
+last-eu	HIRIBIDEA	-	
+last-eu	PASEALEKUA	-	
+last-eu	ENPARANTZA	-	
+last-eu	BIDEA	-	
+last-eu	AUZOA	-	
+road-pt	CAIS	-	
+road-pt	VIELA	-	
+road-pt	PASSEIO	-	
+road-pt	SITIO	-	
+road-ad	PLACA	-	PLCA
+road-es	PLACA	-	PLCA

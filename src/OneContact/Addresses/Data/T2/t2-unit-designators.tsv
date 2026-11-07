@@ -28,3 +28,17 @@ PL	MIESZK
 PL	MIESZKANIE
 PL	LOK
 PL	LOKAL
+# Group B, forms of web pages: Spanish premises words that follow an industrial-estate or street line (nave, parcela, local, oficina), and Portuguese lot and shop words (CTT, Manual de Endereçamento 2014: the door identification may be a "lote, torre ou outro"; its Anexo I lists Lote LT and Loja LJ).
+ES	NAVE
+ES	PARCELA
+ES	LOCAL
+ES	OFICINA
+ES	DESPACHO
+ES	PUESTO
+ES	MODULO
+PT	LOTE
+PT	LT
+PT	LOJA
+PT	FRACCAO
+PT	FRAC
+PT	SALA

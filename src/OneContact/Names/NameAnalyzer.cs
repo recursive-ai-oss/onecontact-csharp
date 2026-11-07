@@ -210,6 +210,27 @@ internal static class NameAnalyzer
             return;
         }
 
+        // "Garcia y Lopez, Maria": the connector sits between the two family names of a "Family, Given" text.
+        if (connectors.Count == 1 && !NameLexicon.FamilyFirst(langs))
+        {
+            ReadOnlySpan<char> joiner = tokens[connectors[0]].Text(whole);
+            string joinerFolded = NameFolding.LettersAndDigits(joiner);
+            int comma = -1;
+            for (int i = 1; i < tokens.Count && comma < 0; i++)
+            {
+                if (tokens[i].CommaBefore)
+                {
+                    comma = i;
+                }
+            }
+
+            if (joiner.Length == 1 && joinerFolded is "y" or "e" or "i" && comma > connectors[0] + 1)
+            {
+                Single(whole, start, end, hints, langs, result);
+                return;
+            }
+        }
+
         // One person with two family names joined by "y" or "e": "Maria Garcia y Lopez".
         if (expanded.Count == 2 && connectors.Count == 1)
         {
