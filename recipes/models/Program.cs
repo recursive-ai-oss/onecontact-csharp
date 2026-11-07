@@ -64,7 +64,7 @@ internal static class Program
         }
     }
 
-    private static List<Example> Load(Dictionary<string, string> o, StringStore strings, bool dev)
+    internal static List<Example> Load(Dictionary<string, string> o, StringStore strings, bool dev)
     {
         string suffix = dev ? "-dev" : string.Empty;
         int addrCount = Num(o, dev ? "address-dev-count" : "address-count", dev ? 8000 : 300000);
@@ -73,7 +73,7 @@ internal static class Program
         // Files named in --address-big (the United States, Canada and the territories) have their own count; the other files share --address-count evenly
         // (a file with fewer lines gives all of them), so every country is seen.
         HashSet<string> big = new(o.TryGetValue("address-big", out string? bigList) ? bigList.Split(',', StringSplitOptions.RemoveEmptyEntries) : [], StringComparer.Ordinal);
-        string[] addressFiles = Files(o, "addresses" + suffix);
+        string[] addressFiles = o.ContainsKey("addresses" + suffix) ? Files(o, "addresses" + suffix) : [];
         string[] others = [.. addressFiles.Where(f => !big.Contains(StripSplit(f)))];
         foreach (string file in addressFiles)
         {
@@ -112,8 +112,8 @@ internal static class Program
         double budget = o.TryGetValue("budget-seconds", out string? b) ? double.Parse(b, CultureInfo.InvariantCulture) : double.PositiveInfinity;
 
         using Pipeline pipeline = SupersetPipeline.New(seed);
-        List<Example> train = Load(o, pipeline.Strings, dev: false);
-        List<Example> dev = Load(o, pipeline.Strings, dev: true);
+        List<Example> train = Challenger.LoadAny(o, pipeline.Strings, dev: false);
+        List<Example> dev = Challenger.LoadAny(o, pipeline.Strings, dev: true);
         Console.WriteLine("train: " + Data.Describe(train));
         Console.WriteLine("dev: " + Data.Describe(dev));
 
@@ -167,7 +167,7 @@ internal static class Program
     private static int Dev(Dictionary<string, string> o)
     {
         using Pipeline pipeline = PipelineFile.Load(Required(o, "model"));
-        List<Example> dev = Load(o, pipeline.Strings, dev: true);
+        List<Example> dev = Challenger.LoadAny(o, pipeline.Strings, dev: true);
         foreach (Example e in dev)
         {
             pipeline.Process(e.Predicted);
@@ -219,7 +219,7 @@ internal static class Program
     // "/path/us.train.jsonl" -> "us"
     private static string StripSplit(string file) => Path.GetFileName(file).Split('.')[0];
 
-    private static string[] Files(Dictionary<string, string> o, string key)
+    internal static string[] Files(Dictionary<string, string> o, string key)
     {
         List<string> files = [];
         foreach (string item in Required(o, key).Split(',', StringSplitOptions.RemoveEmptyEntries))
@@ -237,7 +237,7 @@ internal static class Program
         return [.. files];
     }
 
-    private static int Num(Dictionary<string, string> o, string key, int fallback) =>
+    internal static int Num(Dictionary<string, string> o, string key, int fallback) =>
         o.TryGetValue(key, out string? v) ? int.Parse(v, CultureInfo.InvariantCulture) : fallback;
 
     private static string Required(Dictionary<string, string> o, string key) =>

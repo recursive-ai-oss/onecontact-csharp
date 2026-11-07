@@ -16,7 +16,7 @@ internal static partial class Data
     internal const string Outside = "O";
 
     /// <summary>Reads address examples: words as supplied by the set, a word for every line break, B/I tags in the Tag column.</summary>
-    internal static List<Example> ReadAddresses(string path, StringStore strings, int count, uint salt)
+    internal static List<Example> ReadAddresses(string path, StringStore strings, int count, uint salt, Func<string, string>? relabel = null)
     {
         List<Example> result = [];
         foreach (string line in SelectLines(path, count, salt))
@@ -27,7 +27,7 @@ internal static partial class Data
             var entities = new List<(int S, int E, string L)>();
             foreach (JsonElement e in root.GetProperty("entities").EnumerateArray())
             {
-                entities.Add((e[0].GetInt32(), e[1].GetInt32(), e[2].GetString()!));
+                entities.Add((e[0].GetInt32(), e[1].GetInt32(), relabel is null ? e[2].GetString()! : relabel(e[2].GetString()!)));
             }
 
             // The set already cut words at the edges of its spans; the supplied words are used as they are, with line breaks added.
