@@ -134,7 +134,7 @@ internal static class Uts46
         bool transitional = (options & Uts46Options.TransitionalProcessing) != 0;
 
         // Step 1, map.
-        var mapped = new List<int>(domain.Length);
+        var mapped = new CodePointBuffer(domain.Length);
         for (int i = 0; i < domain.Length; i++)
         {
             int cp = domain[i];
@@ -162,12 +162,12 @@ internal static class Uts46
                         break;
                     }
 
-                    AppendCodePoints(mapped, mapping);
+                    mapped.AddAll(mapping);
                     break;
                 case IdnaStatus.Deviation:
                     if (transitional)
                     {
-                        AppendCodePoints(mapped, mapping);
+                        mapped.AddAll(mapping);
                     }
                     else
                     {
@@ -279,20 +279,43 @@ internal static class Uts46
         return ok;
     }
 
-    private static void AppendCodePoints(List<int> target, ReadOnlySpan<char> text)
+    // The mapped code points of step 1. The array starts at the length of the input, which is the final length when nothing is ignored or
+    // expanded (the usual case), so it is then handed on as it is.
+    private sealed class CodePointBuffer
     {
-        for (int i = 0; i < text.Length; i++)
+        private int[] _items;
+        private int _count;
+
+        internal CodePointBuffer(int capacity) => _items = new int[Math.Max(capacity, 4)];
+
+        internal void Add(int cp)
         {
-            if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+            if (_count == _items.Length)
             {
-                target.Add(char.ConvertToUtf32(text[i], text[i + 1]));
-                i++;
+                Array.Resize(ref _items, _items.Length * 2);
             }
-            else
+
+            _items[_count++] = cp;
+        }
+
+        // Code points of UTF-16 text; a lone surrogate reads as U+FFFD.
+        internal void AddAll(ReadOnlySpan<char> text)
+        {
+            for (int i = 0; i < text.Length; i++)
             {
-                target.Add(char.IsSurrogate(text[i]) ? 0xFFFD : text[i]);
+                if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+                {
+                    Add(char.ConvertToUtf32(text[i], text[i + 1]));
+                    i++;
+                }
+                else
+                {
+                    Add(char.IsSurrogate(text[i]) ? 0xFFFD : text[i]);
+                }
             }
         }
+
+        internal int[] ToArray() => _count == _items.Length ? _items : _items[.._count];
     }
 
     // UTS #46 section 4.1, "Validity Criteria". A label that came from Punycode is validated for non-transitional processing.
