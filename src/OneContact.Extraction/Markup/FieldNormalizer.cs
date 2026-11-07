@@ -321,15 +321,36 @@ internal sealed class FieldNormalizer
         }
 
         var names = new List<string>();
-        foreach (TEnum member in Enum.GetValues<TEnum>())
+        foreach ((ulong bit, string name) in SingleBits<TEnum>.Members)
         {
-            ulong m = Convert.ToUInt64(member, System.Globalization.CultureInfo.InvariantCulture);
-            if (m != 0 && (m & (m - 1)) == 0 && (bits & m) != 0)
+            if ((bits & bit) != 0)
             {
-                names.Add(member.ToString());
+                names.Add(name);
             }
         }
 
         return [.. names];
+    }
+
+    // The single-bit members of a flags enum with their names, listed once per enum type.
+    private static class SingleBits<TEnum>
+        where TEnum : struct, Enum
+    {
+        public static readonly (ulong Bit, string Name)[] Members = Build();
+
+        private static (ulong, string)[] Build()
+        {
+            var list = new List<(ulong, string)>();
+            foreach (TEnum member in Enum.GetValues<TEnum>())
+            {
+                ulong m = Convert.ToUInt64(member, System.Globalization.CultureInfo.InvariantCulture);
+                if (m != 0 && (m & (m - 1)) == 0)
+                {
+                    list.Add((m, member.ToString()));
+                }
+            }
+
+            return [.. list];
+        }
     }
 }

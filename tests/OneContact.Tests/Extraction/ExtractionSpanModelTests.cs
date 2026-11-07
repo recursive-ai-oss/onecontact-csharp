@@ -27,27 +27,27 @@ public sealed class ExtractionSpanModelTests
     }
 
     // No word in front of the name points at it, so the rules leave it to the model.
-    private const string Note = "Renewal notes: Jane Smith has the details.\nShe can be reached on jane.smith@acme.example.";
+    private const string Note = "Renewal notes: Quillon Marchetti has the details.\nShe can be reached on info@acme.example.";
 
     [Fact]
     public void WithoutASpanModelExtractionIsRulesOnly()
     {
         ExtractResult r = new ContactExtractor().ExtractText(Note);
         Assert.DoesNotContain(r.Fields, f => f.Decision == DecisionSource.Model);
-        Assert.Equal(["jane.smith@acme.example"], r.Of(FieldKind.Email).Select(f => f.Text));
+        Assert.Equal(["info@acme.example"], r.Of(FieldKind.Email).Select(f => f.Text));
     }
 
     [Fact]
     public void AFieldTheModelFindsWhereRulesFoundNothingSaysModelWithItsConfidenceAndOffsets()
     {
-        var model = new FixedSpanModel([], ("Jane Smith", "person", 0.9f));
+        var model = new FixedSpanModel([], ("Quillon Marchetti", "person", 0.9f));
         using IDisposable scope = ContactModels.Scope(null, null, model);
         ExtractResult r = new ContactExtractor().ExtractText(Note);
         ExtractedField name = Assert.Single(r.Of(FieldKind.Name));
-        Assert.Equal("Jane Smith", name.Text);
+        Assert.Equal("Quillon Marchetti", name.Text);
         Assert.Equal(DecisionSource.Model, name.Decision);
-        Assert.Equal(Note.IndexOf("Jane", StringComparison.Ordinal), name.Span.Start);
-        Assert.Equal(10, name.Span.Length);
+        Assert.Equal(Note.IndexOf("Quillon", StringComparison.Ordinal), name.Span.Start);
+        Assert.Equal(17, name.Span.Length);
         Assert.Equal(0.9, name.Confidence, 3);
         Assert.Equal(DecisionSource.Rule, Assert.Single(r.Of(FieldKind.Email)).Decision);
     }
@@ -55,11 +55,11 @@ public sealed class ExtractionSpanModelTests
     [Fact]
     public void AModelSpanOverlappingARuleHitIsDroppedAndTheRuleKeepsTheField()
     {
-        var model = new FixedSpanModel([], ("smith@acme.example", "email", 0.99f), ("Jane Smith", "company", 0.2f));
+        var model = new FixedSpanModel([], ("info@acme.example", "email", 0.99f), ("Quillon Marchetti", "company", 0.2f));
         using IDisposable scope = ContactModels.Scope(null, null, model);
         ExtractResult r = new ContactExtractor().ExtractText(Note);
         ExtractedField email = Assert.Single(r.Of(FieldKind.Email));
-        Assert.Equal("jane.smith@acme.example", email.Text);
+        Assert.Equal("info@acme.example", email.Text);
         Assert.Equal(DecisionSource.Rule, email.Decision);
         Assert.Empty(r.Of(FieldKind.Organization));
     }
@@ -77,18 +77,18 @@ public sealed class ExtractionSpanModelTests
     [Fact]
     public void ABlockStartTheModelSeesSplitsTwoGroupsThatTheLayoutAloneWouldJoin()
     {
-        const string signatures = "Jane Smith\njane@acme.example\n555-010-0199\nTom Jones\n555-010-0188";
+        const string signatures = "Quillon Marchetti\njane@acme.example\n555-010-0199\nTom Jones\n555-010-0188";
         var extractor = new ContactExtractor { DefaultRegion = Region.US };
-        var model = new FixedSpanModel(["Tom Jones"], ("Jane Smith", "person", 0.9f), ("Tom Jones", "person", 0.9f));
+        var model = new FixedSpanModel(["Tom Jones"], ("Quillon Marchetti", "person", 0.9f), ("Tom Jones", "person", 0.9f));
         using (ContactModels.Scope(null, null, model))
         {
             ExtractResult r = extractor.ExtractText(signatures);
             Assert.Equal(2, r.Records.Count);
-            Assert.Equal(["Jane Smith", "Tom Jones"], r.Records.SelectMany(rec => rec.Fields).Where(f => f.Kind == FieldKind.Name).Select(f => f.Text).Order());
+            Assert.Equal(["Quillon Marchetti", "Tom Jones"], r.Records.SelectMany(rec => rec.Fields).Where(f => f.Kind == FieldKind.Name).Select(f => f.Text).Order());
         }
 
         // The same text without the block start is one group: the layout has no reason to cut it.
-        using (ContactModels.Scope(null, null, new FixedSpanModel([], ("Jane Smith", "person", 0.9f), ("Tom Jones", "person", 0.9f))))
+        using (ContactModels.Scope(null, null, new FixedSpanModel([], ("Quillon Marchetti", "person", 0.9f), ("Tom Jones", "person", 0.9f))))
         {
             Assert.Single(extractor.ExtractText(signatures).Records);
         }
@@ -110,8 +110,8 @@ public sealed class ExtractionSpanModelTests
     [Fact]
     public void ByDefaultAWebPageIsReadByRulesAndMarkupWhateverModelIsRegistered()
     {
-        const string near = "<html><body><p>Renewal notes: Jane Smith has the details.</p><p>She can be reached on jane.smith@acme.example.</p></body></html>";
-        var model = new FixedSpanModel(["Jane Smith"], ("Jane Smith", "person", 0.9f));
+        const string near = "<html><body><p>Renewal notes: Quillon Marchetti has the details.</p><p>She can be reached on info@acme.example.</p></body></html>";
+        var model = new FixedSpanModel(["Quillon Marchetti"], ("Quillon Marchetti", "person", 0.9f));
         using IDisposable scope = ContactModels.Scope(null, null, model);
         Assert.DoesNotContain(new ContactExtractor().ExtractHtml(near).Fields, f => f.Decision == DecisionSource.Model);
     }
@@ -121,10 +121,10 @@ public sealed class ExtractionSpanModelTests
     {
         // A name next to an email address is read; the same name in prose far from any contact detail is not (the model's names on whole
         // pages were mostly navigation, product names and bylines).
-        const string near = "<html><body><p>Renewal notes: Jane Smith has the details.</p><p>She can be reached on jane.smith@acme.example.</p></body></html>";
-        string far = "<html><body><p>Renewal notes: Jane Smith has the details.</p>" + string.Concat(Enumerable.Repeat("<p>The quarterly report is attached.</p>", 8))
-            + "<p>Mail jane.smith@acme.example for more.</p></body></html>";
-        var model = new FixedSpanModel(["Jane Smith"], ("Jane Smith", "person", 0.9f));
+        const string near = "<html><body><p>Renewal notes: Quillon Marchetti has the details.</p><p>She can be reached on info@acme.example.</p></body></html>";
+        string far = "<html><body><p>Renewal notes: Quillon Marchetti has the details.</p>" + string.Concat(Enumerable.Repeat("<p>The quarterly report is attached.</p>", 8))
+            + "<p>Mail info@acme.example for more.</p></body></html>";
+        var model = new FixedSpanModel(["Quillon Marchetti"], ("Quillon Marchetti", "person", 0.9f));
         using IDisposable scope = ContactModels.Scope(null, null, model);
         using IDisposable gate = WebModelOn();
         ExtractedField inBlock = Assert.Single(new ContactExtractor().ExtractHtml(near).Of(FieldKind.Name));
@@ -136,19 +136,19 @@ public sealed class ExtractionSpanModelTests
     [Fact]
     public void OnAWebPageAModelPersonBelowTheWebCutIsDropped()
     {
-        const string near = "<html><body><p>Renewal notes: Jane Smith has the details.</p><p>She can be reached on jane.smith@acme.example.</p></body></html>";
-        var model = new FixedSpanModel(["Jane Smith"], ("Jane Smith", "person", 0.5f));
+        const string near = "<html><body><p>Renewal notes: Quillon Marchetti has the details.</p><p>She can be reached on info@acme.example.</p></body></html>";
+        var model = new FixedSpanModel(["Quillon Marchetti"], ("Quillon Marchetti", "person", 0.5f));
         using IDisposable scope = ContactModels.Scope(null, null, model);
         using IDisposable gate = WebModelOn();
         Assert.Empty(new ContactExtractor().ExtractHtml(near).Of(FieldKind.Name));
-        Assert.Single(new ContactExtractor().ExtractText("Renewal notes: Jane Smith has the details.\nShe can be reached on jane.smith@acme.example.").Of(FieldKind.Name));
+        Assert.Single(new ContactExtractor().ExtractText("Renewal notes: Quillon Marchetti has the details.\nShe can be reached on info@acme.example.").Of(FieldKind.Name));
     }
 
     [Fact]
     public void OnAWebPageTheModelsAddressesPhonesAndEmailsAreNotUsed()
     {
-        const string html = "<html><body><p>Renewal notes: Jane Smith has the details.</p><p>Write to jane.smith@acme.example</p><p>Oak Lane 12</p></body></html>";
-        var model = new FixedSpanModel([], ("Oak Lane 12", "address", 0.99f), ("Jane Smith", "person", 0.9f));
+        const string html = "<html><body><p>Renewal notes: Quillon Marchetti has the details.</p><p>Write to info@acme.example</p><p>Oak Lane 12</p></body></html>";
+        var model = new FixedSpanModel([], ("Oak Lane 12", "address", 0.99f), ("Quillon Marchetti", "person", 0.9f));
         using IDisposable scope = ContactModels.Scope(null, null, model);
         using IDisposable gate = WebModelOn();
         ExtractResult page = new ContactExtractor().ExtractHtml(html);

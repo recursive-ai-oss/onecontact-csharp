@@ -85,7 +85,7 @@ internal static class NormalizationC
     {
         foreach (int cp in input)
         {
-            if (cp >= IdnaTables.NfcStableLimit)
+            if (cp >= IdnaTables.NfcStableLimit && !IdnaTables.IsNfcStable(cp))
             {
                 return false;
             }

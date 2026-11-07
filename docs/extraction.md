@@ -101,7 +101,24 @@ The rules find a person or an organization in visible text, with or without a mo
 - **Markup agrees.** A text name equal to a name that a markup record already holds takes that record's kind, so "Harbor Freight" in a page's text is an organization when its JSON-LD says so.
 - **Email.** An address that ends in a file extension (`logo@2x.png`) is not an email unless the ending is a real top-level domain.
 
-Word lists (titles, cues, places, region codes, industry words, legal-form words) are our own, in `NameVocabulary`.
+### People in typed text
+
+Text a person typed (a string, a note, a comment) is read with more rules than a web page, because the same shapes mean something else on a page: a byline, a testimonial, a product name. `ExtractText` and text items turn them on; a web page keeps only the rules above plus the ones marked "any input" here. Each needs a reason in the text itself; none builds a name from an email address or a domain.
+
+- **A given name and a family name** (two or three words, the first a given name from the lists). Given names from the core parser's list and the 2,200 commonest US given names; family names from the 5,000 commonest (US Census 2010 and SSA lists, public domain, rendered into `NameListData` by `tools/data/names/extraction-lists.py`). Given names that are also everyday words ("Will", "Rose", "Grace") never start a name on their own. A sentence opener in front ("Yesterday Maria Lopez") is left out of the span.
+- **A cue and a name the lists know.** A small word that takes a person as object ("to", "with", "by", "for", "from", "per", "via", "told", "met") counts when the first word is a given name or the last a family name. Stronger cues ("spoke with", "ask for", "attendees:", "referred by") count for any name.
+- **A verb after the name.** Verbs of answering and writing ("replied", "wrote", "texted", "called") take a person as subject for any two or three capitalized words; other verbs ("said", "was", "will") need a name from the lists.
+- **A list.** A name next to a name already found, with only commas, semicolons, "and" or "&" between them, or on the line below a name that stands alone on its line.
+- **Lower case.** A given name and a family name in lower case count with a cue in front, a contact field beside them, a speech verb after them, or an email address that spells them.
+- **Capitals.** The same rules apply to capitalized text. A label word in front ("CUSTOMER", "CLIENT") and a reference word or verb behind ("RE", "CALLED") are not part of the name.
+- **Last, First.** `Lopez, Maria` at the start of a line or after a cue; it needs a given name second or a contact, a job title or a header label after it, and an opener ("Sure, Jim"), a place or a business word before the comma refuses it.
+- **A first name alone** after a cue ("spoke with Dan", "Thank you, Dan.") or in front of a verb ("Sofia called"), for a common given name; lower case only after the strongest cues.
+- **Plain text only:** a title in front ("Dr. Patel", "Mrs. Alvarez"; "Dr" without a dot after a capitalized word is a street; on a page a title alone is a byline or a testimonial), a leading label word ("CUSTOMER Shane Wilfley"), a verb or reference word at the back ("Elian Messer called"), the greetings "thanks", "good morning" and "thank you", a header label and colon ("From:", "Attendees:", "Ref:"), and an email address in the same or a neighbouring line whose local part spells a word of the name. On a page the same shapes are menus, bylines and addresses of a business, and they added predictions that matched no contact.
+- **Never a contact:** a byline ("By Dana Reyes | May 3"), an attribution after a dash, and a name on its own line under a quotation.
+
+Development rows for these rules are in the repository's `tools/Eval/extraction/crm-texts.py` (synthetic notes and comments from our own templates, with negatives that look like names: "Will Call", "Rose Hill", "Lincoln, Nebraska").
+
+Word lists (titles, cues, places, region codes, industry words, legal-form words) are our own, in `NameVocabulary` and `NameLists`.
 
 Development rows (`blocks-us-ca-v3` dev, first 5,000 blocks, exact span, rules only): person P 98.1 R 80.7 F1 88.6; company P 80.2 R 70.2 F1 74.9; email 99.4 (94.3 before). With the model added: person 93.9, company 80.2, address 92.7. Before the rules the same rows were person 0 and company 0 without labels.
 

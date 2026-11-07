@@ -135,6 +135,69 @@ public sealed class ShortcutEquivalenceTests
         }
     }
 
+    [Fact]
+    public void Nfc_stable_code_points_are_left_alone_beside_each_other()
+    {
+        int[] neighbours = [0x61, 0x1100, 0x3042, 0x4F8B, 0x0915, 0xAC00 - 1, 0x1E9E];
+        int stable = 0;
+        int[] one = new int[1];
+        int[] pair = new int[2];
+        for (int cp = 0; cp <= 0x10FFFF; cp++)
+        {
+            if (cp is >= 0xD800 and <= 0xDFFF || !IdnaTables.IsNfcStable(cp))
+            {
+                continue;
+            }
+
+            stable++;
+            one[0] = cp;
+            Assert.True(NormalizationC.NormalizeFull(one).AsSpan().SequenceEqual(one), $"U+{cp:X4} alone");
+            foreach (int n in neighbours)
+            {
+                if (!IdnaTables.IsNfcStable(n))
+                {
+                    continue;
+                }
+
+                pair[0] = n;
+                pair[1] = cp;
+                Assert.True(NormalizationC.NormalizeFull(pair).AsSpan().SequenceEqual(pair), $"U+{n:X4} U+{cp:X4}");
+                pair[0] = cp;
+                pair[1] = n;
+                Assert.True(NormalizationC.NormalizeFull(pair).AsSpan().SequenceEqual(pair), $"U+{cp:X4} U+{n:X4}");
+            }
+        }
+
+        Assert.True(stable > 100_000, $"only {stable} code points count as stable");
+    }
+
+    [Fact]
+    public void Idna_property_answers_do_not_depend_on_what_was_asked_before()
+    {
+        // The code points collide in the small table that remembers answers; walking up, down and in strides must give the same answers.
+        const int Count = 0x110000;
+        var first = new int[Count];
+        for (int cp = 0; cp < Count; cp++)
+        {
+            first[cp] = (IdnaTables.IsMark(cp) ? 1 : 0) | (IdnaTables.IsNfcStable(cp) ? 2 : 0) | ((int)IdnaTables.GetBidiClass(cp) << 2);
+        }
+
+        foreach (int stride in new[] { 1, 1023, 1024, 4099 })
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                int cp = (int)(((long)i * stride + (stride == 1 ? Count - 1 - (2 * i) : 0)) % Count);
+                if (cp < 0)
+                {
+                    cp += Count;
+                }
+
+                int now = (IdnaTables.GetBidiClass(cp) is var b ? (int)b << 2 : 0) | (IdnaTables.IsNfcStable(cp) ? 2 : 0) | (IdnaTables.IsMark(cp) ? 1 : 0);
+                Assert.True(now == first[cp], $"U+{cp:X4}: {now} then {first[cp]}");
+            }
+        }
+    }
+
     // ---- Public suffix ---------------------------------------------------------------------------------------------------------
 
     [Fact]
@@ -447,5 +510,102 @@ public sealed class ShortcutEquivalenceTests
 
         Assert.True(cases > 3000);
         Assert.True(differences.Count == 0, $"{differences.Count} of {cases} differ:\n" + string.Join('\n', differences.Take(25)));
+    }
+
+    // The ASCII-text route of ToASCII (labels checked in place, Punycode labels kept as written) against the general route.
+    [Fact]
+    public void Idna_ascii_text_route_equals_the_general_route()
+    {
+        Uts46Options[] optionSets =
+        [
+            Uts46Options.UseStd3AsciiRules | Uts46Options.CheckHyphens | Uts46Options.CheckBidi | Uts46Options.CheckJoiners,
+            Uts46Options.CheckBidi | Uts46Options.CheckJoiners,
+            Uts46Options.CheckBidi | Uts46Options.CheckJoiners | Uts46Options.VerifyDnsLength,
+            Uts46Options.None,
+            Uts46Options.CheckHyphens | Uts46Options.IgnoreInvalidPunycode | Uts46Options.VerifyDnsLength,
+        ];
+        var inputs = new HashSet<string>(StringComparer.Ordinal);
+        var rng = new Random(20261106);
+        const string alphabet = "abcdefghijklmnopqrstuvwxyz0123456789-";
+        string RandomText(int length) => string.Create(length, rng, static (span, r) =>
+        {
+            for (int i = 0; i < span.Length; i++)
+            {
+                span[i] = alphabet[r.Next(alphabet.Length)];
+            }
+        });
+
+        // Real A-labels: the general route encodes Unicode labels, and the encoded text is then an input in its own right.
+        string[] unicode = ["bücher", "例え", "münchen", "буква", "יוניקוד", "مثال", "mañana", "☃", "aébèc", "नमस्ते"];
+        foreach (string u in unicode)
+        {
+            Assert.True(Uts46.TryToAsciiGeneral(u, Uts46Options.None, out string a) || a.Length > 0);
+            inputs.Add(a);
+            inputs.Add(a.ToUpperInvariant());
+            inputs.Add("info." + a + ".example");
+            inputs.Add(a + "." + a);
+            inputs.Add("a" + a);
+        }
+
+        (int Low, int High)[] ranges = [(0xE0, 0xFF), (0x430, 0x44F), (0x4E00, 0x4E50), (0x5D0, 0x5EA), (0x627, 0x64A), (0x61, 0x7A), (0x3042, 0x3093)];
+        for (int n = 0; n < 600; n++)
+        {
+            var sb = new StringBuilder();
+            (int low, int high) = ranges[rng.Next(ranges.Length)];
+            for (int k = rng.Next(1, 7); k > 0; k--)
+            {
+                sb.Append(char.ConvertFromUtf32(rng.Next(3) == 0 ? ranges[rng.Next(ranges.Length)].Low : rng.Next(low, high + 1)));
+            }
+
+            if (Uts46.TryToAsciiGeneral(sb.ToString(), Uts46Options.None, out string encoded))
+            {
+                inputs.Add(encoded);
+                inputs.Add("mail." + encoded + ".example");
+                inputs.Add("mail." + encoded + ".xn--p1ai");
+            }
+        }
+
+        for (int n = 0; n < 6000; n++)
+        {
+            string label = rng.Next(3) == 0 ? "xn--" + RandomText(rng.Next(1, 14)) : RandomText(rng.Next(0, 10));
+            string tail = rng.Next(4) switch { 0 => "", 1 => ".example", 2 => ".com.", _ => "." + RandomText(rng.Next(1, 5)) };
+            inputs.Add(label + tail);
+            inputs.Add(RandomText(rng.Next(0, 6)) + "." + label + tail);
+            if (rng.Next(20) == 0)
+            {
+                inputs.Add(new string('a', 62 + rng.Next(4)) + "." + label);
+            }
+        }
+
+        foreach (string word in new[] { "", ".", "..", "-", "a-", "-a", "ab--cd", "xn--", "XN--", "xn---", "xn--a-", "xn--bcher-kva", "Xn--Bcher-Kva.Example", "EXAMPLE.COM", "a.b" })
+        {
+            inputs.Add(word);
+        }
+
+        int handled = 0;
+        int accepted = 0;
+        var differences = new List<string>();
+        foreach (string input in inputs)
+        {
+            foreach (Uts46Options options in optionSets)
+            {
+                bool general = Uts46.TryToAsciiGeneral(input, options, out string expected);
+                if (!Uts46.TryToAsciiOfAsciiText(input, options, out string actual, out bool ok))
+                {
+                    continue;
+                }
+
+                handled++;
+                accepted += general ? 1 : 0;
+                if (general != ok || (general && expected != actual))
+                {
+                    differences.Add($"'{input}' {options}: general {general} '{expected}', short {ok} '{actual}'");
+                }
+            }
+        }
+
+        Assert.True(handled > 20000, $"the short route was taken {handled} times");
+        Assert.True(accepted > 1000, $"only {accepted} accepted inputs");
+        Assert.True(differences.Count == 0, $"{differences.Count} of {handled} differ:\n" + string.Join('\n', differences.Take(20)));
     }
 }

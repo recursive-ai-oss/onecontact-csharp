@@ -273,6 +273,12 @@ internal static class CompanyNameParser
                 return MarkerKind.CareOf;
             }
 
+            // The longest one-word marker is six characters ("d.b.a."), plus a trailing colon.
+            if (text.Length > 7)
+            {
+                continue;
+            }
+
             string lower = text.ToString().TrimEnd(':').ToLowerInvariant();
             if (Array.IndexOf(TradingSingle, lower) >= 0)
             {

@@ -56,6 +56,20 @@ else if (Environment.GetEnvironmentVariable("ONECONTACT_TIER1_MODEL") is { Lengt
     RecursiveAI.OneContact.Models.ContactModels.Register(RecursiveAI.OneContact.Models.Tier1.Tier1Model.PackageId, 1, tier1, tier1, tier1);
 }
 
+// ONECONTACT_TRACE_COUNTS=<file> writes how many names each kind of evidence accepted (a count per evidence name; no text).
+Dictionary<string, int>? traceCounts = null;
+if (Environment.GetEnvironmentVariable("ONECONTACT_TRACE_COUNTS") is { Length: > 0 } traceFile)
+{
+    traceCounts = [];
+    RecursiveAI.OneContact.Extraction.Text.NameCandidates.Trace = line =>
+    {
+        int at = line.LastIndexOf("] ", StringComparison.Ordinal);
+        string key = (line.StartsWith("org", StringComparison.Ordinal) ? "org " : "person ") + (at >= 0 ? line[(at + 2)..] : "?");
+        traceCounts[key] = traceCounts.GetValueOrDefault(key) + 1;
+    };
+    AppDomain.CurrentDomain.ProcessExit += (_, _) => File.WriteAllLines(traceFile, traceCounts.OrderBy(kv => kv.Key, StringComparer.Ordinal).Select(kv => kv.Key + "\t" + kv.Value));
+}
+
 HashSet<string>? ids = null;
 int idsAt = Array.IndexOf(args, "--ids");
 if (idsAt >= 0 && idsAt + 1 < args.Length)

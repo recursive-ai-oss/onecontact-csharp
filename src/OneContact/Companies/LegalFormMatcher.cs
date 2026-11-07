@@ -112,13 +112,15 @@ internal static class LegalFormMatcher
         // Key token: no hint is used, so the key is the same wherever the name is read.
         List<string> globalCodes = DistinctCodes(table, PreferActive(table, hit.Rows));
         string keyToken;
+        string? globalCommon = null;
         if (globalCodes.Count == 1)
         {
             keyToken = globalCodes[0];
         }
         else
         {
-            string common = NameFolding.LettersAndDigits(CommonAbbreviation(table, globalCodes, hit.Rows));
+            globalCommon = CommonAbbreviation(table, globalCodes, hit.Rows);
+            string common = NameFolding.LettersAndDigits(globalCommon);
             string token = common.Length > 0 ? common : hit.Folded;
             keyToken = "~" + (KeySynonyms.TryGetValue(token, out string? shorter) ? shorter : token);
         }
@@ -142,24 +144,31 @@ internal static class LegalFormMatcher
         int[] active = PreferActive(table, rows);
         inactiveOnly = active.Length > 0 && !table.Rows[active[0]].IsActive;
         List<string> codes = DistinctCodes(table, active);
-        List<ElfCandidate> candidates = new(codes.Count);
-        foreach (string code in codes)
+        // The first of the active rows that carries each code, found in one pass (codes are sorted).
+        int[] firstRow = new int[codes.Count];
+        Array.Fill(firstRow, -1);
+        foreach (int i in active)
         {
-            ElfRow row = table.Rows[table.ByCode[code][0]];
-            foreach (int i in active)
+            int at = codes.BinarySearch(table.Rows[i].Code, StringComparer.Ordinal);
+            if (at >= 0 && firstRow[at] < 0)
             {
-                if (table.Rows[i].Code == code)
-                {
-                    row = table.Rows[i];
-                    break;
-                }
+                firstRow[at] = i;
             }
+        }
 
-            candidates.Add(new ElfCandidate(code, row.Country, row.Name, row.IsActive));
+        List<ElfCandidate> candidates = new(codes.Count);
+        for (int c = 0; c < codes.Count; c++)
+        {
+            ElfRow row = table.Rows[firstRow[c] >= 0 ? firstRow[c] : table.ByCode[codes[c]][0]];
+            candidates.Add(new ElfCandidate(codes[c], row.Country, row.Name, row.IsActive));
         }
 
         string elf = codes.Count == 1 ? codes[0] : string.Empty;
-        string abbreviation = codes.Count == 1 ? CanonicalAbbreviation(table, codes[0], hit.Rows) : CommonAbbreviation(table, codes, hit.Rows);
+
+        // With no country hint the codes are the ones the key already worked from: the common abbreviation is the same text.
+        string abbreviation = codes.Count == 1
+            ? CanonicalAbbreviation(table, codes[0], hit.Rows)
+            : globalCommon is not null && codes.SequenceEqual(globalCodes, StringComparer.Ordinal) ? globalCommon : CommonAbbreviation(table, codes, hit.Rows);
 
         // A composite form ("GmbH & Co. KG") is one legal form written with its partners; its canonical abbreviation would drop words.
         if (text.Contains('&') || text.Contains(" und ", StringComparison.OrdinalIgnoreCase) || text.Contains(" and ", StringComparison.OrdinalIgnoreCase))
@@ -295,17 +304,25 @@ internal static class LegalFormMatcher
 
     private static List<string> DistinctCodes(ElfTable table, int[] rows)
     {
-        List<string> codes = [];
+        List<string> codes = new(rows.Length);
         foreach (int i in rows)
         {
-            string code = table.Rows[i].Code;
-            if (!codes.Contains(code))
-            {
-                codes.Add(code);
-            }
+            codes.Add(table.Rows[i].Code);
         }
 
         codes.Sort(StringComparer.Ordinal);
+
+        // Sorted, so the repeats sit together.
+        int kept = 0;
+        for (int i = 0; i < codes.Count; i++)
+        {
+            if (i == 0 || !string.Equals(codes[i], codes[kept - 1], StringComparison.Ordinal))
+            {
+                codes[kept++] = codes[i];
+            }
+        }
+
+        codes.RemoveRange(kept, codes.Count - kept);
         return codes;
     }
 

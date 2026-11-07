@@ -68,6 +68,38 @@ internal static class NameFolding
     /// <summary>Folds <paramref name="s"/> and keeps only letters and digits: <c>S.A. de C.V.</c> becomes <c>sadecv</c>.</summary>
     internal static string LettersAndDigits(ReadOnlySpan<char> s)
     {
+        // ASCII input (most words) needs no mark or letter tables: keep letters and digits, lower the capitals, in one allocation.
+        int kept = 0;
+        bool ascii = true;
+        foreach (char c in s)
+        {
+            if (c >= '')
+            {
+                ascii = false;
+                break;
+            }
+
+            if (char.IsAsciiLetterOrDigit(c))
+            {
+                kept++;
+            }
+        }
+
+        if (ascii)
+        {
+            return kept == 0 ? string.Empty : string.Create(kept, s, static (dest, src) =>
+            {
+                int n = 0;
+                foreach (char c in src)
+                {
+                    if (char.IsAsciiLetterOrDigit(c))
+                    {
+                        dest[n++] = char.IsAsciiLetterUpper(c) ? (char)(c | 0x20) : c;
+                    }
+                }
+            });
+        }
+
         StringBuilder sb = new(s.Length);
         foreach (char c in s)
         {
