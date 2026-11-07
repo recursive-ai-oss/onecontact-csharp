@@ -17,6 +17,8 @@
 
   <ItemGroup>
     <None Include="templates/*" Link="templates/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Our own short name lists, the fallback of the Tier 2 set for languages without an open list. -->
+    <None Include="../templates/tier2a-names.tsv;../templates/tier2b-names.tsv;../templates/tier2c-c1-names.tsv;../templates/tier2c-names.tsv;../templates/tier2c-names-nordic.tsv;../templates/tier2c3-names.tsv" Link="templates/own/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="pins/*" Link="pins/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

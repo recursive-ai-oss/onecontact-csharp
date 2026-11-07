@@ -1,0 +1,5 @@
+Source: Statistical Office of the Republic of Slovenia (SURS), SiStat: tables 05X1005S (male first names), 05X1010S (female), 05X1015S-05X1018S (family names), 1 January 2026, https://pxweb.stat.si
+Terms as read at the publisher, retrieved 2026-11-06:
+https://www.stat.si/StatWeb/en/StaticPages/Index/Copyright says: "data and information may be used free of charge: to reproduce, distribute, and make them available to the public in their original or modified form, to adapt, modify, and create derivative works and incorporate them into other products and services, and to use them for any purpose, including forprofit (commercial) and nonprofit purposes, without any restrictions on condition that whenever the data or information are used the Statistical Office of the Republic of Slovenia (or SURS) is acknowledged as their source."
+Verdict: Free use with the source named (not a named licence; equivalent in effect to CC BY). Credit: Source: Statistical Office of the Republic of Slovenia (SURS).
+The file holds aggregate counts of how many people carry a name; it is not a record of any person.

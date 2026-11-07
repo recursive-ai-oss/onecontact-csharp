@@ -1,0 +1,5 @@
+Source: Statistics Denmark name lists (all registered first names of women and men and surnames, January 2020), published by the Danish Agency for Digitisation (Digitaliseringsstyrelsen), https://sprogtek-ressources.digst.govcloud.dk/danmarks%20statistik/navne_registreret_i_danmark_2020.zip
+Terms as read at the publisher, retrieved 2026-11-06:
+The "Read Me.txt" in the archive says: "Licens: CC 4.0 BY - https://creativecommons.org/licenses/by/4.0/deed.ast (Danmarks Statestik angives som kilde)". The most-frequent lists carry no counts, only the order.
+Verdict: CC BY 4.0. Credit: Statistics Denmark (Danmarks Statistik), Navne registreret i Danmark 2020, published by the Agency for Digitisation, CC BY 4.0.
+The file holds aggregate counts of how many people carry a name; it is not a record of any person.

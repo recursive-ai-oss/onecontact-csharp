@@ -1,0 +1,5 @@
+Source: NSW Registry of Births, Deaths and Marriages: BDM Data - Popular Baby Names 1952 to 2025, https://data.nsw.gov.au/data/dataset/popular-baby-names-from-1952
+Terms as read at the publisher, retrieved 2026-11-06:
+The data.nsw.gov.au catalogue entry gives the licence as "cc-by" (Creative Commons Attribution 4.0), publisher NSW Registry of Births Deaths and Marriages.
+Verdict: CC BY 4.0. Credit: NSW Registry of Births Deaths and Marriages, NSW Government, BDM Data - Popular Baby Names 1952 to 2025, licensed under CC BY 4.0.
+The file holds aggregate counts of how many people carry a name; it is not a record of any person.

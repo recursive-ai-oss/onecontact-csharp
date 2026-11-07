@@ -1,0 +1,5 @@
+Source: Statbel (Statistics Belgium): first names of the total population by municipality (2026, male and female) and family names of the total population by municipality (2026), https://statbel.fgov.be/en/open-data
+Terms as read at the publisher, retrieved 2026-11-06:
+The Statbel open-data page says: "Statbel's open data are published under the Creative Commons Attribution 4.0 license (CC BY 4.0)." Only names borne by five or more people in a municipality are published.
+Verdict: CC BY 4.0. Credit: Statbel (Statistics Belgium), CC BY 4.0.
+The file holds aggregate counts of how many people carry a name; it is not a record of any person.

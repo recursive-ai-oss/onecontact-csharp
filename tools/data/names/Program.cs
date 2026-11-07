@@ -18,7 +18,7 @@ internal static class Program
     {
         if (args.Length == 0)
         {
-            Console.Error.WriteLine("usage: render --data DIR --elf CSV --out DIR [--seed N] [--persons N] [--multiple N] [--unknown N] [--ch-percent P] [--synth N] | report --out DIR [--sample N]");
+            Console.Error.WriteLine("usage: render --data DIR --elf CSV --out DIR [--seed N] [--persons N] [--multiple N] [--unknown N] [--ch-percent P] [--synth N] | render-tier2 --data DIR --out DIR [--seed N] [--persons N] [--multiple N] [--unknown N] | report --out DIR [--sample N]");
             return 2;
         }
 
@@ -45,6 +45,15 @@ internal static class Program
                     int.Parse(Opt("ch-percent", "8"), System.Globalization.CultureInfo.InvariantCulture),
                     int.Parse(Opt("synth", "170000"), System.Globalization.CultureInfo.InvariantCulture),
                     Opt("registers", "all") == "skip");
+                return 0;
+            case "render-tier2":
+                Tier2Gen.Render(
+                    Opt("data"),
+                    Opt("out"),
+                    ulong.Parse(Opt("seed", "20261107"), System.Globalization.CultureInfo.InvariantCulture),
+                    int.Parse(Opt("persons", "1500000"), System.Globalization.CultureInfo.InvariantCulture),
+                    int.Parse(Opt("multiple", "160000"), System.Globalization.CultureInfo.InvariantCulture),
+                    int.Parse(Opt("unknown", "100000"), System.Globalization.CultureInfo.InvariantCulture));
                 return 0;
             case "report":
                 RuleReport.Run(Opt("out"), int.Parse(Opt("sample", "5000"), System.Globalization.CultureInfo.InvariantCulture));

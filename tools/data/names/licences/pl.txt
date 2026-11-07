@@ -1,0 +1,5 @@
+Source: Ministerstwo Cyfryzacji (Poland), name statistics of the PESEL register: "Lista imion występujących w rejestrze PESEL - osoby żyjące" (https://dane.gov.pl/dataset/1667) and "Nazwiska osób żyjących występujące w rejestrze PESEL" (https://dane.gov.pl/dataset/1681)
+Terms as read at the publisher, retrieved 2026-11-06:
+The portal API (https://api.dane.gov.pl/1.4/datasets/1667 and /1681, field license_name) gives the licence of both datasets as: "CC0 1.0".
+Verdict: Public-domain dedication. No conditions; the files are counts of how many living people carry a name, not records of people.
+The file holds aggregate counts of how many people carry a name; it is not a record of any person.

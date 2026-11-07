@@ -491,7 +491,7 @@ internal sealed class PersonGen
 
     // ---- finishing ----------------------------------------------------------------------------------------------------
 
-    private static Example Finish(string id, Builder b, string cls, string pattern, string lang, string region, int caseMode, string source, bool noAccents)
+    internal static Example Finish(string id, Builder b, string cls, string pattern, string lang, string region, int caseMode, string source, bool noAccents)
     {
         string plain = b.Text;
         string text = plain;

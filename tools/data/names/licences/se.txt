@@ -1,0 +1,5 @@
+Source: Statistics Sweden (SCB): first names and last names with at least 10 bearers among persons registered on 31 December 2020 (tables BE0001FNamn10 and BE0001ENamn10 of the open-data API; production of name statistics ended in 2024)
+Terms as read at the publisher, retrieved 2026-11-06:
+https://www.scb.se/vara-tjanster/oppna-data/ says: "Vi använder licensen CC0 för dessa data, vilket innebär att du får använda och sprida eller tillgängliggöra sådana data utan krav på att ange källa." (CC0, no attribution required; "Källa: SCB" is recommended.)
+Verdict: CC0 1.0. Courtesy credit: Source: Statistics Sweden.
+The file holds aggregate counts of how many people carry a name; it is not a record of any person.
