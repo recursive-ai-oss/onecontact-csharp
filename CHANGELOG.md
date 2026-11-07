@@ -4,6 +4,12 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Changed
+
+- Czech, Slovak and Croatian addresses: a settlement line between the street and the postcode line is read as the dependent locality; a Bucharest sector is the dependent locality and the town the locality (printed lines and keys are unchanged).
+- Hungarian, Danish, Norwegian, Swedish and Finnish lines that start with an addressee written in front of the street name without a comma are left to the model instead of being read as one street name.
+- Names: a title written after the name (`Novák Jan Ing.`) is read as the prefix; more credentials (`EMBA`, `ACCA`, `MBChB`, ...) are suffixes; wider given-name lists for the Slavic `Surname Given` order.
+
 ### Added
 
 - Repository skeleton: the `RecursiveAI.OneContact` and `RecursiveAI.OneContact.Phones.Geo` projects, placeholders for the model and extraction packages, tests, an ingest harness, a benchmark project, a fuzz host shape and a NativeAOT smoke app.

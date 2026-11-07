@@ -79,4 +79,16 @@ public class NameFormsTests
     [InlineData("HR", "prof. dr. sc. Ivan Horvat", "pre=prof. dr. sc.|giv=Ivan|mid=|part=|fam=Horvat|fam2=|prof=|GivenFamily")]
     [InlineData("HR", "dipl. iur. Ana Kovačić", "pre=dipl. iur.|giv=Ana|mid=|part=|fam=Kovačić|fam2=|prof=|GivenFamily")]
     public void SlavicTitlesAndDegrees(string country, string input, string expected) => Assert.Equal(expected, Parts(input, Country(country)));
+
+    // A title written after the name belongs to the prefix; a credential after a comma is a suffix; neither lands in the family or middle name.
+    [Theory]
+    [InlineData("SK", "Jana Nováková Ing.", "pre=Ing.|giv=Jana|mid=|part=|fam=Nováková|fam2=|prof=|GivenFamily")]
+    [InlineData("CZ", "Jan Novák Ing.", "pre=Ing.|giv=Jan|mid=|part=|fam=Novák|fam2=|prof=|GivenFamily")]
+    [InlineData("HR", "Ivan Horvat dipl. ing.", "pre=dipl. ing.|giv=Ivan|mid=|part=|fam=Horvat|fam2=|prof=|GivenFamily")]
+    [InlineData("CZ", "Petr Kučera Ing., MBA", "pre=Ing.|giv=Petr|mid=|part=|fam=Kučera|fam2=|prof=MBA|GivenFamily")]
+    [InlineData("SK", "Ing. Jana Nováková, EMBA", "pre=Ing.|giv=Jana|mid=|part=|fam=Nováková|fam2=|prof=EMBA|GivenFamily")]
+    [InlineData("SK", "Ing. Jana Nováková, MBChB", "pre=Ing.|giv=Jana|mid=|part=|fam=Nováková|fam2=|prof=MBChB|GivenFamily")]
+    // A single letter with a period is an initial, never a title.
+    [InlineData("HR", "Ivan Horvat P.", "pre=|giv=Ivan|mid=Horvat|part=|fam=P.|fam2=|prof=|GivenFamily")]
+    public void TitlesAfterTheNameAndMoreCredentials(string country, string input, string expected) => Assert.Equal(expected, Parts(input, Country(country)));
 }

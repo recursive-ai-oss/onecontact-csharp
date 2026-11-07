@@ -65,12 +65,15 @@ internal static class NameLexicon
     {
         "phd", "md", "dds", "dmd", "dvm", "jd", "esq", "esquire", "cpa", "mba", "llm", "llb", "mph", "msc", "bsc", "mpa", "mfa", "dphil", "pmp",
         "cfa", "cfp", "edd", "psyd", "frcs", "mrcs", "aia", "faia", "dmin", "pharmd", "dpm", "dc", "msw", "lcsw", "cissp",
+        "emba", "bba", "mim", "acca", "fcca", "facca", "frcp", "mrcp", "mbchb", "mphil", "meng",
+        "fca", "cma", "acma", "fcma", "cgma", "fcpa", "mha", "frm", "prm",
     }.ToFrozenSet(StringComparer.Ordinal);
 
     // Short forms that are also names or words; they count as suffixes only after a comma or when written with dots ("M.A.").
     private static readonly FrozenSet<string> AmbiguousProfessional = new[]
     {
         "ma", "ba", "bs", "ms", "do", "pe", "rn", "pa", "np", "ed", "csc", "drsc", "dis", "mga", "bca",
+        "cia", "cfe", "march", "mst", "mres", "mas", "aca", "caia",
     }.ToFrozenSet(StringComparer.Ordinal);
 
     // The letter casing of titles and suffixes written in capitals when casing is restored (letters only, in order).
@@ -78,6 +81,9 @@ internal static class NameLexicon
     {
         ["phd"] = "PhD", ["md"] = "MD", ["dds"] = "DDS", ["dmd"] = "DMD", ["dvm"] = "DVM", ["jd"] = "JD", ["cpa"] = "CPA", ["mba"] = "MBA",
         ["llm"] = "LLM", ["llb"] = "LLB", ["msc"] = "MSc", ["bsc"] = "BSc", ["mph"] = "MPH", ["mpa"] = "MPA", ["mfa"] = "MFA", ["dphil"] = "DPhil",
+        ["emba"] = "EMBA", ["bba"] = "BBA", ["mim"] = "MIM", ["acca"] = "ACCA", ["fcca"] = "FCCA", ["facca"] = "FACCA", ["frcp"] = "FRCP", ["mrcp"] = "MRCP", ["mbchb"] = "MBChB",
+        ["mphil"] = "MPhil", ["meng"] = "MEng", ["cia"] = "CIA", ["cfe"] = "CFE", ["aca"] = "ACA", ["fca"] = "FCA", ["cma"] = "CMA", ["acma"] = "ACMA", ["fcma"] = "FCMA", ["cgma"] = "CGMA", ["fcpa"] = "FCPA",
+        ["mha"] = "MHA", ["frm"] = "FRM", ["prm"] = "PRM", ["caia"] = "CAIA", ["mas"] = "MAS", ["march"] = "MArch", ["mst"] = "MSt", ["mres"] = "MRes",
         ["pmp"] = "PMP", ["cfa"] = "CFA", ["cfp"] = "CFP", ["edd"] = "EdD", ["psyd"] = "PsyD", ["pharmd"] = "PharmD", ["dmin"] = "DMin",
         ["ii"] = "II", ["iii"] = "III", ["iv"] = "IV", ["vi"] = "VI", ["vii"] = "VII", ["viii"] = "VIII", ["ix"] = "IX",
         ["mudr"] = "MUDr", ["judr"] = "JUDr", ["phdr"] = "PhDr", ["rndr"] = "RNDr", ["mvdr"] = "MVDr", ["paeddr"] = "PaedDr", ["thdr"] = "ThDr",
@@ -110,6 +116,16 @@ internal static class NameLexicon
         "peter", "jozef", "juraj", "ivan", "marian", "stefan", "lubomir", "dusan", "rudolf", "igor", "branislav", "anton",
         "maria", "katarina", "lucia", "andrea", "viera", "helena", "miroslava", "marta", "gabriela", "jaroslava",
         "marko", "josip", "ante", "luka", "mate", "tomislav", "nikola", "stjepan", "mario", "ivica", "zvonimir", "davor", "damir",
+        "vladislav", "radoslav", "miloslav", "boris", "oliver", "samuel", "dominik", "erik", "viktor", "tibor", "gustav", "emil", "oskar", "kamil", "robert", "richard",
+        "ludovit", "viliam", "alexander", "dalibor", "denis", "emanuel", "lubos", "pavol", "sebastian", "tadeas", "zbynek", "bohumil", "bohuslav", "borivoj",
+        "cyril", "eduard", "gabriel", "gregor", "henrich", "imrich", "jindrich", "kornel", "leopold", "lubor", "ludek", "mikulas", "norbert", "otakar", "radim",
+        "radovan", "rene", "svatopluk", "slavomir", "vilem", "vratislav", "zoltan", "mislav", "vedran", "kresimir", "bruno", "antun", "dragan", "milos", "nenad",
+        "vinko", "zoran", "matko", "alojz", "anze", "blaz", "bostjan", "gasper", "klemen", "matic", "miran", "tadej", "uros",
+        "adriana", "alexandra", "alica", "beata", "daniela", "denisa", "diana", "dominika", "dorota", "edita", "elena", "emilia", "erika", "gertruda", "iveta",
+        "jolana", "julia", "karolina", "klara", "laura", "libuse", "magdalena", "marcela", "margita", "nadezda", "natalia", "patricia", "pavla", "romana",
+        "sabina", "silvia", "simona", "stanislava", "terezia", "valeria", "vlasta", "zdenka", "zofia", "zora", "bozena", "drahomira", "gordana", "ljiljana",
+        "vesna", "snjezana", "marina", "tatjana", "ruzica", "katica", "ivanka", "dubravka", "branka", "zorica", "danica", "jasna", "lidija", "marijana", "sandra",
+        "antonija", "dragica", "mateja", "spela", "urska", "teja",
         "darko", "goran", "dario", "kristijan", "matija", "maja", "ana", "marija", "jelena", "mirjana", "tanja", "nada", "sanja",
         "janez", "franc", "marjan", "andrej", "bojan", "tomaz", "primoz", "miha", "jure", "rok", "natasa", "mojca", "tina", "nina",
         "irena", "sonja", "barbara", "mirko", "zeljko", "vlado", "drago", "zlatko", "hrvoje", "branko", "slavko", "ivo",
@@ -197,6 +213,9 @@ internal static class NameLexicon
         "jan", "piet", "kees", "sanne", "lars", "erik", "olof", "ingrid", "sven", "mikael", "matti", "juha", "anna", "janusz", "krzysztof",
         "tomasz", "pavel", "martin", "petr", "jiri", "marko", "luka", "janos", "laszlo", "istvan", "andrei", "mihai", "ioana", "joao",
         "marco", "giulia", "chiara", "francesca", "paolo", "luca", "sean", "aoife", "niamh", "ciaran", "padraig", "seamus",
+        "nils", "ole", "per", "knut", "bjorn", "arne", "kjell", "magnus", "anders", "henrik", "jens", "soren", "niels", "mads", "lasse", "kari", "kristin", "astrid",
+        "solveig", "hanne", "gunnar", "leif", "trond", "terje", "morten", "jan", "johan", "karl", "carl", "olav", "stein", "mette", "hilde", "randi",
+        "tone", "eva", "maja", "emil", "oskar", "mikko", "jukka", "timo", "kari", "heikki", "antti",
     ];
 
     // Second words of Spanish compound given names ("Juan Carlos", "Maria Jose"): when the middle word of three is one of these,

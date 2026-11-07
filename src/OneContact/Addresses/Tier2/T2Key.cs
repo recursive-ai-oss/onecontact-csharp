@@ -37,7 +37,17 @@ internal static class T2Key
             segments.Add(Line(line, country, codes));
         }
 
-        segments.Add(Words(a.Locality?.Standard ?? string.Empty, codes));
+        // A Bucharest sector is a dependent locality of its own in the fields but part of the locality words of the key, as it always was.
+        string sector = string.Empty;
+        foreach (ParsedAddressField f in a.Fields)
+        {
+            if (f.Rule == Tier2Reader.RomanianSectorRule)
+            {
+                sector = " " + f.Standard;
+            }
+        }
+
+        segments.Add(Words((a.Locality?.Standard ?? string.Empty) + sector, codes));
         segments.Add((a.AdminArea?.Standard ?? string.Empty).ToLowerInvariant());
         segments.Add((a.PostalCode?.Standard ?? string.Empty).Replace(" ", string.Empty, StringComparison.Ordinal).ToLowerInvariant());
         return string.Join('|', segments);

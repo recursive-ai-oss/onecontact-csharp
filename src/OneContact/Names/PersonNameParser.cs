@@ -208,6 +208,7 @@ internal static class PersonNameParser
         List<int> prefixTokens = [];
         List<int> generationalTokens = [];
         List<int> professionalTokens = [];
+        List<int> trailingTitles = [];
         List<Segment> core = [];
         for (int s = 0; s < segments.Count; s++)
         {
@@ -236,6 +237,18 @@ internal static class PersonNameParser
                 else if (NameLexicon.IsProfessional(folded, dotted || alone) && (t > lo || alone))
                 {
                     segmentProfessional.Insert(0, t);
+                }
+                else if (s == 0 && TrailingTitleSize(whole, tokens, lo, hi, langs) is var titleSize and > 0)
+                {
+                    // Czech, Slovak and Croatian registers and signatures also write the academic title after the name ("Novák Jan Ing.", "Ivan Horvat dipl. ing."): it is a
+                    // title, not a given or family name.
+                    for (int k = titleSize; k >= 1; k--)
+                    {
+                        trailingTitles.Insert(0, hi - k);
+                    }
+
+                    hi -= titleSize;
+                    continue;
                 }
                 else
                 {
@@ -276,6 +289,13 @@ internal static class PersonNameParser
             {
                 core.Add(new Segment(lo, hi));
             }
+        }
+
+        // A title written after the name is the prefix when the name has no title in front of it (so its span stays one run); otherwise it joins the professional suffixes.
+        if (trailingTitles.Count > 0)
+        {
+            (prefixTokens.Count == 0 ? prefixTokens : professionalTokens).AddRange(trailingTitles);
+            professionalTokens.Sort();
         }
 
         if (prefixTokens.Count > 0)
@@ -493,6 +513,33 @@ internal static class PersonNameParser
 
         SplitWestern(whole, tokens, t0, langs, draft);
         return draft;
+    }
+
+    // The size in tokens of a dotted title that ends the words lo..hi, with at least one word before it; zero when there is none. The words must be titles of the hinted
+    // languages, so "Smith Dr." with no language stays a surname-like word, and a single letter ("P.") is an initial, never a title.
+    private static int TrailingTitleSize(ReadOnlySpan<char> whole, List<NameToken> tokens, int lo, int hi, string[] langs)
+    {
+        for (int size = Math.Min(3, hi - lo - 1); size >= 1; size--)
+        {
+            int at = hi - size;
+            if (!tokens[hi - 1].Text(whole).EndsWith('.') || NameFolding.LettersAndDigits(tokens[hi - 1].Text(whole)).Length < 2)
+            {
+                return 0;
+            }
+
+            bool dots = true;
+            for (int k = at; k < hi; k++)
+            {
+                dots &= tokens[k].Text(whole).Contains('.');
+            }
+
+            if (dots && TitleSize(whole, tokens, at, hi, langs) == size)
+            {
+                return size;
+            }
+        }
+
+        return 0;
     }
 
     /// <summary>The number of tokens of a title at <paramref name="at"/> (up to three words, or one dotted run such as <c>Prof.Dr.</c>), or zero.</summary>

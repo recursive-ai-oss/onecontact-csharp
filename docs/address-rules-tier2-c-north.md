@@ -182,3 +182,8 @@ Forms and evidence come from Omniva *Kuidas kirja adresseerida?* (Estonian postc
 | SM | no | 92.0 -> 92.0 | 93.1 -> 93.1 | 12 -> 12 | 0 -> 0 |
 | VA | yes | 96.7 -> 96.7 | 96.9 -> 96.9 | 2 -> 2 | 0 -> 0 |
 | VA | no | 96.7 -> 96.7 | 96.9 -> 96.9 | 2 -> 2 | 0 -> 0 |
+
+### A person written in front of the street (round three)
+
+Denmark, Norway, Sweden and Finland write a street name as one word or end it in a type word (`Karl Johans gate`, `Ole Bulls plass`; Posten Norge, *Adressering*; PostNord; Danmarks Adresser, *Gengivelse af adresse*). Exactly three words before the house number that start with a given name and do not end in a type word (`Nils Larsen Nestangen 58`) are a person written in front of a one-word street with no comma or line break; longer names are read as before, since a four-word street name is as likely as a person with a middle name. Where the person ends cannot be told from the words, so the rules refuse the line and the model reads it; they used to read the person as part of the street name. The given names are our own list (`docs/names.md`).
+

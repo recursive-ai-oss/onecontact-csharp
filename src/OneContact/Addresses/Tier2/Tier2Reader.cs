@@ -17,6 +17,12 @@ namespace RecursiveAI.OneContact.Addresses.Tier2;
 /// </summary>
 internal static partial class Tier2Reader
 {
+    /// <summary>The rule name of the dependent locality read from a Bucharest sector.</summary>
+    internal const string RomanianSectorRule = "t2-romania-sector";
+
+    /// <summary>The rule name of a settlement line between the street and the postcode, read as the dependent locality (Czech Republic, Slovakia, Croatia).</summary>
+    internal const string SettlementLineRule = "t2-settlement-line";
+
     internal static bool Handles(Region region) => T2Rules.Handles(region);
 
     internal static OperationStatus TryParse(string text, Region hint, out ParsedAddress? address, out ParseDetail detail) =>
@@ -430,7 +436,7 @@ internal static partial class Tier2Reader
             for (int i = first; i < before.Count; i++)
             {
                 // A line after the first delivery line is another delivery line (a box, a locality name, a village); what the rules cannot place is kept as written.
-                Line line = parsed[i] ?? new Line(StreetLineKind.Street, [country.IsNorth ? NorthOtherPiece(before[i].Toks, country) : country.IsCentral ? CentralOtherPiece(before[i].Toks, country) : OtherPiece(before[i].Toks, country, afterStreet: true)]);
+                Line line = parsed[i] ?? new Line(StreetLineKind.Street, [country.IsNorth ? NorthOtherPiece(before[i].Toks, country) : country.IsCentral ? CentralOtherPiece(before[i].Toks, country, i > first && parsed[i - 1] is { Kind: StreetLineKind.Street }) : OtherPiece(before[i].Toks, country, afterStreet: true)]);
                 delivery.Add(new StreetLine(line.Kind, [.. line.Pieces.Where(p => p.Standard.Length > 0).Select(p => new StreetPart(p.Role, Slice(p.Span), p.Standard, p.Span, p.Rule))]));
                 int houseAt = line.Pieces.FindLastIndex(p => p.Role == StreetPartRole.HouseNumber);
                 if (country.Profile is "it" or "sm" or "va" && line.Kind == StreetLineKind.Street && houseAt >= 0 && houseAt < line.Pieces.Count - 1
@@ -605,7 +611,7 @@ internal static partial class Tier2Reader
                 foreach (StreetPart p in line.Parts)
                 {
                     // A municipality line (Lithuania: sav.) stays where it was written in the layout; the field is the admin area.
-                    string name = p.Rule == "t2-dependent-locality" ? "dependent-locality" : p.Rule == "t2-admin-area" ? "admin-area" : "street." + RoleName(p.Role);
+                    string name = p.Rule is "t2-dependent-locality" or SettlementLineRule ? "dependent-locality" : p.Rule == "t2-admin-area" ? "admin-area" : "street." + RoleName(p.Role);
                     ParsedAddressField field = new(name, p.Text, p.Standard, p.Span, 1f, DecisionSource.Rule, p.Rule);
                     fields.Add(field);
                     if (p.Rule == "t2-admin-area")
@@ -618,8 +624,22 @@ internal static partial class Tier2Reader
             ParsedAddressField? locality = null;
             if (localityToks.Count > 0)
             {
-                locality = new("locality", Slice(Span(localityToks)), localityPostal, Span(localityToks), 1f, DecisionSource.Rule, "last-line");
-                fields.Add(locality.Value);
+                // UPU Romania sheet: Bucharest is divided into sectors ("011371 Bucureşti, Sector 1"). The registers keep the town as the locality and the sector as the dependent
+                // locality; the printed locality line is unchanged, and the key still reads both words (T2Key).
+                int sectorAt = code == "RO" ? localityToks.FindIndex(1, t => t.Key is "SECTOR" or "SECTORUL") : -1;
+                if (sectorAt > 0 && sectorAt == localityToks.Count - 2 && localityToks[^1].Text.All(char.IsAsciiDigit))
+                {
+                    List<Tok> town = localityToks.GetRange(0, sectorAt);
+                    List<Tok> sector = localityToks.GetRange(sectorAt, localityToks.Count - sectorAt);
+                    locality = new("locality", Slice(Span(town)), country.LocalityAsWritten ? Join(town) : Join(town).ToUpperInvariant(), Span(town), 1f, DecisionSource.Rule, "last-line");
+                    fields.Add(locality.Value);
+                    fields.Add(new ParsedAddressField("dependent-locality", Slice(Span(sector)), country.LocalityAsWritten ? Join(sector) : Join(sector).ToUpperInvariant(), Span(sector), 1f, DecisionSource.Rule, RomanianSectorRule));
+                }
+                else
+                {
+                    locality = new("locality", Slice(Span(localityToks)), localityPostal, Span(localityToks), 1f, DecisionSource.Rule, "last-line");
+                    fields.Add(locality.Value);
+                }
             }
             ParsedAddressField? admin = null;
             if (adminInfo is { } info)
