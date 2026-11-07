@@ -14,6 +14,8 @@
     <PropertyGroup>
       <_IngestName>%(IngestSource.Identity)</_IngestName>
       <_IngestOut>$([MSBuild]::NormalizeDirectory($([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)', '$(MSBuildProjectDirectory)')), 'ingest'))</_IngestOut>
+      <!-- Passed to the tool without its trailing separator: on Windows a quoted argument ending in a backslash swallows its closing quote. -->
+      <_IngestOutArg>$([System.IO.Path]::TrimEndingDirectorySeparator('$(_IngestOut)'))</_IngestOutArg>
       <_IngestHost>$(DOTNET_HOST_PATH)</_IngestHost>
       <_IngestHost Condition="'$(_IngestHost)' == ''">dotnet</_IngestHost>
       <_IngestUpstream>$(ONECONTACT_UPSTREAM)</_IngestUpstream>
@@ -31,7 +33,7 @@
     </MSBuild>
 
     <MakeDir Directories="$(_IngestOut)" />
-    <Exec Command="&quot;$(_IngestHost)&quot; &quot;$(_IngestToolDll)&quot; --pin &quot;%(IngestSource.Pin)&quot; --files &quot;$(_IngestFiles)&quot; --out &quot;$(_IngestOut)&quot;"
+    <Exec Command="&quot;$(_IngestHost)&quot; &quot;$(_IngestToolDll)&quot; --pin &quot;%(IngestSource.Pin)&quot; --files &quot;$(_IngestFiles)&quot; --out &quot;$(_IngestOutArg)&quot;"
           StandardOutputImportance="low" />
 
     <ItemGroup>
