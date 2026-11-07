@@ -159,4 +159,19 @@ public class ModelWiringTests
             Assert.Equal(NameClass.Person, NameParsing.Split(plain).Class);
         }
     }
+
+    [Fact]
+    public void ForATier2TextThePackageWithTier2ModelsLeavesTheRulesDefaultPersonAlone()
+    {
+        // The Tier 1 + Tier 2 package learned Tier 2 person names from small lists, so there it reads only what the rules leave open; United States and Canada texts keep the override.
+        const string plain = "Bestline Imports";
+        using (ContactModels.Scope(null, new FixedNameModel(NameClass.Company, 0.9f, ("Bestline", "Base"))))
+        {
+            Assert.Equal(NameClass.Person, NameParsing.Split(plain, NameHints.ForCountry(Region.Parse("DE"))).Class);
+            Assert.Equal(NameClass.Person, NameParsing.Classify(plain, NameHints.ForCountry(Region.Parse("PL"))));
+            Assert.Equal(NameClass.Person, NameParsing.Split(plain, NameHints.ForLanguage("de")).Class);
+            Assert.Equal(NameClass.Company, NameParsing.Split(plain, NameHints.ForCountry(Region.US)).Class);
+            Assert.Equal(NameClass.Company, NameParsing.Split(plain, NameHints.ForCountry(Region.CA)).Class);
+        }
+    }
 }

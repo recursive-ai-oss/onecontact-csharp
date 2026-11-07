@@ -5,7 +5,7 @@ The same design as the Tier 1 package (see `models.md`): one fast-tier encoder s
 - **Size and cost.** 22.8 MB of weights (Tier 1: 10.2 MB), peak working set of a process that has loaded it and parsed 5,000 addresses and 5,000 names: 367 MB (Tier 1: 277 MB; both include the comparison libraries the measuring tool loads). Load and first call 180 ms (Tier 1: 138 ms). The numbers are indicative (a shared machine, one run).
 - **Resolution.** When both model packages are referenced the superset wins. The Tier 1 package never reads Tier 2 text; the superset reads Tier 1 text as Tier 1 does. Without a model package a Tier 2 address the rules refuse stays refused; the refusal message names both packages.
 - **Single encode.** A name is encoded once for its class and part heads (Tier 1 as well). The outputs are byte for byte those of two encodes (checked on 5,000 development addresses and 5,000 names), and name analysis allocates 19% less (35.5 to 28.7 KB per call, indicative). A first version took the class vote after the parts head had overwritten the word confidences; the byte comparison caught it and the vote is now taken between the two heads.
-- **Country.** The model labels fields; it does not tell countries apart. A Tier 2 read takes the country from the hint, or from the country the rules had decided before they refused the address, and is otherwise refused as country-undetermined. A model read of a text with no hint never displaces a Tier 2 rule reading, and is not made a United States or Canada address on a postal code alone (a German, Spanish or Czech postcode looks like a ZIP): it needs a state or province. This costs recall on no-hint text (below) and is the right trade: the first version labelled such addresses as United States addresses, with the fields right.
+- **Country.** The model labels fields; it does not tell countries apart. A Tier 2 read takes the country from the hint, or from the country the rules had decided before they refused the address, and is otherwise refused as country-undetermined. A model read of a text with no hint never displaces a Tier 2 rule reading, and is not made a United States or Canada address on a postal code alone (a German, Spanish or Czech postcode looks like a ZIP): it needs a state or province. This costs recall on no-hint text (below). A wrong country is invented content, so the refusal is the decision, not a gap to close in the model: recall comes back through rules-level country inference, after which the model reads the text with the country known. The first version labelled such addresses as United States addresses, with the fields right.
 - **Dependent locality** (the settlement or sector between street and postcode) is a label of the address head and its own field and line in a model read. On the Czech, Croatian and Romanian development splits the rules read these lines as street text and succeed, so the model is not asked and finds 32 of 304, 48 of 442 and 18 of 317 of them; where the rules refuse (Estonia, Latvia, Lithuania, Mexico) it finds 96 to 99% (Mexico 87%).
 
 ## Development splits, rules alone and with the model
@@ -59,7 +59,7 @@ The model lowers no row on the development splits; on no-hint text it raises the
 
 ## Real pages: addresses
 
-Common Crawl evaluation sets (private, aggregates only). Field F1 on coarse labels; `+ model` is the rules and the model of this package; the interval is a paired bootstrap, 1000 resamples, seed 20261105, against libpostal 1.1.4 (Senzing's model alongside). "ok" = not behind libpostal beyond the interval (or within 0.5 points); "behind" = the interval is entirely below zero. The reference was run without a country, so the hinted columns compare us with a hint against it without one.
+Common Crawl evaluation sets (private, aggregates only). Field F1 on coarse labels; `+ model` is the rules and the model of this package; the interval is a paired bootstrap, 1000 resamples, seed 20261105, against libpostal 1.1.4 (Senzing's model alongside). "ok" = not behind libpostal beyond the interval (or within 0.5 points); "behind" = the interval is entirely below zero. **The reference was run without a country**, so the hinted columns compare us with a hint against libpostal and Senzing without one; they are to be re-run like for like with the item country given to the reference.
 
 | Country | n | rules, hint | + model, hint | + model vs libpostal, hint [95% CI] | | libpostal / Senzing | rules, no hint | + model, no hint | + model vs libpostal, no hint [95% CI] | |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -106,52 +106,55 @@ Common Crawl evaluation sets (private, aggregates only). Field F1 on coarse labe
 
 ## Real pages: names
 
-Accuracy of person-name tokens (person and multiple items), of the person/company/unknown class and of company-name tokens, rules alone and with the model, next to the best of probablepeople 0.5.6 and python-nameparser 2.8.2 (the class and company-token rows only have probablepeople; nameparser gives person tokens).
+Accuracy of person-name tokens (person and multiple items), of the person/company/unknown class and of company-name tokens on the private sets: rules alone, and rules with this package's model before and after the policy below. The best reference (probablepeople 0.5.6, python-nameparser 2.8.2) is in the per-set results kept with the evaluation sets; every row here is at or above the rules alone except where noted.
 
-| Country | person tokens: rules | + model | best of probablepeople / nameparser | class: rules | + model | best reference | company tokens: rules | + model | best reference |
+**Policy for Tier 2 names.** The Tier 2 person names this model learned come from small lists of our own (about 20 to 40 names per language). A first version let the model replace the rules' default reading of a string as a person (no title, suffix, particle, comma order, initial or known given name proved it) whenever it said company or unknown with confidence 0.6 or more. On real pages that raised company and class rows in most countries, but it also turned unfamiliar real person names into companies, and person-token and class accuracy fell below the rules alone in DE, NL, LU, LI, DK, FI, IS, EE, LV, LT, JE, IM, IE, ES, IT, AD and RO. Until a licence-checked national name source exists, a text whose country (or, with no country, language) is a Tier 2 one is read by the model only where the rules leave it open: a string the rules classify as unknown (refusals) is classified and split by the model; a rule class or person part is never replaced, and the default person reading is kept. United States and Canada texts (and texts with no country and no language, or in English, French or Spanish) keep the override at confidence 0.6, which the Tier 1 rows support. The policy applies only to the Tier 1 + Tier 2 package; the Tier 1 package is unchanged.
+
+Result (columns: before = the first version, after = this policy). No Tier 2 row is below the rules alone; the class and company gains that came from the default override are gone and the remaining gains (DK, FI and LT class; DK and FI company tokens) come from refusals. CA person tokens are 1 item below the rules alone (98.6 to 97.9, unchanged by the policy; Tier 1 behaves the same).
+
+| Country | person tokens: rules | before | after | class: rules | before | after | company tokens: rules | before | after |
 |---|---|---|---|---|---|---|---|---|---|
-| PL | 100.0 | 100.0 | 89.4 | 71.0 | 79.0 | 74.2 | 59.8 | 73.8 | 42.6 |
-| CZ | 100.0 | 100.0 | 97.0 | 97.7 | 98.8 | 55.2 | 90.7 | 94.4 | 47.2 |
-| SK | 94.5 | 94.5 | 98.2 | 100.0 | 100.0 | 61.3 | 98.6 | 98.6 | 46.5 |
-| SI | 93.2 | 93.2 | 97.7 | 91.7 | 95.8 | 47.9 | 85.7 | 92.9 | 33.3 |
-| HR | 97.7 | 97.7 | 97.7 | 87.5 | 93.8 | 52.1 | 80.0 | 91.2 | 35.0 |
-| HU | 96.1 | 96.1 | 17.6 | 100.0 | 100.0 | 81.8 | 94.8 | 94.8 | 70.1 |
-| RO | 80.4 | 76.1 | 80.4 | 97.9 | 95.7 | 76.6 | 87.5 | 87.5 | 55.2 |
-| MX | 93.5 | 93.5 | 88.7 | 86.3 | 90.2 | 78.4 | 91.3 | 95.2 | 60.2 |
-| AU | 100.0 | 100.0 | 100.0 | 74.5 | 84.3 | 86.3 | 68.6 | 81.4 | 73.5 |
-| FR | 95.6 | 95.6 | 97.1 | 67.2 | 81.0 | 65.5 | 37.3 | 66.1 | 49.1 |
-| DE | 95.2 | 90.5 | 95.2 | 78.8 | 80.3 | 80.3 | 61.4 | 70.0 | 64.3 |
-| NL | 97.9 | 93.6 | 97.9 | 64.6 | 67.1 | 67.1 | 39.8 | 50.0 | 45.5 |
-| BE | 89.0 | 89.0 | 89.0 | 73.4 | 78.1 | 75.0 | 51.3 | 60.5 | 61.8 |
-| AT | 95.1 | 95.1 | 95.1 | 79.4 | 88.2 | 69.1 | 54.9 | 80.3 | 63.4 |
-| CH | 95.6 | 95.6 | 100.0 | 80.0 | 88.6 | 72.9 | 68.2 | 84.1 | 71.6 |
-| LU | 97.1 | 88.4 | 91.3 | 65.7 | 74.6 | 73.1 | 54.6 | 77.3 | 59.8 |
-| LI | 92.7 | 90.2 | 93.9 | 72.9 | 79.7 | 72.9 | 62.0 | 77.5 | 71.8 |
-| MC | 100.0 | 100.0 | 100.0 | 30.6 | 41.7 | 36.1 | 28.8 | 42.4 | 27.1 |
-| DK | 93.6 | 91.0 | 93.6 | 87.3 | 92.7 | 81.8 | 66.7 | 86.4 | 62.1 |
-| SE | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 83.9 | 87.2 | 87.2 | 72.3 |
-| FI | 89.6 | 80.5 | 89.6 | 94.4 | 88.9 | 66.7 | 77.8 | 87.0 | 40.7 |
-| NO | 95.0 | 93.8 | 95.0 | 94.1 | 96.1 | 68.6 | 82.7 | 94.2 | 57.7 |
-| IS | 100.0 | 90.5 | 100.0 | 100.0 | 95.0 | 70.0 | 96.2 | 96.2 | 50.0 |
-| EE | 100.0 | 84.9 | 100.0 | 100.0 | 91.3 | 84.8 | 98.2 | 98.2 | 55.6 |
-| LV | 100.0 | 96.2 | 100.0 | 100.0 | 97.2 | 69.4 | 100.0 | 100.0 | 26.9 |
-| LT | 91.3 | 82.6 | 95.7 | 97.1 | 94.3 | 80.0 | 90.9 | 90.9 | 42.4 |
-| GB | 91.6 | 91.6 | 96.8 | 97.8 | 98.9 | 93.4 | 95.2 | 96.8 | 81.4 |
-| JE | 100.0 | 98.2 | 100.0 | 100.0 | 98.7 | 94.7 | 99.0 | 99.0 | 83.3 |
-| GG | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 92.5 | 100.0 | 100.0 | 91.1 |
-| IM | 100.0 | 94.2 | 98.8 | 100.0 | 97.3 | 91.9 | 100.0 | 100.0 | 92.6 |
-| IE | 93.8 | 91.7 | 97.9 | 100.0 | 98.8 | 91.2 | 100.0 | 100.0 | 90.1 |
-| ES | 100.0 | 98.5 | 89.2 | 100.0 | 98.8 | 82.1 | 99.4 | 99.4 | 72.9 |
-| PT | 98.0 | 98.0 | 94.1 | 100.0 | 100.0 | 81.5 | 100.0 | 100.0 | 75.9 |
-| IT | 97.2 | 96.1 | 98.3 | 100.0 | 99.0 | 65.7 | 99.3 | 99.3 | 57.4 |
-| MT | 95.7 | 95.7 | 97.4 | 100.0 | 100.0 | 89.3 | 100.0 | 100.0 | 89.7 |
-| SM | 100.0 | 100.0 | 96.5 | 100.0 | 100.0 | 89.2 | 99.1 | 99.1 | 60.0 |
-| VA | 90.0 | 90.0 | 90.0 | 100.0 | 100.0 | 81.0 | 100.0 | 100.0 | 64.9 |
-| AD | 100.0 | 88.2 | 100.0 | 100.0 | 94.4 | 88.9 | 97.1 | 97.1 | 62.9 |
-| US | 98.0 | 98.0 | 100.0 | 79.3 | 88.7 | 90.2 | 68.1 | 84.6 | 76.8 |
-| CA | 98.6 | 97.9 | 99.6 | 80.8 | 88.5 | 85.6 | 64.6 | 82.9 | 78.3 |
+| PL | 100.0 | 100.0 | 100.0 | 71.0 | 79.0 | 71.0 | 59.8 | 73.8 | 59.8 |
+| CZ | 100.0 | 100.0 | 100.0 | 97.7 | 98.8 | 97.7 | 90.7 | 94.4 | 90.7 |
+| SK | 94.5 | 94.5 | 94.5 | 100.0 | 100.0 | 100.0 | 98.6 | 98.6 | 98.6 |
+| SI | 93.2 | 93.2 | 93.2 | 91.7 | 95.8 | 91.7 | 85.7 | 92.9 | 85.7 |
+| HR | 97.7 | 97.7 | 97.7 | 87.5 | 93.8 | 87.5 | 80.0 | 91.2 | 80.0 |
+| HU | 96.1 | 96.1 | 96.1 | 100.0 | 100.0 | 100.0 | 94.8 | 94.8 | 94.8 |
+| RO | 80.4 | 76.1 | 80.4 | 97.9 | 95.7 | 97.9 | 87.5 | 87.5 | 87.5 |
+| MX | 93.5 | 93.5 | 93.5 | 86.3 | 90.2 | 86.3 | 91.3 | 95.2 | 91.3 |
+| AU | 100.0 | 100.0 | 100.0 | 74.5 | 84.3 | 74.5 | 68.6 | 81.4 | 68.6 |
+| FR | 95.6 | 95.6 | 95.6 | 67.2 | 81.0 | 67.2 | 37.3 | 66.1 | 37.3 |
+| DE | 95.2 | 90.5 | 95.2 | 78.8 | 80.3 | 78.8 | 61.4 | 70.0 | 61.4 |
+| NL | 97.9 | 93.6 | 97.9 | 64.6 | 67.1 | 64.6 | 39.8 | 50.0 | 39.8 |
+| BE | 89.0 | 89.0 | 89.0 | 73.4 | 78.1 | 73.4 | 51.3 | 60.5 | 51.3 |
+| AT | 95.1 | 95.1 | 95.1 | 79.4 | 88.2 | 79.4 | 54.9 | 80.3 | 54.9 |
+| CH | 95.6 | 95.6 | 95.6 | 80.0 | 88.6 | 80.0 | 68.2 | 84.1 | 68.2 |
+| LU | 97.1 | 88.4 | 97.1 | 65.7 | 74.6 | 65.7 | 54.6 | 77.3 | 54.6 |
+| LI | 92.7 | 90.2 | 92.7 | 72.9 | 79.7 | 72.9 | 62.0 | 77.5 | 62.0 |
+| MC | 100.0 | 100.0 | 100.0 | 30.6 | 41.7 | 30.6 | 28.8 | 42.4 | 28.8 |
+| DK | 93.6 | 91.0 | 93.6 | 87.3 | 92.7 | 89.1 | 66.7 | 86.4 | 72.7 |
+| SE | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 87.2 | 87.2 | 87.2 |
+| FI | 89.6 | 80.5 | 89.6 | 94.4 | 88.9 | 96.3 | 77.8 | 87.0 | 87.0 |
+| NO | 95.0 | 93.8 | 95.0 | 94.1 | 96.1 | 94.1 | 82.7 | 94.2 | 82.7 |
+| IS | 100.0 | 90.5 | 100.0 | 100.0 | 95.0 | 100.0 | 96.2 | 96.2 | 96.2 |
+| EE | 100.0 | 84.9 | 100.0 | 100.0 | 91.3 | 100.0 | 98.2 | 98.2 | 98.2 |
+| LV | 100.0 | 96.2 | 100.0 | 100.0 | 97.2 | 100.0 | 100.0 | 100.0 | 100.0 |
+| LT | 91.3 | 82.6 | 91.3 | 97.1 | 94.3 | 100.0 | 90.9 | 90.9 | 90.9 |
+| GB | 91.6 | 91.6 | 91.6 | 97.8 | 98.9 | 97.8 | 95.2 | 96.8 | 95.2 |
+| JE | 100.0 | 98.2 | 100.0 | 100.0 | 98.7 | 100.0 | 99.0 | 99.0 | 99.0 |
+| GG | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 |
+| IM | 100.0 | 94.2 | 100.0 | 100.0 | 97.3 | 100.0 | 100.0 | 100.0 | 100.0 |
+| IE | 93.8 | 91.7 | 93.8 | 100.0 | 98.8 | 100.0 | 100.0 | 100.0 | 100.0 |
+| ES | 100.0 | 98.5 | 100.0 | 100.0 | 98.8 | 100.0 | 99.4 | 99.4 | 99.4 |
+| PT | 98.0 | 98.0 | 98.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 |
+| IT | 97.2 | 96.1 | 97.2 | 100.0 | 99.0 | 100.0 | 99.3 | 99.3 | 99.3 |
+| MT | 95.7 | 95.7 | 95.7 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 |
+| SM | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 99.1 | 99.1 | 99.1 |
+| VA | 90.0 | 90.0 | 90.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 |
+| AD | 100.0 | 88.2 | 100.0 | 100.0 | 94.4 | 100.0 | 97.1 | 97.1 | 97.1 |
+| US | 98.0 | 98.0 | 98.0 | 79.3 | 88.7 | 88.7 | 68.1 | 84.6 | 84.6 |
+| CA | 98.6 | 97.9 | 97.9 | 80.8 | 88.5 | 88.5 | 64.6 | 82.9 | 82.9 |
 
-**Reading the name rows.** The Tier 2 person names the model learned come from small lists of our own (about 20 to 40 names per language), so on real pages the model reads some unfamiliar person names as companies or unknown, and person-token or class accuracy falls below the rules alone in DE, NL, LU, LI, DK, FI, IS, EE, LV, LT, JE, IM, IE, ES, IT, AD and RO. It raises the class and company rows in most other countries (for example FR, AT, CH, PL, SI, HR, US and CA). A larger open name source, licence-checked per country, is the fix; until then these rows are the package's weakest.
 
 ## Extraction (United States and Canada pages, no regression)
 

@@ -54,7 +54,7 @@ Each source's licence was read at the publisher before use; the quoted terms, ve
 
 ## Known limits
 
-- The Tier 2 person-name head has seen few distinct names. On real pages it reads some unfamiliar person names as companies or unknown, which lowers person-token and class accuracy in some countries relative to the rules alone (see `docs/models.md`). A larger name source would fix this; none was licence-checked in this build.
+- The Tier 2 person-name head has seen few distinct names (our own lists). So for Tier 2 texts the parsers use the name model only where the rules leave a string open and never replace a rule class or person part; see `docs/models-superset.md`. A larger licence-checked name source would allow more.
 - Dependent-locality (settlement, sector) lines are learned by the address head, but the rules read most such lines as street text first, so the model rarely gets to label them (Czech, Croatian, Romanian).
 - A text with no country hint that the Tier 2 rules cannot place is read as a United States or Canada address only when it carries a state or province; otherwise it is refused as country-undetermined.
 
