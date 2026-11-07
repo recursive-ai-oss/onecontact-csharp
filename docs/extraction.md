@@ -1,6 +1,6 @@
-# Extraction: structured markup
+# Extraction
 
-`RecursiveAI.OneContact.Extraction` reads the contact information a page states in structured markup and returns it as person and organization records. This document is what the markup readers do; the visible-text half is separate and arrives later (`ExtractionSources.Text` is reserved and ignored).
+`RecursiveAI.OneContact.Extraction` reads the contact information a page states in structured markup, and the contact details in its visible text, and returns them as person and organization records. The first half of this document is what the markup readers do; the visible-text half starts at "Visible text".
 
 ```csharp
 IReadOnlyList<ContactRecord> records = ContactExtractor.Extract(html);          // string or bytes
@@ -10,7 +10,7 @@ ExtractResult result = extractor.ExtractHtml(bytes, contentType: "text/html; cha
 foreach (ContactRecord r in result.Records) { /* r.Name, r.Phones, r.Emails, r.Websites, r.Addresses, r.Links */ }
 ```
 
-Nothing is fetched and nothing is stored. The caller is responsible, under data-protection law, for what it extracts and what it does with it.
+Nothing is fetched and nothing is stored. **Personal data:** names, emails, phones and addresses are personal data. Extraction runs offline on exactly what the caller passes in, and the library keeps no copy; responsibility for a lawful basis and for compliance with data-protection law (for example the GDPR) for what is extracted and what is done with it sits with the caller.
 
 ## Result model
 
@@ -20,7 +20,7 @@ Nothing is fetched and nothing is stored. The caller is responsible, under data-
 | `ContactRecord` | `Kind` (`Person`, `Organization`), `Fields`, accessors per `FieldKind`, `Links`, `Disagreements`, `Span`, `Confidence` |
 | `ExtractedField` | `Kind`, `Source`, `Raw`, `Text`, `Span`, `Confidence`, `Flags`, `Normalized` (a `ContactValue`), `Issue`, `Facts`, `Label`, `RecordId`, `BlockId`, `Duplicates` |
 | `FieldKind` | `Name`, `Organization` (the employer by name), `Phone`, `Email`, `Website`, `Address`. New kinds may be added; consumers keep a default branch |
-| `FieldSource` | `JsonLd`, `Microdata`, `Rdfa`, `HCard`, `Link`, `AddressElement`, `Text` (reserved) |
+| `FieldSource` | `JsonLd`, `Microdata`, `Rdfa`, `HCard`, `Link`, `AddressElement`, `Text` |
 | `RecordLink` | `WorksFor`, `HasMember`, `ParentOrganization`, `SubOrganization`; always stored in both directions |
 
 **Raw and text.** `Raw` is the source slice at `Span`, exactly as written (character references and JSON escapes undecoded; newlines as HTML parsing normalizes them, CR LF and CR to LF). `Text` is what the normalizer was given: references and escapes decoded, markup removed, white space collapsed, address lines separated by `\n`. Where a value is put together from several pieces of markup (a given and a family name; address parts) the field carries `Composed`, `Raw` spans all the pieces and `Text` is the joined value.

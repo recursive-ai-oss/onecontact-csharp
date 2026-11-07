@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The README quick start, built and run by the test pipeline so the documented calls stay true. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/OneContact/OneContact.csproj" />
+    <ProjectReference Include="../../src/OneContact.Phones.Geo/OneContact.Phones.Geo.csproj" />
+    <ProjectReference Include="../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
+  </ItemGroup>
+
+</Project>
