@@ -51,6 +51,31 @@ internal static class AllocTypes
         }
     }
 
+    /// <summary>Parses the cases of a file (lines "CC|text") over and over for a number of seconds, for an external sampling profiler.</summary>
+    public static int Loop(string file, int seconds)
+    {
+        List<(Region, string)> cases = [];
+        foreach (string line in File.ReadAllLines(file).Where(l => l.Length > 0 && l[0] != '#'))
+        {
+            int bar = line.IndexOf('|', StringComparison.Ordinal);
+            cases.Add((bar == 0 ? Region.Unknown : Region.Parse(line[..bar]), line[(bar + 1)..].Replace(" // ", "\n", StringComparison.Ordinal)));
+        }
+
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        long n = 0;
+        while (clock.Elapsed.TotalSeconds < seconds)
+        {
+            foreach ((Region h, string t) in cases)
+            {
+                RuleAddressParser.TryParse(t, h, out _, out _);
+                n++;
+            }
+        }
+
+        Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{n} parses, {clock.Elapsed.TotalMilliseconds * 1000 / n:F2} us each"));
+        return 0;
+    }
+
     public static int Run(string[] args)
     {
         using var listener = new Listener();

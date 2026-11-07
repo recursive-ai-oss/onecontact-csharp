@@ -224,9 +224,12 @@ public static class RuleAddressParser
 
     private sealed record Unit(List<AddressToken> Tokens);
 
+    private static readonly List<AddressToken> NoTokens = [];
+
     private sealed class LastLine
     {
-        internal List<AddressToken> Locality { get; set; } = [];
+        // Always set before a last line is returned; until then it is the shared empty list, which nothing changes.
+        internal List<AddressToken> Locality { get; set; } = NoTokens;
 
         internal (int First, int Last)? Admin { get; set; }
 
@@ -240,7 +243,7 @@ public static class RuleAddressParser
 
         internal bool PostalIsCa { get; set; }
 
-        internal List<AddressToken> All { get; set; } = [];
+        internal List<AddressToken> All { get; set; } = NoTokens;
     }
 
     private sealed class Reader(string text, Region hint)
@@ -702,7 +705,7 @@ public static class RuleAddressParser
             bool pr,
             out ParseDetail detail)
         {
-            List<ParsedAddressField> fields = [];
+            List<ParsedAddressField> fields = new(16);
             foreach (ParsedAddressText l in leading)
             {
                 fields.Add(new ParsedAddressField("leading-line", l.Text, l.Standard, l.Span, 1f, DecisionSource.Rule, "line-structure"));

@@ -143,6 +143,11 @@ internal static class Program
             return DiffDump.Run(args[1], args[2]);
         }
 
+        if (args.Length == 3 && args[0] == "loop-address")
+        {
+            return AllocTypes.Loop(args[1], int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture));
+        }
+
         if (args.Length >= 3 && args[0] == "profile-alloc")
         {
             return AllocTypes.Run(args);
