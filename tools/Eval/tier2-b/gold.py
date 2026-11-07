@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.join(here, ".."))
 import score  # noqa: E402
 
 root, cc, n_addr = sys.argv[1], sys.argv[2], int(sys.argv[3])
-who = sys.argv[4] if len(sys.argv) > 4 else "agent adjudication"
+who = sys.argv[4] if len(sys.argv) > 4 else "adjudicated"
 d, out = os.path.join(root, "drafts"), os.path.join(root, "sets")
 os.makedirs(out, exist_ok=True)
 for kind in ("address", "name"):

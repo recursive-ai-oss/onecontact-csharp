@@ -10,8 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../OneContact/OneContact.csproj" />
-    <!-- The reader of compiled table files is shared with the core library's source; it is internal to each assembly. -->
-    <Compile Include="../OneContact/Data/CompiledTableFile.cs" Link="Data/CompiledTableFile.cs" />
   </ItemGroup>
 
   <ItemGroup>

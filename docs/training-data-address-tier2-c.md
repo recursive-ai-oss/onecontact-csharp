@@ -75,7 +75,7 @@ tools/data/fetch-tier2c3.sh                        # the five source files, each
 AddressTier2C count  --data <train dir> --out <dir> --countries HR,HU,RO,AU
 AddressTier2C render --data <train dir> --out <dir> --countries HR,HU,RO,AU
 AddressTier2C check  --out <dir>
-tools/data/try-tier2c3.sh                          # count, render, check and show examples for HU,AU,RO into scratch directories
+tools/data/try-tier2c3.sh                          # count, render, check and show examples for HU,AU,RO into working directories
 ```
 
 The options, splits and determinism are those above; these countries are drawn by `RendererC3.cs` (layouts, rates and the labelled pieces are the same kind as the others) from `tools/data/templates/tier2c3-names.tsv` (recipient and organisation parts) and `tier2c3-streets.tsv`.

@@ -103,4 +103,4 @@ if __name__ == "__main__":
     if a[0] == "view":
         view(a[1], a[2], a[3], int(a[4]) if len(a) > 4 else 0, int(a[5]) if len(a) > 5 else 40)
     else:
-        apply(a[1], a[2], a[3], a[4], a[5], a[6] if len(a) > 6 else "agent adjudication")
+        apply(a[1], a[2], a[3], a[4], a[5], a[6] if len(a) > 6 else "adjudicated")

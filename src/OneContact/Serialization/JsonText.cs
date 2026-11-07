@@ -10,7 +10,8 @@ namespace RecursiveAI.OneContact.Serialization;
 /// canonical form starts with one and an email's local part or a URL's query may hold one, so a value is written with the default escaping for everything else and
 /// the plus sign as it is. Quotes, backslashes, control characters, angle brackets, ampersands, apostrophes and non-ASCII text keep the default escaping, so the output
 /// stays as safe to place in HTML or script as before. A property name uses the relaxed encoder, which also leaves the plus sign alone, when it holds nothing but letters,
-/// digits and ASCII punctuation free of markup; any other name keeps the default escaping.
+/// digits and ASCII punctuation free of angle brackets, apostrophes and backticks; the writer offers no way to escape only some characters of a name, so an ampersand
+/// next to a plus sign is written as it is in a name (as a value it stays escaped). Any other name keeps the default escaping.
 /// </summary>
 internal static class JsonText
 {
@@ -57,7 +58,7 @@ internal static class JsonText
         {
             if (c < 0x80)
             {
-                if (c < 0x20 || c == 0x7F || c is '<' or '>' or '&' or '\'' or '`')
+                if (c < 0x20 || c == 0x7F || c is '<' or '>' or '\'' or '`')
                 {
                     return false;
                 }

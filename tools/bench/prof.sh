@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # usage: prof.sh <mode>...  -- builds the bench program, then runs the named profile modes (profile-phone, profile-find, profile-extract, accuracy).
-# Meant to run inside a queued job: timings taken any other way are not trusted.
+# Run it on an otherwise idle machine: timings taken on a loaded one are not trusted.
 cd "$(dirname "$0")/../.."
 bash tools/bench/build.sh
 . tools/bench/env.sh

@@ -1,10 +1,8 @@
-extern alias geo;
-
 using System.Diagnostics;
 using System.Globalization;
 using RecursiveAI.OneContact.Phones;
-using geo::RecursiveAI.OneContact.Phones.Geo;
-using geo::RecursiveAI.OneContact.Phones.Geo.Data;
+using RecursiveAI.OneContact.Phones.Geo;
+using RecursiveAI.OneContact.Phones.Geo.Data;
 
 namespace RecursiveAI.OneContact.Tests;
 

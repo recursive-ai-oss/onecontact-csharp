@@ -7,7 +7,7 @@ cd "$(dirname "$0")/../.."
 . tools/bench/env.sh
 export DOTNET_PROCESSOR_COUNT=4
 label=$1; filter=$2; shift 2
-OUT=$HOME/onecontact/u37/results/$label
+OUT=${ONECONTACT_WORK:-$HOME/onecontact/work}/bench/results/$label
 mkdir -p "$OUT"
 { echo "cpu: $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2)"; echo "cores: $(nproc)"; echo "before: $(cat /proc/loadavg)"; } > "$OUT/load.txt"
 ( while sleep 20; do echo "during: $(cat /proc/loadavg)" >> "$OUT/load.txt"; done ) &

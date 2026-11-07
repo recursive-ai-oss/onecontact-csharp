@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Quick local run of the group C-3 countries (Hungary, Australia, Romania): count, render into a scratch directory, check, look at samples.
 set -euo pipefail
-export PATH=~/dotnet10:$PATH DOTNET_ROOT=~/dotnet10 DOTNET_PROCESSOR_COUNT=4
+export DOTNET_PROCESSOR_COUNT=4
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../.." && pwd)
 (cd "$here/AddressTier2C" && nice dotnet build -c Release -m:4 -v quiet -clp:NoSummary 2>&1 | tail -5)
 dll=$root/artifacts/bin/OneContact.Data.AddressTier2C/release/RecursiveAI.OneContact.Data.AddressTier2C.dll
-out=${1:-$HOME/onecontact/u30/out}
-try=${2:-$HOME/onecontact/u30/try}
+out=${1:-${ONECONTACT_WORK:-$HOME/onecontact/work}/tier2-east/out}
+try=${2:-${ONECONTACT_WORK:-$HOME/onecontact/work}/tier2-east/try}
 countries=${3:-HU,AU,RO}
 data=${ONECONTACT_DATA:-$HOME/onecontact/data}/train
 mkdir -p "$out" "$try"
