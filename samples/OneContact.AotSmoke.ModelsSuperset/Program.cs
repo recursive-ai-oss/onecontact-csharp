@@ -28,10 +28,7 @@ Check(a?.PostalCode?.Standard == "10001", "postal code");
 Check(d.Fields.Any(f => f.Source == DecisionSource.Model), "fields say a model decided them");
 
 // A Tier 2 address the rules refuse is read through the model, with the country from the hint.
-OperationStatus t = RuleAddressParser.TryParse("58 Hordley Avenue
-Shrewsbury
-Shropshire
-SY4 1AA", Region.Parse("GB"), out ParsedAddress? gb, out ParseDetail gd);
+OperationStatus t = RuleAddressParser.TryParse("58 Hordley Avenue Shrewsbury\nSY4 1AA", Region.Parse("GB"), out ParsedAddress? gb, out ParseDetail gd);
 Check(t == OperationStatus.Done && gb is not null && gb.Country == Region.Parse("GB"), "a Tier 2 address is read through the model");
 Check(gd.Fields.Any(f => f.Source == DecisionSource.Model), "Tier 2 fields say a model decided them");
 

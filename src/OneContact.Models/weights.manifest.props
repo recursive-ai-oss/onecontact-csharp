@@ -1,9 +1,9 @@
 <Project>
   <!-- The weights this package packs: name, size, sha256 and where each came from. A pack fails when a file is missing or differs.
        To use retrained weights, replace the row (and PROVENANCE.md); no code changes. Weights are never committed.
-       The row is filled in when a trained model is accepted; until then a development build has no weights and cannot be packed. -->
+       Weights are fetched or rebuilt with recipes/models; their sha256 is the one below. -->
   <ItemGroup>
-    <ModelsWeight Include="models.onenlp" Size="0" Sha256="0000000000000000000000000000000000000000000000000000000000000000"
-                  Recipe="recipes/models" Data="see PROVENANCE.md" Contents="shared fast-tier encoder; address-field head; name-part head; name-class head; contact-span head" />
+    <ModelsWeight Include="models.onenlp" Size="22784861" Sha256="adde4a664b622170235b49fc09da13916ac3f5b53031b1eb55d2378d0ef94d87"
+                  Recipe="recipes/models" Data="open address registers of the United States, Canada and 37 Tier 2 countries, names, companies and contact blocks; see PROVENANCE.md" Contents="shared fast-tier encoder; address-field head; name-part head; name-class head; contact-span head" />
   </ItemGroup>
 </Project>

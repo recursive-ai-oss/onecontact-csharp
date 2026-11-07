@@ -68,11 +68,25 @@ public static class RuleAddressParser
         }
 
         OperationStatus status = TryParseUsCa(input, hint, out address, out detail);
-        if (status != OperationStatus.Done && otherStatus == OperationStatus.Done)
+
+        // A United States or Canada reading made by the model never displaces a Tier 2 reading the rules made: the model fills what the rules leave open only.
+        bool usCaReadByModel = status == OperationStatus.Done && address is not null && detail.Fields.Count > 0 && detail.Fields.All(f => f.Source == DecisionSource.Model);
+        if ((status != OperationStatus.Done || usCaReadByModel) && otherStatus == OperationStatus.Done)
         {
             address = other;
             detail = otherDetail;
             return OperationStatus.Done;
+        }
+
+        // Text the rules could not place in any country is not made a United States or Canada address by the Tier 1 + Tier 2 model on a postal code alone, because the
+        // model labels fields and does not tell countries apart (a German or Spanish postcode looks like a ZIP): without a state or province the refusal stays, and says why.
+        // The Tier 1 package knows no other country, so it still reads it.
+        if (usCaReadByModel && !HasKnownUsCaAdmin(address!) && hint.IsUnknown && Models.ContactModels.PackageId is { } package && package != Models.ContactModels.Tier1PackageId
+            && (otherDetail.PrimaryReason.Equals(ReasonCode.AddressCountryUndetermined) || otherDetail.PrimaryReason.Equals(ReasonCode.AddressCountryConflict)))
+        {
+            address = null;
+            detail = otherDetail;
+            return OperationStatus.InvalidData;
         }
 
         // Text that has a postcode and a locality of a Tier 2 country but no way to tell which: the reason is more useful than "no last line".
@@ -111,6 +125,9 @@ public static class RuleAddressParser
 
         return status;
     }
+
+    private static bool HasKnownUsCaAdmin(ParsedAddress address) =>
+        address.AdminArea is { } f && (Standardization.UsCaRules.UsStateNames.ContainsKey(f.Standard.ToUpperInvariant()) || Standardization.UsCaRules.CaProvinceNames.ContainsKey(f.Standard.ToUpperInvariant()));
 
     private static OperationStatus TryParseUsCa(ReadOnlySpan<char> input, Region hint, out ParsedAddress? address, out ParseDetail detail)
     {

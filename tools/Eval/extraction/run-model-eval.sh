@@ -5,7 +5,7 @@
 #   usage: run-model-eval.sh <label> <cut> <out dir>
 #   environment:
 #     EVAL_EXTRACT            the built eval-extract tool
-#     ONECONTACT_TIER1_MODEL  the saved Tier 1 pipeline (with the contact-span head)
+#     ONECONTACT_TIER1_MODEL  the saved Tier 1 pipeline (with the contact-span head), or ONECONTACT_MODELS_MODEL the Tier 1 + Tier 2 one
 #     FROZEN                  folder with gold-web.jsonl and gold-ugc.jsonl
 #     WEB_SET                 the web set folder (pages/, pages.jsonl)
 #     BASELINES               folder with web/ and ugc/, each holding in.jsonl and the reference systems' prediction files (run-baselines.sh)
@@ -23,9 +23,9 @@ import json, sys
 for l in open(sys.argv[1]): print(json.loads(l)['id'])" "$1"; }
 
 ids "$FROZEN/gold-web.jsonl" > "$tmp/web.ids"
-env -u ONECONTACT_TIER1_MODEL "$EVAL_EXTRACT" ours-web "$WEB_SET" "$tmp/web-rules.jsonl" --ids "$tmp/web.ids" > /dev/null
+env -u ONECONTACT_TIER1_MODEL -u ONECONTACT_MODELS_MODEL "$EVAL_EXTRACT" ours-web "$WEB_SET" "$tmp/web-rules.jsonl" --ids "$tmp/web.ids" > /dev/null
 ONECONTACT_SPAN_CUT=$cut "$EVAL_EXTRACT" ours-web "$WEB_SET" "$tmp/web-model.jsonl" --ids "$tmp/web.ids" > /dev/null
-env -u ONECONTACT_TIER1_MODEL "$EVAL_EXTRACT" ours-text "$BASELINES/ugc/in.jsonl" "$tmp/text-rules.jsonl" > /dev/null
+env -u ONECONTACT_TIER1_MODEL -u ONECONTACT_MODELS_MODEL "$EVAL_EXTRACT" ours-text "$BASELINES/ugc/in.jsonl" "$tmp/text-rules.jsonl" > /dev/null
 ONECONTACT_SPAN_CUT=$cut "$EVAL_EXTRACT" ours-text "$BASELINES/ugc/in.jsonl" "$tmp/text-model.jsonl" > /dev/null
 
 score() { # set gold mentions
