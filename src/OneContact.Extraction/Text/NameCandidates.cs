@@ -1072,7 +1072,7 @@ internal sealed class NameCandidates
         bool attributed = Attribution(before) || (before.Trim().IsEmpty && line > 0 && SameSection(line - 1, line) && EndsWithQuote(line - 1));
 
         // "Dr. Patel", "Mrs. Alvarez": a title in front of a name says it is a person's.
-        if (honorific && !attributed && StrongHonorific(toks, honorificAt))
+        if (_loose && honorific && !attributed && StrongHonorific(toks, honorificAt))
         {
             why = "honorific";
             return true;
@@ -1455,7 +1455,17 @@ internal sealed class NameCandidates
         return industry && (words >= 3 || Array.IndexOf(SurnameLike, folded) < 0);
     }
 
-    private bool KnownGivenName(Tok t) => LikelyGiven(t);
+    // On a page only the library's own given names count; the longer lists are for typed text.
+    private bool KnownGivenName(Tok t)
+    {
+        if (_loose)
+        {
+            return LikelyGiven(t);
+        }
+
+        string f = Folded(t);
+        return f.Length > 1 && NameLexicon.IsGivenName(f);
+    }
 
     private static bool AllEndings(ReadOnlySpan<char> after)
     {
@@ -1570,7 +1580,7 @@ internal sealed class NameCandidates
         return words <= 4;
     }
 
-    private static bool CuePhraseBefore(ReadOnlySpan<char> before)
+    private bool CuePhraseBefore(ReadOnlySpan<char> before)
     {
         ReadOnlySpan<char> t = before.TrimEnd(" \t\u00A0:,-\u2013");
         if (t.Length == 0)
@@ -1578,7 +1588,12 @@ internal sealed class NameCandidates
             return false;
         }
 
-        foreach (string cue in CuePhrases)
+        return EndsWithCue(t, CuePhrases) || (_loose && EndsWithCue(t, CuePhrasesTyped));
+    }
+
+    private static bool EndsWithCue(ReadOnlySpan<char> t, string[] cues)
+    {
+        foreach (string cue in cues)
         {
             if (t.EndsWith(cue, StringComparison.OrdinalIgnoreCase) && (t.Length == cue.Length || !char.IsLetter(t[t.Length - cue.Length - 1])))
             {
@@ -1595,10 +1610,15 @@ internal sealed class NameCandidates
         "speak with", "spoke to", "spoke with", "speaking with", "talk to", "talk with", "talked to", "talked with", "reach out to", "meet", "met with",
         "contacted", "emailed", "email", "e-mail", "my name is", "manager is", "owner is", "agent is", "your contact is", "your agent is",
         "your representative is", "reps name is", "representative is", "you will be working with", "direct line for", "text",
+        "rappeler", "appeler", "contacter", "contactez", "demandez", "demander", "joindre", "parler \u00e0", "parlez \u00e0", "contacto", "llamar a", "hablar con", "preguntar por",
+    ];
+
+    // More cue phrases for typed text; on a page they would follow bylines, credits and attendee lists.
+    private static readonly string[] CuePhrasesTyped =
+    [
         "met", "meeting with", "meet with", "referred by", "referral from", "thanks to", "thank you", "thanks", "thx", "per", "courtesy of", "assigned to",
         "handled by", "approved by", "signed by", "sent by", "forwarded to", "forward to", "cc", "bcc", "attendees", "participants", "present", "guests",
         "visit with", "chat with", "chatted with", "heard from", "hear from", "left a message for", "message for",
-        "rappeler", "appeler", "contacter", "contactez", "demandez", "demander", "joindre", "parler \u00e0", "parlez \u00e0", "contacto", "llamar a", "hablar con", "preguntar por",
     ];
 
     // ---------------------------------------------------------------- jobs

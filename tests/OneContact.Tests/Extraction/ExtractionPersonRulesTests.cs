@@ -96,7 +96,9 @@ public sealed class ExtractionPersonRulesTests
     {
         // The same sentence that names a person in a note is, on a page, as likely a product review or a byline.
         Assert.Empty(new ContactExtractor().ExtractHtml("<html><body><p>Maria Lopez called this morning about the renewal.</p></body></html>").Of(FieldKind.Name));
-        ExtractedField titled = Assert.Single(new ContactExtractor().ExtractHtml("<html><body><p>Dr. Patel will see you at 3.</p></body></html>").Of(FieldKind.Name));
+        Assert.Empty(new ContactExtractor().ExtractHtml("<html><body><p>Dr. Patel will see you at 3.</p></body></html>").Of(FieldKind.Name));
+        Assert.Empty(new ContactExtractor().ExtractHtml("<html><body><p>From: Zbigniew Wolczak</p></body></html>").Of(FieldKind.Name));
+        ExtractedField titled = Assert.Single(new ContactExtractor().ExtractHtml("<html><body><p>Dr. Patel, Chief Medical Officer</p></body></html>").Of(FieldKind.Name));
         Assert.Equal("Dr. Patel", titled.Text);
     }
 }
