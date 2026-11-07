@@ -26,8 +26,9 @@ internal sealed partial class TextFieldReader
     // Settable inside the assembly (and by the evaluation tools); there is no public option.
     internal static float WebMinConfidence { get; set; } = 0.6f;
 
-    // False reads web pages with the rules and the markup alone, as before.
-    internal static bool ModelOnWeb { get; set; } = true;
+    // False reads web pages with the rules and the markup alone. That is the default: scored once each on real pages, the gated model
+    // found no more people or organizations than the rules did and cost record F1 (docs/extraction.md, "The span model on real pages").
+    internal static bool ModelOnWeb { get; set; }
 
     private void RunModel(IContactSpanModel model)
     {

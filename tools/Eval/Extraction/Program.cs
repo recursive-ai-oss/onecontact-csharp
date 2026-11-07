@@ -21,9 +21,9 @@ if (Environment.GetEnvironmentVariable("ONECONTACT_SPAN_CUT") is { Length: > 0 }
     RecursiveAI.OneContact.Extraction.Text.TextFieldReader.MinConfidence = float.Parse(cut, CultureInfo.InvariantCulture);
 }
 
-if (Environment.GetEnvironmentVariable("ONECONTACT_WEB_MODEL") == "0")
+if (Environment.GetEnvironmentVariable("ONECONTACT_WEB_MODEL") != "0")
 {
-    RecursiveAI.OneContact.Extraction.Text.TextFieldReader.ModelOnWeb = false;
+    RecursiveAI.OneContact.Extraction.Text.TextFieldReader.ModelOnWeb = true;
 }
 
 if (Environment.GetEnvironmentVariable("NAME_TRACE") is { Length: > 0 })

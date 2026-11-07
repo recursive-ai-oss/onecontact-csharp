@@ -94,6 +94,28 @@ public sealed class ExtractionSpanModelTests
         }
     }
 
+    private sealed class Restore(bool was) : IDisposable
+    {
+        public void Dispose() => RecursiveAI.OneContact.Extraction.Text.TextFieldReader.ModelOnWeb = was;
+    }
+
+    // The gate on web pages is off by default; these tests turn it on for their own duration.
+    private static Restore WebModelOn()
+    {
+        var was = new Restore(RecursiveAI.OneContact.Extraction.Text.TextFieldReader.ModelOnWeb);
+        RecursiveAI.OneContact.Extraction.Text.TextFieldReader.ModelOnWeb = true;
+        return was;
+    }
+
+    [Fact]
+    public void ByDefaultAWebPageIsReadByRulesAndMarkupWhateverModelIsRegistered()
+    {
+        const string near = "<html><body><p>Renewal notes: Jane Smith has the details.</p><p>She can be reached on jane.smith@acme.example.</p></body></html>";
+        var model = new FixedSpanModel(["Jane Smith"], ("Jane Smith", "person", 0.9f));
+        using IDisposable scope = ContactModels.Scope(null, null, model);
+        Assert.DoesNotContain(new ContactExtractor().ExtractHtml(near).Fields, f => f.Decision == DecisionSource.Model);
+    }
+
     [Fact]
     public void OnAWebPageTheModelsPeopleCountOnlyInsideAContactBlock()
     {
@@ -104,6 +126,7 @@ public sealed class ExtractionSpanModelTests
             + "<p>Mail jane.smith@acme.example for more.</p></body></html>";
         var model = new FixedSpanModel(["Jane Smith"], ("Jane Smith", "person", 0.9f));
         using IDisposable scope = ContactModels.Scope(null, null, model);
+        using IDisposable gate = WebModelOn();
         ExtractedField inBlock = Assert.Single(new ContactExtractor().ExtractHtml(near).Of(FieldKind.Name));
         Assert.Equal(DecisionSource.Model, inBlock.Decision);
         Assert.Empty(new ContactExtractor().ExtractHtml(far).Of(FieldKind.Name));
@@ -116,6 +139,7 @@ public sealed class ExtractionSpanModelTests
         const string near = "<html><body><p>Renewal notes: Jane Smith has the details.</p><p>She can be reached on jane.smith@acme.example.</p></body></html>";
         var model = new FixedSpanModel(["Jane Smith"], ("Jane Smith", "person", 0.5f));
         using IDisposable scope = ContactModels.Scope(null, null, model);
+        using IDisposable gate = WebModelOn();
         Assert.Empty(new ContactExtractor().ExtractHtml(near).Of(FieldKind.Name));
         Assert.Single(new ContactExtractor().ExtractText("Renewal notes: Jane Smith has the details.\nShe can be reached on jane.smith@acme.example.").Of(FieldKind.Name));
     }
@@ -126,6 +150,7 @@ public sealed class ExtractionSpanModelTests
         const string html = "<html><body><p>Renewal notes: Jane Smith has the details.</p><p>Write to jane.smith@acme.example</p><p>Oak Lane 12</p></body></html>";
         var model = new FixedSpanModel([], ("Oak Lane 12", "address", 0.99f), ("Jane Smith", "person", 0.9f));
         using IDisposable scope = ContactModels.Scope(null, null, model);
+        using IDisposable gate = WebModelOn();
         ExtractResult page = new ContactExtractor().ExtractHtml(html);
         Assert.Empty(page.Of(FieldKind.Address));
     }
