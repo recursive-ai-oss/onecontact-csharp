@@ -1,0 +1,9 @@
+<phoneNumberMetadata><territories>
+  <territory id="ZA" countryCode="27">
+    <generalDesc><nationalNumberPattern>1\d{2,4}</nationalNumberPattern><possibleLengths national="[3-5]"/></generalDesc>
+    <shortCode><possibleLengths national="3"/><nationalNumberPattern>1\d{2}</nationalNumberPattern><exampleNumber>112</exampleNumber></shortCode>
+    <emergency><possibleLengths national="3"/><nationalNumberPattern>112</nationalNumberPattern><exampleNumber>112</exampleNumber></emergency>
+    <tollFree><possibleLengths national="4"/><nationalNumberPattern>1000</nationalNumberPattern></tollFree>
+    <standardRate><possibleLengths national="5"/><nationalNumberPattern>12345</nationalNumberPattern></standardRate>
+  </territory>
+</territories></phoneNumberMetadata>

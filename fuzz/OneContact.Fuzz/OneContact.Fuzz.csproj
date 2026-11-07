@@ -1,13 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- The fuzz host: runs one target over an input file, or over every file of a directory. A fuzzer (SharpFuzz with libFuzzer or AFL)
-       is attached by instrumenting this assembly's reference to the library; that wiring is added with the first fuzz campaign. -->
+  <!-- The fuzz host: runs one target over an input file, a directory, or under AFL++ with SharpFuzz instrumentation on the libraries
+       (fuzz/run.sh does the instrumentation; see fuzz/README.md). -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="../../src/OneContact/OneContact.csproj" />
+    <ProjectReference Include="../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
+    <ProjectReference Include="../../src/OneContact.Models.Tier1/OneContact.Models.Tier1.csproj" />
+    <ProjectReference Include="../../src/OneContact.Models/OneContact.Models.csproj" />
+    <PackageReference Include="SharpFuzz" />
   </ItemGroup>
 
 </Project>
