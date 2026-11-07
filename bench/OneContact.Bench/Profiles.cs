@@ -72,6 +72,7 @@ internal static class Profiles
         Time("  ShapePhoneFinder per line", pages, p => PerLine(p, (view, text, l, sink) => ShapePhoneFinder.Instance.Find(text, l.Start, l.End, sink.Phones)));
         var matcherFinder = new MatcherPhoneFinder(Region.US);
         Time("  MatcherPhoneFinder per line", pages, p => PerLine(p, (view, text, l, sink) => matcherFinder.Find(text, l.Start, l.End, sink.Phones)));
+        Time("  NameCandidates.Find (no fields)", pages, p => NameCandidates.Find(PlainTextView.Build(p.Text), [], (a, b) => false, (a, b) => false).Count);
         Time("  PlainTextView.Build only", pages, p => PlainTextView.Build(p.Text).Lines.Count);
         Time("ExtractText (all)", pages, p => extractor.ExtractText(p.Text).Fields.Count);
         Time("ExtractHtml (all)", pages, p => extractor.ExtractHtml(p.Html).Fields.Count);
