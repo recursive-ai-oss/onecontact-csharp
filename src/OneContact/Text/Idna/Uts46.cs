@@ -183,23 +183,26 @@ internal static class Uts46
         }
 
         // Step 2, normalize; step 3, break into labels.
-        int[] normalized = NormalizationC.Normalize(mapped.ToArray());
-        labels = [];
-        var current = new List<int>();
+        int[] normalized = NormalizationC.NormalizeOwned(mapped.ToArray());
+        int dots = 0;
         foreach (int cp in normalized)
         {
             if (cp == '.')
             {
-                labels.Add([.. current]);
-                current.Clear();
-            }
-            else
-            {
-                current.Add(cp);
+                dots++;
             }
         }
 
-        labels.Add([.. current]);
+        labels = new List<int[]>(dots + 1);
+        int labelStart = 0;
+        for (int i = 0; i <= normalized.Length; i++)
+        {
+            if (i == normalized.Length || normalized[i] == '.')
+            {
+                labels.Add(normalized[labelStart..i]);
+                labelStart = i + 1;
+            }
+        }
 
         // Step 4, convert xn-- labels; validation comes after, because the Bidi rule looks at the whole domain.
         var fromPunycode = new bool[labels.Count];
@@ -251,15 +254,19 @@ internal static class Uts46
             }
         }
 
+        // Only the Bidi rule reads this, so it is looked for only when that rule is on.
         bool bidiDomain = false;
-        foreach (int[] label in labels)
+        if ((options & Uts46Options.CheckBidi) != 0)
         {
-            foreach (int cp in label)
+            foreach (int[] label in labels)
             {
-                BidiClass b = IdnaTables.GetBidiClass(cp);
-                if (b is BidiClass.R or BidiClass.AL or BidiClass.AN)
+                foreach (int cp in label)
                 {
-                    bidiDomain = true;
+                    BidiClass b = IdnaTables.GetBidiClass(cp);
+                    if (b is BidiClass.R or BidiClass.AL or BidiClass.AN)
+                    {
+                        bidiDomain = true;
+                    }
                 }
             }
         }
@@ -299,7 +306,7 @@ internal static class Uts46
         bool transitional = (options & Uts46Options.TransitionalProcessing) != 0 && !fromPunycode;
 
         // 1. NFC. Mapping and normalization already did this for labels that were not Punycode.
-        if (fromPunycode)
+        if (fromPunycode && !AllBelowNfcLimit(label))
         {
             int[] nfc = NormalizationC.Normalize(label);
             if (!nfc.AsSpan().SequenceEqual(label))
@@ -367,6 +374,20 @@ internal static class Uts46
         if ((options & Uts46Options.CheckBidi) != 0 && bidiDomain && !BidiRule(label))
         {
             return false;
+        }
+
+        return true;
+    }
+
+    // Code points below IdnaTables.NfcStableLimit never change under NFC, so a label made only of them is in NFC.
+    private static bool AllBelowNfcLimit(int[] label)
+    {
+        foreach (int cp in label)
+        {
+            if (cp >= IdnaTables.NfcStableLimit)
+            {
+                return false;
+            }
         }
 
         return true;

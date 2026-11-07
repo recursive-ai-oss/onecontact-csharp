@@ -54,11 +54,11 @@ internal sealed class ShapePhoneFinder : IPhoneCandidateFinder
                 continue;
             }
 
-            if (TryRun(text, p, end, out int runEnd, out bool grouped, out bool plus, out int digits, out List<int> groups))
+            if (TryRun(text, p, end, out int runEnd, out bool grouped, out bool plus, out int digits, out DigitGroups groups))
             {
                 string? label = FindLabel(text, start, p);
                 bool labelled = label is not null;
-                bool dateLike = IsDateLike(groups);
+                bool dateLike = groups.IsDateLike();
                 if (digits is >= 7 and <= 15 && !dateLike && !IsMoneyBefore(text, start, p)
                     && (plus || grouped || labelled))
                 {
@@ -91,12 +91,12 @@ internal sealed class ShapePhoneFinder : IPhoneCandidateFinder
 
     private static bool IsSeparator(char c) => c is ' ' or '-' or '.' or '/' or '(' or ')' or '\u00A0' or '\u2010' or '\u2011' or '\u2012' or '\u2013' or '\u2212';
 
-    private static bool TryRun(string text, int p, int end, out int runEnd, out bool grouped, out bool plus, out int digits, out List<int> groups)
+    private static bool TryRun(string text, int p, int end, out int runEnd, out bool grouped, out bool plus, out int digits, out DigitGroups groups)
     {
         plus = text[p] == '+';
         int i = p + (plus ? 1 : 0);
         digits = 0;
-        groups = [];
+        groups = default;
         int separators = 0;
         bool parens = false;
         int lastDigit = p;
@@ -186,17 +186,41 @@ internal sealed class ShapePhoneFinder : IPhoneCandidateFinder
         return digits > 0;
     }
 
-    // Digit groups 4-2-2, 2-2-4 and 1or2-1or2-4 are dates; four groups of up to three digits are an IPv4 address.
-    private static bool IsDateLike(List<int> groups)
+    // The sizes of the first four digit groups of a run and how many there were: enough to tell dates and IP addresses, without a list.
+    private struct DigitGroups
     {
-        if (groups.Count == 3)
+        private int _a;
+        private int _b;
+        private int _c;
+        private int _d;
+
+        public int Count { get; private set; }
+
+        public void Add(int size)
         {
-            bool yearFirst = groups[0] == 4 && groups[1] <= 2 && groups[2] <= 2;
-            bool yearLast = groups[2] == 4 && groups[0] <= 2 && groups[1] <= 2;
-            return yearFirst || yearLast;
+            switch (Count)
+            {
+                case 0: _a = size; break;
+                case 1: _b = size; break;
+                case 2: _c = size; break;
+                case 3: _d = size; break;
+            }
+
+            Count++;
         }
 
-        return groups.Count == 4 && groups.TrueForAll(g => g <= 3);
+        // Digit groups 4-2-2, 2-2-4 and 1or2-1or2-4 are dates; four groups of up to three digits are an IPv4 address.
+        public readonly bool IsDateLike()
+        {
+            if (Count == 3)
+            {
+                bool yearFirst = _a == 4 && _b <= 2 && _c <= 2;
+                bool yearLast = _c == 4 && _a <= 2 && _b <= 2;
+                return yearFirst || yearLast;
+            }
+
+            return Count == 4 && _a <= 3 && _b <= 3 && _c <= 3 && _d <= 3;
+        }
     }
 
     internal static string? FindLabel(string text, int start, int p)
@@ -252,6 +276,10 @@ internal sealed class MatcherPhoneFinder : IPhoneCandidateFinder
 
     private readonly Region _region;
 
+    // One finder serves one extraction on one thread, so its work lists are kept between lines.
+    private readonly List<PhoneHit> _shape = [];
+    private readonly List<PhoneHit> _merged = [];
+
     /// <summary>Creates a finder for numbers written without a country code in <paramref name="region"/>.</summary>
     /// <param name="region">The region; it must be known.</param>
     public MatcherPhoneFinder(Region region) => _region = region;
@@ -278,10 +306,12 @@ internal sealed class MatcherPhoneFinder : IPhoneCandidateFinder
             return;
         }
 
-        var shape = new List<PhoneHit>();
+        List<PhoneHit> shape = _shape;
+        List<PhoneHit> merged = _merged;
+        shape.Clear();
+        merged.Clear();
         ShapePhoneFinder.Instance.Find(text, start, end, shape);
 
-        var merged = new List<PhoneHit>();
         int index = 0;
         long tries = long.MaxValue;
         while (PhoneNumberMatcher.Default.TryFindNext(line, _region, PhoneMatchLeniency.Valid, ref index, ref tries, out PhoneNumberMatch m))
@@ -312,7 +342,11 @@ internal sealed class MatcherPhoneFinder : IPhoneCandidateFinder
             }
         }
 
-        merged.Sort((a, b) => a.Start.CompareTo(b.Start));
+        if (merged.Count > 1)
+        {
+            merged.Sort((a, b) => a.Start.CompareTo(b.Start));
+        }
+
         sink.AddRange(merged);
     }
 }

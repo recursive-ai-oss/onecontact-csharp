@@ -234,6 +234,100 @@ public class EmailCompareRow
     }
 }
 
+/// <summary>Email parsing over the plain-ASCII addresses of the email row (30 addresses).</summary>
+[MemoryDiagnoser]
+public class EmailAsciiCompareRow
+{
+    /// <summary>This library.</summary>
+    /// <returns>The number accepted.</returns>
+    [Benchmark(OperationsPerInvoke = 30)]
+    public int Ours()
+    {
+        int n = 0;
+        foreach ((string text, _) in Inputs.EmailsAscii)
+        {
+            n += EmailAddress.TryParse(text, out _) ? 1 : 0;
+        }
+
+        return n;
+    }
+
+    /// <summary>System.Net.Mail.MailAddress.</summary>
+    /// <returns>The number accepted.</returns>
+    [Benchmark(OperationsPerInvoke = 30)]
+    public int MailAddressTryCreate()
+    {
+        int n = 0;
+        foreach ((string text, _) in Inputs.EmailsAscii)
+        {
+            n += MailAddress.TryCreate(text, out _) ? 1 : 0;
+        }
+
+        return n;
+    }
+
+    /// <summary>MimeKit MailboxAddress.</summary>
+    /// <returns>The number accepted.</returns>
+    [Benchmark(OperationsPerInvoke = 30)]
+    public int MimeKitTryParse()
+    {
+        int n = 0;
+        foreach ((string text, _) in Inputs.EmailsAscii)
+        {
+            n += MailboxAddress.TryParse(text, out _) ? 1 : 0;
+        }
+
+        return n;
+    }
+}
+
+/// <summary>Email parsing over the internationalized addresses of the email row (3 addresses).</summary>
+[MemoryDiagnoser]
+public class EmailIdnCompareRow
+{
+    /// <summary>This library.</summary>
+    /// <returns>The number accepted.</returns>
+    [Benchmark(OperationsPerInvoke = 3)]
+    public int Ours()
+    {
+        int n = 0;
+        foreach ((string text, _) in Inputs.EmailsIdn)
+        {
+            n += EmailAddress.TryParse(text, out _) ? 1 : 0;
+        }
+
+        return n;
+    }
+
+    /// <summary>System.Net.Mail.MailAddress.</summary>
+    /// <returns>The number accepted.</returns>
+    [Benchmark(OperationsPerInvoke = 3)]
+    public int MailAddressTryCreate()
+    {
+        int n = 0;
+        foreach ((string text, _) in Inputs.EmailsIdn)
+        {
+            n += MailAddress.TryCreate(text, out _) ? 1 : 0;
+        }
+
+        return n;
+    }
+
+    /// <summary>MimeKit MailboxAddress.</summary>
+    /// <returns>The number accepted.</returns>
+    [Benchmark(OperationsPerInvoke = 3)]
+    public int MimeKitTryParse()
+    {
+        int n = 0;
+        foreach ((string text, _) in Inputs.EmailsIdn)
+        {
+            n += MailboxAddress.TryParse(text, out _) ? 1 : 0;
+        }
+
+        return n;
+    }
+}
+
 /// <summary>URL parsing over 30 absolute URLs: this library's <c>WebAddress</c> (parse, canonical form, registrable domain) against AngleSharp's <c>Url</c>.</summary>
 [MemoryDiagnoser]
 public class UrlCompareRow

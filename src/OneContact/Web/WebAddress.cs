@@ -118,7 +118,7 @@ public readonly partial struct WebAddress :
             return false;
         }
 
-        return TryParse(s.AsSpan(), out result);
+        return WebAddressParser.TryParseValue(s, out result);
     }
 
     /// <summary>Tries to parse a value.</summary>

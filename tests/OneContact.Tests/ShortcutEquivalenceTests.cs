@@ -66,10 +66,10 @@ public sealed class ShortcutEquivalenceTests
             shortcut += CompareUrl(input, differences);
         }
 
-        string[] schemes = ["http://", "https://", "HTTP://", "Https://", "http:", "ftp://", "http://user@", "http://u:p@"];
-        string[] hosts = ["example.com", "a.b.c.example.co.uk", "EXAMPLE.com", "localhost", "1.2.3.4", "xn--bcher-kva.example", "exa_mple.com", "a..b", "-a.com", "a-.com", "a.com.", "[::1]", "münchen.de", "a b.com", "0x7f.1", "9.9.9.9.9", "a%41.com", "e.com:80", "e.com:443", "e.com:8080", "e.com:99999", "e.com:", "e.com:0"];
-        string[] paths = ["", "/", "/a", "/a/b/", "/a/./b", "/a/../b", "/a/%2e%2E/b", "/a b", "/a%20b", "/ä", "/a\\b", "//", "/a?b", "/~x/_y-z", "/a;b=c", "/a|b", "/a\"b", "/a{b}"];
-        string[] queries = ["", "?", "?a=b", "?a=b&c=d", "?a=b c", "?a='b'", "?q=ä", "?a=%zz", "?a=\"x\"", "?a=<>"];
+        string[] schemes = ["http://", "https://", "HTTP://", "Https://", "http:", "ftp://", "ws://", "wss://", "WSS://", "wsx://", "http://user@", "http://u:p@"];
+        string[] hosts = ["example.com", "a.b.c.example.co.uk", "EXAMPLE.com", "localhost", "1.2.3.4", "xn--bcher-kva.example", "exa_mple.com", "a..b", "-a.com", "a-.com", "a.com.", "[::1]", "münchen.de", "a b.com", "0x7f.1", "9.9.9.9.9", "a%41.com", "e.com:80", "e.com:443", "e.com:8080", "e.com:99999", "e.com:", "e.com:0", "e.com:21", "e.com:00080", "Bücher.de", "x.xn--p1ai", "1.2.3", "0x7f.0.0.1", "a.b.0x1g", "%41.com", "e.com\ud800", "😀.com", "ex ample.com", "e.com\\x"];
+        string[] paths = ["", "/", "/a", "/a/b/", "/a/./b", "/a/../b", "/a/%2e%2E/b", "/a b", "/a%20b", "/ä", "/a\\b", "//", "/a?b", "/~x/_y-z", "/a;b=c", "/a|b", "/a\"b", "/a{b}", "/a\\b/..\\c", "/%2e", "/%2E%2e/", "/a/b/..", "/.", "/..", "/a/%2E/b", "/a/.%2e/b", "/\U0001F600", "/\ud800x", "/a\u007fb", "/a\u0001b", "\\a", "\\\\", "/a b/../c d"];
+        string[] queries = ["", "?", "?a=b", "?a=b&c=d", "?a=b c", "?a='b'", "?q=ä", "?a=%zz", "?a=\"x\"", "?a=<>", "?a=\U0001F600", "?a=\ud800", "?a b#c d"];
         string[] fragments = ["", "#", "#top", "#a b", "#a`b", "#ä", "#a#b"];
         foreach (string sc in schemes)
         {
@@ -105,11 +105,33 @@ public sealed class ShortcutEquivalenceTests
     [Fact]
     public void Idna_ascii_answers_equal_the_table_search()
     {
-        for (int cp = 0; cp < 128; cp++)
+        for (int cp = 0; cp < IdnaTables.NfcStableLimit; cp++)
         {
             IdnaStatus fast = IdnaTables.GetStatus(cp, out ReadOnlySpan<char> fastMapping);
             IdnaStatus slow = IdnaTables.SearchStatus(cp, out ReadOnlySpan<char> slowMapping);
             Assert.True(fast == slow && fastMapping.SequenceEqual(slowMapping), $"U+{cp:X4}: {fast} '{fastMapping}' vs {slow} '{slowMapping}'");
+        }
+    }
+
+    [Fact]
+    public void Nfc_leaves_low_code_points_alone()
+    {
+        for (int cp = 0; cp < IdnaTables.NfcStableLimit; cp++)
+        {
+            Assert.Equal(0, IdnaTables.CombiningClass(cp));
+            Assert.Equal([cp], NormalizationC.NormalizeFull([cp]));
+        }
+
+        // Pairs of them, too: nothing composes.
+        int[] pair = new int[2];
+        for (int a = 0; a < IdnaTables.NfcStableLimit; a++)
+        {
+            for (int b = 0; b < IdnaTables.NfcStableLimit; b += 7)
+            {
+                pair[0] = a;
+                pair[1] = b;
+                Assert.Equal(pair, NormalizationC.NormalizeFull(pair));
+            }
         }
     }
 

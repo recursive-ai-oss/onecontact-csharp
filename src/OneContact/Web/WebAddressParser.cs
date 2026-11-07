@@ -12,13 +12,17 @@ internal static class WebAddressParser
     private static readonly string[] OpaqueSchemes = ["mailto", "tel", "sms", "urn", "geo", "callto", "skype", "magnet", "news", "data", "javascript", "about", "blob"];
 
     internal static OperationStatus TryParse(ReadOnlySpan<char> input, out WebAddress value, out ParseDetail detail) =>
-        Parse(input, wantDetail: true, out value, out detail);
+        Parse(input, null, wantDetail: true, out value, out detail);
 
     // The bool-returning parse builds no ParseDetail.
     internal static bool TryParseValue(ReadOnlySpan<char> input, out WebAddress value) =>
-        Parse(input, wantDetail: false, out value, out _) == OperationStatus.Done;
+        Parse(input, null, wantDetail: false, out value, out _) == OperationStatus.Done;
 
-    private static OperationStatus Parse(ReadOnlySpan<char> input, bool wantDetail, out WebAddress value, out ParseDetail detail)
+    // Text that is already a string and needs no trimming is used as it is instead of being copied.
+    internal static bool TryParseValue(string input, out WebAddress value) =>
+        Parse(input, input, wantDetail: false, out value, out _) == OperationStatus.Done;
+
+    private static OperationStatus Parse(ReadOnlySpan<char> input, string? original, bool wantDetail, out WebAddress value, out ParseDetail detail)
     {
         int start = 0;
         int end = input.Length;
@@ -39,7 +43,7 @@ internal static class WebAddressParser
             return OperationStatus.InvalidData;
         }
 
-        string text = input[start..end].ToString();
+        string text = original is not null && start == 0 && end == original.Length ? original : input[start..end].ToString();
         bool assumed = !HasScheme(text);
         const string Prefix = "https://";
         string toParse = assumed ? Prefix + text : text;

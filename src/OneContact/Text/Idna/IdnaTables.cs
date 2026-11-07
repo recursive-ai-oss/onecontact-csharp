@@ -35,12 +35,15 @@ internal static class IdnaTables
     private static readonly EmbeddedTables Tables = new(typeof(IdnaTables).Assembly, "OneContact.Data.unicode-idna.ocd");
     private static readonly Lazy<Loaded> Data = new(() => new Loaded(Tables), LazyThreadSafetyMode.ExecutionAndPublication);
 
+    /// <summary>Code points below this value (U+0000 to U+02FF) have combining class 0 and are unchanged by NFC.</summary>
+    internal const int NfcStableLimit = Loaded.AsciiCount;
+
     internal static IdnaStatus GetStatus(int codePoint, out ReadOnlySpan<char> mapping)
     {
         Loaded d = Data.Value;
         if ((uint)codePoint < Loaded.AsciiCount)
         {
-            // Domain names are mostly ASCII: answer from the table filled with this same search.
+            // Domain names are mostly ASCII or Latin: answer from the table filled with this same search.
             mapping = d.AsciiMappingLength[codePoint] == 0 ? default : d.MappingChars.AsSpan(d.AsciiMappingOffset[codePoint], d.AsciiMappingLength[codePoint]);
             return (IdnaStatus)d.AsciiStatus[codePoint];
         }
@@ -212,7 +215,7 @@ internal static class IdnaTables
             Bidi = tables.GetTable("bidi");
             Joining = tables.GetTable("joining");
 
-            // The answers for ASCII, from the same searches, so the common case needs none.
+            // The answers for the low code points, from the same searches, so the common case needs none.
             for (int c = 0; c < AsciiCount; c++)
             {
                 IdnaStatus status = Search(this, c, out ReadOnlySpan<char> mapping);
@@ -245,7 +248,9 @@ internal static class IdnaTables
             }
         }
 
-        internal const int AsciiCount = 128;
+        // U+0000 to U+02FF: ASCII, Latin-1, Latin Extended and IPA, the scripts domains in Western languages use. None of them has a
+        // combining class, and none changes under NFC, which NormalizationC relies on.
+        internal const int AsciiCount = 0x300;
 
         internal byte[] AsciiStatus { get; } = new byte[AsciiCount];
 

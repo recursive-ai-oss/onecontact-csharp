@@ -161,20 +161,16 @@ internal static class UrlParser
         return TryParsePlainWebUrl(input, first, last, url, ref spans);
     }
 
-    // The common shape of a web address: http or https, "//", a plain ASCII domain name, an optional port, and a path, query and
-    // fragment of characters the percent-encode sets leave alone. For these the state machine does nothing but split the text, so it is
-    // split here and the record filled the way the machine would fill it (the offsets in <paramref name="spans"/> included). Anything
-    // else (credentials, IP addresses, IDNA labels, dot segments, characters to encode, backslashes) returns false and takes the full
-    // parser, which also decides every failure.
+    // The common shape of a web address: a special scheme other than file, "//", a host without credentials or brackets, an optional
+    // port, and a path, query and fragment. The state machine's work on these is splitting the text and percent-encoding it, which is
+    // done here the same way (the percent-encode sets, backslash as a slash, dot segments); the host goes to the same host parser. The
+    // record is filled the way the machine would fill it (the offsets in <paramref name="spans"/> included). Anything else (credentials,
+    // IPv6 addresses, tabs and newlines inside the text, a host or port that does not parse) returns false and takes the full parser,
+    // which also decides every failure.
     private static bool TryParsePlainWebUrl(string input, int first, int last, UrlRecord url, ref UrlSpans spans)
     {
         ReadOnlySpan<char> s = input.AsSpan(first, last - first);
-        int schemeLength;
-        if (s.Length > 8 && (s[0] | 0x20) == 'h' && (s[1] | 0x20) == 't' && (s[2] | 0x20) == 't' && (s[3] | 0x20) == 'p')
-        {
-            schemeLength = (s[4] | 0x20) == 's' ? 5 : 4;
-        }
-        else
+        if (!TryReadSpecialScheme(s, out string scheme, out int schemeLength, out int defaultPort))
         {
             return false;
         }
@@ -184,49 +180,24 @@ internal static class UrlParser
             return false;
         }
 
-        string scheme = schemeLength == 5 ? "https" : "http";
+        // The machine drops tabs and newlines before it reads anything.
+        if (s.IndexOfAny('\t', '\n', '\r') >= 0)
+        {
+            return false;
+        }
+
         int hostStart = schemeLength + 3;
-        int i = hostStart;
-        int lastDot = -1;
-        while (i < s.Length)
-        {
-            char c = s[i];
-            if (char.IsAsciiLetterOrDigit(c) || c == '-')
-            {
-                i++;
-            }
-            else if (c == '.')
-            {
-                // An empty label is left to the full parser.
-                if (i == hostStart || lastDot == i - 1)
-                {
-                    return false;
-                }
-
-                lastDot = i;
-                i++;
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        int hostEnd = i;
-        if (hostEnd == hostStart || lastDot == hostEnd - 1)
+        int authorityLength = s[hostStart..].IndexOfAny(AuthorityEnd);
+        int authorityEnd = authorityLength < 0 ? s.Length : hostStart + authorityLength;
+        ReadOnlySpan<char> authority = s[hostStart..authorityEnd];
+        if (authority.IndexOfAny('@', '[', ']') >= 0)
         {
             return false;
         }
 
-        ReadOnlySpan<char> host = s[hostStart..hostEnd];
-        if (host.Contains("xn--", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        // A last label that is a number (decimal, or 0x then hex digits) makes the host an IPv4 address.
-        ReadOnlySpan<char> lastLabel = lastDot < 0 ? host : s[(lastDot + 1)..hostEnd];
-        if (IsNumberLabel(lastLabel))
+        int colon = authority.IndexOf(':');
+        int hostEnd = colon < 0 ? authorityEnd : hostStart + colon;
+        if (hostEnd == hostStart)
         {
             return false;
         }
@@ -234,104 +205,123 @@ internal static class UrlParser
         int port = -1;
         int portStart = -1;
         int portEnd = -1;
-        if (i < s.Length && s[i] == ':')
+        if (colon >= 0)
         {
-            portStart = i + 1;
-            int p = portStart;
-            long value = 0;
-            while (p < s.Length && char.IsAsciiDigit(s[p]))
+            portStart = hostEnd + 1;
+            portEnd = authorityEnd;
+            if (portEnd == portStart)
             {
+                return false;
+            }
+
+            long value = 0;
+            for (int p = portStart; p < portEnd; p++)
+            {
+                if (!char.IsAsciiDigit(s[p]))
+                {
+                    return false;
+                }
+
                 value = (value * 10) + (s[p] - '0');
                 if (value > 65535)
                 {
                     return false;
                 }
-
-                p++;
             }
 
-            if (p == portStart)
-            {
-                return false;
-            }
-
-            portEnd = p;
-            port = value == (schemeLength == 5 ? 443 : 80) ? -1 : (int)value;
-            i = p;
+            port = value == defaultPort ? -1 : (int)value;
         }
 
-        int pathStart = i;
-        int pathEnd = i;
-        int queryStart = -1;
-        int fragmentStart = -1;
-        if (i < s.Length && s[i] == '/')
+        ReadOnlySpan<char> host = s[hostStart..hostEnd];
+        string hostText;
+        HostKind hostKind;
+        if (IsPlainDomain(host))
         {
-            while (pathEnd < s.Length && s[pathEnd] is not ('?' or '#'))
+            hostText = host.ToString().ToLowerInvariant();
+            hostKind = HostKind.Domain;
+        }
+        else
+        {
+            // Credentials and brackets are out; what is left is for the host parser, as the machine would call it.
+            foreach (char c in host)
             {
-                if (!IsPlainPathChar(s[pathEnd]))
+                if (char.IsSurrogate(c))
                 {
                     return false;
                 }
+            }
 
-                pathEnd++;
+            if (!HostParser.TryParse(host.ToString(), false, out hostText, out hostKind))
+            {
+                return false;
             }
         }
-        else if (i < s.Length && s[i] is not ('?' or '#'))
+
+        int pathStart = authorityEnd;
+        int pathEnd = pathStart;
+        if (pathStart < s.Length && s[pathStart] is '/' or '\\')
         {
-            return false;
+            int q = s[pathStart..].IndexOfAny('?', '#');
+            pathEnd = q < 0 ? s.Length : pathStart + q;
         }
 
-        ReadOnlySpan<char> path = s[pathStart..pathEnd];
-        if (path.Contains("/.", StringComparison.Ordinal) || path.Contains("%2", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
+        int queryStart = -1;
         int queryEnd = pathEnd;
         if (pathEnd < s.Length && s[pathEnd] == '?')
         {
             queryStart = pathEnd + 1;
-            queryEnd = queryStart;
-            while (queryEnd < s.Length && s[queryEnd] != '#')
-            {
-                if (!IsPlainQueryChar(s[queryEnd]))
-                {
-                    return false;
-                }
-
-                queryEnd++;
-            }
+            int h = s[queryStart..].IndexOf('#');
+            queryEnd = h < 0 ? s.Length : queryStart + h;
         }
 
-        if (queryEnd < s.Length)
-        {
-            fragmentStart = queryEnd + 1;
-            for (int f = fragmentStart; f < s.Length; f++)
-            {
-                if (!IsPlainQueryChar(s[f]) && s[f] != '\'')
-                {
-                    return false;
-                }
-            }
-        }
+        int fragmentStart = queryEnd < s.Length ? queryEnd + 1 : -1;
 
         url.Scheme = scheme;
-        url.Host = host.ToString().ToLowerInvariant();
-        url.HostKind = HostKind.Domain;
+        url.Host = hostText;
+        url.HostKind = hostKind;
         url.Port = port;
-        if (path.IsEmpty)
+        if (pathEnd == pathStart)
         {
             url.Path.Add(string.Empty);
         }
         else
         {
-            // "/a/b" has the segments a and b; a trailing slash leaves an empty last segment.
-            int segmentStart = 1;
-            for (int k = 1; k <= path.Length; k++)
+            // Segments are cut at / or \ (special schemes); the first separator belongs to the path-start state. "/a/b" has the segments a
+            // and b; a trailing slash leaves an empty last segment. "." segments vanish and ".." removes the one before (section 4.4, path state).
+            int segmentStart = pathStart + 1;
+            for (int k = segmentStart; k <= pathEnd; k++)
             {
-                if (k == path.Length || path[k] == '/')
+                if (k == pathEnd || s[k] is '/' or '\\')
                 {
-                    url.Path.Add(path[segmentStart..k].ToString());
+                    bool slash = k < pathEnd;
+                    string segment = EncodeComponent(s[segmentStart..k], PercentEncodeSet.Path);
+                    if (segment.Length is >= 1 and <= 6 && (segment[0] is '.' or '%'))
+                    {
+                        if (IsDoubleDot(segment))
+                        {
+                            ShortenPath(url);
+                            if (!slash)
+                            {
+                                url.Path.Add(string.Empty);
+                            }
+
+                            segmentStart = k + 1;
+                            continue;
+                        }
+
+                        if (IsSingleDot(segment))
+                        {
+                            if (!slash)
+                            {
+                                url.Path.Add(string.Empty);
+                            }
+
+                            segmentStart = k + 1;
+                            continue;
+                        }
+                    }
+
+                    url.Path.Add(segment);
                     segmentStart = k + 1;
                 }
             }
@@ -339,12 +329,12 @@ internal static class UrlParser
 
         if (queryStart >= 0)
         {
-            url.Query = s[queryStart..queryEnd].ToString();
+            url.Query = EncodeComponent(s[queryStart..queryEnd], PercentEncodeSet.SpecialQuery);
         }
 
         if (fragmentStart >= 0)
         {
-            url.Fragment = s[fragmentStart..].ToString();
+            url.Fragment = EncodeComponent(s[fragmentStart..], PercentEncodeSet.Fragment);
         }
 
         spans.End = last;
@@ -371,6 +361,125 @@ internal static class UrlParser
         return true;
     }
 
+    // http, https, ftp, ws and wss, in any letter case, with the scheme's default port.
+    private static bool TryReadSpecialScheme(ReadOnlySpan<char> s, out string scheme, out int length, out int defaultPort)
+    {
+        scheme = string.Empty;
+        length = 0;
+        defaultPort = 0;
+        if (s.Length < 7)
+        {
+            return false;
+        }
+
+        char c0 = (char)(s[0] | 0x20);
+        char c1 = (char)(s[1] | 0x20);
+        char c2 = (char)(s[2] | 0x20);
+        if (c0 == 'h' && c1 == 't' && c2 == 't' && (s[3] | 0x20) == 'p')
+        {
+            if ((s[4] | 0x20) == 's')
+            {
+                scheme = "https";
+                length = 5;
+                defaultPort = 443;
+            }
+            else
+            {
+                scheme = "http";
+                length = 4;
+                defaultPort = 80;
+            }
+
+            return true;
+        }
+
+        if (c0 == 'f' && c1 == 't' && c2 == 'p')
+        {
+            scheme = "ftp";
+            length = 3;
+            defaultPort = 21;
+            return true;
+        }
+
+        if (c0 == 'w' && c1 == 's')
+        {
+            bool secure = c2 == 's';
+            scheme = secure ? "wss" : "ws";
+            length = secure ? 3 : 2;
+            defaultPort = secure ? 443 : 80;
+            return secure || s[2] == ':';
+        }
+
+        return false;
+    }
+
+    // Letters, digits, hyphens and dots only, no empty label, no label that starts with xn--, and a last label that is not a number
+    // (which would make the host an IPv4 address): for these the host parser only lowercases.
+    private static bool IsPlainDomain(ReadOnlySpan<char> host)
+    {
+        int lastDot = -1;
+        for (int i = 0; i < host.Length; i++)
+        {
+            char c = host[i];
+            if (char.IsAsciiLetterOrDigit(c) || c == '-')
+            {
+                continue;
+            }
+
+            if (c != '.' || i == 0 || lastDot == i - 1)
+            {
+                return false;
+            }
+
+            lastDot = i;
+        }
+
+        if (lastDot == host.Length - 1 || host.Contains("xn--", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        return !IsNumberLabel(lastDot < 0 ? host : host[(lastDot + 1)..]);
+    }
+
+    // Percent-encodes a component as the machine does, one scalar value at a time (a lone surrogate reads as U+FFFD).
+    private static string EncodeComponent(ReadOnlySpan<char> raw, PercentEncodeSet set)
+    {
+        int i = 0;
+        while (i < raw.Length && !PercentEncoding.InSet(raw[i], set))
+        {
+            i++;
+        }
+
+        if (i == raw.Length)
+        {
+            return raw.ToString();
+        }
+
+        var sb = new StringBuilder(raw.Length + 8);
+        sb.Append(raw[..i]);
+        for (; i < raw.Length; i++)
+        {
+            char c = raw[i];
+            int cp = c;
+            if (char.IsHighSurrogate(c) && i + 1 < raw.Length && char.IsLowSurrogate(raw[i + 1]))
+            {
+                cp = char.ConvertToUtf32(c, raw[i + 1]);
+                i++;
+            }
+            else if (char.IsSurrogate(c))
+            {
+                cp = 0xFFFD;
+            }
+
+            PercentEncoding.AppendEncoded(sb, cp, set);
+        }
+
+        return sb.ToString();
+    }
+
+    private static readonly System.Buffers.SearchValues<char> AuthorityEnd = System.Buffers.SearchValues.Create("/\\?#");
+
     private static readonly System.Buffers.SearchValues<char> HexDigits = System.Buffers.SearchValues.Create("0123456789abcdefABCDEF");
 
     private static bool IsNumberLabel(ReadOnlySpan<char> label)
@@ -393,10 +502,6 @@ internal static class UrlParser
 
         return label.Length >= 2 && label[0] == '0' && (label[1] | 0x20) == 'x' && label[2..].IndexOfAnyExcept(HexDigits) < 0;
     }
-
-    private static bool IsPlainPathChar(char c) => char.IsAsciiLetterOrDigit(c) || c is '-' or '.' or '_' or '~' or '!' or '$' or '&' or '\'' or '(' or ')' or '*' or '+' or ',' or ';' or '=' or ':' or '@' or '/' or '%';
-
-    private static bool IsPlainQueryChar(char c) => char.IsAsciiLetterOrDigit(c) || c is '-' or '.' or '_' or '~' or '!' or '$' or '&' or '(' or ')' or '*' or '+' or ',' or ';' or '=' or ':' or '@' or '/' or '?' or '%';
 
     /// <summary>Runs the basic URL parser on an existing URL with a state override (the URL API's setters).</summary>
     /// <param name="url">The record to change.</param>

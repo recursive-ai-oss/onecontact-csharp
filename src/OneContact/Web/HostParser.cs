@@ -60,8 +60,8 @@ internal static class HostParser
         }
 
         // Host parser step 5 and 6: percent-decode, then UTF-8 decode without BOM (invalid bytes become U+FFFD).
-        // Text that is plain ASCII with no percent sign decodes to itself; skip the byte round trip for it.
-        string domain = IsAsciiWithoutPercent(input) ? input : Encoding.UTF8.GetString(PercentEncoding.Decode(input));
+        // Text with no percent sign and no surrogate (a lone one would become U+FFFD) decodes to itself; skip the byte round trip for it.
+        string domain = IsUnchangedByDecoding(input) ? input : Encoding.UTF8.GetString(PercentEncoding.Decode(input));
         if (!TryDomainToAscii(domain, beStrict: false, out string asciiDomain))
         {
             return false;
@@ -151,11 +151,11 @@ internal static class HostParser
         return true;
     }
 
-    private static bool IsAsciiWithoutPercent(string s)
+    private static bool IsUnchangedByDecoding(string s)
     {
         foreach (char c in s)
         {
-            if (c >= 0x80 || c == '%')
+            if (c == '%' || char.IsSurrogate(c))
             {
                 return false;
             }

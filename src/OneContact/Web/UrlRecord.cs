@@ -55,12 +55,39 @@ internal sealed class UrlRecord
 
     internal void SetPath(List<string> path) => Path = path;
 
+    // Serializing is done often and in short strings: one builder per thread is reused instead of allocating one each time.
+    [ThreadStatic]
+    private static StringBuilder? t_builder;
+
+    private static StringBuilder Rent()
+    {
+        StringBuilder? sb = t_builder;
+        if (sb is null)
+        {
+            return new StringBuilder(128);
+        }
+
+        t_builder = null;
+        return sb.Clear();
+    }
+
+    private static string Return(StringBuilder sb)
+    {
+        string result = sb.ToString();
+        if (sb.Capacity <= 4096)
+        {
+            t_builder = sb;
+        }
+
+        return result;
+    }
+
     /// <summary>Section 4.5, the URL serializer.</summary>
     /// <param name="excludeFragment">Whether to leave the fragment out.</param>
     /// <returns>The serialized URL.</returns>
     internal string Serialize(bool excludeFragment = false)
     {
-        var sb = new StringBuilder(64);
+        StringBuilder sb = Rent();
         sb.Append(Scheme).Append(':');
         if (Host is not null)
         {
@@ -100,7 +127,7 @@ internal sealed class UrlRecord
             sb.Append('#').Append(Fragment);
         }
 
-        return sb.ToString();
+        return Return(sb);
     }
 
     internal string SerializePath()
@@ -115,9 +142,9 @@ internal sealed class UrlRecord
             return string.Concat("/", Path[0]);
         }
 
-        var sb = new StringBuilder();
+        StringBuilder sb = Rent();
         AppendPath(sb);
-        return sb.ToString();
+        return Return(sb);
     }
 
     // The path as the serializer writes it: the opaque path, or each segment after a slash.

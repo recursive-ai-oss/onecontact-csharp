@@ -32,6 +32,14 @@ internal static class Inputs
         ("jane@exa mple.com", false), ("jane@example,com", false), ("Jane <jane@example.com> extra", false),
     ];
 
+    /// <summary>The plain-ASCII subset of <see cref="Emails"/> (no internationalized domain, no non-ASCII local part).</summary>
+    public static readonly (string Text, bool Valid)[] EmailsAscii = Array.FindAll(Emails, e => IsAsciiOnly(e.Text) && !e.Text.Contains("xn--", StringComparison.Ordinal));
+
+    /// <summary>The internationalized subset of <see cref="Emails"/>.</summary>
+    public static readonly (string Text, bool Valid)[] EmailsIdn = Array.FindAll(Emails, e => !IsAsciiOnly(e.Text) || e.Text.Contains("xn--", StringComparison.Ordinal));
+
+    private static bool IsAsciiOnly(string s) => System.Text.Ascii.IsValid(s);
+
     /// <summary>Absolute URLs, written as found on web pages.</summary>
     public static readonly string[] Urls =
     [
