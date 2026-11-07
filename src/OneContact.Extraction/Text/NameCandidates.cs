@@ -892,7 +892,7 @@ internal sealed class NameCandidates
         }
 
         // "CUSTOMER SHANE WILFLEY": a word that says what the person is to the writer is a label, not a word of the name.
-        while (to - from >= 2 && NameLists.FrontLabels.Contains(Folded(toks[from])) && KindOf(toks[from]) != Kind.Honorific)
+        while (_loose && to - from >= 2 && NameLists.FrontLabels.Contains(Folded(toks[from])) && KindOf(toks[from]) != Kind.Honorific)
         {
             from++;
         }
@@ -920,7 +920,7 @@ internal sealed class NameCandidates
         }
 
         // "SPOKE WITH DWAINE PIESKE RE: QUOTE", "ELIAN MESSER CALLED": a reference word or a verb at the back of three or more words.
-        while (to - from >= 2 && (NameLists.TrailWords.Contains(Folded(toks[to])) || NameLists.PersonVerbs.Contains(LowerWord(toks[to]))))
+        while (_loose && to - from >= 2 && (NameLists.TrailWords.Contains(Folded(toks[to])) || NameLists.PersonVerbs.Contains(LowerWord(toks[to]))))
         {
             to--;
         }
@@ -1873,7 +1873,7 @@ internal sealed class NameCandidates
         for (int k = 0; k + 1 < toks.Count; k++)
         {
             string g = Folded(toks[k]);
-            if (Array.IndexOf(Greetings, g) < 0)
+            if (Array.IndexOf(Greetings, g) < 0 || (!_loose && g is "morning" or "afternoon" or "evening" or "thanks" or "thx" or "cheers" or "you"))
             {
                 continue;
             }
