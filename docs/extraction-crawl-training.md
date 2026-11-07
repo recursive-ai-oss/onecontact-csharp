@@ -59,7 +59,7 @@ Data (`tools/data/crawl-spans`, labels `v1`): crawl `CC-MAIN-2026-39`, block-sel
 | `train-negative.jsonl` | 14,606 | `7a7d359f…2e9` |
 | `dev.jsonl` | 755 (123 positive, 632 negative) | `b831d15e…8366` |
 
-Training spans: 5,227 organization and 1,135 person mentions from markup, 17,019 web addresses and 463 phone, email and address mentions (markup and rules) from the rules and markup. `crawl-spans check` finds 0 bad spans and 0 hosts in both files.
+Training spans: 5,227 organization and 1,135 person mentions from markup, 17,019 web addresses and 458 phone, email and address mentions (263 from markup, 195 from the rules). `crawl-spans check` finds 0 bad spans and 0 hosts in both files.
 
 Two candidates, `recipes/tier1 spans` on the Tier 1 encoder (frozen, seed 1, 4 epochs, 400,000 rendered blocks): **A** repeats each positive piece 6 times and each negative once, **B** 15 and 2 times. The best development epoch was kept (the second in both; later epochs fit the repeated pieces and lose on dev).
 
