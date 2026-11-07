@@ -207,6 +207,10 @@ public sealed class ShortcutEquivalenceTests
                 inputs.Add(l + "@" + d);
                 inputs.Add(" " + l + "@" + d + "\t");
                 inputs.Add("<" + l + "@" + d + ">");
+                inputs.Add("Jane Smith <" + l + "@" + d + ">");
+                inputs.Add("\"J. Smith\" <" + l + "@" + d + "> (work)");
+                inputs.Add("=?UTF-8?Q?J=C3=BCrgen?= <" + l + "@" + d + ">");
+                inputs.Add("<" + l + "@" + d + "> extra");
             }
         }
 

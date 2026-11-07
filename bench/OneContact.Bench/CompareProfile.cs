@@ -15,6 +15,23 @@ internal static class CompareProfile
 {
     public static int Run()
     {
+        // Let the JIT reach its final code for every path before anything is timed.
+        for (int pass = 0; pass < 3; pass++)
+        {
+            foreach ((string text, _) in Inputs.Emails)
+            {
+                Best(() => EmailAddress.TryParse(text, out _), 20000);
+                Best(() => MailAddress.TryCreate(text, out _), 20000);
+                Best(() => MailboxAddress.TryParse(text, out _), 20000);
+            }
+
+            foreach (string text in Inputs.Urls)
+            {
+                Best(() => WebAddress.TryParse(text, out _), 20000);
+                Best(() => new Url(text).IsInvalid, 20000);
+            }
+        }
+
         Console.WriteLine("-- email: ours | MailAddress | MimeKit (ns per parse)");
         foreach ((string text, _) in Inputs.Emails)
         {
@@ -35,9 +52,9 @@ internal static class CompareProfile
         return 0;
     }
 
-    private static double Best(Func<bool> work)
+    private static double Best(Func<bool> work, int warm = 5000)
     {
-        for (int i = 0; i < 5000; i++)
+        for (int i = 0; i < warm; i++)
         {
             work();
         }

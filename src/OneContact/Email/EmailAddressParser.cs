@@ -45,6 +45,10 @@ internal static class EmailAddressParser
         return false;
     }
 
+    // The characters of a plain local part (atext and the dot) and of a plain domain (letters, digits, hyphen and dot).
+    private static readonly SearchValues<char> LocalPartChars = SearchValues.Create("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789." + AtextSpecials);
+    private static readonly SearchValues<char> DomainChars = SearchValues.Create("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-.");
+
     private static bool IsAtextAscii(char c) => char.IsAsciiLetterOrDigit(c) || AtextSpecials.Contains(c, StringComparison.Ordinal);
 
     private static bool IsWsp(char c) => c is ' ' or '\t';
@@ -181,6 +185,11 @@ internal static class EmailAddressParser
                 addrStart = lt + 1;
                 addrEnd = gt;
                 angle = true;
+                if (_allowPlainShortcut && TryReadPlainAddrSpec(addrStart, addrEnd))
+                {
+                    Classify();
+                    return true;
+                }
             }
 
             if (!ParseAddrSpec(addrStart, addrEnd, angle))
@@ -197,51 +206,25 @@ internal static class EmailAddressParser
         // normalization. Anything else, including every failure, is left to the full grammar, which also reports it.
         private bool TryReadPlainAddrSpec(int start, int end)
         {
-            int at = -1;
-            char previous = '.';
-            for (int i = start; i < end; i++)
-            {
-                char c = _s[i];
-                if (c == '@')
-                {
-                    if (at >= 0 || i == start)
-                    {
-                        return false;
-                    }
-
-                    if (previous == '.')
-                    {
-                        return false;
-                    }
-
-                    at = i;
-                    previous = '@';
-                }
-                else if (c == '.')
-                {
-                    // No leading, trailing or doubled dot in the local part; the domain's dots are checked by its normalization.
-                    if (at < 0 && previous == '.')
-                    {
-                        return false;
-                    }
-
-                    previous = '.';
-                }
-                else if (at < 0 ? IsAtextAscii(c) : char.IsAsciiLetterOrDigit(c) || c == '-')
-                {
-                    previous = c;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            if (at < 0 || at + 1 >= end)
+            ReadOnlySpan<char> text = _s[start..end];
+            int at = text.IndexOf('@');
+            if (at <= 0 || at + 1 >= text.Length)
             {
                 return false;
             }
 
+            ReadOnlySpan<char> local = text[..at];
+            ReadOnlySpan<char> domainPart = text[(at + 1)..];
+
+            // A dot-atom local part: atext and dots, but no leading, trailing or doubled dot. The domain's characters are letters, digits,
+            // hyphens and dots; its dots and hyphens are checked by its normalization.
+            if (local.IndexOfAnyExcept(LocalPartChars) >= 0 || local[0] == '.' || local[^1] == '.' || local.Contains("..", StringComparison.Ordinal)
+                || domainPart.IndexOfAnyExcept(DomainChars) >= 0)
+            {
+                return false;
+            }
+
+            at += start;
             string ascii;
             if (!EmailDomain.TryNormalizePlainAscii(_s[(at + 1)..end], out ascii!))
             {
