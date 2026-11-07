@@ -17,8 +17,19 @@ internal static partial class Tier2Reader
     {
         address = null;
         detail = failure;
-        if (text.Length > MaxInferenceLength || !text.AsSpan().ContainsAnyInRange('0', '9')
+        if (text.Length > MaxInferenceLength
             || !(failure.PrimaryReason.Equals(ReasonCode.AddressCountryUndetermined) || failure.PrimaryReason.Equals(ReasonCode.AddressNoLastLine)))
+        {
+            return false;
+        }
+
+        // "Main Street, Naas, Co. Kildare": an Irish last line with no postcode. Only the county marker or a Dublin postal district is evidence, and the reading is tried only for text that holds one.
+        if (failure.PrimaryReason.Equals(ReasonCode.AddressNoLastLine) && MayBeIrishLine(text) && TryInferIrishLine(text, out address, out detail))
+        {
+            return true;
+        }
+
+        if (!text.AsSpan().ContainsAnyInRange('0', '9'))
         {
             return false;
         }
@@ -94,6 +105,54 @@ internal static partial class Tier2Reader
         readable.RemoveAll(r => !LettersHold(text, r.Code));
 
         return readable;
+    }
+
+    // The cheap look before the Irish trial read: "Co." or "County" as a word, or Dublin followed by a district number.
+    private static bool MayBeIrishLine(string text)
+    {
+        foreach ((string key, bool _, bool _) in Words(text))
+        {
+            foreach (string part in key.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (part is "CO" or "COUNTY" or "DUBLIN")
+                {
+                    if (part != "CO" || text.Contains("Co.", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // UPU Ireland sheet: Irish addresses without an Eircode end in the post town and "CO. CORK", or in a Dublin postal district ("DUBLIN 8"). Nobody else writes either, so with the
+    // county marker or the district present the Irish reading is the text's country; a bare town name is never enough, as with a hint it would be the only evidence.
+    private static bool TryInferIrishLine(string text, out ParsedAddress? address, out ParseDetail detail)
+    {
+        address = null;
+        detail = default!;
+        Reader trial = new(text, Region.Parse("IE"));
+        if (trial.Run(out ParsedAddress? read, out ParseDetail readDetail) != OperationStatus.Done || read is not { PostalCode: null } || read.Country != Region.Parse("IE") || !LettersHold(text, "IE"))
+        {
+            return false;
+        }
+
+        // "CO" with no period is Colorado in a United States address: only "Co." and "County" are markers.
+        bool county = read.AdminArea is { } admin && admin.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries) is [var marker, ..]
+            && (marker.StartsWith("Co.", StringComparison.OrdinalIgnoreCase) || marker.Equals("County", StringComparison.OrdinalIgnoreCase));
+        bool district = read.Locality is { } place && T2Rules.Key(place.Text).StartsWith("DUBLIN ", StringComparison.Ordinal);
+        if (!county && !district)
+        {
+            return false;
+        }
+
+        read.SourceText = text;
+        read.Hint = Region.Unknown;
+        address = read;
+        detail = readDetail;
+        return true;
     }
 
     private static bool TryInferProvinceLine(string text, out ParsedAddress? address, out ParseDetail detail)

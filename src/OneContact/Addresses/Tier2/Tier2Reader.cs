@@ -208,6 +208,12 @@ internal static partial class Tier2Reader
             int tokenIndex;
             PostcodeMatch match;
             MergeTrailingProvince(units, known);
+            if (_multiLine && known is "JE" or "GG" or "IM")
+            {
+                SplitLineAboveIsland(units, known);
+            }
+
+            MergeTrailingEstonianCounty(units, known);
             if (!FindAustralian(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindRomanian(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindHungarianOneLine(units, known, out unitIndex, out tokenIndex, out match)
@@ -850,7 +856,9 @@ internal static partial class Tier2Reader
             if (last.Count >= 2 && last[^1].Text.Length >= 4 && last[^1].Text[0] == '(' && last[^1].Text[^1] == ')')
             {
                 string inner = T2Rules.Key(last[^1].Text.Trim('(', ')'));
-                string? parenthesized = inner is "AD" or "IT" or "ES" or "GB" or "IE" or "DE" or "NL" or "BE" ? inner
+                // "(UK)" after a British or Manx postcode names no country the postcode does not: the postcode area says which island or nation (as for "British Isles").
+                string? parenthesized = inner.Replace(".", string.Empty, StringComparison.Ordinal) == "UK" ? "BI"
+                    : inner is "AD" or "IT" or "ES" or "GB" or "IE" or "DE" or "NL" or "BE" ? inner
                     : T2Rules.CountryNames.TryGetValue(inner, out string? byName) && inner.Length > 2 ? byName : null;
                 if (parenthesized is not null)
                 {

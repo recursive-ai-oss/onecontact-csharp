@@ -29,6 +29,36 @@ internal static partial class Tier2Reader
         // Jersey, Guernsey and the Isle of Man write the name of the island on the line above the postcode.
         private static bool IsIslandName(List<Tok> toks) =>
             toks.Count > 0 && T2Rules.Key(Join(toks)) is "JERSEY" or "GUERNSEY" or "ISLE OF MAN";
+        // Jersey Post and Guernsey Post print the parish or town on its own line above the island's name, and web pages often put the house name, the road and the parish on one line
+        // with commas ("Mon Plaisir, La Rue du Hocq, St Clement" above "Jersey JE2 6LF"). The last piece of the line above the island's name is cut off when it can be a place
+        // (no digits), so that it is read as the locality; a line that ends in a street and number ("Apartment 4, 52 Prospect Hill") is left whole.
+        private void SplitLineAboveIsland(List<Unit> units, string code)
+        {
+            if (units.Count < 2 || units[^1].Toks.Count < 2 || units[^1].Toks[0].Key is not ("JERSEY" or "GUERNSEY" or "ISLE"))
+            {
+                return;
+            }
+
+            List<Tok> line = units[^2].Toks;
+            int lastStart = 0;
+            for (int i = 1; i < line.Count; i++)
+            {
+                if (CommaBetween(line[i - 1], line[i]))
+                {
+                    lastStart = i;
+                }
+            }
+
+            List<Tok> place = line.GetRange(lastStart, line.Count - lastStart);
+            if (lastStart == 0 || !PlaceFits(place, false, code))
+            {
+                return;
+            }
+
+            units[^2].Toks = line.GetRange(0, lastStart);
+            units.Insert(units.Count - 1, new Unit(place));
+        }
+
         // The number of words at the end of the tokens that name any of the three islands, or 0.
         private static int TrailingIslandAny(List<Tok> toks) =>
             Math.Max(TrailingIslandWords(toks, "IM"), Math.Max(TrailingIslandWords(toks, "JE"), TrailingIslandWords(toks, "GG")));

@@ -70,11 +70,12 @@ internal static partial class Tier2Reader
                 return false;
             }
 
-            static bool IsCode(string s) => s.Length == 5 && s[0] != '0' && s.All(char.IsAsciiDigit);
+            // UPU Estonia sheet: the code may carry the country letters (EE-80010); the match then holds the digits and the prefix, as for Latvia.
+            static bool IsCode(string s) => s.Length == 5 && s[0] != '0' && s.All(char.IsAsciiDigit) || s.Length == 8 && s.StartsWith("EE-", StringComparison.OrdinalIgnoreCase) && IsCode(s[3..]);
             static bool Plain(List<Tok> toks) => toks.Count is >= 1 and <= 3 && !toks.Any(t => t.Text.Any(char.IsAsciiDigit)) && !StartsWithSpatial(toks);
             int u = units.Count - 1;
             List<Tok> toks = units[u].Toks;
-            PostcodeMatch code = new(1, toks[^1].Text, ["EE"], null);
+            PostcodeMatch code = toks[^1].Text.Length == 8 ? new(1, toks[^1].Text[3..], ["EE"], "EE") : new(1, toks[^1].Text, ["EE"], null);
             if (toks.Count == 1 && IsCode(toks[0].Text) && u >= 1 && Plain(units[u - 1].Toks))
             {
                 // "Pärnu mnt 12, Tallinn, 10145": the postcode stands alone after a comma.
@@ -109,6 +110,56 @@ internal static partial class Tier2Reader
             unitIndex = u;
             match = code;
             return true;
+        }
+
+        // Omniva: the county (maakond) is the last word group of the last line, but web pages put it on a line of its own after the town: "Pärnu mnt 12, 10148 Tallinn, Harju maakond" and
+        // "Pärnu mnt 12, Tallinn 10148, Harju maakond". The county is joined to the line that holds the postcode, which is the form the reader handles. A bare county line is taken only
+        // for Estonian text (a hint, or the word maakond itself); the line above must hold the five-digit postcode, first or last.
+        private static void MergeTrailingEstonianCounty(List<Unit> units, string? known)
+        {
+            if (known is not ("EE" or null) || units.Count < 2)
+            {
+                return;
+            }
+
+            List<Tok> last = units[^1].Toks;
+            bool county = last.Count == 2 && last[1].Key == "MAAKOND" && !last.Any(t => t.Text.Any(char.IsAsciiDigit))
+                || known == "EE" && last.Count == 1 && last[0].Key.Length > 5 && last[0].Key.EndsWith("MAA", StringComparison.Ordinal) && !last[0].Text.Any(char.IsAsciiDigit);
+            if (!county)
+            {
+                return;
+            }
+
+            List<Tok> prev = units[^2].Toks;
+            static bool IsCode(Tok t) => t.Text.Length == 5 && t.Text[0] != '0' && t.Text.All(char.IsAsciiDigit);
+            if (prev.Count < 2)
+            {
+                return;
+            }
+
+            if (IsCode(prev[0]))
+            {
+                prev.AddRange(last);
+            }
+            else if (IsCode(prev[^1]))
+            {
+                // "Tallinn 10148, Harju maakond": the line is rewritten to read postcode, town, county. The town is the plain words after the last other number.
+                int number = prev.FindLastIndex(prev.Count - 2, t => t.Text.Any(char.IsAsciiDigit));
+                List<Tok> town = prev.GetRange(number + 1, prev.Count - number - 2);
+                if (town.Count == 0 || town.Count > 3 || StartsWithSpatial(town))
+                {
+                    return;
+                }
+
+                List<Tok> head = prev.GetRange(0, number + 1);
+                units[^2].Toks = [.. head, prev[^1], .. town, .. last];
+            }
+            else
+            {
+                return;
+            }
+
+            units.RemoveAt(units.Count - 1);
         }
 
         private bool CommaBetween(Tok previous, Tok next) =>
@@ -407,6 +458,18 @@ internal static partial class Tier2Reader
                         before.RemoveAt(village);
                         return;
                     }
+                }
+
+                // "Ülikooli 18, Tartu, Tartu maakond, 51003" and "..., Tallinn, Harju maakond 10148": the county stands between the town and the postcode, so the plain town word before
+                // it is the locality. A rural municipality, village or town-with-status word (vald, küla, linn ...) before the county is read as before.
+                if (!_headSplit && (localityToks.Count == 2 && localityToks[^1].Key == "MAAKOND" || localityToks.Count == 1 && localityToks[0].Key.Length > 5 && localityToks[0].Key.EndsWith("MAA", StringComparison.Ordinal))
+                    && before.Count > 1 && before[^1].Toks.Count <= 2 && !before[^1].Toks.Any(t => t.Text.Any(char.IsAsciiDigit)) && !StartsWithSpatial(before[^1].Toks)
+                    && before[^1].Toks[^1].Key is not ("VALD" or "LINN" or "LINNAOSA" or "KULA" or "ALEVIK" or "ALEV" or "ASULA" or "MAAKOND"))
+                {
+                    admin = localityToks;
+                    localityToks = before[^1].Toks;
+                    before.RemoveAt(before.Count - 1);
+                    return;
                 }
 
                 if (localityToks.Count >= 3 && localityToks[^1].Key == "MAAKOND")
