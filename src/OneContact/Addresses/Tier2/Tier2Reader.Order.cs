@@ -51,10 +51,28 @@ internal static partial class Tier2Reader
 
             int n = units.Count;
 
-            // The postcode and the locality open a line, delivery lines follow.
-            for (int p = 0; p < n - 1; p++)
+            // The locality and then the postcode end a line ("Gdynia 81-001"): the line is rewritten to read postcode, locality. Delivery lines stand before it or after it.
+            for (int p = 0; p < n; p++)
             {
                 List<Tok> t = units[p].Toks;
+                PostcodeMatch? trailing = t.Count >= 2 ? MatchAt(t, t.Count - 1, known) : null;
+                if (trailing is { Length: 1 } && (trailing.Candidates.Contains(Family(known)) || trailing.Candidates.Contains(known)) && !(Inferring && trailing.Candidates.Count != 1)
+                    && PlainPlace(t.GetRange(0, t.Count - 1)) && (units.Take(p).Any(u => IsDeliveryLine(u, country)) || units.Skip(p + 1).Any(u => IsDeliveryLine(u, country))))
+                {
+                    Unit rewritten = new([t[^1], .. t.GetRange(0, t.Count - 1)]);
+                    units.RemoveAt(p);
+                    units.Add(rewritten);
+                    unitIndex = units.Count - 1;
+                    match = trailing;
+                    return true;
+                }
+
+                if (p == n - 1)
+                {
+                    break;
+                }
+
+                // The postcode and the locality open a line, delivery lines follow.
                 PostcodeMatch? m = t.Count >= 2 ? MatchAt(t, 0, known) : null;
                 // A trial read of country inference takes only a postcode form of one country: four or five digits at the start of a line are as often a house number.
                 if (m is null || m.Length >= t.Count || !m.Candidates.Contains(Family(known)) && !m.Candidates.Contains(known) || Inferring && m.Candidates.Count != 1)
@@ -113,7 +131,8 @@ internal static partial class Tier2Reader
 
         // A locality: a few words without digits that does not open a place inside a building or a box line.
         private static bool PlainPlace(List<Tok> toks) =>
-            toks.Count is >= 1 and <= 4 && !StartsWithSpatial(toks) && toks.All(x => !x.Text.Any(char.IsAsciiDigit) && x.Text.Any(char.IsLetter));
+            toks.Count is >= 1 and <= 4 && !StartsWithSpatial(toks)
+            && toks.All(x => !x.Text.Any(char.IsAsciiDigit) && x.Text.Any(char.IsLetter) && x.Key is not ("CP" or "PLZ" or "CAP" or "ZIP" or "KOD" or "COD" or "PSC" or "CODIGO" or "POSTCODE"));
 
         // Spanish streets such as "Gran Vía" and "Mayor" are known by their name alone: the sign and the address carry no type word (UPU Spain sheet, street names are
         // printed as the municipality registers them). A name of capitalized words followed by the house number and what may follow it is read as a street line; a line

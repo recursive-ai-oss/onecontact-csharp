@@ -1035,6 +1035,12 @@ internal static partial class Tier2Reader
                 return false;
             }
 
+            // "Westside Business Park", "Mill House", "Harbour Centre": a building, estate or park name above the post town is a line of the address, not the post town.
+            if (toks.Count >= 2 && toks[^1].Key is "PARK" or "ESTATE" or "CENTRE" or "CENTER" or "HOUSE" or "BUILDING" or "BUILDINGS" or "TOWER" or "WORKS" or "CAMPUS" or "YARD")
+            {
+                return false;
+            }
+
             return !(toks.Count >= 2 && T2Rules.FindTailType(toks[^1].Key) is { Full: "ROAD" or "STREET" or "LANE" or "AVENUE" or "DRIVE" or "CLOSE" or "CRESCENT" or "TERRACE" or "GARDENS" or "WAY" or "SQUARE" or "PLACE" or "COURT" });
         }
 

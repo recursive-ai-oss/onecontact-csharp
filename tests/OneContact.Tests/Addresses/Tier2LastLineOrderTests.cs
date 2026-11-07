@@ -28,6 +28,8 @@ public class Tier2LastLineOrderTests
     [Theory]
     [InlineData("PL", "00-590 Warszawa, ul. Marszałkowska 10", "street.type=ul. ; street.name=Marszałkowska ; street.house-number=10 ; locality=Warszawa ; postal-code=00-590")]
     [InlineData("PL", "Warszawa, ul. Złota 59, 00-120", "street.type=ul. ; street.name=Złota ; street.house-number=59 ; locality=Warszawa ; postal-code=00-120")]
+    [InlineData("PL", "ul. Kościuszki 12, Gdynia 81-001", "street.name=Kościuszki ; street.house-number=12 ; locality=Gdynia ; postal-code=81-001")]
+    [InlineData("PL", "Kraków 31-147, ul. Długa 5", "street.name=Długa ; street.house-number=5 ; locality=Kraków ; postal-code=31-147")]
     [InlineData("ES", "28013 Madrid, Calle Mayor 5", "street.type=Calle ; street.name=Mayor ; street.house-number=5 ; locality=Madrid ; postal-code=28013")]
     [InlineData("ES", "08037 Barcelona, Avinguda Diagonal 400", "street.type=Avinguda ; street.name=Diagonal ; street.house-number=400 ; locality=Barcelona ; postal-code=08037")]
     [InlineData("HU", "Fő utca 12., Debrecen, 4024", "street.name=Fő ; street.type=utca ; street.house-number=12. ; locality=Debrecen ; postal-code=4024")]
@@ -61,6 +63,16 @@ public class Tier2LastLineOrderTests
         ParsedAddress a = Read("34 Findcastle Place, Dundee, Dundee City, DD4 9EN", "GB");
         Assert.Equal("Dundee", a.Locality!.Value.Text);
         Assert.Equal("Dundee City", a.AdminArea!.Value.Text);
+    }
+
+    // A city that is also a county, written with the postcode on its line, is the post town; the business park above it is a line of the address (Royal Mail PAF Programmers' Guide: building and estate names precede the post town).
+    [Fact]
+    public void CityNamedLikeACountyIsThePostTownBehindABusinessPark()
+    {
+        ParsedAddress a = Read("Unit 3, Westside Business Park, Galway H91 X2Y3", "IE");
+        Assert.Equal("Galway", a.Locality!.Value.Text);
+        Assert.Equal("H91 X2Y3", a.PostalCode!.Value.Text);
+        Assert.Null(a.AdminArea);
     }
 
     [Fact]
