@@ -226,6 +226,7 @@ internal static partial class Tier2Reader
                 && !FindStateLine(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindPostcodeAlone(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindPostcodeFirst(units, known, out unitIndex, out tokenIndex, out match)
+                && !FindEstonianNoPostcode(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindNoPostcode(units, known, out unitIndex, out tokenIndex, out match))
             {
                 detail = ParseDetail.Failure(ReasonCode.AddressNoLastLine, new SourceSpan(0, text.Length));

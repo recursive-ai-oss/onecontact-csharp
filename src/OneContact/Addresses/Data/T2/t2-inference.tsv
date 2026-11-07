@@ -109,6 +109,56 @@ word	EE	KORTER
 marked	EE	TN
 marked	EE	MNT
 marked	EE	PST
+# Estonia: the towns (linn) and county names in the one-word forms (Harjumaa) are the country's own divisions and nobody else writes them (Statistics Estonia list of towns; Omniva
+#   writes the county as maakond or as one word ending in -maa). Towns whose name is also an ordinary word elsewhere (Elva, Turi, Valga, Pussi, Polva, Rapina) are left out. Hyphenated towns (Kohtla-Jarve, Abja-Paluoja) are listed by their first part. poik (lane), valjak (square) and
+#   postkast (post office box) are street and delivery words of Omniva.
+place	EE	TALLINN
+place	EE	TARTU
+place	EE	NARVA
+place	EE	PARNU
+place	EE	VILJANDI
+place	EE	RAKVERE
+place	EE	KURESSAARE
+place	EE	SILLAMAE
+place	EE	VORU
+place	EE	JOHVI
+place	EE	HAAPSALU
+place	EE	KARDLA
+place	EE	PAIDE
+place	EE	JOGEVA
+place	EE	RAPLA
+place	EE	MAARDU
+place	EE	POLTSAMAA
+place	EE	OTEPAA
+place	EE	KOHILA
+place	EE	MUSTVEE
+place	EE	KIVIOLI
+place	EE	PALDISKI
+place	EE	ANTSLA
+place	EE	LIHULA
+place	EE	LOKSA
+place	EE	TAMSALU
+place	EE	KOHTLA
+place	EE	ABJA
+place	EE	VOHMA
+place	EE	SAUE
+place	EE	HARJUMAA
+place	EE	HIIUMAA
+place	EE	VIRUMAA
+place	EE	JOGEVAMAA
+place	EE	JARVAMAA
+place	EE	LAANEMAA
+place	EE	POLVAMAA
+place	EE	PARNUMAA
+place	EE	RAPLAMAA
+place	EE	SAAREMAA
+place	EE	TARTUMAA
+place	EE	VALGAMAA
+place	EE	VILJANDIMAA
+place	EE	VORUMAA
+word	EE	POIK
+word	EE	VALJAK
+word	EE	POSTKAST
 # Latvia: iela, prospekts, bulvaris, novads, pagasts (the Latvian rules for unified postal addresses).
 suffix	LV	IELA
 suffix	LV	IELAS
@@ -230,6 +280,7 @@ lang	fr	CHEMIN
 lang	fr	IMPASSE
 lang	fr	FAUBOURG
 lang	fr	ALLEE
+lang	et	ALLEE
 lang	fr	CHAUSSEE
 lang	es	CALLE
 lang	es	AVENIDA

@@ -59,6 +59,47 @@ internal static partial class Tier2Reader
             return true;
         }
 
+        // Estonia, a last line with no postcode: "Pärnu mnt 12, Tallinn" and "Pärnu mnt 12, Tallinn, Harju maakond". Web pages often leave the postcode out, and Omniva's form
+        // (street, town, county) is otherwise the same. A bare name is not enough on its own: the line must be a town of Estonia (t2-inference.tsv), written alone or with its
+        // county (maakond), and a delivery line must stand above it. The county is joined to the town's line, as for text with a postcode.
+        private bool FindEstonianNoPostcode(List<Unit> units, string? known, out int unitIndex, out int tokenIndex, out PostcodeMatch match)
+        {
+            unitIndex = tokenIndex = 0;
+            match = null!;
+            if (known != "EE" || units.Count < 2)
+            {
+                return false;
+            }
+
+            T2Country country = T2Rules.Countries["EE"];
+            bool NoDigits(List<Tok> toks) => !toks.Any(t => t.Text.Any(char.IsAsciiDigit));
+            bool IsTown(List<Tok> toks) => toks.Count is >= 1 and <= 2 && NoDigits(toks) && InferenceTables.Instance.IsPlace("EE", toks[0].Key) && !toks[0].Key.EndsWith("MAA", StringComparison.Ordinal);
+
+            int u = units.Count - 1;
+            List<Tok> last = units[u].Toks;
+            bool countyOnly = last.Count == 2 && last[1].Key == "MAAKOND" && NoDigits(last) || last.Count == 1 && last[0].Key.Length > 5 && last[0].Key.EndsWith("MAA", StringComparison.Ordinal) && NoDigits(last);
+            if (countyOnly && u >= 2 && IsTown(units[u - 1].Toks) && units[u - 1].Toks.Count == 1)
+            {
+                units[u - 1] = new Unit([.. units[u - 1].Toks, .. last]);
+                units.RemoveAt(u);
+                u--;
+                last = units[u].Toks;
+            }
+            else if (!(IsTown(last) || last.Count is >= 3 and <= 4 && NoDigits(last) && last[^1].Key == "MAAKOND" && last.Count > 1 && InferenceTables.Instance.IsPlace("EE", last[0].Key)))
+            {
+                return false;
+            }
+
+            if (!IsDeliveryLine(units[u - 1], country))
+            {
+                return false;
+            }
+
+            match = new PostcodeMatch(0, string.Empty, ["EE"], null);
+            unitIndex = u;
+            return true;
+        }
+
         private bool FindNoPostcode(List<Unit> units, string? known, out int unitIndex, out int tokenIndex, out PostcodeMatch match)
         {
             unitIndex = tokenIndex = 0;

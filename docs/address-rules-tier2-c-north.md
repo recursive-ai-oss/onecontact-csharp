@@ -99,3 +99,11 @@ Denmark, Norway, Sweden and Finland write a street name as one word or end it in
 
 Omniva (*Kuidas kirja adresseerida?*) writes the postcode, the town and then the county (`maakond`). Web pages also put the county on a line of its own after the town (`Pärnu mnt 12, 10148 Tallinn, Harju maakond`, `Pärnu mnt 12, Tallinn 10148, Harju maakond`), or between the town and the postcode (`Ülikooli 18, Tartu, Tartu maakond, 51003`, `Tallinn, Harju maakond 10148`). A county line after the postcode line is joined to it, and a county that stands between a plain town word and the postcode makes that word the locality and the county the admin area. A village, rural municipality or town-status word (`küla`, `vald`, `linn`, `alevik`) before the county keeps the reading above. The postcode may carry the country letters (`EE-80010`; UPU Estonia sheet).
 
+
+## Estonia without a hint, and without a postcode
+
+- **Towns and counties are evidence of the country.** The towns (`linn`) of Estonia and the one-word county names (`Harjumaa`, `Tartumaa`) are listed as places in `Data/T2/t2-inference.tsv`, as Liechtenstein's municipalities are. A five-digit text with a street, a postcode and one of these towns (`Pikk 5, 10133 Tallinn`) is read as Estonian when no other country that can read it has evidence of its own. Towns whose name is also an ordinary word in a neighbouring language (`Elva`, `Turi`, `Valga`, `Pussi`, `Polva`, `Rapina`) are left out, so a place word never decides against a country that writes it. `põik` (lane), `väljak` (square) and `postkast` (post office box) are street and delivery words of Omniva.
+- **`allee` is Estonian as well as French, German and Dutch** (`Pärna allee`): without that row the language check refused every Estonian avenue.
+- **A last line with no postcode.** Web pages often leave the postcode out. A town of Estonia alone, or with its county, on the last line after a delivery line is the locality (and admin area): `Pärnu mnt 12, Tallinn`, `Pärnu mnt 12, Tallinn, Harju maakond`, `Aia 12, Tartu, Tartu maakond`, and with `Estonia` after it. The postcode is left empty. The town must be on the list; a bare name is never taken for a locality (`Pikk 5, Springfield` stays refused). Only when Estonia is hinted, named, or the sole country with evidence.
+
+Measurements are in `docs/maintainers/address-recovery.md`.
