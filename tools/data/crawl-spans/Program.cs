@@ -17,7 +17,7 @@ namespace OneContact.Data.CrawlSpans;
 // (JSON-LD, microdata, RDFa, h-card, mailto/tel links) with the library's own readers, finds where its names, organizations and contact values
 // repeat in the page's visible text, and writes training pieces (text plus labelled spans) as JSON Lines, split train/dev by host.
 // The method is written down in docs/extraction-crawl-training.md. Page text is written only to --out, on the machine that holds the pages.
-internal static class Program
+internal static partial class Program
 {
     // Same piece size as the model reads at run time (TextFieldReader.Model.cs).
     private const int MaxPieceLines = 40;
@@ -31,6 +31,16 @@ internal static class Program
         if (args.Length >= 3 && args[0] == "check")
         {
             return Check(args[2..]);
+        }
+
+        if (args.Length >= 1 && args[0] == "select")
+        {
+            return Select(args);
+        }
+
+        if (args.Length >= 1 && args[0] == "apply")
+        {
+            return Apply(args);
         }
 
         if (args.Length == 0 || args[0] != "label")
