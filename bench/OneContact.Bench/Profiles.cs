@@ -7,6 +7,7 @@ using RecursiveAI.OneContact.Extraction.Text;
 using RecursiveAI.OneContact.Models;
 using RecursiveAI.OneContact.Models.Tier1;
 using RecursiveAI.OneContact.Names;
+using RecursiveAI.OneContact.Phones;
 using RecursiveAI.OneHtml;
 using RecursiveAI.OneHtml.Accessibility;
 using RecursiveAI.OneHtml.Css;
@@ -89,6 +90,39 @@ internal static class Profiles
         Time("  PlainTextView.Build only", pages, p => PlainTextView.Build(p.Text).Lines.Count);
         Time("ExtractText (all)", pages, p => extractor.ExtractText(p.Text).Fields.Count);
         Time("ExtractHtml (all)", pages, p => extractor.ExtractHtml(p.Html).Fields.Count);
+        return 0;
+    }
+
+    public static int Loop(string kind, int seconds)
+    {
+        Inputs.Page[] pages = Enumerable.Range(1, 8).Select(i => Inputs.MakePage(i, 24)).ToArray();
+        var extractor = new ContactExtractor { Sources = ExtractionSources.Markup | ExtractionSources.Text, DefaultRegion = Region.US };
+        string phoneText = PhoneMatcherRow.MakeText();
+        var clock = Stopwatch.StartNew();
+        long rounds = 0;
+        long sink = 0;
+        while (clock.Elapsed.TotalSeconds < seconds)
+        {
+            switch (kind)
+            {
+                case "html":
+                    foreach (Inputs.Page p in pages) { sink += extractor.ExtractHtml(p.Html).Fields.Count; }
+                    break;
+                case "recog":
+                    foreach (Inputs.Page p in pages) { sink += Accuracy.Recognizers(p.Text).Count; }
+                    break;
+                case "phones":
+                    sink += PhoneNumber.FindAll(phoneText, Region.US, PhoneMatchLeniency.Valid).Count();
+                    break;
+                default:
+                    foreach (Inputs.Page p in pages) { sink += extractor.ExtractText(p.Text).Fields.Count; }
+                    break;
+            }
+
+            rounds++;
+        }
+
+        Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{kind}: {rounds} rounds, {clock.Elapsed.TotalMilliseconds / rounds:F2} ms per round ({sink})"));
         return 0;
     }
 

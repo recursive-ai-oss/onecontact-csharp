@@ -42,6 +42,8 @@ internal sealed class NameCandidates
     private readonly bool[] _own;
     private readonly int[] _lastPersonEnd;
     private readonly bool[] _aloneName;
+    private readonly Dictionary<string, bool> _legalForms = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, NameClass?> _classes = new(StringComparer.Ordinal);
 
     // The free-text rules (a given name beside a family name, a verb after the name, lists, lower case, "Last, First") are for text a person
     // typed: notes, messages, comments. On a web page the same shapes are bylines, testimonials and product names, so a page keeps the
@@ -567,16 +569,26 @@ internal sealed class NameCandidates
         folded is "copyright" or "welcome" or "visit" or "about" or "contact" or "call" or "email" or "powered" or "designed" or "website" or "site"
             or "privacy" or "terms" or "thanks" or "thank" or "hello" or "hi" or "dear" or "attn" or "from" or "reserved" or "rights" or "all" or "c";
 
-    private static bool CoreAcceptsLegalForm(string candidate)
+    // The answer depends on the text alone, and a page names its company again and again, so each is asked of the core once per page.
+    private bool CoreAcceptsLegalForm(string candidate)
     {
+        if (_legalForms.TryGetValue(candidate, out bool known))
+        {
+            return known;
+        }
+
+        bool accepted;
         try
         {
-            return CompanyName.TryParse(candidate, out CompanyName c) && c.LegalForm is not null && !c.Base.IsEmpty;
+            accepted = CompanyName.TryParse(candidate, out CompanyName c) && c.LegalForm is not null && !c.Base.IsEmpty;
         }
         catch (ArgumentException)
         {
-            return false;
+            accepted = false;
         }
+
+        _legalForms[candidate] = accepted;
+        return accepted;
     }
 
     private void CopyrightOrganization(int line)
@@ -1017,12 +1029,7 @@ internal sealed class NameCandidates
         }
 
         string candidate = _text.Substring(start, end - start);
-        NameClass cls;
-        try
-        {
-            cls = NameParsing.Classify(candidate);
-        }
-        catch (ArgumentException)
+        if (!TryClassify(candidate, out NameClass cls))
         {
             return;
         }
@@ -1039,6 +1046,30 @@ internal sealed class NameCandidates
 
         Trace?.Invoke($"{(cls == NameClass.Company ? "org" : "person")} [{candidate}] {why}");
         Add(start, end, cls == NameClass.Company, line);
+    }
+
+    // The class of a name depends on its text alone, and the same name or company line comes up again and again on a page (every block of a
+    // staff list names the firm), so each is classified once. A text the classifier refuses is remembered as refused.
+    private bool TryClassify(string candidate, out NameClass cls)
+    {
+        if (_classes.TryGetValue(candidate, out NameClass? known))
+        {
+            cls = known.GetValueOrDefault();
+            return known.HasValue;
+        }
+
+        try
+        {
+            cls = NameParsing.Classify(candidate);
+            _classes[candidate] = cls;
+            return true;
+        }
+        catch (ArgumentException)
+        {
+            _classes[candidate] = null;
+            cls = default;
+            return false;
+        }
     }
 
     // True when something next to the run says it is a person's name; why names the evidence (for the evaluation tools).
@@ -2346,12 +2377,7 @@ internal sealed class NameCandidates
         }
 
         string candidate = _text.Substring(start, end - start);
-        NameClass cls;
-        try
-        {
-            cls = NameParsing.Classify(candidate);
-        }
-        catch (ArgumentException)
+        if (!TryClassify(candidate, out NameClass cls))
         {
             return;
         }

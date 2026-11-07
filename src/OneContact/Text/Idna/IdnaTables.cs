@@ -48,7 +48,21 @@ internal static class IdnaTables
             return (IdnaStatus)d.AsciiStatus[codePoint];
         }
 
-        return Search(d, codePoint, out mapping);
+        // A script's few letters come up again and again, so the answer for a code point without a mapping is remembered (see Recent below).
+        int known = RecentStatus[codePoint & RecentMask];
+        if (known >> 3 == codePoint)
+        {
+            mapping = default;
+            return (IdnaStatus)(known & 7);
+        }
+
+        IdnaStatus status = Search(d, codePoint, out mapping);
+        if (mapping.IsEmpty)
+        {
+            RecentStatus[codePoint & RecentMask] = (codePoint << 3) | (int)status;
+        }
+
+        return status;
     }
 
     internal static IdnaStatus SearchStatus(int codePoint, out ReadOnlySpan<char> mapping) => Search(Data.Value, codePoint, out mapping);
@@ -148,6 +162,10 @@ internal static class IdnaTables
     private const int NfcKnown = 1 << 8;
     private const int BidiKnown = 1 << 9;
     private static readonly int[] Recent = new int[RecentMask + 1];
+
+    // The same idea for the mapping status: an entry holds the code point (bits 3 and up) and the status (bits 0 to 2). Code points below
+    // AsciiCount never reach it, so an empty entry (code point 0) never matches.
+    private static readonly int[] RecentStatus = new int[RecentMask + 1];
 
     private static int Remember(int codePoint, int slot, int answer)
     {
