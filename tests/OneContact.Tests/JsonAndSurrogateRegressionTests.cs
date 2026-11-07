@@ -84,6 +84,17 @@ public class JsonAndSurrogateRegressionTests
     }
 
     [Fact]
+    public void Dictionary_keys_with_a_plus_and_an_ampersand_write_the_plus_literally()
+    {
+        WebAddress w = WebAddress.Parse("https://example.com/a+b?q=1&r=2");
+        JsonSerializerOptions options = new() { Converters = { new WebAddressJsonConverter() } };
+        string json = JsonSerializer.Serialize(new Dictionary<WebAddress, int> { [w] = 1 }, options);
+        Assert.Contains("a+b?q=1&r=2", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("u002B", json, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(1, JsonSerializer.Deserialize<Dictionary<WebAddress, int>>(json, options)![w]);
+    }
+
+    [Fact]
     public void Email_json_writes_a_plus_tag_literally_and_keeps_other_escapes()
     {
         EmailAddress e = EmailAddress.Parse("J.Smith+crm@example.com");

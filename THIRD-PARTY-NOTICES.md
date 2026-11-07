@@ -2,7 +2,7 @@
 
 OneContact's own code is licensed `MIT OR Apache-2.0`, Copyright (c) Recursive AI, LLC.
 
-Each third-party data file that is packed with a package is listed below with its licence, its pinned upstream version and the SHA-256 of the file as fetched. A section is filled in when the data it covers is first packed; until then the sections are empty and no such data ships.
+Each third-party data source that is packed with a package is listed below with its licence and its pinned upstream version. The SHA-256 of every file as fetched is in the `PIN` file of its folder under `upstream/`. The trained models carry their own notices and provenance in their packages.
 
 ## libphonenumber metadata (Apache-2.0)
 
@@ -15,7 +15,7 @@ Compiled into the core package: the phone, short-number and alternate-format met
 | `PhoneNumberAlternateFormats.xml` | `8645e64f568506abee96308c7f7013bfc864a09aeeecfe9845ba0dc27cfa8093` |
 | `phonemetadata.proto` (read as a format document, not packed) | `c7b7e75a7f7944cb6264cc7d96f0a46eed7ec12eecb5aa633a67bc6113821d38` |
 
-The geocoding, carrier and time-zone tables belong to the `.Phones.Geo` package and are listed there when packed.
+The geocoding, carrier and time-zone tables belong to the `.Phones.Geo` package and are listed below.
 
 ## libaddressinput address data (Apache-2.0)
 
@@ -33,7 +33,7 @@ The address expansion tables of `RecursiveAI.OneContact` are compiled from dicti
 
 ## Public Suffix List (MPL-2.0)
 
-None packed yet. When packed: `public_suffix_list.dat`, byte for byte as published, under the Mozilla Public License 2.0, with the licence notice. Additions of ours live in a separate file.
+Packed with `RecursiveAI.OneContact`: `public_suffix_list.dat` of https://github.com/publicsuffix/list at commit aae37acca5d0f3d09e7c1fe4da9024c514674ac9, byte for byte as published (SHA-256 `762b6cbdd2dacc597b398fcd7860e2184b684125a58aa177dbdf54916a1f3430`), under the Mozilla Public License 2.0. The file is not modified; the licence text is packed under `notices/psl/`. Additions of ours live in a separate file.
 
 ## GLEIF entity legal forms (CC0 1.0)
 
@@ -46,8 +46,14 @@ Credit: Entity Legal Forms code list, GLEIF (gleif.org). The notice is packed wi
 
 The list of disposable email domains (`disposable_email_blocklist.conf`) of the disposable-email-domains project, https://github.com/disposable-email-domains/disposable-email-domains, commit a72c0cecfcdd940d666265e44c0f661282e2d4aa, file SHA-256 e66aa85a1f16d2afa14cbf8a82517091d6df811cf405e29481238c365649c93e. The project dedicates it to the public domain under CC0 1.0 Universal. Credit: the disposable-email-domains contributors. Compiled into the library as the `Disposable` flag data.
 
-## OpenStreetMap address data (ODbL 1.0), pending challenger note
+## Unicode data files (Unicode License v3)
 
-Nothing from this source is packed or shipped. Training examples for a challenger address model are converted from the OpenStreetMap address file of the published libpostal parser training set (https://archive.org/details/libpostal-parser-training-data-20170304, `formatted_addresses_tagged.random.tsv.gz`, SHA-256 `3851ba7c9c6a0a2f5b27e419343faa9f01a571f7f44303bd123c6e4f45a83a69`). The data is made available under the Open Database License 1.0 (https://opendatacommons.org/licenses/odbl/1-0/).
+Compiled into `RecursiveAI.OneContact`: the IDNA mapping table and the character properties UTS #46 processing needs (`IdnaMappingTable.txt`, `UnicodeData.txt`, `DerivedNormalizationProps.txt`, `DerivedBidiClass.txt`, `DerivedJoiningType.txt`), Unicode Character Database 18.0.0 (https://www.unicode.org/Public/18.0.0/; file hashes in `upstream/unicode-idna/PIN`). Copyright (c) 1991-2026 Unicode, Inc., distributed under the Unicode License v3; the licence text is packed under `notices/unicode/`.
 
-If a model trained on it is ever packed, its notices carry: "Contains information from OpenStreetMap, which is made available under the Open Database License (ODbL). © OpenStreetMap contributors, https://www.openstreetmap.org/copyright." The record is `tools/data/provenance/address-challenger-osm.md`.
+## libphonenumber geocoding, carrier and time-zone data (Apache-2.0)
+
+Compiled into `RecursiveAI.OneContact.Phones.Geo`: the area description (`resources/geocoding/`), carrier name (`resources/carrier/`) and time-zone map (`resources/timezones/map_data.txt`) data files of Google's libphonenumber, version 9.0.43 (commit 86ea33cee5c22ab7e23b3de368e7cc7fa439a2b7), under the Apache License 2.0, Copyright (C) The Libphonenumber Authors. Only data files are used. The file hashes are in `upstream/libphonenumber-geocoding/PIN`, `upstream/libphonenumber-carrier/PIN` and `upstream/libphonenumber-timezones/PIN`; the licence text is packed under `notices/libphonenumber/`.
+
+## Unicode CLDR territory names (Unicode License v3)
+
+Compiled into `RecursiveAI.OneContact.Phones.Geo`: the territory display names of every locale (`cldr-localenames-full/main/*/territories.json`) and the parent-locale table (`cldr-core/supplemental/parentLocales.json`) of the CLDR JSON distribution, release 43 (https://github.com/unicode-org/cldr-json at commit c3349f36f4d4808a0c5e52b63fff16de8b867edf; file hashes in `upstream/cldr-territories/PIN`). Copyright (c) 1991-2023 Unicode, Inc., distributed under the Unicode, Inc. License Agreement for Data Files and Software (the text shipped with the CLDR JSON distribution; the same permissive terms as the Unicode License v3); the licence text is packed under `notices/cldr/`.

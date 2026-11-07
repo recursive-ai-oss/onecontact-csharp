@@ -5,7 +5,7 @@
 set -uo pipefail
 repo=$(cd "$(dirname "$0")/../.." && pwd)
 cd "$repo"
-export PATH=~/dotnet10:$PATH DOTNET_ROOT=~/dotnet10 DOTNET_PROCESSOR_COUNT=4 DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
+export DOTNET_PROCESSOR_COUNT=4 DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
 : "${ONECONTACT_MODELS_MODEL:?saved pipeline}"
 for p in Rules Models; do
   nice dotnet build "tools/Eval/$p" -c Release -m:4 -v quiet -clp:NoSummary 2>&1 | grep -E 'error|warn' | sort -u | head

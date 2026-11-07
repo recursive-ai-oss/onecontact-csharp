@@ -3,9 +3,9 @@ using RecursiveAI.OneContact.Data;
 
 namespace RecursiveAI.OneContact.Addresses.Expansion;
 
-/// <summary>The languages whose dictionaries expansion uses.</summary>
+/// <summary>The languages whose dictionaries expansion uses. The underlying type is 64-bit so that more languages can be added.</summary>
 [Flags]
-public enum ExpansionLanguages
+public enum ExpansionLanguages : long
 {
     /// <summary>No language: expansion only normalizes.</summary>
     None = 0,

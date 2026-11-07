@@ -67,7 +67,7 @@ What comes from the data and what is synthetic:
 
 Seed `20261105`, dev split `hash(record id, split salt) mod 1000 < 20` of the range-draw id (`tiger:<state>:<range id>:<draw>`). The split is by record, as for NAD and ODA: a street can appear in train and dev with different house numbers, so the dev loss measures the head's fit to unseen records, not to unseen streets. Evaluation sets are not drawn from this data.
 
-Run (worker, 2026-11-05): `count --caps PR=80000,VI=24500,*=27000 --per-range *=3,VI=16,AS=16,MP=16`, then `render`; twice with the same seed:
+Run (2026-11-05): `count --caps PR=80000,VI=24500,*=27000 --per-range *=3,VI=16,AS=16,MP=16`, then `render`; twice with the same seed:
 
 | File | Examples | SHA-256 (both runs) |
 |---|---|---|

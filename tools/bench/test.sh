@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# usage: tools/bench/test.sh [xunit filter args...]   -- builds the test project (Release) on a build machine and runs it; prints errors and failures only.
+# usage: tools/bench/test.sh [xunit filter args...]   -- builds the test project (Release) and runs it; prints errors and failures only.
 cd "$(dirname "$0")/../.."
 . tools/bench/env.sh
 export DOTNET_PROCESSOR_COUNT=4 MSBUILDDISABLENODEREUSE=1 ONECONTACT_UPSTREAM="$PWD/.upstream"

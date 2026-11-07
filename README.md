@@ -39,7 +39,7 @@ dotnet build -c Release
 dotnet test --solution OneContact.slnx -c Release
 ```
 
-Build output goes outside the source tree: set `ONECONTACT_ARTIFACTS` to a directory, or leave it unset to use `artifacts/`. How the code and its data fit together: [docs/architecture.md](docs/architecture.md).
+Build output goes outside the source tree: set `ONECONTACT_ARTIFACTS` to a directory, or leave it unset to use `artifacts/`. How the code and its data fit together: [docs/architecture.md](docs/architecture.md). Where the tools keep data, models and evaluation sets: [docs/tools-environment.md](docs/tools-environment.md).
 
 Licensed `MIT OR Apache-2.0`. Copyright (c) Recursive AI, LLC. Third-party data is listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 

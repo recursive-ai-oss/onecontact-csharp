@@ -3,7 +3,7 @@
 # usage: gold.sh <set root> <country> [labeler]
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
-root=${1:?set root}; cc=${2:?country}; who=${3:-agent adjudication}
+root=${1:?set root}; cc=${2:?country}; who=${3:-adjudicated}
 d=$root/drafts; out=$root/sets; mkdir -p "$out"
 touch "$d/corr-address-$cc.jsonl" "$d/corr-name-$cc.jsonl"
 python3 "$here/../labeling.py" apply address "$d/draft-address-$cc.jsonl" "$d/pred-address-$cc.jsonl" "$d/corr-address-$cc.jsonl" "$out/gold-address-$cc.jsonl" "$who"

@@ -15,6 +15,8 @@
     <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).AotSmoke" />
     <!-- Extraction asks the Public Suffix List whether a name ends in a real top-level domain. -->
     <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Extraction" />
+    <!-- Geo reads its compiled tables with the core library's table-file reader. -->
+    <InternalsVisibleTo Include="$(PackagePrefix)$(LibName).Phones.Geo" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,7 +4,7 @@ index, by random blocks of the sorted URL index.
 
 usage: select-pages.py <crawl-id> <out-dir> <seed> <exclude-hosts-file|-> <tld>:<blocks> [<tld>:<blocks> ...]
 
-Example: select-pages.py CC-MAIN-2026-43 sets/u33 1 hosts-used.txt dk:60 se:60 is:all
+Example: select-pages.py CC-MAIN-2026-43 sets/c-north 1 hosts-used.txt dk:60 se:60 is:all
 
 The index (cluster.idx) lists blocks of about 3000 captures in reversed-host order. For every TLD given we draw that many blocks at
 random (`all` takes every block), and keep HTML captures with status 200 whose path suggests contact, about, staff, location or
