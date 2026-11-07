@@ -16,6 +16,9 @@ namespace OneContact.Recipe.Models;
 //         [--address-count N] [--names-count N] [--seed N] [--epochs N] [--threads N] [--budget-seconds S] [--checkpoint-every N]
 //         trains (or resumes from DIR/last.ckpt) until done or the time budget is used; writes DIR/models.onenlp when done.
 //         Run it again with the same arguments to continue: the result is the same as one uninterrupted run.
+//   names --base models.onenlp --names FILES --names-dev FILES [--names2 FILES --names2-dev FILES] --out DIR [--names-count N] [--names2-count N] ...
+//         retrains the name-part and name-class heads of a trained pipeline with the encoder frozen (resumable like train); the address and span heads
+//         are not touched. Writes DIR/models.onenlp when done.
 //   spans --base models.onenlp --blocks DIR_OR_FILES --blocks-dev FILES --out DIR [--blocks-count N] [--seed N] [--epochs N] [--budget-seconds S]
 //         adds the contact-span head to a trained pipeline with the encoder frozen (resumable like train); writes DIR/models.onenlp when done.
 //   spans-dev --model models.onenlp --blocks-dev FILES      scores the contact-span head on dev blocks.
@@ -52,6 +55,7 @@ internal static class Program
                 "train" => Train(o),
                 "dev" => Dev(o),
                 "names-dev" => NamesDev(o),
+                "names" => NameRecipe.Train(o, k => Files(o, k), (k, d) => Num(o, k, d)),
                 "spans" => SpanRecipe.Train(o, k => Files(o, k), (k, d) => Num(o, k, d)),
                 "spans-dev" => SpanRecipe.Dev(o, k => Files(o, k), (k, d) => Num(o, k, d)),
                 _ => 2,
@@ -73,7 +77,7 @@ internal static class Program
         // Files named in --address-big (the United States, Canada and the territories) have their own count; the other files share --address-count evenly
         // (a file with fewer lines gives all of them), so every country is seen.
         HashSet<string> big = new(o.TryGetValue("address-big", out string? bigList) ? bigList.Split(',', StringSplitOptions.RemoveEmptyEntries) : [], StringComparer.Ordinal);
-        string[] addressFiles = Files(o, "addresses" + suffix);
+        string[] addressFiles = o.ContainsKey("addresses" + suffix) ? Files(o, "addresses" + suffix) : [];
         string[] others = [.. addressFiles.Where(f => !big.Contains(StripSplit(f)))];
         foreach (string file in addressFiles)
         {
@@ -90,6 +94,11 @@ internal static class Program
         if (o.ContainsKey("names2" + suffix))
         {
             all.AddRange(Data.ReadNames(Files(o, "names2" + suffix), strings, Num(o, dev ? "names2-dev-count" : "names2-count", dev ? 8000 : 200000), SelectionSalt));
+        }
+
+        if (o.ContainsKey("names3" + suffix))
+        {
+            all.AddRange(Data.ReadNames(Files(o, "names3" + suffix), strings, Num(o, dev ? "names3-dev-count" : "names3-count", dev ? 8000 : 200000), SelectionSalt));
         }
 
         // A fixed shuffle, so batches mix addresses and names whatever order the files came in.
