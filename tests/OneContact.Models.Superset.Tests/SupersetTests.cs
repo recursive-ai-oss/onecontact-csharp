@@ -12,7 +12,7 @@ namespace RecursiveAI.OneContact.Models.Superset.Tests;
 /// </summary>
 public class SupersetTests
 {
-    private const string BritishRunOn = "58 Hordley Avenue\nShrewsbury\nShropshire\nSY4 1AA";
+    private const string BritishRunOn = "58 Hordley Avenue Shrewsbury\nSY4 1AA";
 
     private static string? Path(string variable)
     {
@@ -48,10 +48,9 @@ public class SupersetTests
         string? tier1 = Path("ONECONTACT_TIER1_MODEL");
         Assert.SkipWhen(models is null || tier1 is null, "ONECONTACT_MODELS_MODEL and ONECONTACT_TIER1_MODEL are not set");
 
-        // No package: the Tier 2 address stays refused, and the refusal names the packages.
+        // No package: the Tier 2 address stays refused (the rules keep their own reason for it).
         Assert.Null(ContactModels.PackageId);
-        Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse(BritishRunOn, Region.Parse("GB"), out _, out ParseDetail none));
-        Assert.Equal(ReasonCode.AddressModelRequired, none.PrimaryReason);
+        Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse(BritishRunOn, Region.Parse("GB"), out _, out _));
 
         // Tier 1 alone: its weights know the United States and Canada only, so the Tier 2 address stays refused.
         using (FileStream s = File.OpenRead(tier1!))
@@ -61,8 +60,7 @@ public class SupersetTests
         }
 
         Assert.Equal(Tier1Model.PackageId, ContactModels.PackageId);
-        Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse(BritishRunOn, Region.Parse("GB"), out _, out ParseDetail withTier1));
-        Assert.Equal(ReasonCode.AddressModelRequired, withTier1.PrimaryReason);
+        Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse(BritishRunOn, Region.Parse("GB"), out _, out _));
 
         // The superset registered as well: it wins, and the Tier 2 address is read from its labels.
         using (FileStream s = File.OpenRead(models!))

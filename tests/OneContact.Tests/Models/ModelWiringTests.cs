@@ -36,19 +36,19 @@ public class ModelWiringTests
             new(cls, confidence, [.. parts.Select(p => new ModelSpan(text.IndexOf(p.Needle, StringComparison.Ordinal), p.Needle.Length, p.Label, 0.8f))]);
     }
 
-    private const string BritishRunOn = "58 Hordley Avenue\nShrewsbury\nShropshire\nSY4 1AA";
+    private const string BritishRunOn = "58 Hordley Avenue Shrewsbury\nSY4 1AA";
 
     [Fact]
     public void ATier2AddressTheRulesRefuseIsReadFromTheModelsLabelsWithTheHintedCountry()
     {
-        var model = new FixedAddressModel(("58", "street.house-number"), ("Hordley Avenue", "street.name"), ("Shrewsbury", "locality"), ("Shropshire", "admin-area"), ("SY4 1AA", "postal-code"));
+        var model = new FixedAddressModel(("58", "street.house-number"), ("Hordley Avenue", "street.name"), ("Shrewsbury", "locality"), ("SY4 1AA", "postal-code"));
         using IDisposable scope = ContactModels.Scope(model, null);
         Assert.Equal(OperationStatus.Done, RuleAddressParser.TryParse(BritishRunOn, Region.Parse("GB"), out ParsedAddress? a, out ParseDetail d));
         Assert.Equal(Region.Parse("GB"), a!.Country);
         Assert.Equal("SHREWSBURY", a.Locality!.Value.Standard);
         Assert.Equal("SY4 1AA", a.PostalCode!.Value.Standard);
         Assert.All(d.Fields, f => Assert.Equal(DecisionSource.Model, f.Source));
-        Assert.Equal("58 HORDLEY AVENUE\nSHREWSBURY\nSHROPSHIRE\nSY4 1AA", a.ToString(Addresses.AddressStyle.Postal));
+        Assert.Equal("58 HORDLEY AVENUE\nSHREWSBURY\nSY4 1AA", a.ToString(RecursiveAI.OneContact.Addresses.Standardization.AddressStyle.Postal));
         Assert.Equal(BritishRunOn.IndexOf("Hordley", StringComparison.Ordinal), a.Fields.First(f => f.Name == "street.name").Span.Start);
     }
 
