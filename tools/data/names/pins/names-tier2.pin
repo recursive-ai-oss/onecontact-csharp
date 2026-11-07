@@ -1,0 +1,52 @@
+# Open national name-frequency lists behind the Tier 2 person-name training data (tools/data/provenance/names-tier2.md has the terms of
+# each, quoted from its publisher). Format: file <local name> <size in bytes> <sha256> <url> [<JSON request body for a POST>].
+# The statistics offices' query APIs answer for the latest period when asked, so the pin is the hash: a newer release fails the check
+# until the pin and the provenance entry are updated on purpose. Hashes and sizes are filled in by `RECORD=1 fetch.sh pins/names-tier2.pin`.
+register names
+file pl/given-m-2026-01-20.xlsx 968212 b9faca8309390781d61475f868dbfe2e5afe6a15a1f15cec529c911a855a58b4 https://api.dane.gov.pl/resources/1159669/file
+file pl/given-f-2026-01-20.xlsx 623835 00a7b8f202ea8af7684aff21da1ff47c7a2e935fd12df3b99583303b7d441eea https://api.dane.gov.pl/resources/1159670/file
+file pl/surname-m-2026-01-20.xlsx 7621712 d1aa180ad0d026eaaa019ab0572c718125d2c54c463f5db1e33008eb1d72440f https://api.dane.gov.pl/resources/1148808/file
+file pl/surname-f-2026-01-20.xlsx 7972934 f84240be50225fde65c9fc490f4426c4e39cb723cc606158413b41832f9d488f https://api.dane.gov.pl/resources/1148811/file
+file fi/etunimitilasto-2026-08-04-dvv.xlsx 909948 52f2ae71ca63592e0df0a0a5831c1cb69af7eb85a5e32545d673894490ee2e84 https://avoindata.suomi.fi/data/dataset/57282ad6-3ab1-48fb-983a-8aba5ff8d29a/resource/08c89936-a230-42e9-a9fc-288632e234f5/download/etunimitilasto-2026-08-04-dvv.xlsx
+file fi/sukunimitilasto-2026-08-04-dvv.xlsx 447936 ecda3e4d79767cda23fac3c26f017bbaccf62417ca001b98fe981f4976e59a82 https://avoindata.suomi.fi/data/dataset/57282ad6-3ab1-48fb-983a-8aba5ff8d29a/resource/26c2d0fc-c27d-4c8a-b646-95155f9b6e59/download/sukunimitilasto-2026-08-04-dvv.xlsx
+file lv/vardi-dz-20260701.csv 3433206 ec4159e0d465aec13aabfdf67420e8281acccbf8446bcab468fbb9e3df59a136 https://data.gov.lv/dati/dataset/ac246d11-d5d6-445e-a6c7-8f5013460335/resource/10f0bb84-dd18-44e9-9a80-dc1515a4b3a9/download/vardi-dz-20260701.csv
+file ie/VSA50.csv 38007974 5e8a40708dea10aafab17cf9bc483279bc442cf71c0ef9443567bd6b5d2bdb19 https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/VSA50/CSV/1.0/en
+file ie/VSA60.csv 50841385 bd72b96a02bca8e7bcc0ac8273aa4c19c17ef86caae20647b171fbc330d7f96a https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/VSA60/CSV/1.0/en
+file ie/VSA110.csv 653246 913c2d7b2e95307414dd388972f5f8977957bbdba181ce119245dee015a06a6a https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/VSA110/CSV/1.0/en
+file be/TA_POP_MALE_2026.zip 915767 6e7d4d8c19d8446bb466e545e8926dd78655eb82a3c29b3030fce2e7f4032ba2 https://statbel.fgov.be/sites/default/files/files/opendata/Voornamen%20bevolking%20per%20gemeente/TA_POP_MALE_2026.zip
+file be/TA_POP_FEMALE_2026.zip 994573 fbaa9813ad57f2fc6f1a936426d8920864cda23311e5e0393655cb58dd646cff https://statbel.fgov.be/sites/default/files/files/opendata/Voornamen%20bevolking%20per%20gemeente/TA_POP_FEMALE_2026.zip
+file be/TA_POP_LST_2026.zip 2582044 8a63e09de4c1d26c1806577b90a70e2ca766b6963de6f52f59d3589f550dad7e https://statbel.fgov.be/sites/default/files/files/opendata/Familienamen/TA_POP_LST_2026.zip
+file at/OGDEXT_VORNAMEN_1.csv 28222406 49c277575ff669e5a7b670d759ec17d033e9c079aa802e3a096a0640b6756a6c https://data.statistik.gv.at/data/OGDEXT_VORNAMEN_1.csv
+file ch/bfs-lastnames-by-canton-2024.csv 19076410 e9fda1fb6118380e9f6d8a91b05a0c919333f0243561f6354144c53f315b3334 https://dam-api.bfs.admin.ch/hub/api/dam/assets/36062362/master
+file ch/zurich-BEV370OD3701.csv 3387901 973743a25a1f9a67d967fd0f3d6b2d0f2ecc8608b5689c67fe85fecd4c3d74bb https://data.stadt-zuerich.ch/dataset/bev_bestand_vornamen_jahrgang_geschlecht_od3701/download/BEV370OD3701.csv
+file de/rostock-male-2025.csv 8770 0b592fc5eb95f468fe508f9b588872cc3bbdbdd1db2345769306a1891085470d https://geo.sv.rostock.de/download/opendata/vornamen_von_neugeborenen_2025/vornamen_von_maennlichen_neugeborenen_2025.csv
+file de/rostock-female-2025.csv 8625 7a36de2500668cb7d954fd59cec2854b9e9c298addde6028b7e05d1b69264eb7 https://geo.sv.rostock.de/download/opendata/vornamen_von_neugeborenen_2025/vornamen_von_weiblichen_neugeborenen_2025.csv
+file gb/ons-boys-2025.xlsx 232935 268af7c74e917211f85508c2afd7a8e177281814f94cbbc2759e8f12919c3f38 https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/birthsdeathsandmarriages/livebirths/datasets/babynamesenglandandwalesbabynamesstatisticsboys/2025/2025boysbabynames.xlsx
+file gb/ons-girls-2025.xlsx 247767 5639f972f5d742cf2c01ee71a9948100944790a1985e3179e0c8673c4eaf07f8 https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/birthsdeathsandmarriages/livebirths/datasets/babynamesenglandandwalesbabynamesstatisticsgirls/2025/2025girlsbabynames.xlsx
+file gb/nrs-most-common-surnames-2025.xlsx 1152716 00bb4f9e1ba96c993436ff7d9fde60cdcd5526d2c22539544b39e5cce97b5221 https://www.nrscotland.gov.uk/media/e2fest4s/most-common-surnames-2025.xlsx
+file au/nsw-popular-baby-names-1952-2025.csv 378688 1335e7311868520ea172a1de107a1a1d5d655909c77afa531c1d92fbee1e37c2 https://data.nsw.gov.au/data/dataset/a677cbe2-91e1-4e45-b771-08830d3d9e41/resource/2adcb228-9101-4c95-a786-b3216539b4a2/download/popular_baby_names_1952_to_2025.csv
+file no/ssb-10501-2025.json 83191 7aac532ca71fc569fbc89c8d35dc879a8cea322b0630157dc923dabe8dc1d0ce https://data.ssb.no/api/v0/en/table/10501 {"query":[{"code":"Tid","selection":{"filter":"item","values":["2025"]}}],"response":{"format":"json-stat2"}}
+file no/ssb-12891-2025.json 144591 9b9a695eab7e6e55cbc7bcaff5a64bb8ff5912df6231969d23cfa379f13bc98b https://data.ssb.no/api/v0/en/table/12891 {"query":[{"code":"Tid","selection":{"filter":"item","values":["2025"]}}],"response":{"format":"json-stat2"}}
+file se/scb-BE0001FNamn10-2020.json 1747518 91777007fd1e09e236bf6e101c6d89c4790491ec0da1ce48edd5309c1da61d2d https://api.scb.se/OV0104/v1/doris/en/ssd/BE/BE0001/BE0001G/BE0001FNamn10 {"query":[{"code":"Fornamn","selection":{"filter":"all","values":["*"]}},{"code":"Tid","selection":{"filter":"item","values":["2020"]}}],"response":{"format":"json-stat2"}}
+file se/scb-BE0001ENamn10-2020.json 4558171 eb5cb574fcecc7ceb3b6c5780808f4f093f7af46654152f0803dc26ce2ee16e5 https://api.scb.se/OV0104/v1/doris/en/ssd/BE/BE0001/BE0001G/BE0001ENamn10 {"query":[{"code":"Efternamn","selection":{"filter":"all","values":["*"]}},{"code":"Tid","selection":{"filter":"item","values":["2020"]}}],"response":{"format":"json-stat2"}}
+file si/surs-05X1005S-2026.json 170273 43fc8256669880cb978277b4fa07af9af6c26018229308681e7b1e89f4fb9432 https://pxweb.stat.si/SiStatData/api/v1/en/Data/05X1005S.px {"query":[{"code":"IME","selection":{"filter":"all","values":["*"]}},{"code":"MERITVE","selection":{"filter":"item","values":["1"]}},{"code":"LETO","selection":{"filter":"item","values":["2026"]}}],"response":{"format":"json-stat2"}}
+file si/surs-05X1010S-2026.json 169227 96b122ed33fc54eb29f1015d23f780a423446ec7c4a086563119169bb9d98786 https://pxweb.stat.si/SiStatData/api/v1/en/Data/05X1010S.px {"query":[{"code":"IME","selection":{"filter":"all","values":["*"]}},{"code":"MERITVE","selection":{"filter":"item","values":["1"]}},{"code":"LETO","selection":{"filter":"item","values":["2026"]}}],"response":{"format":"json-stat2"}}
+file si/surs-05X1015S-2026.json 279468 24844bb09f4fe4cacdf06e30f6e9dae7a77e8b7d8b15342565a3c7e3de36a78a https://pxweb.stat.si/SiStatData/api/v1/en/Data/05X1015S.px {"query":[{"code":"PRIIMEK","selection":{"filter":"all","values":["*"]}},{"code":"MERITVE","selection":{"filter":"item","values":["1"]}},{"code":"LETO","selection":{"filter":"item","values":["2026"]}}],"response":{"format":"json-stat2"}}
+file si/surs-05X1016S-2026.json 314897 6a5b6ca4aad6e42f2082af48d3fe24ad78f9252ee54520e9e3d185e2d7808541 https://pxweb.stat.si/SiStatData/api/v1/en/Data/05X1016S.px {"query":[{"code":"PRIIMEK","selection":{"filter":"all","values":["*"]}},{"code":"MERITVE","selection":{"filter":"item","values":["1"]}},{"code":"LETO","selection":{"filter":"item","values":["2026"]}}],"response":{"format":"json-stat2"}}
+file si/surs-05X1017S-2026.json 291327 99a1a3e90afce9ab7bde0176e4784a2d87d8288cb4bff12870ee53a068f7bd8f https://pxweb.stat.si/SiStatData/api/v1/en/Data/05X1017S.px {"query":[{"code":"PRIIMEK","selection":{"filter":"all","values":["*"]}},{"code":"MERITVE","selection":{"filter":"item","values":["1"]}},{"code":"LETO","selection":{"filter":"item","values":["2026"]}}],"response":{"format":"json-stat2"}}
+file si/surs-05X1018S-2026.json 325647 45a799dc462a310ab250d8583ca6f9385ce38a14611b8647f1c0cd89933131a8 https://pxweb.stat.si/SiStatData/api/v1/en/Data/05X1018S.px {"query":[{"code":"PRIIMEK","selection":{"filter":"all","values":["*"]}},{"code":"MERITVE","selection":{"filter":"item","values":["1"]}},{"code":"LETO","selection":{"filter":"item","values":["2026"]}}],"response":{"format":"json-stat2"}}
+file dk/navne_registreret_i_danmark_2020.zip 1326523 550f59b4368e0f1c76ecf6cf573d5bdf4bee1b9a409fdc4ef2bc6e4106c439c3 https://sprogtek-ressources.digst.govcloud.dk/danmarks%20statistik/navne_registreret_i_danmark_2020.zip
+licence at at.txt
+licence au au.txt
+licence be be.txt
+licence ch ch.txt
+licence de de.txt
+licence dk dk.txt
+licence fi fi.txt
+licence gb gb.txt
+licence ie ie.txt
+licence lv lv.txt
+licence no no.txt
+licence pl pl.txt
+licence se se.txt
+licence si si.txt

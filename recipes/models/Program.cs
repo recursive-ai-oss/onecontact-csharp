@@ -16,6 +16,9 @@ namespace OneContact.Recipe.Models;
 //         [--address-count N] [--names-count N] [--seed N] [--epochs N] [--threads N] [--budget-seconds S] [--checkpoint-every N]
 //         trains (or resumes from DIR/last.ckpt) until done or the time budget is used; writes DIR/models.onenlp when done.
 //         Run it again with the same arguments to continue: the result is the same as one uninterrupted run.
+//   names --base models.onenlp --names FILES --names-dev FILES [--names2 FILES --names2-dev FILES] --out DIR [--names-count N] [--names2-count N] ...
+//         retrains the name-part and name-class heads of a trained pipeline with the encoder frozen (resumable like train); the address and span heads
+//         are not touched. Writes DIR/models.onenlp when done.
 //   spans --base models.onenlp --blocks DIR_OR_FILES --blocks-dev FILES --out DIR [--blocks-count N] [--seed N] [--epochs N] [--budget-seconds S]
 //         adds the contact-span head to a trained pipeline with the encoder frozen (resumable like train); writes DIR/models.onenlp when done.
 //   spans-dev --model models.onenlp --blocks-dev FILES      scores the contact-span head on dev blocks.
@@ -52,6 +55,7 @@ internal static class Program
                 "train" => Train(o),
                 "dev" => Dev(o),
                 "names-dev" => NamesDev(o),
+                "names" => NameRecipe.Train(o, k => Files(o, k), (k, d) => Num(o, k, d)),
                 "spans" => SpanRecipe.Train(o, k => Files(o, k), (k, d) => Num(o, k, d)),
                 "spans-dev" => SpanRecipe.Dev(o, k => Files(o, k), (k, d) => Num(o, k, d)),
                 _ => 2,
@@ -73,7 +77,7 @@ internal static class Program
         // Files named in --address-big (the United States, Canada and the territories) have their own count; the other files share --address-count evenly
         // (a file with fewer lines gives all of them), so every country is seen.
         HashSet<string> big = new(o.TryGetValue("address-big", out string? bigList) ? bigList.Split(',', StringSplitOptions.RemoveEmptyEntries) : [], StringComparer.Ordinal);
-        string[] addressFiles = Files(o, "addresses" + suffix);
+        string[] addressFiles = o.ContainsKey("addresses" + suffix) ? Files(o, "addresses" + suffix) : [];
         string[] others = [.. addressFiles.Where(f => !big.Contains(StripSplit(f)))];
         foreach (string file in addressFiles)
         {
@@ -90,6 +94,11 @@ internal static class Program
         if (o.ContainsKey("names2" + suffix))
         {
             all.AddRange(Data.ReadNames(Files(o, "names2" + suffix), strings, Num(o, dev ? "names2-dev-count" : "names2-count", dev ? 8000 : 200000), SelectionSalt));
+        }
+
+        if (o.ContainsKey("names3" + suffix))
+        {
+            all.AddRange(Data.ReadNames(Files(o, "names3" + suffix), strings, Num(o, dev ? "names3-dev-count" : "names3-count", dev ? 8000 : 200000), SelectionSalt));
         }
 
         // A fixed shuffle, so batches mix addresses and names whatever order the files came in.
@@ -177,40 +186,50 @@ internal static class Program
         return 0;
     }
 
-    // Chooses how sure the model must be before it replaces the rules' default reading of a name (a person taken for lack of evidence otherwise).
-    // Reads dev names only. For each threshold, prints the class accuracy of the rules alone and of rules plus model on the dev names.
+    // Chooses how sure the model must be before it replaces the rules' default reading of a name (a person taken for lack of evidence otherwise), per country.
+    // Reads dev names only. For each country and threshold, prints the class accuracy of the rules alone and of rules plus model on the dev names.
     private static int NamesDev(Dictionary<string, string> o)
     {
         var model = SupersetModel.Load(File.OpenRead(Required(o, "model")));
-        string[] thresholds = ["0.5", "0.6", "0.7", "0.8", "0.9", "0.95", "0.99"];
+        string[] thresholds = ["0.6", "0.8", "0.9", "0.95", "0.99"];
         int count = Num(o, "names-dev-count", 20000);
-        var items = new List<(string Text, string Class)>();
+        var items = new List<(string Text, string Class, string Region, string Lang)>();
         foreach (string file in Files(o, "names-dev"))
         {
             foreach (string line in File.ReadLines(file))
             {
                 using System.Text.Json.JsonDocument json = System.Text.Json.JsonDocument.Parse(line);
-                items.Add((json.RootElement.GetProperty("text").GetString()!, json.RootElement.GetProperty("class").GetString()!));
+                System.Text.Json.JsonElement r = json.RootElement;
+                items.Add((r.GetProperty("text").GetString()!, r.GetProperty("class").GetString()!,
+                    r.TryGetProperty("region", out var rg) ? rg.GetString()! : "US", r.TryGetProperty("lang", out var lg) ? lg.GetString()! : "en"));
             }
         }
 
         int step = Math.Max(1, items.Count / count);
-        var rows = new List<(string Class, bool Default, RecursiveAI.OneContact.Models.NameModelResult M, RecursiveAI.OneContact.Names.NameClass Rules)>();
+        var rows = new List<(string Class, string Region, bool Default, RecursiveAI.OneContact.Models.NameModelResult M, RecursiveAI.OneContact.Names.NameClass Rules)>();
         for (int i = 0; i < items.Count; i += step)
         {
-            RecursiveAI.OneContact.Names.NameParseResult r = RecursiveAI.OneContact.Names.NameParsing.Split(items[i].Text);
+            var hints = new RecursiveAI.OneContact.Names.NameHints(RecursiveAI.OneContact.Region.Parse(items[i].Region), items[i].Lang);
+            RecursiveAI.OneContact.Names.NameParseResult r = RecursiveAI.OneContact.Names.NameParsing.Split(items[i].Text, hints);
             bool isDefault = r.Class == RecursiveAI.OneContact.Names.NameClass.Person && r.Detail.Issues.Any(x => x.Reason.Equals(RecursiveAI.OneContact.ReasonCode.PersonNoEvidence));
-            rows.Add((items[i].Class, isDefault, model.Analyze(items[i].Text), r.Class));
+            rows.Add((items[i].Class, items[i].Region, isDefault, model.Analyze(items[i].Text), r.Class));
         }
 
         static string Label(RecursiveAI.OneContact.Names.NameClass c) => c switch { RecursiveAI.OneContact.Names.NameClass.Person => "person", RecursiveAI.OneContact.Names.NameClass.Company => "company", RecursiveAI.OneContact.Names.NameClass.Multiple => "multiple", _ => "unknown" };
-        int rulesRight = rows.Count(r => Label(r.Rules) == r.Class);
-        Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"items={rows.Count} defaults={rows.Count(r => r.Default)} rules_class_accuracy={(double)rulesRight / rows.Count:F4}"));
-        foreach (string t in thresholds)
+        foreach (IGrouping<string, (string Class, string Region, bool Default, RecursiveAI.OneContact.Models.NameModelResult M, RecursiveAI.OneContact.Names.NameClass Rules)> group in rows.GroupBy(r => r.Region).OrderBy(g => g.Key, StringComparer.Ordinal))
         {
-            float threshold = float.Parse(t, CultureInfo.InvariantCulture);
-            int right = rows.Count(r => (r.Default && r.M.Class != RecursiveAI.OneContact.Names.NameClass.Person && r.M.ClassConfidence >= threshold ? Label(r.M.Class) : Label(r.Rules)) == r.Class);
-            Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"threshold={t} class_accuracy={(double)right / rows.Count:F4}"));
+            var list = group.ToList();
+            int rulesRight = list.Count(r => Label(r.Rules) == r.Class);
+            var sb = new System.Text.StringBuilder();
+            sb.Append(string.Create(CultureInfo.InvariantCulture, $"{group.Key} items={list.Count} defaults={list.Count(r => r.Default)} rules={(double)rulesRight / list.Count:F4}"));
+            foreach (string t in thresholds)
+            {
+                float threshold = float.Parse(t, CultureInfo.InvariantCulture);
+                int right = list.Count(r => (r.Default && r.M.Class != RecursiveAI.OneContact.Names.NameClass.Person && r.M.ClassConfidence >= threshold ? Label(r.M.Class) : Label(r.Rules)) == r.Class);
+                sb.Append(string.Create(CultureInfo.InvariantCulture, $" t{t}={(double)right / list.Count:F4}"));
+            }
+
+            Console.WriteLine(sb.ToString());
         }
 
         return 0;

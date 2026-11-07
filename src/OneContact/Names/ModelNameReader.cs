@@ -19,14 +19,39 @@ internal static class ModelNameReader
     private static bool IsUsCaLanguage(string? language) => language is null || language.Length == 0 || language.Equals("en", StringComparison.OrdinalIgnoreCase)
         || language.Equals("fr", StringComparison.OrdinalIgnoreCase) || language.Equals("es", StringComparison.OrdinalIgnoreCase);
 
+    // Countries whose rules-default person readings the Tier 1 + Tier 2 model may overrule, at the higher confidence below. In each the override gained at least 0.3
+    // points of class accuracy on the development names and did not lower any name row on the real-page sets (docs/models-superset.md). Every other Tier 2
+    // country reads only what the rules leave open.
+    private static readonly HashSet<string> OverrideCountries = new(StringComparer.Ordinal) { "AU", "EE", "FR", "GB", "IT", "LI", "MT" };
+
+    // How sure the model must be to replace a rules-default person reading in those countries.
+    internal const float Tier2OverrideConfidence = 0.8f;
+
     /// <summary>
-    /// True when the text is a Tier 2 country's or language's and the registered package is the Tier 1 + Tier 2 one. Its person names for those languages come from small
-    /// lists of our own, so there the model reads only what the rules leave open (<see cref="NameClass.Unknown"/>) and never replaces the rules' default reading of a
-    /// string as a person, which would drop person parts the rules found.
+    /// The confidence the model needs to replace the rules' default reading of a string as a person, or <see langword="null"/> when it may not. With the Tier 1 package
+    /// and for United States, Canadian and unhinted English, French and Spanish text it is <see cref="DefaultOverrideConfidence"/>. With the Tier 1 + Tier 2 package a
+    /// Tier 2 text is read open-only (the model reads what the rules leave <see cref="NameClass.Unknown"/>, and never replaces a rule's person reading, which would drop
+    /// the person parts the rules found) except in <see cref="OverrideCountries"/>.
     /// </summary>
-    private static bool OpenReadingsOnly(NameHints hints) =>
-        ContactModels.PackageId is { } package && package != ContactModels.Tier1PackageId
-        && (hints.Country.IsUnknown ? !IsUsCaLanguage(hints.Language) : hints.Country != Region.US && hints.Country != Region.CA);
+    private static float? OverrideConfidence(NameHints hints)
+    {
+        if (ContactModels.PackageId is not { } package || package == ContactModels.Tier1PackageId)
+        {
+            return DefaultOverrideConfidence;
+        }
+
+        if (hints.Country.IsUnknown)
+        {
+            return IsUsCaLanguage(hints.Language) ? DefaultOverrideConfidence : null;
+        }
+
+        if (hints.Country == Region.US || hints.Country == Region.CA)
+        {
+            return DefaultOverrideConfidence;
+        }
+
+        return OverrideCountries.Contains(hints.Country.ToString()) ? Tier2OverrideConfidence : null;
+    }
 
     /// <summary>True when the rules took the string as one person only because nothing marked it as a company: no title, suffix, nickname, particle, comma order, initial or known given name proved it (the <c>person.no-evidence</c> issue).</summary>
     internal static bool IsDefaultPerson(Analysis rules)
@@ -51,10 +76,10 @@ internal static class ModelNameReader
     /// <returns>The class, or the rules' own class when no model is registered or it is not confident enough.</returns>
     internal static NameClass Classify(ReadOnlySpan<char> text, Analysis rules, NameHints hints = default)
     {
-        if (IsDefaultPerson(rules) && !OpenReadingsOnly(hints) && ContactModels.Name is { } defaultModel)
+        if (IsDefaultPerson(rules) && OverrideConfidence(hints) is { } cut && ContactModels.Name is { } defaultModel)
         {
             NameModelResult m = defaultModel.Analyze(text.ToString());
-            return m.Class != NameClass.Person && m.Class != NameClass.Multiple && m.ClassConfidence >= DefaultOverrideConfidence ? m.Class : rules.Class;
+            return m.Class != NameClass.Person && m.Class != NameClass.Multiple && m.ClassConfidence >= cut ? m.Class : rules.Class;
         }
 
         if (rules.Class != NameClass.Unknown || rules.Persons.Count > 0 || ContactModels.Name is not { } model)
@@ -71,23 +96,26 @@ internal static class ModelNameReader
     internal static bool TryRead(ReadOnlySpan<char> text, NameHints hints, Analysis rules, out NameParseResult result)
     {
         result = null!;
-        if (IsDefaultPerson(rules) && OpenReadingsOnly(hints))
+        bool isDefault = IsDefaultPerson(rules);
+        float? allowed = isDefault ? OverrideConfidence(hints) : null;
+        if (isDefault && allowed is null)
         {
             return false;
         }
 
-        if (IsDefaultPerson(rules) && ContactModels.Name is { } defaultModel)
+        if (isDefault && ContactModels.Name is { } defaultModel)
         {
+            float cut = allowed!.Value;
             string text0 = text.ToString();
             NameModelResult m = defaultModel.Analyze(text0);
-            if (m.ClassConfidence >= DefaultOverrideConfidence && m.Class == NameClass.Company)
+            if (m.ClassConfidence >= cut && m.Class == NameClass.Company)
             {
                 CompanyName.TryParse(text, hints, out CompanyName c, out ParseDetail cd);
                 result = new NameParseResult(NameClass.Company, [], c, Marked(cd, m.ClassConfidence));
                 return true;
             }
 
-            if (m.ClassConfidence >= DefaultOverrideConfidence && m.Class == NameClass.Unknown)
+            if (m.ClassConfidence >= cut && m.Class == NameClass.Unknown)
             {
                 result = new NameParseResult(NameClass.Unknown, [], default, new ParseDetail([], []));
                 return true;

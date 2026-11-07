@@ -1,0 +1,5 @@
+Source: Statistics Austria, first names of newborns by year, district and sex, 1984 onward (OGDEXT_VORNAMEN_1), https://data.statistik.gv.at/web/meta.jsp?dataset=OGDEXT_VORNAMEN_1
+Terms as read at the publisher, retrieved 2026-11-06:
+The terms page (https://data.statistik.gv.at/web/?page=terms) says: "STATISTICS AUSTRIA open.data is subject to a Creative Commons Attribution 4.0 International (CC BY 4.0) licence. Attribution of Statistics Austria must be effected as follows: Data source: Statistics Austria - data.statistik.gv.at".
+Verdict: CC BY 4.0. Credit: "Data source: Statistics Austria - data.statistik.gv.at".
+The file holds aggregate counts of how many people carry a name; it is not a record of any person.

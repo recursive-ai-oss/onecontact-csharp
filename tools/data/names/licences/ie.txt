@@ -1,0 +1,5 @@
+Source: Central Statistics Office (CSO), Ireland: VSA50 "Boys Names in Ireland with 3 or More Occurrences", VSA60 "Girls Names ...", VSA110 "Surnames of Babies in Ireland with 10 or More Occurrences", https://data.gov.ie (PxStat API of ws.cso.ie)
+Terms as read at the publisher, retrieved 2026-11-06:
+The data.gov.ie catalogue entries of the three datasets give the licence as: "CC-BY-4.0 Creative Commons Attribution 4.0" (publisher: Central Statistics Office).
+Verdict: CC BY 4.0. Credit: Central Statistics Office, Ireland (VSA50, VSA60, VSA110), CC BY 4.0.
+The file holds aggregate counts of how many people carry a name; it is not a record of any person.

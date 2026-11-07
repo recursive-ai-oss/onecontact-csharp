@@ -45,7 +45,22 @@ The code of this package is licensed `MIT OR Apache-2.0`, Copyright (c) Recursiv
 - Global Legal Entity Identifier Foundation (GLEIF), Level 1 golden copy (2026-11-05) and ISO 20275 entity legal forms code list v1.6, CC0 1.0.
 - Contains public sector information from Companies House (Free Company Data Product, 2026-11-01), licensed under the Open Government Licence v3.0 (Creative Commons Attribution).
 - U.S. Securities and Exchange Commission, EDGAR company names (`cik-lookup-data.txt`), public information.
-- Person names for the Tier 2 languages other than English, French and Spanish come from lists of common given and family names that we wrote ourselves; no third-party list is used for them.
+- Person names for the Tier 2 languages come from national name statistics (counts of how many people carry a name), combined with our own lists where no open list was found:
+  - Poland: Ministerstwo Cyfryzacji, PESEL name statistics (dane.gov.pl, 2026-01-20), CC0 1.0.
+  - Finland: Digi- ja väestötietovirasto (DVV), Väestötietojärjestelmän suomalaisten nimiaineistot, 2026-08-04, CC BY 4.0.
+  - Latvia: Pilsonības un migrācijas lietu pārvalde (PMLP), Personu vārdi, 2026-07-01, CC0 1.0.
+  - Ireland: Central Statistics Office, VSA50, VSA60 and VSA110, CC BY 4.0.
+  - Belgium: Statbel (Statistics Belgium), first names and family names of the population, 2026, CC BY 4.0.
+  - Austria: Data source: Statistics Austria - data.statistik.gv.at, first names of newborns, CC BY 4.0.
+  - Switzerland: Federal Statistical Office (FSO), Last names of the permanent resident population by canton, 2024 (open use, source required); Statistik Stadt Zürich, BEV370OD3701, CC0 1.0.
+  - Germany: Hanse- und Universitätsstadt Rostock, Vornamen von Neugeborenen 2025, CC0 1.0.
+  - United Kingdom: Contains public sector information licensed under the Open Government Licence v3.0 (Office for National Statistics, baby names 2025; National Records of Scotland, most common surnames 2025).
+  - Australia: NSW Registry of Births Deaths and Marriages, BDM Data - Popular Baby Names 1952 to 2025, CC BY 4.0.
+  - Norway: Statistics Norway (SSB), tables 10501 and 12891, CC BY 4.0.
+  - Sweden: Source: Statistics Sweden (SCB), CC0 1.0.
+  - Slovenia: Source: Statistical Office of the Republic of Slovenia (SURS).
+  - Denmark: Danmarks Statistik, Navne registreret i Danmark 2020, published by Digitaliseringsstyrelsen, CC BY 4.0.
+  - Given names of Czech, Slovak, Croatian, Hungarian, Romanian, Portuguese, Spanish (Spain and Mexico), Italian, Maltese, Catalan, Estonian, Lithuanian and Icelandic persons, and the family names of Latvia, are lists of common names that we wrote ourselves.
 
 ## Contact blocks
 

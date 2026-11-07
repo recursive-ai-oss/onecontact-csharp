@@ -23,3 +23,14 @@ Layout: `Pools.cs` (name lists), `Registers.cs` (GLEIF, Companies House, EDGAR, 
 writer), `Templates.cs` and `templates/*.tsv` (our hand-written lists), `Report.cs`.
 
 The 95–99 hash buckets are never rendered: evaluation sets are to be drawn from them, or checked against `text-hashes.u64`.
+
+## Tier 2 person names
+
+```
+tools/data/names/fetch.sh tools/data/names/pins/names-tier2.pin       # open national name lists, hash-checked, with their licence quotes
+dotnet run -c Release --project tools/data/names -- render-tier2 --data $ONECONTACT_DATA/train/names --out $ONECONTACT_DATA/train/names-tier2-2   # seed 20261107
+```
+
+`render-tier2` writes persons, several-people strings and non-names for 38 language-country units, with titles, particles and connectors per language (`templates/forms-tier2.tsv`)
+and family-first order where the language uses it (Hungarian). Same output layout and determinism as `render`. Terms, counts and proxies: `../provenance/names-tier2.md`.
+Companies for the Tier 2 set come from `tools/data/names-tier2`.

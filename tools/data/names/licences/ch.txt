@@ -1,0 +1,5 @@
+Source: (1) Federal Statistical Office (FSO/BFS), Switzerland: last names of the permanent resident population by canton, 2024, via opendata.swiss. (2) Statistik Stadt Zürich: first names of the resident population of the city of Zurich by birth year and sex (BEV370OD3701), https://data.stadt-zuerich.ch/dataset/bev_bestand_vornamen_jahrgang_geschlecht_od3701
+Terms as read at the publisher, retrieved 2026-11-06:
+(1) The catalogue entry on opendata.swiss gives the terms "terms_by" (Open use, source required): "You may use this dataset for commercial purposes. You must provide the source (author, title and link to the dataset)." (https://opendata.swiss/en/terms-of-use). (2) The Zurich dataset page says: "Lizenz Creative Commons CCZero".
+Verdict: (1) Open use with the source named. Credit: Federal Statistical Office (FSO), Last names of the permanent resident population by canton, 2024. (2) CC0 1.0.
+The file holds aggregate counts of how many people carry a name; it is not a record of any person.

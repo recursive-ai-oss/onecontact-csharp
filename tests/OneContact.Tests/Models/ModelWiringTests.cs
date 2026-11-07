@@ -132,6 +132,28 @@ public class ModelWiringTests
     }
 
     [Fact]
+    public void TheModelMayOverruleADefaultPersonReadingOnlyWhereItsNameDataSupportsIt()
+    {
+        // Two unfamiliar words: the rules take them as one person for want of any evidence of a company (person.no-evidence).
+        const string text = "Zorblat Quux";
+        Assert.Equal(NameClass.Person, NameParsing.Split(text).Class);
+        using IDisposable scope = ContactModels.Scope(null, new FixedNameModel(NameClass.Company, 0.9f, ("Zorblat Quux", "Base")));
+        Assert.Equal(NameClass.Company, NameParsing.Split(text, NameHints.ForCountry(Region.US)).Class);
+        Assert.Equal(NameClass.Company, NameParsing.Split(text, NameHints.ForCountry(Region.Parse("GB"))).Class);
+        Assert.Equal(NameClass.Company, NameParsing.Classify(text, NameHints.ForCountry(Region.Parse("GB"))));
+
+        // A Tier 2 country without an override reads only what the rules leave open.
+        Assert.Equal(NameClass.Person, NameParsing.Split(text, NameHints.ForCountry(Region.Parse("PL"))).Class);
+        Assert.Equal(NameClass.Person, NameParsing.Classify(text, NameHints.ForCountry(Region.Parse("PL"))));
+        Assert.Equal(NameClass.Person, NameParsing.Split(text, NameHints.ForLanguage("pl")).Class);
+
+        // Where it is allowed in a Tier 2 country the model must be surer (0.8) than for the United States (0.6).
+        using IDisposable unsure = ContactModels.Scope(null, new FixedNameModel(NameClass.Company, 0.7f, ("Zorblat Quux", "Base")));
+        Assert.Equal(NameClass.Company, NameParsing.Split(text, NameHints.ForCountry(Region.US)).Class);
+        Assert.Equal(NameClass.Person, NameParsing.Split(text, NameHints.ForCountry(Region.Parse("GB"))).Class);
+    }
+
+    [Fact]
     public void ANameTheRulesClassifiedIsNeverChangedAndALowConfidenceModelIsIgnored()
     {
         using IDisposable scope = ContactModels.Scope(null, new FixedNameModel(NameClass.Company, 0.99f, ("Smith", "Base")));

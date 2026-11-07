@@ -1,0 +1,5 @@
+Source: Statistics Norway (SSB): table 10501 (first names borne by 200 or more people) and table 12891 (last names used by 200 or more people), 2025, StatBank API
+Terms as read at the publisher, retrieved 2026-11-06:
+https://www.ssb.no/en/omssb/tjenester-og-verktoy/api says: "Like the rest of ssb.no, the APIs use the license CC BY 4.0."
+Verdict: CC BY 4.0. Credit: Statistics Norway (SSB), tables 10501 and 12891, CC BY 4.0.
+The file holds aggregate counts of how many people carry a name; it is not a record of any person.

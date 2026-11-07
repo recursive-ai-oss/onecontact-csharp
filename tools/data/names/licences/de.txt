@@ -1,0 +1,5 @@
+Source: Hanse- und Universitätsstadt Rostock, registry office: first names of newborns 2025, male and female, https://www.opendata-hro.de/dataset/vornamen_von_neugeborenen_2025
+Terms as read at the publisher, retrieved 2026-11-06:
+The portal page says: "Lizenz CC0 1.0"; the European data portal lists it as cc-zero.
+Verdict: Public-domain dedication. No conditions.
+The file holds aggregate counts of how many people carry a name; it is not a record of any person.

@@ -1,0 +1,264 @@
+# Forms of address, name particles and connectors for the Tier 2 languages. Our own lists, written from general usage in each language; they
+# only make the rendered strings look like real ones (the pairing of a title with the sex of the sampled given name is never a label).
+# kind <TAB> language <TAB> text <TAB> sex of the given name it pairs with (M, F, -) <TAB> dot-optional (1) or fixed spelling (0) <TAB> weight
+#   title: a prefix (Prefix label)
+#   particle: a family-name particle written in lower case between the given and the family name (weight in the last column)
+#   mr, mrs, dr, and: the strings of several-people forms ("Herr und Frau Müller"): mr = him, mrs = her, dr = doctor, and = connector
+# Languages without a particle line get no particle examples; Slavic and Hungarian feminine family-name forms come from the sources, not from rules.
+title	de	Herr	M	0	30
+title	de	Frau	F	0	30
+title	de	Dr.	-	0	10
+title	de	Prof.	-	0	3
+title	de	Prof. Dr.	-	0	3
+title	de	Dipl.-Ing.	-	0	3
+title	de	Mag.	-	0	2
+title	de	Ing.	-	0	2
+title	nl	Dhr.	M	0	30
+title	nl	Mevr.	F	0	25
+title	nl	Mw.	F	0	5
+title	nl	Dr.	-	0	8
+title	nl	Prof.	-	0	3
+title	nl	Ir.	-	0	3
+title	nl	Drs.	-	0	3
+title	nl	Mr.	-	0	3
+title	it	Sig.	M	0	30
+title	it	Sig.ra	F	0	30
+title	it	Dott.	M	0	8
+title	it	Dott.ssa	F	0	8
+title	it	Prof.	-	0	4
+title	it	Ing.	-	0	4
+title	it	Avv.	-	0	4
+title	it	Geom.	-	0	2
+title	pt	Sr.	M	0	30
+title	pt	Sra.	F	0	30
+title	pt	Dr.	M	0	8
+title	pt	Dra.	F	0	8
+title	pt	Eng.	-	0	4
+title	pt	Prof.	-	0	3
+title	ca	Sr.	M	0	30
+title	ca	Sra.	F	0	30
+title	ca	Dr.	M	0	6
+title	ca	Dra.	F	0	6
+title	ca	Prof.	-	0	2
+title	da	Hr.	M	0	25
+title	da	Fru	F	0	25
+title	da	Dr.	-	0	6
+title	da	Prof.	-	0	3
+title	da	Cand.	-	0	1
+title	sv	Herr	M	0	20
+title	sv	Fru	F	0	20
+title	sv	Dr	-	0	6
+title	sv	Prof.	-	0	3
+title	sv	Ing.	-	0	1
+title	nb	Herr	M	0	25
+title	nb	Fru	F	0	25
+title	nb	Dr.	-	0	6
+title	nb	Prof.	-	0	3
+title	fi	Hra	M	0	20
+title	fi	Rva	F	0	20
+title	fi	Tri	-	0	6
+title	fi	Prof.	-	0	3
+title	is	Hr.	M	0	10
+title	is	Frú	F	0	10
+title	is	Dr.	-	0	8
+title	is	Prof.	-	0	3
+title	et	Hr	M	0	20
+title	et	Pr	F	0	20
+title	et	Dr	-	0	6
+title	et	Prof.	-	0	3
+title	lv	Kgs	M	0	20
+title	lv	Kdze	F	0	20
+title	lv	Dr.	-	0	6
+title	lv	Prof.	-	0	3
+title	lt	p.	M	0	20
+title	lt	p-ia	F	0	20
+title	lt	Dr.	-	0	6
+title	lt	Prof.	-	0	3
+title	pl	Pan	M	0	25
+title	pl	Pani	F	0	25
+title	pl	Dr	-	0	8
+title	pl	Prof.	-	0	3
+title	pl	Mgr	-	0	4
+title	pl	Inż.	-	0	4
+title	pl	Dr hab.	-	0	2
+title	cs	Pan	M	0	15
+title	cs	Paní	F	0	15
+title	cs	Ing.	-	0	15
+title	cs	Mgr.	-	0	10
+title	cs	MUDr.	-	0	4
+title	cs	JUDr.	-	0	3
+title	cs	Doc.	-	0	2
+title	cs	Prof.	-	0	2
+title	cs	Bc.	-	0	2
+title	sk	Pán	M	0	15
+title	sk	Pani	F	0	15
+title	sk	Ing.	-	0	15
+title	sk	Mgr.	-	0	10
+title	sk	MUDr.	-	0	4
+title	sk	JUDr.	-	0	3
+title	sk	Doc.	-	0	2
+title	sk	Prof.	-	0	2
+title	sl	g.	M	0	20
+title	sl	ga.	F	0	20
+title	sl	dr.	-	0	8
+title	sl	prof.	-	0	3
+title	sl	mag.	-	0	3
+title	sl	inž.	-	0	2
+title	hr	g.	M	0	20
+title	hr	gđa	F	0	20
+title	hr	dr. sc.	-	0	4
+title	hr	prof.	-	0	3
+title	hr	mr.	-	0	2
+title	hr	ing.	-	0	2
+title	hu	Dr.	-	0	25
+title	hu	Prof.	-	0	3
+title	hu	Özv.	F	0	3
+title	hu	Ifj.	M	0	1
+title	ro	Dl	M	0	25
+title	ro	Dna	F	0	25
+title	ro	Dr.	-	0	8
+title	ro	Prof.	-	0	3
+title	ro	Ing.	-	0	3
+title	mt	Sur	M	0	20
+title	mt	Sinjura	F	0	20
+title	mt	Dr	-	0	6
+title	mt	Prof.	-	0	3
+title	mt	Perit	-	0	2
+particle	de	von	6
+particle	de	zu	1
+particle	de	von der	2
+particle	de	von dem	1
+particle	de	van	1
+particle	de	de	1
+particle	nl	van	8
+particle	nl	van der	4
+particle	nl	van den	4
+particle	nl	de	4
+particle	nl	ter	1
+particle	nl	ten	1
+particle	nl	van de	2
+particle	it	di	4
+particle	it	de	3
+particle	it	del	2
+particle	it	della	1
+particle	it	dal	1
+particle	it	da	1
+particle	pt	da	5
+particle	pt	de	5
+particle	pt	do	3
+particle	pt	dos	3
+particle	pt	das	1
+particle	ca	de	4
+particle	ca	del	2
+particle	sv	af	1
+particle	sv	von	1
+particle	da	von	1
+particle	nb	von	1
+mr	de	Herr	-	0	1
+mrs	de	Frau	-	0	1
+dr	de	Dr.	-	0	1
+and	de	und	-	0	1
+and	de	&	-	0	1
+mr	nl	Dhr.	-	0	1
+mrs	nl	Mevr.	-	0	1
+dr	nl	Dr.	-	0	1
+and	nl	en	-	0	1
+and	nl	&	-	0	1
+mr	fr	M.	-	0	1
+mrs	fr	Mme	-	0	1
+dr	fr	Dr	-	0	1
+and	fr	et	-	0	1
+and	fr	&	-	0	1
+mr	it	Sig.	-	0	1
+mrs	it	Sig.ra	-	0	1
+dr	it	Dott.	-	0	1
+and	it	e	-	0	1
+and	it	&	-	0	1
+mr	es	Sr.	-	0	1
+mrs	es	Sra.	-	0	1
+dr	es	Dr.	-	0	1
+and	es	y	-	0	1
+mr	pt	Sr.	-	0	1
+mrs	pt	Sra.	-	0	1
+dr	pt	Dr.	-	0	1
+and	pt	e	-	0	1
+and	pt	&	-	0	1
+mr	ca	Sr.	-	0	1
+mrs	ca	Sra.	-	0	1
+dr	ca	Dr.	-	0	1
+and	ca	i	-	0	1
+mr	en	Mr	-	0	1
+mrs	en	Mrs	-	0	1
+dr	en	Dr	-	0	1
+and	en	and	-	0	1
+and	en	&	-	0	1
+mr	da	Hr.	-	0	1
+mrs	da	Fru	-	0	1
+dr	da	Dr.	-	0	1
+and	da	og	-	0	1
+and	da	&	-	0	1
+mr	sv	Herr	-	0	1
+mrs	sv	Fru	-	0	1
+dr	sv	Dr	-	0	1
+and	sv	och	-	0	1
+and	sv	&	-	0	1
+mr	nb	Herr	-	0	1
+mrs	nb	Fru	-	0	1
+dr	nb	Dr.	-	0	1
+and	nb	og	-	0	1
+and	nb	&	-	0	1
+mr	fi	Hra	-	0	1
+mrs	fi	Rva	-	0	1
+dr	fi	Tri	-	0	1
+and	fi	ja	-	0	1
+mr	is	Hr.	-	0	1
+mrs	is	Frú	-	0	1
+dr	is	Dr.	-	0	1
+and	is	og	-	0	1
+mr	et	Hr	-	0	1
+mrs	et	Pr	-	0	1
+dr	et	Dr	-	0	1
+and	et	ja	-	0	1
+mr	lv	Kgs	-	0	1
+mrs	lv	Kdze	-	0	1
+dr	lv	Dr.	-	0	1
+and	lv	un	-	0	1
+mr	lt	p.	-	0	1
+mrs	lt	p-ia	-	0	1
+dr	lt	Dr.	-	0	1
+and	lt	ir	-	0	1
+mr	pl	Pan	-	0	1
+mrs	pl	Pani	-	0	1
+dr	pl	Dr	-	0	1
+and	pl	i	-	0	1
+and	pl	oraz	-	0	1
+mr	cs	Pan	-	0	1
+mrs	cs	Paní	-	0	1
+dr	cs	MUDr.	-	0	1
+and	cs	a	-	0	1
+mr	sk	Pán	-	0	1
+mrs	sk	Pani	-	0	1
+dr	sk	MUDr.	-	0	1
+and	sk	a	-	0	1
+mr	sl	g.	-	0	1
+mrs	sl	ga.	-	0	1
+dr	sl	dr.	-	0	1
+and	sl	in	-	0	1
+mr	hr	g.	-	0	1
+mrs	hr	gđa	-	0	1
+dr	hr	dr.	-	0	1
+and	hr	i	-	0	1
+mr	hu	Dr.	-	0	1
+mrs	hu	Dr.	-	0	1
+dr	hu	Dr.	-	0	1
+and	hu	és	-	0	1
+and	hu	&	-	0	1
+mr	ro	Dl	-	0	1
+mrs	ro	Dna	-	0	1
+dr	ro	Dr.	-	0	1
+and	ro	și	-	0	1
+and	ro	&	-	0	1
+mr	mt	Sur	-	0	1
+mrs	mt	Sinjura	-	0	1
+dr	mt	Dr	-	0	1
+and	mt	u	-	0	1

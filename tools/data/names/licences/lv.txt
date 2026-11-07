@@ -1,0 +1,5 @@
+Source: Office of Citizenship and Migration Affairs (PMLP), Latvia: "Personu vārdi" (names of persons in the Register of Natural Persons with their counts and sex), file Vardi-dz-20260701.csv, https://data.gov.lv/dati/lv/dataset/personu-vardi
+Terms as read at the publisher, retrieved 2026-11-06:
+The dataset page on data.gov.lv gives: "Licence CC0-1.0".
+Verdict: Public-domain dedication. No conditions. Combinations of several names in one entry are not used.
+The file holds aggregate counts of how many people carry a name; it is not a record of any person.

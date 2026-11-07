@@ -1,0 +1,5 @@
+Source: (1) Office for National Statistics: Baby names in England and Wales, 2025 edition, boys and girls (Table 6, all names with at least three births). (2) National Records of Scotland: Most common surnames 2025 (all surnames, "All Surnames for 2025").
+Terms as read at the publisher, retrieved 2026-11-06:
+(1) data.gov.uk: "All content is available under the Open Government Licence v3.0, except where otherwise stated"; the ONS release says "Source: Office for National Statistics licensed under the Open Government Licence". (2) nrscotland.gov.uk: "All content is available under the Open Government Licence v3.0, except for graphic assets and where otherwise stated".
+Verdict: OGL v3.0. Credit: Contains public sector information licensed under the Open Government Licence v3.0 (Office for National Statistics; National Records of Scotland).
+The file holds aggregate counts of how many people carry a name; it is not a record of any person.
