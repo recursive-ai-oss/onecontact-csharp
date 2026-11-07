@@ -18,7 +18,7 @@ The encoder is a transformer run on OneModel's CPU kernels, so the tier is slowe
 
 ## OneNLP version
 
-This package is built on OneNLP 0.4. A project that references it and a fast-tier package must resolve one OneNLP version; the fast tiers are retrained against 0.4 for that.
+This package ships in 1.1, built on OneNLP 1.0, like the fast-tier packages. A project that references it and a fast-tier package resolves one OneNLP version.
 
 ## Retraining
 

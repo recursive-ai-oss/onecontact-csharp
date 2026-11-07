@@ -28,7 +28,7 @@ Normative notes on how trained models reach the parsers, what a model package ca
 
 Registration is not discovered by scanning: each model package ships a one-line source file under `contentFiles/cs/any/` that NuGet adds to the referencing project. It holds a `[ModuleInitializer]` that calls the package's `Register()`, so the trimmer and NativeAOT see the model code and its embedded weights as reachable. `Register()` costs nothing; the weights are read on first use, once, and the model is shared by all callers (it is safe to call from many threads).
 
-Text extraction reaches the span model only through this seam (`docs/extraction.md`), so `.Extraction` does not reference the model package. The 0.5 superset reuses the seam: a package registers more interfaces or a higher rank; the parsers do not change.
+Text extraction reaches the span model only through this seam (`docs/extraction.md`), so `.Extraction` does not reference the model package. `RecursiveAI.OneContact.Models` (the Tier 1 and Tier 2 superset, from 1.1) reuses the seam: a package registers more interfaces or a higher rank; the parsers do not change.
 
 ## The Tier 1 model
 
