@@ -26,6 +26,10 @@ First release. All packages share one version. `KeyVersion.V1` is frozen with th
 
 - Trained fast-tier models on OneNLP and OneModel: an address-field head, name-part and name-class heads, and a contact-span head for extraction from plain text. Tier 1 covers the United States and Canada; `Models` also covers the Tier 2 countries and is preferred when both are referenced. The weights are embedded; `Models` is trained on open national registers mixed with OpenStreetMap addresses (© OpenStreetMap contributors, ODbL 1.0), as its readme and notices state.
 
+**`RecursiveAI.OneContact.Models.Accurate`**
+
+- The same address-field, name and contact-span heads over OneNLP's distilled multilingual encoder (`RecursiveAI.OneNlp.Models.Multilingual.FrozenEncoder`), for running text. About 10 MB of head weights in the package; the encoder is a dependency. With a fast-tier package referenced too, the fast tier keeps normalizing single addresses and names and this package reads running text. `ContactModels.Register` gained an optional `normalizationRank`.
+
 **`RecursiveAI.OneContact.Extraction`**
 
 - `ContactExtractor` over HTML (string or bytes), plain text, or a set of pages from one site that you supply (it never fetches). Markup readers for JSON-LD, microdata, RDFa Lite, h-card, `mailto:`/`tel:` links and `<address>`; visible-text reading through OneHtml's cascade; decoding of obfuscated emails with a `Deobfuscated` flag; `Person` and `Organization` records with their flat fields, sources, byte offsets into the original HTML, confidence, normalized values and kept disagreements; grouping and key-based de-duplication; site merge; `ContactExtractor.Limits`.

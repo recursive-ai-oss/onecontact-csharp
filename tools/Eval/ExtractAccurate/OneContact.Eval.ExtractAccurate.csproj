@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The extraction evaluation tool with the accurate-tier model registered from ONECONTACT_ACCURATE_MODEL. It shares the sources of the fast-tier tool
+       except its model loader. A separate project because the accurate tier runs on a newer OneNLP than the fast tiers. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <AssemblyName>$(PackagePrefix)$(LibName).Eval</AssemblyName>
+    <RootNamespace>OneContact.Eval.Extract</RootNamespace>
+    <!-- Same assembly name as the fast-tier tool: the extraction library lets that assembly see its internals. -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <NoWarn>$(NoWarn);CA1303;CA1848;CA1031</NoWarn>
+    <NuGetAudit>false</NuGetAudit>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../Extract/Program.cs" Link="Program.cs" />
+    <Compile Include="../Extract/Adjudication.cs" Link="Adjudication.cs" />
+    <Compile Include="../Extract/Io.cs" Link="Io.cs" />
+    <Compile Include="ModelLoader.cs" />
+    <PackageReference Include="Microsoft.Recognizers.Text.Sequence" />
+    <ProjectReference Include="../../../src/OneContact/OneContact.csproj" />
+    <ProjectReference Include="../../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
+    <ProjectReference Include="../../../src/OneContact.Models.Accurate/OneContact.Models.Accurate.csproj" />
+  </ItemGroup>
+
+</Project>

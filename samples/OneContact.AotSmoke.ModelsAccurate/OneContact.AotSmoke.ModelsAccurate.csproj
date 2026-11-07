@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Publishes with NativeAOT and warnings as errors: proves the accurate-tier package loads its embedded head weights and the OneNLP encoder package's
+       transformer, and runs after trimming. Build it with ONECONTACT_ACCURATE_WEIGHTS set to the folder holding the weights file listed in the package's manifest. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <PublishAot>true</PublishAot>
+    <IsAotCompatible>true</IsAotCompatible>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/OneContact.Models.Accurate/OneContact.Models.Accurate.csproj" />
+    <ProjectReference Include="../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
+    <!-- A package reference adds this file to the project by itself; a project reference does not. -->
+    <Compile Include="../../src/OneContact.Models.Accurate/contentFiles/OneContactModelsAccurateRegistration.cs" Link="OneContactModelsAccurateRegistration.cs" />
+  </ItemGroup>
+
+</Project>

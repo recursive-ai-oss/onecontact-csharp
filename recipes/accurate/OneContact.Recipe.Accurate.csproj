@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The accurate-tier training recipe: turns the rendered training sets into examples and trains the heads over the frozen multilingual encoder with OneNLP's Train. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>OneContact.Recipe.Accurate</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <NoWarn>$(NoWarn);CA1303;CA1848;CA1307;CA1305;CA1310;CA1304;CA1311;CA1861;CA1869;CA1822</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/OneContact.Models.Accurate/OneContact.Models.Accurate.csproj" />
+    <PackageReference Include="RecursiveAI.OneNlp.Neural" VersionOverride="0.4.0-preview.1" />
+    <PackageReference Include="RecursiveAI.OneNlp.Models.Multilingual.FrozenEncoder" VersionOverride="0.4.0-preview.1" />
+    <PackageReference Include="RecursiveAI.OneModel.Training" />
+  </ItemGroup>
+
+</Project>

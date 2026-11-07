@@ -42,19 +42,8 @@ if (Environment.GetEnvironmentVariable("ONECONTACT_WEB_MODEL") == "1")
     TextFieldReader.ModelOnWeb = true;
 }
 
-// ONECONTACT_MODELS_MODEL names the saved Tier 1 + Tier 2 pipeline (registered at rank 2); otherwise ONECONTACT_TIER1_MODEL the Tier 1 one.
-if (Environment.GetEnvironmentVariable("ONECONTACT_MODELS_MODEL") is { Length: > 0 } supersetPath)
-{
-    using FileStream supersetStream = File.OpenRead(supersetPath);
-    var superset = RecursiveAI.OneContact.Models.Superset.SupersetModel.Load(supersetStream);
-    RecursiveAI.OneContact.Models.ContactModels.Register(RecursiveAI.OneContact.Models.Superset.SupersetModel.PackageId, 2, superset, superset, superset);
-}
-else if (Environment.GetEnvironmentVariable("ONECONTACT_TIER1_MODEL") is { Length: > 0 } modelPath)
-{
-    using FileStream modelStream = File.OpenRead(modelPath);
-    var tier1 = RecursiveAI.OneContact.Models.Tier1.Tier1Model.Load(modelStream);
-    RecursiveAI.OneContact.Models.ContactModels.Register(RecursiveAI.OneContact.Models.Tier1.Tier1Model.PackageId, 1, tier1, tier1, tier1);
-}
+// The model package registered for the run is named by the environment (see ModelLoader.cs).
+ModelLoader.RegisterFromEnvironment();
 
 // ONECONTACT_TRACE_COUNTS=<file> writes how many names each kind of evidence accepted (a count per evidence name; no text).
 Dictionary<string, int>? traceCounts = null;
