@@ -1,0 +1,38 @@
+person span F1         default          n=119   10.96 [  3.03,  21.74]  P 6.61 R 32.0 (gold 25, predicted 121)
+person span F1         cand             n=119   11.19 [  2.96,  21.95]  vs_default +0.23 [-0.64, +1.52]  P 6.78 R 32.0 (gold 25, predicted 118)
+org span F1            default          n=119   40.91 [ 34.86,  47.28]  P 43.81 R 38.37 (gold 258, predicted 226)
+org span F1            cand             n=119   40.57 [ 34.21,  47.18]  vs_default -0.34 [-1.20, +0.40]  P 43.04 R 38.37 (gold 258, predicted 230)
+address span F1        default          n=119   89.83 [ 84.36,  94.34]  P 96.36 R 84.13 (gold 126, predicted 110)
+address span F1        cand             n=119   89.83 [ 84.36,  94.34]  vs_default +0.00 [+0.00, +0.00]  P 96.36 R 84.13 (gold 126, predicted 110)
+phone span F1          default          n=119   99.07 [ 97.80,  99.86]  P 98.77 R 99.38 (gold 322, predicted 324)
+phone span F1          cand             n=119   99.07 [ 97.80,  99.86]  vs_default +0.00 [+0.00, +0.00]  P 98.77 R 99.38 (gold 322, predicted 324)
+email span F1          default          n=119   98.91 [ 97.41, 100.00]  P 97.84 R 100.0 (gold 227, predicted 232)
+email span F1          cand             n=119   98.91 [ 97.41, 100.00]  vs_default +0.00 [+0.00, +0.00]  P 97.84 R 100.0 (gold 227, predicted 232)
+website span F1        default          n=119   71.77 [ 51.21,  88.89]  P 55.97 R 100.0 (gold 136, predicted 243)
+website span F1        cand             n=119   71.77 [ 51.21,  88.89]  vs_default +0.00 [+0.00, +0.00]  P 55.97 R 100.0 (gold 136, predicted 243)
+all span F1            default          n=119   76.26 [ 70.30,  81.41]  P 71.34 R 81.9 (gold 1094, predicted 1256)
+all span F1            cand             n=119   76.22 [ 70.25,  81.37]  vs_default -0.03 [-0.11, +0.00]  P 71.28 R 81.9 (gold 1094, predicted 1257)
+person value F1        default          n=119   20.45 [  8.25,  33.77]  P 12.86 R 50.0 (gold 18, predicted 70)
+person value F1        cand             n=119   20.22 [  8.16,  33.33]  vs_default -0.23 [-1.69, +0.89]  P 12.68 R 50.0 (gold 18, predicted 71)
+org value F1           default          n=119   53.88 [ 45.76,  61.54]  P 42.58 R 73.33 (gold 90, predicted 155)
+org value F1           cand             n=119   53.88 [ 45.97,  61.24]  vs_default +0.00 [-0.92, +1.12]  P 42.58 R 73.33 (gold 90, predicted 155)
+address value F1       default          n=119   88.89 [ 83.45,  93.33]  P 96.55 R 82.35 (gold 102, predicted 87)
+address value F1       cand             n=119   88.89 [ 83.45,  93.33]  vs_default +0.00 [+0.00, +0.00]  P 96.55 R 82.35 (gold 102, predicted 87)
+phone value F1         default          n=119   99.10 [ 97.58, 100.00]  P 99.1 R 99.1 (gold 111, predicted 111)
+phone value F1         cand             n=119   99.10 [ 97.58, 100.00]  vs_default +0.00 [+0.00, +0.00]  P 99.1 R 99.1 (gold 111, predicted 111)
+email value F1         default          n=119   98.55 [ 96.55, 100.00]  P 97.14 R 100.0 (gold 102, predicted 105)
+email value F1         cand             n=119   98.55 [ 96.55, 100.00]  vs_default +0.00 [+0.00, +0.00]  P 97.14 R 100.0 (gold 102, predicted 105)
+website value F1       default          n=119   72.54 [ 51.61,  89.88]  P 56.91 R 100.0 (gold 107, predicted 188)
+website value F1       cand             n=119   72.54 [ 51.61,  89.88]  vs_default +0.00 [+0.00, +0.00]  P 56.91 R 100.0 (gold 107, predicted 188)
+all value F1           default          n=119   76.73 [ 69.84,  82.12]  P 66.76 R 90.19 (gold 530, predicted 716)
+all value F1           cand             n=119   76.66 [ 69.74,  82.12]  vs_default -0.06 [-0.20, +0.00]  P 66.67 R 90.19 (gold 530, predicted 717)
+record F1              default          n=119   33.44 [ 25.73,  41.16]
+record F1              cand             n=119   33.56 [ 25.85,  41.28]  vs_default +0.11 [+0.00, +0.39]
+link F1                default          n=119   54.68 [ 29.20,  84.12]
+link F1                cand             n=119   54.90 [ 29.20,  84.34]  vs_default +0.22 [-0.27, +1.47]
+gold person: 25 fields
+gold org: 261 fields
+gold address: 126 fields
+gold phone: 323 fields
+gold email: 227 fields
+gold website: 136 fields

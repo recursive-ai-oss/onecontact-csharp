@@ -1,0 +1,56 @@
+person span F1         default          n=119   11.11 [  0.00,  24.14]  P 7.84 R 19.05 (gold 21, predicted 51)
+person span F1         cand             n=119   11.59 [  0.00,  24.56]  vs_default +0.48 [-1.19, +2.80]  P 8.33 R 19.05 (gold 21, predicted 48)
+person span F1         spacy            n=119    7.96 [  2.86,  14.66]  vs_default -3.15 [-16.53, +8.33]  P 4.18 R 85.71 (gold 21, predicted 431)
+org span F1            default          n=119   21.20 [ 14.81,  27.89]  P 24.03 R 18.97 (gold 195, predicted 154)
+org span F1            cand             n=119   20.96 [ 14.61,  27.83]  vs_default -0.24 [-0.87, +0.29]  P 23.42 R 18.97 (gold 195, predicted 158)
+org span F1            spacy            n=119   14.05 [  9.34,  20.19]  vs_default -7.15 [-15.07, +0.98]  P 7.94 R 61.03 (gold 195, predicted 1499)
+address span F1        default          n=119   84.62 [ 76.81,  91.43]  P 94.29 R 76.74 (gold 86, predicted 70)
+address span F1        cand             n=119   84.62 [ 76.81,  91.43]  vs_default +0.00 [+0.00, +0.00]  P 94.29 R 76.74 (gold 86, predicted 70)
+phone span F1          default          n=119   99.43 [ 98.53, 100.00]  P 100.0 R 98.86 (gold 176, predicted 174)
+phone span F1          cand             n=119   99.43 [ 98.53, 100.00]  vs_default +0.00 [+0.00, +0.00]  P 100.0 R 98.86 (gold 176, predicted 174)
+phone span F1          libphonenumber   n=119   97.69 [ 94.29,  99.73]  vs_default -1.74 [-5.19, +0.00]  P 99.41 R 96.02 (gold 176, predicted 170)
+phone span F1          recognizers      n=119   85.56 [ 79.21,  91.04]  vs_default -13.87 [-20.00, -8.28]  P 83.7 R 87.5 (gold 176, predicted 184)
+email span F1          default          n=119   99.25 [ 98.14, 100.00]  P 98.51 R 100.0 (gold 132, predicted 134)
+email span F1          cand             n=119   99.25 [ 98.14, 100.00]  vs_default +0.00 [+0.00, +0.00]  P 98.51 R 100.0 (gold 132, predicted 134)
+email span F1          recognizers      n=119   85.47 [ 73.83,  94.83]  vs_default -13.78 [-25.40, -4.44]  P 98.04 R 75.76 (gold 132, predicted 102)
+website span F1        default          n=119   62.69 [ 43.14,  76.32]  P 45.65 R 100.0 (gold 21, predicted 46)
+website span F1        cand             n=119   62.69 [ 43.14,  76.32]  vs_default +0.00 [+0.00, +0.00]  P 45.65 R 100.0 (gold 21, predicted 46)
+website span F1        recognizers      n=119   54.55 [ 36.00,  71.05]  vs_default -8.14 [-17.57, +0.00]  P 40.0 R 85.71 (gold 21, predicted 45)
+all span F1            default          n=119   68.89 [ 64.06,  73.34]  P 69.0 R 68.78 (gold 631, predicted 629)
+all span F1            cand             n=119   68.83 [ 64.00,  73.23]  vs_default -0.05 [-0.18, +0.00]  P 68.89 R 68.78 (gold 631, predicted 630)
+all span F1            libphonenumber   n=119   97.69 [ 94.29,  99.73]  vs_default +28.80 [+22.91, +34.66]  P 99.41 R 96.02 (gold 176, predicted 170)
+all span F1            recognizers      n=119   82.42 [ 76.49,  88.00]  vs_default +13.54 [+6.92, +20.06]  P 82.18 R 82.67 (gold 329, predicted 331)
+all span F1            spacy            n=119   12.77 [  8.95,  17.77]  vs_default -56.12 [-62.55, -48.88]  P 7.1 R 63.43 (gold 216, predicted 1930)
+person value F1        default          n=119   20.69 [  5.00,  36.36]  P 13.95 R 40.0 (gold 15, predicted 43)
+person value F1        cand             n=119   20.34 [  5.00,  36.07]  vs_default -0.35 [-2.34, +1.42]  P 13.64 R 40.0 (gold 15, predicted 44)
+person value F1        spacy            n=119    8.41 [  3.70,  13.97]  vs_default -12.28 [-26.00, +0.48]  P 4.42 R 86.67 (gold 15, predicted 294)
+org value F1           default          n=119   35.29 [ 26.44,  44.55]  P 27.97 R 47.83 (gold 69, predicted 118)
+org value F1           cand             n=119   35.29 [ 26.74,  44.55]  vs_default +0.00 [-0.82, +0.97]  P 27.97 R 47.83 (gold 69, predicted 118)
+org value F1           spacy            n=119   10.95 [  8.26,  14.50]  vs_default -24.34 [-32.89, -15.14]  P 5.92 R 72.46 (gold 69, predicted 844)
+address value F1       default          n=119   83.97 [ 76.64,  90.28]  P 94.83 R 75.34 (gold 73, predicted 58)
+address value F1       cand             n=119   83.97 [ 76.64,  90.28]  vs_default +0.00 [+0.00, +0.00]  P 94.83 R 75.34 (gold 73, predicted 58)
+phone value F1         default          n=119   99.03 [ 97.41, 100.00]  P 100.0 R 98.08 (gold 104, predicted 102)
+phone value F1         cand             n=119   99.03 [ 97.41, 100.00]  vs_default +0.00 [+0.00, +0.00]  P 100.0 R 98.08 (gold 104, predicted 102)
+phone value F1         libphonenumber   n=119   99.03 [ 97.41, 100.00]  vs_default +0.00 [+0.00, +0.00]  P 100.0 R 98.08 (gold 104, predicted 102)
+phone value F1         recognizers      n=119   90.00 [ 85.36,  93.90]  vs_default -9.03 [-13.42, -5.22]  P 85.34 R 95.19 (gold 104, predicted 116)
+email value F1         default          n=119   98.88 [ 97.01, 100.00]  P 97.78 R 100.0 (gold 88, predicted 90)
+email value F1         cand             n=119   98.88 [ 97.01, 100.00]  vs_default +0.00 [+0.00, +0.00]  P 97.78 R 100.0 (gold 88, predicted 90)
+email value F1         recognizers      n=119   92.22 [ 85.19,  96.82]  vs_default -6.66 [-13.47, -2.25]  P 97.47 R 87.5 (gold 88, predicted 79)
+website value F1       default          n=119   58.18 [ 41.56,  73.33]  P 41.03 R 100.0 (gold 16, predicted 39)
+website value F1       cand             n=119   58.18 [ 41.56,  73.33]  vs_default +0.00 [+0.00, +0.00]  P 41.03 R 100.0 (gold 16, predicted 39)
+website value F1       recognizers      n=119   58.18 [ 41.18,  73.68]  vs_default +0.00 [-2.82, +3.16]  P 41.03 R 100.0 (gold 16, predicted 39)
+all value F1           default          n=119   73.62 [ 69.47,  77.50]  P 66.67 R 82.19 (gold 365, predicted 450)
+all value F1           cand             n=119   73.53 [ 69.38,  77.50]  vs_default -0.09 [-0.29, +0.00]  P 66.52 R 82.19 (gold 365, predicted 451)
+all value F1           libphonenumber   n=119   99.03 [ 97.41, 100.00]  vs_default +25.41 [+21.66, +29.51]  P 100.0 R 98.08 (gold 104, predicted 102)
+all value F1           recognizers      n=119   86.88 [ 81.94,  91.16]  vs_default +13.26 [+9.21, +17.00]  P 82.05 R 92.31 (gold 208, predicted 234)
+all value F1           spacy            n=119   10.31 [  8.05,  13.42]  vs_default -63.31 [-67.67, -58.37]  P 5.54 R 75.0 (gold 84, predicted 1138)
+record F1              default          n=119   25.44 [ 17.14,  32.79]
+record F1              cand             n=119   25.55 [ 17.22,  32.91]  vs_default +0.11 [+0.00, +0.38]
+link F1                default          n=119   54.49 [ 45.24,  62.48]
+link F1                cand             n=119   55.56 [ 47.46,  62.52]  vs_default +1.07 [-0.68, +3.68]
+gold person: 21 fields
+gold org: 195 fields
+gold address: 86 fields
+gold phone: 176 fields
+gold email: 132 fields
+gold website: 21 fields

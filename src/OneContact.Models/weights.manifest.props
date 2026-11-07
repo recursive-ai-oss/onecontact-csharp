@@ -3,7 +3,7 @@
        To use retrained weights, replace the row (and PROVENANCE.md); no code changes. Weights are never committed.
        Weights are fetched or rebuilt with recipes/models; their sha256 is the one below. -->
   <ItemGroup>
-    <ModelsWeight Include="models.onenlp" Size="22784861" Sha256="0e31f3fd8ec06fe69cef2cc0c82d2cc495cd9313bbc9a4bfb64ef6c56d6dd60a"
-                  Recipe="recipes/models" Data="open address registers of the United States, Canada and 37 Tier 2 countries, names, companies and contact blocks; see PROVENANCE.md" Contents="shared fast-tier encoder; address-field head; name-part head; name-class head; contact-span head" />
+    <ModelsWeight Include="models.onenlp" Size="22785395" Sha256="c5cedca0d4d0991f272cdafa28471a7744423bd65e26f0dc5970dafc2ee9640d"
+                  Recipe="recipes/models" Data="open address registers of the United States, Canada and 37 Tier 2 countries plus OpenStreetMap addresses (ODbL), names, companies and contact blocks; see PROVENANCE.md" Contents="shared fast-tier encoder; address-field head; name-part head; name-class head; contact-span head" />
   </ItemGroup>
 </Project>
