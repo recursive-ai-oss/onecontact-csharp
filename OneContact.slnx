@@ -23,6 +23,7 @@
     <Project Path="samples/OneContact.AotSmoke.Models/OneContact.AotSmoke.Models.csproj" />
     <Project Path="samples/OneContact.AotSmoke.ModelsSuperset/OneContact.AotSmoke.ModelsSuperset.csproj" />
     <Project Path="samples/OneContact.AotSmoke.ModelsAccurate/OneContact.AotSmoke.ModelsAccurate.csproj" />
+    <Project Path="samples/OneContact.AotSmoke.ModelsMixed/OneContact.AotSmoke.ModelsMixed.csproj" />
   </Folder>
   <Folder Name="/bench/">
     <Project Path="bench/OneContact.Bench/OneContact.Bench.csproj" />

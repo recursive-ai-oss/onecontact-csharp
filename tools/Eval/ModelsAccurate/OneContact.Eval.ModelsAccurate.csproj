@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!-- The same prediction writer as the rules tool, with the accurate-tier model registered from the saved pipeline named by ONECONTACT_ACCURATE_MODEL.
-       A separate project because the accurate tier runs on a newer OneNLP than the fast tiers. -->
+       A separate project so that only the accurate tier is registered. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>

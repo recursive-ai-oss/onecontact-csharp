@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Publishes with NativeAOT and warnings as errors: one app that references the Tier 1 + Tier 2 package and the accurate-tier package together (both run on one
+       OneNLP version), and proves which one serves what. Build it with ONECONTACT_MODELS_WEIGHTS and ONECONTACT_ACCURATE_WEIGHTS set to the folders holding the weights
+       files listed in the packages' manifests. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <PublishAot>true</PublishAot>
+    <IsAotCompatible>true</IsAotCompatible>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/OneContact.Models/OneContact.Models.csproj" />
+    <ProjectReference Include="../../src/OneContact.Models.Accurate/OneContact.Models.Accurate.csproj" />
+    <ProjectReference Include="../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
+    <!-- A package reference adds these files to the project by itself; a project reference does not. -->
+    <Compile Include="../../src/OneContact.Models/contentFiles/OneContactModelsRegistration.cs" Link="OneContactModelsRegistration.cs" />
+    <Compile Include="../../src/OneContact.Models.Accurate/contentFiles/OneContactModelsAccurateRegistration.cs" Link="OneContactModelsAccurateRegistration.cs" />
+  </ItemGroup>
+
+</Project>
