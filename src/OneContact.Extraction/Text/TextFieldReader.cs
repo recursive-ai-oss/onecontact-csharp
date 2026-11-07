@@ -22,6 +22,7 @@ internal sealed partial class TextFieldReader
     private readonly IPhoneCandidateFinder _phones;
     private readonly bool[] _taken;
     private readonly List<FieldDraft> _drafts = [];
+    private readonly List<(FieldKind Kind, int Start, int End, int Line)> _read = [];
 
     private int[] _blockLines = [];
 
@@ -146,7 +147,49 @@ internal sealed partial class TextFieldReader
             }
         }
 
+        ReadNames();
         _drafts.Sort((a, b) => a.Raw.Start.CompareTo(b.Raw.Start));
+    }
+
+    // People and organizations the rules can tell from what stands next to them (see NameCandidates).
+    private void ReadNames()
+    {
+        foreach (NameHit h in NameCandidates.Find(_view, _read, IsTaken, SideBySide))
+        {
+            if (_drafts.Count >= MaxCandidates)
+            {
+                break;
+            }
+
+            Take(h.Start, h.End);
+            Add(h.Organization ? FieldKind.Organization : FieldKind.Name, h.Start, h.End, _view.Text[h.Start..h.End], h.Line, false, h.Organization ? 0.75 : 0.7, false, null, h.Organization, nameRule: true);
+        }
+    }
+
+    // Text at two indexes comes from elements that are neither the same nor one inside the other.
+    private bool SideBySide(int a, int b)
+    {
+        if (_view.IsPlain)
+        {
+            return false;
+        }
+
+        int x = _view.ElementOf(a);
+        int y = _view.ElementOf(b);
+        return x >= 0 && y >= 0 && x != y && !Encloses(x, y) && !Encloses(y, x);
+    }
+
+    private bool Encloses(int outer, int inner)
+    {
+        for (Node n = _page.GetNode(inner); !n.IsNull; n = n.Parent)
+        {
+            if (n.Index == outer)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private bool IsTaken(int start, int end)
@@ -170,8 +213,13 @@ internal sealed partial class TextFieldReader
         }
     }
 
-    private void Add(FieldKind kind, int start, int end, string value, int line, bool decoded, double confidence, bool requireValid, string? label, bool companyLabel, bool model = false)
+    private void Add(FieldKind kind, int start, int end, string value, int line, bool decoded, double confidence, bool requireValid, string? label, bool companyLabel, bool model = false, bool nameRule = false)
     {
+        if (!model && !nameRule)
+        {
+            _read.Add((kind, start, end, line));
+        }
+
         TextRange raw = _view.RangeOf(start, end, out bool gap, out bool reversed);
         bool obfuscated = decoded || reversed || (kind is FieldKind.Email or FieldKind.Website && gap);
         if (!obfuscated && !_view.IsPlain && raw.IsPresent && kind is FieldKind.Email or FieldKind.Website)

@@ -11,10 +11,12 @@ record 0 Organization pages=index.html conf=1
 record 1 Person pages=team.html conf=1
   #3 Name team.html HCard raw="Jane Doe" text="Jane Doe" span=138+8 => Person:Jane Doe
   #4 Organization team.html HCard raw="Cedar Analytics Inc" text="Cedar Analytics Inc" span=174+19 => Company:Cedar Analytics Inc
+    also team.html Text span=174+19
   #5 Email team.html HCard raw="mailto:jane.doe@cedaranalytics.example.com" text="jane.doe@cedaranalytics.example.com" span=226+42 => Email:jane.doe@cedaranalytics.example.com
   link WorksFor -> record 0
 record 2 Person pages=team.html conf=1
   #6 Name team.html HCard raw="Rob Roe" text="Rob Roe" span=323+7 => Person:Rob Roe
   #7 Organization team.html HCard raw="Cedar Analytics Inc" text="Cedar Analytics Inc" span=358+19 => Company:Cedar Analytics Inc
+    also team.html Text span=358+19
   #8 Email team.html HCard raw="mailto:rob.roe@cedaranalytics.example.com" text="rob.roe@cedaranalytics.example.com" span=410+41 => Email:rob.roe@cedaranalytics.example.com
   link WorksFor -> record 0

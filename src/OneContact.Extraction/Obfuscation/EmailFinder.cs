@@ -109,6 +109,10 @@ internal static class EmailFinder
         return EmailAddress.TryParse(address, out EmailAddress parsed) && !parsed.Flags.HasFlag(EmailFacts.SingleLabelDomain);
     }
 
+    private static readonly System.Collections.Frozen.FrozenSet<string> FileExtensions = System.Collections.Frozen.FrozenSet.ToFrozenSet(
+        ["png", "jpg", "jpeg", "gif", "svg", "webp", "bmp", "ico", "css", "js", "json", "xml", "pdf", "html", "htm", "php", "asp", "aspx", "jsp", "woff", "woff2", "ttf", "eot", "otf", "map", "txt", "gz", "tgz", "avif", "tif", "tiff", "mp3", "mp4", "webm", "wav", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "csv"],
+        StringComparer.Ordinal);
+
     private static bool IsPlausibleTopLevel(string label)
     {
         if (label.StartsWith("xn--", StringComparison.OrdinalIgnoreCase))
@@ -117,6 +121,12 @@ internal static class EmailFinder
         }
 
         if (label.Length < 2)
+        {
+            return false;
+        }
+
+        // "logo@2x.png" is a file name for an image density, not a mailbox: a file extension that is no top-level domain ends no address.
+        if (FileExtensions.Contains(label.ToLowerInvariant()) && !TopLevelDomains.IsKnown(label))
         {
             return false;
         }

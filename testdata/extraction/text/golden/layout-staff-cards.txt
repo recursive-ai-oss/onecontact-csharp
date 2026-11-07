@@ -1,7 +1,9 @@
 unit Bytes
-record 0 Unknown src=Text conf=0.5 span=133+43
-  #0 Email Text raw="ada@staff.example" text="ada@staff.example" span=133+17 conf=0.9 => Email:ada@staff.example
-  #1 Phone Text raw="+1 202 555 0101" text="+1 202 555 0101" span=161+15 conf=0.85 => Phone:+12025550101 facts=Valid|InternationalInput label="Tel"
-record 1 Unknown src=Text conf=0.5 span=220+42
-  #2 Email Text raw="bo@staff.example" text="bo@staff.example" span=220+16 conf=0.9 => Email:bo@staff.example
-  #3 Phone Text raw="+1 202 555 0102" text="+1 202 555 0102" span=247+15 conf=0.85 => Phone:+12025550102 facts=Valid|InternationalInput label="Tel"
+record 0 Person src=Text conf=0.7 span=114+62
+  #0 Name Text raw="Ada Example" text="Ada Example" span=114+11 conf=0.7 => Person:Ada Example
+  #1 Email Text raw="ada@staff.example" text="ada@staff.example" span=133+17 conf=0.9 => Email:ada@staff.example
+  #2 Phone Text raw="+1 202 555 0101" text="+1 202 555 0101" span=161+15 conf=0.85 => Phone:+12025550101 facts=Valid|InternationalInput label="Tel"
+record 1 Person src=Text conf=0.7 span=203+59
+  #3 Name Text raw="Bo Sample" text="Bo Sample" span=203+9 conf=0.7 => Person:Bo Sample
+  #4 Email Text raw="bo@staff.example" text="bo@staff.example" span=220+16 conf=0.9 => Email:bo@staff.example
+  #5 Phone Text raw="+1 202 555 0102" text="+1 202 555 0102" span=247+15 conf=0.85 => Phone:+12025550102 facts=Valid|InternationalInput label="Tel"
