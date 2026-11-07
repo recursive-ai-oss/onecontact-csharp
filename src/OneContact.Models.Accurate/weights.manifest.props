@@ -1,0 +1,8 @@
+<Project>
+  <!-- The head weights this package packs: name, size, sha256 and where each came from. A pack fails when a file is missing or differs.
+       The encoder is not here: it comes from RecursiveAI.OneNlp.Models.Multilingual.FrozenEncoder. Weights are never committed. -->
+  <ItemGroup>
+    <ModelsWeight Include="accurate.onenlp" Size="9968307" Sha256="d3f788323884ee460a2305a81c39742f390263f48696d9e19cc70a9e23ed5447"
+                  Recipe="recipes/accurate" Data="open address registers of the United States, Canada and 37 Tier 2 countries plus OpenStreetMap addresses (ODbL), names, companies and contact blocks; see PROVENANCE.md" Contents="heads over the frozen multilingual encoder: address-field head; name-part head; name-class head; contact-span head" />
+  </ItemGroup>
+</Project>

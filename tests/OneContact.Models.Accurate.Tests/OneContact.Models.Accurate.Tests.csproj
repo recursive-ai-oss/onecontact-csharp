@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);xUnit1051</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+
+  <!-- The accurate tier only: it runs on a newer OneNLP than the fast tiers, so the two cannot be referenced from one project. The registry is process-wide,
+       so this project holds one ordered test for it. -->
+  <ItemGroup>
+    <ProjectReference Include="../../src/OneContact.Models.Accurate/OneContact.Models.Accurate.csproj" />
+  </ItemGroup>
+
+</Project>

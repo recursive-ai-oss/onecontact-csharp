@@ -2,8 +2,8 @@ namespace RecursiveAI.OneContact;
 
 public readonly partial struct ReasonCode
 {
-    /// <summary>The rules cannot tell where the street ends and the city begins (or which words are the street name); a trained model decides it. Add the NuGet package RecursiveAI.OneContact.Models.Tier1 (United States and Canada) or RecursiveAI.OneContact.Models (those and every Tier 2 country); models are never downloaded.</summary>
-    public static ReasonCode AddressModelRequired { get; } = new(ContactKind.Address, 110, "model-required", "the rules cannot decide this address; add the NuGet package RecursiveAI.OneContact.Models.Tier1 (United States and Canada) or RecursiveAI.OneContact.Models (those and every Tier 2 country), whose trained model decides it");
+    /// <summary>The rules cannot tell where the street ends and the city begins (or which words are the street name); a trained model decides it. Add the NuGet package RecursiveAI.OneContact.Models.Tier1 (United States and Canada) or RecursiveAI.OneContact.Models (those and every Tier 2 country), or RecursiveAI.OneContact.Models.Accurate (the same countries over a multilingual encoder); models are never downloaded.</summary>
+    public static ReasonCode AddressModelRequired { get; } = new(ContactKind.Address, 110, "model-required", "the rules cannot decide this address; add the NuGet package RecursiveAI.OneContact.Models.Tier1 (United States and Canada) or RecursiveAI.OneContact.Models (those and every Tier 2 country), or RecursiveAI.OneContact.Models.Accurate (the same countries over a multilingual encoder), whose trained model decides it");
 
     /// <summary>The content does not say which country the address is in, and no country hint was given.</summary>
     public static ReasonCode AddressCountryUndetermined { get; } = new(ContactKind.Address, 111, "country-undetermined", "the country cannot be told from the content; give a country hint");

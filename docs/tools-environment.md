@@ -6,7 +6,7 @@ The scripts and tools under `tools/`, `recipes/` and `bench/` keep everything la
 |---|---|---|
 | `ONECONTACT_DATA` | `~/onecontact/data` | Downloaded registers and name lists (`train/<name>`), rendered training sets (`rendered/<group>`, for example `rendered/tier2-a`, `tier2-b`, `tier2-c-north`, `tier2-c-south`, `tier2-c-nordic`, `tier2-c-east`, `tier2-au`), challenger data (`challenger/`). |
 | `ONECONTACT_WORK` | `~/onecontact/work` | Scratch for runs: bench snapshots and results (`bench/`), quick trial renders (`tier2-east/`), saved models (`models/tier1.onenlp`). |
-| `ONECONTACT_EVAL` | `~/onecontact/eval/private` | Evaluation sets (`tier2/group-a`, `group-b`, `c-north`, `c-south`, each with `sets/`; `sets/` for US and CA). Private: they hold personal data and stay on the machine that holds them. |
+| `ONECONTACT_EVAL` | `~/onecontact/eval/private` | Evaluation sets (`tier2/group-a`, `group-b`, `c-north`, `c-south`, each with `sets/`; `sets/` for US and CA; `fresh/names`, `fresh/ro-mx`, `fresh/addresses` for the sets drawn for the 1.0 gate). Private: they hold personal data and stay on the machine that holds them. |
 | `ONECONTACT_ORACLES` | `~/onecontact/oracles` | Pinned oracle installs (jars, JDK, Python environments). |
 | `ONECONTACT_UPSTREAM` | `.upstream/` in the checkout | Upstream data files fetched by `tools/fetch/all.sh`. |
 | `ONECONTACT_ARTIFACTS` | `artifacts/` in the checkout | Build output. |

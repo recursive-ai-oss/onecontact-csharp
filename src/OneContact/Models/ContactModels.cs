@@ -65,6 +65,8 @@ public static class ContactModels
 
     private static readonly Lock Gate = new();
     private static Registration? s_current;
+    // The span model is chosen by its own rank: the accurate tier reads running text while the fast tier keeps reading single addresses and names.
+    private static Registration? s_spanReg;
 
     // Lets a test use a model for the current async flow only, so the process-wide registration other tests see is untouched.
     private static readonly AsyncLocal<Registration?> s_scoped = new();
@@ -76,7 +78,7 @@ public static class ContactModels
     public static INameModel? Name => (s_scoped.Value ?? Volatile.Read(ref s_current))?.Name;
 
     /// <summary>Gets the registered contact-span model, or <see langword="null"/> when no model package that carries one is referenced.</summary>
-    public static IContactSpanModel? Spans => (s_scoped.Value ?? Volatile.Read(ref s_current))?.Spans;
+    public static IContactSpanModel? Spans => (s_scoped.Value ?? Volatile.Read(ref s_spanReg))?.Spans;
 
     /// <summary>Gets the id of the package whose models are in use, or <see langword="null"/> when none is.</summary>
     public static string? PackageId => (s_scoped.Value ?? Volatile.Read(ref s_current))?.PackageId;
@@ -87,16 +89,24 @@ public static class ContactModels
     /// <param name="address">The address model, or <see langword="null"/>.</param>
     /// <param name="name">The name model, or <see langword="null"/>.</param>
     /// <param name="spans">The contact-span model, or <see langword="null"/>.</param>
+    /// <param name="normalizationRank">The rank the package's address and name models compete with, or <see langword="null"/> for <paramref name="rank"/>. The accurate tier passes 0, so the fast tier keeps normalizing addresses and names when it is referenced too, and the accurate tier serves them only when it is the only model package.</param>
     /// <exception cref="ArgumentException"><paramref name="packageId"/> is empty.</exception>
-    public static void Register(string packageId, int rank, IAddressFieldModel? address, INameModel? name, IContactSpanModel? spans = null)
+    public static void Register(string packageId, int rank, IAddressFieldModel? address, INameModel? name, IContactSpanModel? spans = null, int? normalizationRank = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(packageId);
         lock (Gate)
         {
+            int normalization = normalizationRank ?? rank;
             Registration? current = s_current;
-            if (current is null || rank > current.Rank)
+            if (current is null || normalization > current.Rank)
             {
-                Volatile.Write(ref s_current, new Registration(packageId, rank, address, name, spans));
+                Volatile.Write(ref s_current, new Registration(packageId, normalization, address, name, null));
+            }
+
+            Registration? spanCurrent = s_spanReg;
+            if (spans is not null && (spanCurrent is null || rank > spanCurrent.Rank))
+            {
+                Volatile.Write(ref s_spanReg, new Registration(packageId, rank, null, null, spans));
             }
         }
     }
