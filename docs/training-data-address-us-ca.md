@@ -62,19 +62,6 @@ The names are the ones the rule parser emits, so rule output and training labels
 
 `tools/data/templates/layouts.tsv` holds the layouts (USPS Publication 28 labels, Canada Post labels in English and French, and single lines with commas, without, with semicolons, with the province in parentheses); `names.tsv` the invented name parts; `oda-excluded-providers.tsv` the providers left out. A template names slots (`{city}{, |state}{ |zip}`); the punctuation before or after a slot is written only when the slot has content, so a missing ZIP removes its comma. The variants drawn per example are casing, abbreviated or spelled-out street types and directionals (from the Publication 28 and Canada Post rule tables), unit placement and designator, optional recipient, organisation and country, PO box, rural route, highway contract route, military and general-delivery lines, missing fields, ZIP+4, French civic forms (type before the name, a comma after the number, `St-`/`Ste-` for saint), and typing or OCR edits. The rates are in the manifest.
 
-## Where rules alone fall short
-
-The library's rule parser run over about 5,000 sampled training examples per country (information for the model recipe; the parser reads the example text with no hint, and a field counts as recovered when it returns the same label on the same span):
-
-| | US | CA |
-|---|---|---|
-| Every labelled field recovered | 66.3 % | 55.2 % |
-| Fields recovered | 90.9 % | 81.7 % |
-| Parse refused (`address.model-required`) | 84 (1.7 %) | 135 (2.7 %) |
-| Parse refused (`address.no-last-line`) | 59 | 464 |
-
-Weakest labels (fields recovered / seen): US `street.name` 76.5 %, `street.military-*` 66.7 %, `street.route-designator` 67.9 %, `organization` 69.5 %; CA `street.unit-number` 48.6 %, `street.name` 62.3 %, `street.route-designator` 57.8 %, `organization` 68.4 %. Recipient and organisation lines are expected misses in single-line text: the rules cannot tell a name from the rest without line breaks. The numbers include the deliberate typing and OCR noise (6 % of examples), spacing damage, and layouts the rules decline to read, so they are a floor for what the model must add, not a score of the parser.
-
 ## Regions the National Address Database lacks
 
 Puerto Rico, the territories and five states have no (or few) rows in NAD. `--tiger` reads Census TIGER/Line county address-range tables (the `.dbf` inside each `*_addrfeat.zip`; `*_edges.zip` for American Samoa and the Northern Mariana Islands, which have no ranges) and the ZCTA to place relationship file, and makes one record per house number drawn inside an address range. Street names come from the Census with their abbreviations, split with the Publication 28 tables; the house number and the city are synthetic (see `tools/data/provenance/address-us-ca.md`). Puerto Rico uses `templates/layouts-pr.tsv`: Spanish street prefixes stay in the street name (Publication 28 appendix I section 51.1), and the urbanization line comes before the delivery line. Option `--caps` replaces the shared per-region cap of `count` with fixed caps, `--per-range` sets how many numbers are drawn from each range, `--countries` and `--dataset` name the output files and the manifest.

@@ -20,7 +20,7 @@ internal static class ModelNameReader
         || language.Equals("fr", StringComparison.OrdinalIgnoreCase) || language.Equals("es", StringComparison.OrdinalIgnoreCase);
 
     // Countries whose rules-default person readings the Tier 1 + Tier 2 model may overrule, at the higher confidence below. In each the override gained at least 0.3
-    // points of class accuracy on the development names and did not lower any name row on the real-page sets (docs/models-superset.md). Every other Tier 2
+    // points of class accuracy on the development names and did not lower any name row on the real-page sets (docs/maintainers/models-superset.md). Every other Tier 2
     // country reads only what the rules leave open.
     private static readonly HashSet<string> OverrideCountries = new(StringComparer.Ordinal) { "AU", "EE", "FR", "GB", "IT", "LI", "MT" };
 

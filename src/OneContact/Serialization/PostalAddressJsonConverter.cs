@@ -13,6 +13,23 @@ namespace RecursiveAI.OneContact.Serialization;
 /// </summary>
 public sealed class PostalAddressJsonConverter : JsonConverter<PostalAddress>
 {
+    private readonly Region _region;
+
+    /// <summary>Creates a converter that reads string input without a country hint.</summary>
+    public PostalAddressJsonConverter()
+    {
+    }
+
+    /// <summary>
+    /// Creates a converter that reads a plain string (and a property name) as free text of a country, the way <see cref="PostalAddress.Parse(string, Region)"/> does.
+    /// Add an instance to the serializer options to read addresses from a client in a known country. An object read back carries its own stored <c>hint</c> and is not affected.
+    /// </summary>
+    /// <param name="defaultRegion">The country hint for string input; <see cref="Region.Unknown"/> reads without a hint.</param>
+    public PostalAddressJsonConverter(Region defaultRegion)
+    {
+        _region = defaultRegion;
+    }
+
     /// <inheritdoc/>
     public override PostalAddress Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
         reader.TokenType == JsonTokenType.StartObject ? ReadObject(ref reader) : Parse(reader.TokenType == JsonTokenType.String ? reader.GetString() : null, reader.TokenStartIndex);
@@ -77,7 +94,7 @@ public sealed class PostalAddressJsonConverter : JsonConverter<PostalAddress>
         JsonText.WritePropertyName(writer, value.Canonical);
     }
 
-    private static PostalAddress Parse(string? text, long tokenStart)
+    private PostalAddress Parse(string? text, long tokenStart)
     {
         if (text is null)
         {
@@ -86,7 +103,7 @@ public sealed class PostalAddressJsonConverter : JsonConverter<PostalAddress>
 
         try
         {
-            return PostalAddress.Parse(text);
+            return _region.IsUnknown ? PostalAddress.Parse(text) : PostalAddress.Parse(text, _region);
         }
         catch (ContactParseException e)
         {

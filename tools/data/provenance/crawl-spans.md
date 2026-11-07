@@ -1,6 +1,6 @@
 # Provenance: crawl-trained span-head candidates
 
-Candidates only (not packed in any package). The method is `docs/extraction-crawl-training.md`; this file lists the inputs.
+Candidates only (not packed in any package). The method is `docs/maintainers/extraction-crawl-training.md`; this file lists the inputs.
 
 | Item | Value |
 |---|---|

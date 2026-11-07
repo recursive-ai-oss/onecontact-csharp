@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Trains (or resumes) the Tier 1 model for at most BUDGET seconds, from the rendered training sets under $ONECONTACT_DATA.
 # Run it again with the same arguments to continue from the last checkpoint; the result equals one uninterrupted run.
-#   ONECONTACT_DATA   folder holding u-address/ and names sets (default ~/onecontact)
+#   ONECONTACT_DATA   folder holding the rendered address and name sets (default ~/onecontact)
 #   OUT               checkpoint and model folder (default $ONECONTACT_DATA/runs/tier1)
 #   BUDGET            seconds for this chunk (default 1500)
 #   THREADS, SEED, EPOCHS, ADDRESS_COUNT, NAMES_COUNT   see recipes/tier1/Program.cs

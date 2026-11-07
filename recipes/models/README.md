@@ -25,4 +25,4 @@ Provenance of the data and of the trained weights: `src/OneContact.Models/PROVEN
 
 ## Address challenger mode
 
-`challenger.sh` trains an address challenger on the converted OpenStreetMap sets (ODbL), alone or mixed with the register sets, with the same pipeline shape and the same resumable chunks. It is a separate lineage and never feeds a package; `run.sh` and `data.manifest.tsv` never name its data. See `docs/models-challenger.md` and `PROVENANCE-challenger.md`.
+`challenger.sh` trains an address challenger on the converted OpenStreetMap sets (ODbL), alone or mixed with the register sets, with the same pipeline shape and the same resumable chunks. It is a separate lineage and never feeds a package; `run.sh` and `data.manifest.tsv` never name its data. See `docs/maintainers/models-challenger.md` and `PROVENANCE-challenger.md`.

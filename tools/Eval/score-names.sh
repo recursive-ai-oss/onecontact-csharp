@@ -31,8 +31,8 @@ each() { # set directory, countries
     echo "scored $cc"
   done
 }
-each "$root/tier2/u31/ctx/sets" "FR DE NL BE AT CH LU LI MC"
-each "$root/tier2/u32/sets" "GB JE GG IM IE ES PT IT MT SM VA AD"
-each "$root/tier2/u33/sets" "DK SE FI NO IS EE LV LT"
-each "$root/tier2/u34/sets" "PL CZ SK SI HR HU RO MX AU"
+each "$root/tier2/group-a/sets" "FR DE NL BE AT CH LU LI MC"
+each "$root/tier2/group-b/sets" "GB JE GG IM IE ES PT IT MT SM VA AD"
+each "$root/tier2/c-north/sets" "DK SE FI NO IS EE LV LT"
+each "$root/tier2/c-south/sets" "PL CZ SK SI HR HU RO MX AU"
 each "$root/sets" "US CA"

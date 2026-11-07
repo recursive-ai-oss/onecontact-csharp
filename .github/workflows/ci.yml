@@ -45,6 +45,8 @@ jobs:
         run: dotnet build OneContact.slnx -c Release
       - name: Test
         run: dotnet test --solution OneContact.slnx -c Release --no-build
+      - name: Run the README quick start
+        run: dotnet run --project samples/OneContact.QuickStart -c Release --no-build
 
   aot:
     # The library must publish with NativeAOT without a single trim or AOT warning, and the published app must run.

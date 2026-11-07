@@ -16,8 +16,12 @@
 - `PhoneNumber`: canonical text. The attribute converter reads international numbers only; add `new PhoneNumberJsonConverter(Region.DE)` to `JsonSerializerOptions.Converters` to read national numbers too.
 - `EmailAddress`: the canonical form, or `"Display Name" <canonical>` when the value has a display name, so the display name round-trips.
 - `WebAddress`: the canonical form, which leaves out the fragment and tracking parameters; they do not come back. `CompanyName`, `PersonName`: canonical text; a legal form chosen with a hint is found again by parsing with the same hint.
-- `PostalAddress`: one object shape (`canonical`, `country`, `language`, the fields, `streetLines`, `flags`, `sourceStart`, `sourceLength`; parsed addresses add `text` and `hint`). Names are fixed camelCase.
+- `PostalAddress`: one object shape (`canonical`, `country`, `language`, the fields, `streetLines`, `flags`, `sourceStart`, `sourceLength`; parsed addresses add `text` and `hint`). Names are fixed camelCase. A plain JSON string is also read, as free text; add `new PostalAddressJsonConverter(Region.ES)` to `JsonSerializerOptions.Converters` to read strings as text of a country (an object carries its own stored hint).
 - `Region`: the two-letter code; `ZZ` is `Region.Unknown`.
 Errors are `JsonException`s whose message names the reason id and the byte offset of the token, with the `ContactParseException` as `InnerException`; the serializer adds the path and line.
+
+**Fragments.** `WebAddress` has no `Fragment` member. The canonical form, the key and `==` leave the fragment out, and a value does not keep it, so a property would be empty for every parsed value or would make a value carry text its canonical form hides. Keep the original text when you need a link that scrolls to a section; `WebFacts.FragmentRemoved` tells you there was one.
+
+**Extraction names.** `ContactExtractor` has two kinds of members, told apart by their names. The static `Extract(...)` overloads are the happy path: they take HTML, bytes or a set of pages, use default options and return the records. An instance (`new ContactExtractor { ... }`) carries options (`Sources`, `DefaultRegion`, `Limits`) and has `ExtractHtml`, `ExtractText`, `ExtractSite`, `ExtractSiteAsync` and `Extract(Document)`, which return the fuller `ExtractResult` with flat fields and provenance. The static and instance `Extract` overloads differ in their parameter types and are never ambiguous; the format-specific instance names exist so a string is never guessed to be HTML or text.
 
 **Limits.** Names and companies longer than `NameParsing.MaxInputLength` (1,000 UTF-16 code units) are refused (`person.too-long`, `company.too-long`). Extraction input limits are `ContactExtractor.Limits` (see extraction.md).

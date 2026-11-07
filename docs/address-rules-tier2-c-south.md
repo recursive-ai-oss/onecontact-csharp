@@ -61,38 +61,12 @@ Each applies the country's own postcode or name form, a post's own written rule,
 
 Keys use the same segments as the earlier groups with each country's dictionaries applied: Polish, Czech, Slovak, Slovenian, Croatian, Hungarian and Romanian from libpostal's `pl`, `cs`, `sk`, `sl`, `hr`, `hu` and `ro`; Spanish for Mexico, English for Australia. `AddressExpander` takes the seven new languages (`ExpansionLanguages.Polish` … `Romanian`); a leading street type expands in first position in Polish, Czech, Slovak, Slovenian, Croatian and Romanian. House-number markers (`Nr`, `nr.`, `č. p.`) are skipped in the key and the Polish box words are normalized. The keys of US/CA and the first two Tier 2 groups do not change.
 
-## Reading real-world text (recovery fixes)
+## Reading real-world text
 
-Measured on the register dev examples (2000 per country, rules alone, with the country as hint; every labelled field recovered):
 
 - **Romania.** The postcode may come last (`Pitești, 110040`; `București, Sector 3, 032391`; `Brașov, RO-500483`), and a sector or county after the locality (`011371 București, Sector 1`; `400241 Cluj-Napoca, județul Cluj`), which on one line is a unit of its own after the postcode, is joined to it. A county (`jud.`, `județ`, `județul` and a name) is the admin area, kept as written and printed after the locality, `400241 CLUJ-NAPOCA, JUDEȚUL CLUJ`. A sector stays part of the locality. The comma-below letters `ș` and `ț` now fold to `s` and `t` like the cedilla forms (the fold missed them, so Romanian words never matched their keys).
 - **Australia.** The state in full is read and standardized to its abbreviation (`Camira Queensland 4300` is `CAMIRA QLD 4300`); a comma before the state (`Downer, ACT 2602`) is read on one line; a lowercase state abbreviation is read once the country is known to be Australian (without a hint `Sydney nsw 2000` is still refused). On one line without separators the locality starts after the only street type that can end a street name; where two could, the text is refused. `4/12 Smith St` is a unit number and a street number that print as written, in two parts.
 - Not changed: a line between the street and the postcode line (a settlement or part of a municipality: `Hodolany`, `Bakovčica`, `Sector 1`) stays an additional delivery line, because Postal and Display print it where the writer put it; the registers label it a dependent locality, and the rules do not yet produce that field. Slash numbers in Croatia and the Czech Republic (`7/6`, `320/62`) stay house numbers: the slash is not always a unit.
-
-| Country | Rules alone, with hint: before | after | Refused to the model |
-|---|---|---|---|
-| CZ | 71.2 | 71.2 | no-last-line 104 (no postcode or no locality), model-required 17 |
-| HR | 61.5 | 61.5 | no-last-line 102, model-required 50 |
-| RO | 16.0 | 50.2 | no-last-line 435, model-required 21 |
-| HU | 92.6 | 92.6 | no-last-line 128 |
-| AU | 56.8 | 90.6 | no-last-line 160, model-required 24, country-conflict 4 |
-
-Without a hint the Czech, Croatian and Hungarian forms are shared with other countries, so text is refused as `address.country-undetermined` unless country inference finds evidence (see the north rules, "Country inference"; the figures here were measured before it); Romania and Australia read without a hint as well as with it.
-
-### Second recovery round: Mexico, Poland, Slovenia, Slovakia
-
-Same measurement (2000 register dev examples per country, rules alone). Both columns come from the same recovery tool with the same gold conventions: the marker word of a number (`Núm.`) counts with the house number as `No.` does. Before is the code without this round; "every" is every labelled field recovered, "fields" the share of labelled fields recovered.
-
-| Country | Hint | Every field before → after | Fields before → after | Top refusals after |
-|---|---|---|---|---|
-| MX | yes | 4.7 → 73.3 | 42.5 → 87.1 | no-last-line 140 (no postcode), model-required 29, country-conflict 5 |
-| MX | no | 4.0 → 67.8 | 39.5 → 80.8 | no-last-line 134, country-undetermined 131, model-required 42 |
-| PL | yes | 72.3 → 92.4 | 81.0 → 95.1 | no-last-line 107 |
-| PL | no | 75.1 → 87.5 | 84.3 → 90.6 | no-last-line 125, country-undetermined 65 |
-| SI | yes | 78.5 → 89.9 | 90.2 → 93.0 | no-last-line 143, model-required 6 |
-| SI | no | 26.2 → 29.0 | 32.1 → 32.8 | country-undetermined 1249, no-last-line 145 |
-| SK | yes | 89.3 → 91.3 | 93.7 → 94.4 | no-last-line 108, model-required 4 |
-| SK | no | 13.2 → 13.5 | 16.8 → 16.9 | country-undetermined 1592, no-last-line 123 |
 
 Without a hint the four-digit (SI) and `NNN NN` (SK) forms are shared with other countries and stay `address.country-undetermined` unless country inference finds evidence (SI and SK now read about half of the register text without a hint). A refusal as `no-last-line` is mostly text without a postcode, which the rules never invent.
 
@@ -115,19 +89,6 @@ Forms people write on web pages, read from the posts' layouts above (all example
 - **Romania.** The label of the postcode (`cod`, `cod poștal`, `Cod poștal:`) is left out of every field. A postcode written between the street and the locality is joined to the locality after it. A locality written on the street line without a comma is the plain words after the last number (`Strada Frumoasă Nr. 51 București, Sector 1, 010986`); a tail with a period or a building word (`bl.`, `ap.`) is never taken for one. A text with no locality or no postcode still goes to the model.
 - **Australia.** Commas around the state and the postcode (`Sydney, NSW, 2000`; `Sydney NSW, 2000`) are read like the unseparated form, provided a street or box line and a locality stand before the state. `Unit 3/12 Smith St` and `Shop 4/100 George St` keep the unit and the street number apart.
 - **Names.** `adw.` (adwokat), `r.pr.` (radca prawny), `radca prawny`, `adwokat` and `nadzw.` are Polish titles alongside `dr`, `dr hab.`, `mgr`, `inż.` and `prof.`. `adw.` and `r.pr.` count without a language hint; the full words need Polish. No gender or salutation is inferred.
-
-Recovery on the register dev rows (2000 per country, rules alone; every labelled field recovered / labelled fields recovered; main before the change and after, same rows, same tool):
-
-| Country | Hint | Every field before | after | Fields before | after | Refused before | after |
-|---|---|---|---|---|---|---|---|
-| HU | yes | 92.6 | 92.6 | 94.0 | 94.0 | no-last-line 128 | no-last-line 128 |
-| HU | no | 45.2 | 72.1 | 47.8 | 74.0 | country-undetermined 955, no-last-line 131 | country-undetermined 410, no-last-line 131 |
-| RO | yes | 50.2 | 51.3 | 68.8 | 71.1 | model-required 21, no-last-line 435 | model-required 19, no-last-line 378 |
-| RO | no | 50.2 | 51.3 | 68.8 | 71.1 | no-last-line 456 | no-last-line 397 |
-| AU | yes | 90.6 | 90.6 | 91.5 | 91.5 | country-conflict 4, model-required 24, no-last-line 160 | unchanged |
-| AU | no | 85.9 | 85.9 | 86.7 | 86.7 | country-undetermined 4, no-last-line 276 | unchanged |
-
-The register rows mostly lack what the web forms add (their refusals are texts with no postcode, a postcode with no locality, or a glued recipient), so the table moves little; the new forms are covered by the unit tests. No other Tier 2 country changed on its dev rows.
 
 ## Sources
 
