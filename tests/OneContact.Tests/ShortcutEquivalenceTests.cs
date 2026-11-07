@@ -608,4 +608,71 @@ public sealed class ShortcutEquivalenceTests
         Assert.True(accepted > 1000, $"only {accepted} accepted inputs");
         Assert.True(differences.Count == 0, $"{differences.Count} of {handled} differ:\n" + string.Join('\n', differences.Take(20)));
     }
+
+    [Fact]
+    public void TheValidBmpRouteAnswersAsTheGeneralRouteDoes()
+    {
+        Uts46Options[] optionSets =
+        [
+            Uts46Options.UseStd3AsciiRules | Uts46Options.CheckHyphens | Uts46Options.CheckBidi | Uts46Options.CheckJoiners,
+            Uts46Options.CheckBidi | Uts46Options.CheckJoiners,
+            Uts46Options.CheckBidi | Uts46Options.CheckJoiners | Uts46Options.VerifyDnsLength,
+            Uts46Options.None,
+            Uts46Options.CheckHyphens | Uts46Options.VerifyDnsLength,
+            Uts46Options.CheckJoiners | Uts46Options.UseStd3AsciiRules,
+        ];
+        var rng = new Random(20261107);
+
+        // Latin with marks, Cyrillic, CJK, Hebrew and Arabic (right-to-left, declined), Hangul (NFC changes it, declined), full-width and
+        // upper-case forms (mapped), ideographic full stop (maps to a dot), soft hyphen (ignored), joiners, ASCII, combining marks.
+        (int Low, int High)[] ranges =
+        [
+            (0xE0, 0xFF), (0x430, 0x44F), (0x4E00, 0x4E50), (0x5D0, 0x5EA), (0x627, 0x64A), (0x61, 0x7A), (0x3042, 0x3093), (0x41, 0x5A),
+            (0xFF21, 0xFF3A), (0xFF41, 0xFF5A), (0x300, 0x30F), (0xAC00, 0xAC20), (0x1100, 0x1112), (0x391, 0x3A9), (0x3B1, 0x3C9), (0x900, 0x93C),
+        ];
+        int[] singles = [0x3002, 0xAD, 0x200C, 0x200D, 0x2E, 0x2D, 0xDF, 0x3C2, 0xFF0E, 0x2460, 0x1E9E, 0x20];
+        string[] tails = ["", ".example", ".com", ".", ".xn--p1ai", ".xn--bcher-kva", "." + new string('a', 64)];
+        int handled = 0;
+        int declined = 0;
+        var differences = new List<string>();
+        for (int n = 0; n < 12000; n++)
+        {
+            var sb = new StringBuilder();
+            for (int labelCount = rng.Next(1, 4); labelCount > 0; labelCount--)
+            {
+                (int low, int high) = ranges[rng.Next(ranges.Length)];
+                for (int k = rng.Next(1, 7); k > 0; k--)
+                {
+                    int cp = rng.Next(12) == 0 ? singles[rng.Next(singles.Length)] : rng.Next(5) == 0 ? ranges[rng.Next(ranges.Length)].Low : rng.Next(low, high + 1);
+                    sb.Append(char.ConvertFromUtf32(cp));
+                }
+
+                if (labelCount > 1)
+                {
+                    sb.Append('.');
+                }
+            }
+
+            sb.Append(tails[rng.Next(tails.Length)]);
+            string input = sb.ToString();
+            foreach (Uts46Options options in optionSets)
+            {
+                if (!Uts46.TryToAsciiOfValidBmpText(input, options, out string actual))
+                {
+                    declined++;
+                    continue;
+                }
+
+                handled++;
+                bool general = Uts46.TryToAsciiGeneral(input, options, out string expected);
+                if (!general || expected != actual)
+                {
+                    differences.Add($"'{input}' {options}: general {general} '{expected}', short '{actual}'");
+                }
+            }
+        }
+
+        Assert.True(handled > 5000, $"the route was taken {handled} times and declined {declined}");
+        Assert.True(differences.Count == 0, $"{differences.Count} of {handled} differ:\n" + string.Join('\n', differences.Take(20)));
+    }
 }

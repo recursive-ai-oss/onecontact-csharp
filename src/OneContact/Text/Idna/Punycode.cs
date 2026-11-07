@@ -21,8 +21,26 @@ internal static class Punycode
     /// <returns><see langword="false"/> when the input is not valid Punycode (RFC 3492 section 6.2).</returns>
     internal static bool TryDecode(ReadOnlySpan<char> input, out int[] output)
     {
-        output = [];
-        var result = new List<int>(input.Length); // the decoded label is never longer than its Punycode
+        int[] buffer = new int[input.Length];
+        if (!TryDecode(input, buffer, out int written))
+        {
+            output = [];
+            return false;
+        }
+
+        output = written == buffer.Length ? buffer : buffer[..written];
+        return true;
+    }
+
+    /// <summary>Decodes the part of a label after <c>xn--</c> into a caller-owned buffer.</summary>
+    /// <param name="input">The ASCII Punycode text.</param>
+    /// <param name="output">Receives the code points; as long as <paramref name="input"/> is always enough, because every decoded code point takes at least one input character.</param>
+    /// <param name="written">The number of code points written.</param>
+    /// <returns><see langword="false"/> when the input is not valid Punycode (RFC 3492 section 6.2) or <paramref name="output"/> is too short.</returns>
+    internal static bool TryDecode(ReadOnlySpan<char> input, Span<int> output, out int written)
+    {
+        written = 0;
+        int count0 = 0;
         int basicEnd = input.LastIndexOf('-');
         if (basicEnd < 0)
         {
@@ -36,7 +54,12 @@ internal static class Punycode
                 return false;
             }
 
-            result.Add(input[j]);
+            if (count0 >= output.Length)
+            {
+                return false;
+            }
+
+            output[count0++] = input[j];
         }
 
         int n = InitialN;
@@ -80,7 +103,7 @@ internal static class Punycode
                 }
             }
 
-            int count = result.Count + 1;
+            int count = count0 + 1;
             bias = Adapt(i - oldi, count, oldi == 0);
             long newN = n + (i / count);
             if (newN > 0x10FFFF)
@@ -97,11 +120,18 @@ internal static class Punycode
                 return false;
             }
 
-            result.Insert(i, n);
+            if (count0 >= output.Length)
+            {
+                return false;
+            }
+
+            output.Slice(i, count0 - i).CopyTo(output[(i + 1)..]);
+            output[i] = n;
+            count0++;
             i++;
         }
 
-        output = [.. result];
+        written = count0;
         return true;
     }
 
@@ -111,8 +141,26 @@ internal static class Punycode
     /// <returns><see langword="false"/> on arithmetic overflow.</returns>
     internal static bool TryEncode(ReadOnlySpan<int> input, out string output)
     {
-        output = string.Empty;
-        var sb = new System.Text.StringBuilder();
+        char[] buffer = new char[(input.Length * 8) + 8];
+        if (!TryEncode(input, buffer, out int written))
+        {
+            output = string.Empty;
+            return false;
+        }
+
+        output = new string(buffer, 0, written);
+        return true;
+    }
+
+    /// <summary>Encodes code points (without any <c>xn--</c> prefix) into a caller-owned buffer.</summary>
+    /// <param name="input">The code points.</param>
+    /// <param name="output">Receives the ASCII Punycode text.</param>
+    /// <param name="written">The number of characters written.</param>
+    /// <returns><see langword="false"/> on arithmetic overflow or when <paramref name="output"/> is too short.</returns>
+    internal static bool TryEncode(ReadOnlySpan<int> input, Span<char> output, out int written)
+    {
+        written = 0;
+        var sb = new Appender(output);
         foreach (int c in input)
         {
             if (c < 0x80)
@@ -186,8 +234,30 @@ internal static class Punycode
             n++;
         }
 
-        output = sb.ToString();
-        return true;
+        written = sb.Length;
+        return !sb.Overflowed;
+    }
+
+    // Writes into a fixed buffer and remembers when it ran out, so the caller can report failure once at the end.
+    private ref struct Appender(Span<char> buffer)
+    {
+        private readonly Span<char> _buffer = buffer;
+
+        internal int Length { get; private set; }
+
+        internal bool Overflowed { get; private set; }
+
+        internal void Append(char c)
+        {
+            if (Length < _buffer.Length)
+            {
+                _buffer[Length++] = c;
+            }
+            else
+            {
+                Overflowed = true;
+            }
+        }
     }
 
     // RFC 3492 section 6.1: bias adaptation.

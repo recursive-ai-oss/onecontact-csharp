@@ -132,6 +132,27 @@ internal static class Program
             return CompareProfile.Run();
         }
 
+        if (args.Length > 0 && args[0] == "loop-extract")
+        {
+            // loop-extract <text|html|phones> <seconds>: runs one extraction workload for a fixed time, for an external sampling profiler.
+            return Profiles.Loop(args[1], int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture));
+        }
+
+        if (args.Length == 3 && args[0] == "dump-diff")
+        {
+            return DiffDump.Run(args[1], args[2]);
+        }
+
+        if (args.Length > 0 && args[0] == "profile-parse-alloc")
+        {
+            return PhoneParseAllocProfile.Run();
+        }
+
+        if (args.Length > 0 && args[0] == "profile-idn")
+        {
+            return IdnProfile.Run();
+        }
+
         if (args.Length > 0 && args[0] == "profile-find")
         {
             return PhoneFindProfile.Run();

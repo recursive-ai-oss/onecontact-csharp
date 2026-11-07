@@ -25,6 +25,10 @@ internal static class Uts46
     /// <summary>Longest input, in UTF-16 code units, that processing accepts.</summary>
     internal const int MaxDomainLength = 4096;
 
+    // Fixed size of the stack buffers below: domains and labels up to this many code units take them, longer ones fall back to the heap or
+    // to the general route.
+    private const int ScratchLength = 128;
+
     /// <summary>ToASCII (UTS #46 section 4.2).</summary>
     /// <param name="domain">The domain name.</param>
     /// <param name="options">The flags.</param>
@@ -35,6 +39,11 @@ internal static class Uts46
         if (TryToAsciiOfAsciiText(domain, options, out result, out bool fastOk))
         {
             return fastOk;
+        }
+
+        if (TryToAsciiOfValidBmpText(domain, options, out result))
+        {
+            return true;
         }
 
         return TryToAsciiGeneral(domain, options, out result);
@@ -131,6 +140,7 @@ internal static class Uts46
         }
 
         string lower = upper ? domain.ToLowerInvariant() : domain;
+
         bool good = true;
         bool dnsLength = (options & Uts46Options.VerifyDnsLength) != 0;
         bool checkHyphens = (options & Uts46Options.CheckHyphens) != 0;
@@ -156,33 +166,15 @@ internal static class Uts46
 
             if (label.Length >= 4 && label[0] == 'x' && label[1] == 'n' && label[2] == '-' && label[3] == '-')
             {
-                if (!Punycode.TryDecode(label[4..], out int[] decoded))
+                switch (CheckPunycodeLabel(label[4..], options))
                 {
-                    if ((options & Uts46Options.IgnoreInvalidPunycode) != 0)
-                    {
+                    case PunycodeCheck.Decline:
                         return false;
-                    }
-
-                    good = false;
-                    continue;
+                    case PunycodeCheck.Invalid:
+                        good = false;
+                        break;
                 }
 
-                bool allAscii = true;
-                foreach (int cp in decoded)
-                {
-                    allAscii &= cp <= 0x7F;
-                    if ((options & Uts46Options.CheckBidi) != 0 && IdnaTables.GetBidiClass(cp) is BidiClass.R or BidiClass.AL or BidiClass.AN)
-                    {
-                        return false;
-                    }
-                }
-
-                if (decoded.Length == 0 || allAscii)
-                {
-                    good = false;
-                }
-
-                good &= ValidateLabel(decoded, options, true, false);
                 continue;
             }
 
@@ -200,6 +192,255 @@ internal static class Uts46
 
         result = lower;
         ok = good;
+        return true;
+    }
+
+    private enum PunycodeCheck { Valid, Invalid, Decline }
+
+    // Step 4 and the label validity checks for one xn-- label of an ASCII-only domain (the text after the prefix is given). Decline means the
+    // general route must decide: invalid Punycode that is to be ignored, or a label that decodes to right-to-left text, which changes how the
+    // Bidi rule treats every other label.
+    private static PunycodeCheck CheckPunycodeLabel(ReadOnlySpan<char> rest, Uts46Options options)
+    {
+        // A decoded label is never longer than its Punycode; a small stack buffer serves every usual label.
+        // Bounds: ScratchLength integers, used only when the label fits; a longer one gets a heap array.
+        Span<int> buffer = rest.Length <= ScratchLength ? stackalloc int[ScratchLength] : new int[rest.Length];
+        if (!Punycode.TryDecode(rest, buffer, out int decodedLength))
+        {
+            return (options & Uts46Options.IgnoreInvalidPunycode) != 0 ? PunycodeCheck.Decline : PunycodeCheck.Invalid;
+        }
+
+        ReadOnlySpan<int> decoded = buffer[..decodedLength];
+        bool allAscii = true;
+        foreach (int cp in decoded)
+        {
+            allAscii &= cp <= 0x7F;
+            if ((options & Uts46Options.CheckBidi) != 0 && IdnaTables.GetBidiClass(cp) is BidiClass.R or BidiClass.AL or BidiClass.AN)
+            {
+                return PunycodeCheck.Decline;
+            }
+        }
+
+        bool good = decoded.Length != 0 && !allAscii;
+        good &= ValidateLabel(decoded, options, true, false);
+        return good ? PunycodeCheck.Valid : PunycodeCheck.Invalid;
+    }
+
+    // ToASCII of a short domain whose code points are all in the Basic Multilingual Plane and whose mapping and validity checks all pass: the
+    // common internationalized domain (one script, no right-to-left text, nothing for NFC to reorder). It follows the general route step by
+    // step on fixed stack buffers (ScratchLength code points) instead of arrays and lists, and returns true only when the answer is a
+    // success. Anything else returns false and is left to the general route, which also produces the failures: a surrogate, a disallowed
+    // code point, a mapping that leaves the plane, a character NFC could change, transitional processing, right-to-left text, any
+    // validity failure, a domain or result longer than the buffers.
+    internal static bool TryToAsciiOfValidBmpText(string domain, Uts46Options options, out string result)
+    {
+        result = domain;
+        if (domain.Length is 0 or > ScratchLength || (options & (Uts46Options.TransitionalProcessing | Uts46Options.IgnoreInvalidPunycode)) != 0)
+        {
+            return false;
+        }
+
+        // Step 1, map.
+        // Bounds: the domain is at most ScratchLength code units and a mapping that would overflow declines the route; the four buffers
+        // here are ScratchLength integers, ScratchLength characters, ScratchLength integers and twice ScratchLength characters.
+        Span<int> mapped = stackalloc int[ScratchLength];
+        int length = 0;
+        foreach (char c in domain)
+        {
+            if (char.IsSurrogate(c))
+            {
+                return false;
+            }
+
+            switch (IdnaTables.GetStatus(c, out ReadOnlySpan<char> mapping))
+            {
+                case IdnaStatus.Valid:
+                case IdnaStatus.Deviation: // non-transitional processing keeps a deviation character
+                    if (length == mapped.Length)
+                    {
+                        return false;
+                    }
+
+                    mapped[length++] = c;
+                    break;
+                case IdnaStatus.Ignored:
+                    break;
+                case IdnaStatus.Mapped:
+                    if (length + mapping.Length > mapped.Length)
+                    {
+                        return false;
+                    }
+
+                    foreach (char m in mapping)
+                    {
+                        if (char.IsSurrogate(m))
+                        {
+                            return false;
+                        }
+
+                        mapped[length++] = m;
+                    }
+
+                    break;
+                default:
+                    return false;
+            }
+        }
+
+        // Step 2, normalize: a text made only of code points that NFC never changes is in NFC.
+        for (int i = 0; i < length; i++)
+        {
+            if (mapped[i] >= IdnaTables.NfcStableLimit && !IdnaTables.IsNfcStable(mapped[i]))
+            {
+                return false;
+            }
+        }
+
+        bool checkBidi = (options & Uts46Options.CheckBidi) != 0;
+        Span<char> punycodeText = stackalloc char[ScratchLength];
+        Span<int> decoded = stackalloc int[ScratchLength];
+        Span<char> output = stackalloc char[ScratchLength * 2];
+        int written = 0;
+
+        // Steps 3 and 4 for every label; pass 0 only looks for right-to-left text (the Bidi rule applies to every label once any label has
+        // some), pass 1 validates and converts.
+        for (int pass = checkBidi ? 0 : 1; pass < 2; pass++)
+        {
+            int start = 0;
+            bool firstLabel = true;
+            for (int i = 0; i <= length; i++)
+            {
+                if (i < length && mapped[i] != '.')
+                {
+                    continue;
+                }
+
+                ReadOnlySpan<int> label = mapped.Slice(start, i - start);
+                start = i + 1;
+                bool punycode = label.Length >= 4 && label[0] == 'x' && label[1] == 'n' && label[2] == '-' && label[3] == '-';
+                if (punycode)
+                {
+                    // Step 4: a Punycode label with non-ASCII text, invalid Punycode or an all-ASCII result is an error.
+                    for (int k = 4; k < label.Length; k++)
+                    {
+                        if (label[k] > 0x7F)
+                        {
+                            return false;
+                        }
+
+                        punycodeText[k - 4] = (char)label[k];
+                    }
+
+                    if (!Punycode.TryDecode(punycodeText[..(label.Length - 4)], decoded, out int decodedLength) || decodedLength == 0)
+                    {
+                        return false;
+                    }
+
+                    label = decoded[..decodedLength];
+                    bool allAscii = true;
+                    foreach (int cp in label)
+                    {
+                        allAscii &= cp <= 0x7F;
+                    }
+
+                    if (allAscii)
+                    {
+                        return false;
+                    }
+                }
+
+                if (pass == 0)
+                {
+                    foreach (int cp in label)
+                    {
+                        if (IdnaTables.GetBidiClass(cp) is BidiClass.R or BidiClass.AL or BidiClass.AN)
+                        {
+                            return false;
+                        }
+                    }
+
+                    continue;
+                }
+
+                if (!ValidateLabel(label, options, punycode, false))
+                {
+                    return false;
+                }
+
+                // ToASCII (section 4.2 step 3): a label with any non-ASCII code point becomes xn-- and its Punycode.
+                if (!firstLabel)
+                {
+                    if (written == output.Length)
+                    {
+                        return false;
+                    }
+
+                    output[written++] = '.';
+                }
+
+                firstLabel = false;
+                bool ascii = true;
+                foreach (int cp in label)
+                {
+                    ascii &= cp <= 0x7F;
+                }
+
+                if (ascii)
+                {
+                    if (written + label.Length > output.Length)
+                    {
+                        return false;
+                    }
+
+                    foreach (int cp in label)
+                    {
+                        output[written++] = (char)cp;
+                    }
+                }
+                else
+                {
+                    if (written + 4 > output.Length)
+                    {
+                        return false;
+                    }
+
+                    "xn--".CopyTo(output[written..]);
+                    written += 4;
+                    if (!Punycode.TryEncode(label, output[written..], out int encodedLength))
+                    {
+                        return false;
+                    }
+
+                    written += encodedLength;
+                }
+            }
+        }
+
+        if ((options & Uts46Options.VerifyDnsLength) != 0)
+        {
+            // UTS #46 section 4.2 step 4: 1 to 253 octets and every label 1 to 63; an empty root label is not allowed.
+            if (written is < 1 or > 253)
+            {
+                return false;
+            }
+
+            ReadOnlySpan<char> text = output[..written];
+            int labelStart = 0;
+            for (int i = 0; i <= text.Length; i++)
+            {
+                if (i == text.Length || text[i] == '.')
+                {
+                    if (i - labelStart is < 1 or > 63)
+                    {
+                        return false;
+                    }
+
+                    labelStart = i + 1;
+                }
+            }
+        }
+
+        result = new string(output[..written]);
         return true;
     }
 
@@ -432,7 +673,7 @@ internal static class Uts46
     }
 
     // UTS #46 section 4.1, "Validity Criteria". A label that came from Punycode is validated for non-transitional processing.
-    private static bool ValidateLabel(int[] label, Uts46Options options, bool fromPunycode, bool bidiDomain)
+    private static bool ValidateLabel(ReadOnlySpan<int> label, Uts46Options options, bool fromPunycode, bool bidiDomain)
     {
         if (label.Length == 0)
         {
@@ -516,7 +757,7 @@ internal static class Uts46
     }
 
     // Code points below IdnaTables.NfcStableLimit never change under NFC, so a label made only of them is in NFC.
-    private static bool AllBelowNfcLimit(int[] label)
+    private static bool AllBelowNfcLimit(ReadOnlySpan<int> label)
     {
         foreach (int cp in label)
         {
@@ -530,7 +771,7 @@ internal static class Uts46
     }
 
     // RFC 5892 appendix A.1 and A.2.
-    private static bool ContextJ(int[] label)
+    private static bool ContextJ(ReadOnlySpan<int> label)
     {
         for (int i = 0; i < label.Length; i++)
         {
@@ -578,7 +819,7 @@ internal static class Uts46
     }
 
     // RFC 5893 section 2, the Bidi rule: six conditions on a label of a Bidi domain name.
-    private static bool BidiRule(int[] label)
+    private static bool BidiRule(ReadOnlySpan<int> label)
     {
         BidiClass first = IdnaTables.GetBidiClass(label[0]);
         bool rtl;

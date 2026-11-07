@@ -10,8 +10,19 @@ namespace RecursiveAI.OneContact.Extraction.Markup;
 /// </summary>
 internal sealed class FieldNormalizer
 {
+    private const int ReadPerson = 0;
+    private const int ReadCompany = 1;
+    private const int ReadPhone = 2;
+    private const int ReadEmail = 3;
+    private const int ReadWeb = 4;
+    private const int ReadAddress = 5;
+    private const int ReadAddressParts = 6; // parts the page gave: nothing to parse, so nothing to remember
+
     private readonly PageContext _page;
     private readonly Region _fallbackRegion;
+    private readonly Dictionary<(int, string, Region), Answer> _answers = [];
+
+    private readonly record struct Answer(bool Ok, ContactValue Value, ReasonCode Issue, string[] Facts, ExtractedFieldFacts Flags);
 
     /// <summary>Phone numbers found in text by their shape that were dropped only because no region was known to read them in.</summary>
     public int RegionDrops { get; private set; }
@@ -97,43 +108,88 @@ internal sealed class FieldNormalizer
         ReasonCode issue = default;
         string[] facts = [];
         bool ok;
-        try
+
+        // The core parsers give the same answer for the same text and region, and a page repeats its company, its street address and its
+        // phone numbers, so each answer is worked out once per page (the key is the kind of reading, the text it reads and the region).
+        int reading;
+        switch (d.Kind)
         {
-            switch (d.Kind)
-            {
-                case FieldKind.Name:
-                    ok = recordKind == ContactRecordKind.Organization
-                        ? NormalizeCompany(text, recordRegion, out value, out issue, out facts)
-                        : NormalizePerson(text, recordRegion, out value, out issue, out facts);
-                    break;
-                case FieldKind.Organization:
-                    ok = NormalizeCompany(text, recordRegion, out value, out issue, out facts);
-                    break;
-                case FieldKind.Phone:
-                    text = ContactText.PhoneFrom(text);
-                    ok = NormalizePhone(text, recordRegion, out value, out issue, out facts, ref flags);
-                    break;
-                case FieldKind.Email:
-                    text = ContactText.EmailFrom(text);
-                    ok = NormalizeEmail(text, out value, out issue, out facts);
-                    break;
-                case FieldKind.Website:
-                    text = text.Trim();
-                    ok = NormalizeWeb(text, out value, out issue, out facts);
-                    break;
-                default:
-                    ok = NormalizeAddress(d, text, recordRegion, out value, out issue, out facts, ref flags);
-                    break;
-            }
+            case FieldKind.Name:
+                reading = recordKind == ContactRecordKind.Organization ? ReadCompany : ReadPerson;
+                break;
+            case FieldKind.Organization:
+                reading = ReadCompany;
+                break;
+            case FieldKind.Phone:
+                text = ContactText.PhoneFrom(text);
+                reading = ReadPhone;
+                break;
+            case FieldKind.Email:
+                text = ContactText.EmailFrom(text);
+                reading = ReadEmail;
+                break;
+            case FieldKind.Website:
+                text = text.Trim();
+                reading = ReadWeb;
+                break;
+            default:
+                reading = d.Parts is null ? ReadAddress : ReadAddressParts;
+                break;
         }
-        catch (Exception e) when (e is not OutOfMemoryException)
+
+        Region keyRegion = reading is ReadEmail or ReadWeb ? Region.Unknown : recordRegion;
+        (int, string, Region) key = (reading, text, keyRegion);
+        if (reading != ReadAddressParts && _answers.TryGetValue(key, out Answer known))
         {
-            // The core parsers are written not to throw. A page is hostile input, though, and one value that trips a defect there must
-            // not cost the whole page: the field is kept as text, unnormalized.
-            ok = false;
-            value = default;
-            issue = default;
-            facts = [];
+            ok = known.Ok;
+            value = known.Value;
+            issue = known.Issue;
+            facts = known.Facts;
+            flags |= known.Flags;
+        }
+        else
+        {
+            ExtractedFieldFacts added = ExtractedFieldFacts.None;
+            try
+            {
+                switch (reading)
+                {
+                    case ReadPerson:
+                        ok = NormalizePerson(text, recordRegion, out value, out issue, out facts);
+                        break;
+                    case ReadCompany:
+                        ok = NormalizeCompany(text, recordRegion, out value, out issue, out facts);
+                        break;
+                    case ReadPhone:
+                        ok = NormalizePhone(text, recordRegion, out value, out issue, out facts, ref added);
+                        break;
+                    case ReadEmail:
+                        ok = NormalizeEmail(text, out value, out issue, out facts);
+                        break;
+                    case ReadWeb:
+                        ok = NormalizeWeb(text, out value, out issue, out facts);
+                        break;
+                    default:
+                        ok = NormalizeAddress(d, text, recordRegion, out value, out issue, out facts, ref added);
+                        break;
+                }
+            }
+            catch (Exception e) when (e is not OutOfMemoryException)
+            {
+                // The core parsers are written not to throw. A page is hostile input, though, and one value that trips a defect there must
+                // not cost the whole page: the field is kept as text, unnormalized.
+                ok = false;
+                value = default;
+                issue = default;
+                facts = [];
+                added = ExtractedFieldFacts.None;
+            }
+
+            flags |= added;
+            if (reading != ReadAddressParts)
+            {
+                _answers[key] = new Answer(ok, value, issue, facts, added);
+            }
         }
 
         if (!ok)
