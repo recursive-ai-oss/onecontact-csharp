@@ -44,10 +44,10 @@ internal sealed class VisibleTextReader
     private readonly Dictionary<int, bool> _textVisible = [];
     private readonly Dictionary<int, bool> _preserve = [];
 
-    private char[] _chars = new char[1024];
-    private int[] _start = new int[1024];
-    private int[] _end = new int[1024];
-    private byte[] _flags = new byte[1024];
+    private char[] _chars;
+    private int[] _start;
+    private int[] _end;
+    private byte[] _flags;
     private int _length;
     private readonly List<TextLine> _lines = [];
     private readonly List<int> _segmentStart = [];
@@ -65,6 +65,13 @@ internal sealed class VisibleTextReader
     private VisibleTextReader(PageContext page)
     {
         _page = page;
+
+        // The visible text of a page is most of its markup or less; starting near that size avoids growing the four arrays again and again.
+        int capacity = Math.Clamp(page.Text.Length, 1024, 32_768);
+        _chars = new char[capacity];
+        _start = new int[capacity];
+        _end = new int[capacity];
+        _flags = new byte[capacity];
         try
         {
             _styles = DocumentStyles.Create(page.Document);
@@ -463,9 +470,19 @@ internal sealed class VisibleTextReader
         int[]? ends = null;
         SourceRange range = text.Source.Range;
         SourceRange verbatim = text.Source.DataRange;
+        int plainStart = verbatim.IsPresent ? verbatim.Start : -1;
         if (!verbatim.IsPresent && range.IsPresent)
         {
-            AlignEntities(_page.Text.AsSpan(range.Start, Math.Min(range.End, _page.Text.Length) - range.Start), data, range.Start, out starts, out ends);
+            ReadOnlySpan<char> raw = _page.Text.AsSpan(range.Start, Math.Min(range.End, _page.Text.Length) - range.Start);
+            if (raw.Length == data.Length && raw.IndexOf('&') < 0)
+            {
+                // No character reference and no rewriting: each character is the source character at its own position, which is what the alignment below would find.
+                plainStart = range.Start;
+            }
+            else
+            {
+                AlignEntities(raw, data, range.Start, out starts, out ends);
+            }
         }
 
         bool preserve = PreservesNewlines(parent);
@@ -476,9 +493,9 @@ internal sealed class VisibleTextReader
         {
             int s;
             int e;
-            if (verbatim.IsPresent)
+            if (plainStart >= 0)
             {
-                s = verbatim.Start + i;
+                s = plainStart + i;
                 e = s + 1;
             }
             else if (starts is not null && ends is not null)

@@ -143,6 +143,11 @@ internal static class Program
             return DiffDump.Run(args[1], args[2]);
         }
 
+        if (args.Length >= 3 && args[0] == "profile-alloc")
+        {
+            return AllocTypes.Run(args);
+        }
+
         if (args.Length >= 4 && args[0] == "dump-address")
         {
             return AddressDump.Run(args[1..]);
