@@ -45,6 +45,7 @@
     <Project Path="tools/data/AddressUsCa/OneContact.Data.AddressUsCa.csproj" />
     <Project Path="tools/data/AddressChallenger/OneContact.Data.AddressChallenger.csproj" />
     <Project Path="tools/data/blocks/OneContact.Data.Blocks.csproj" />
+    <Project Path="tools/data/crawl-spans/OneContact.Data.CrawlSpans.csproj" />
     <Project Path="tools/Ingest.LibPhoneNumberGeo/OneContact.Ingest.LibPhoneNumberGeo.csproj" />
     <Project Path="tools/Oracles/PhonesGeo/OneContact.Oracles.PhonesGeo.csproj" />
   </Folder>
