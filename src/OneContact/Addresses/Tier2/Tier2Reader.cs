@@ -175,6 +175,7 @@ internal static partial class Tier2Reader
 
             // The postcode and the locality after it end the address.
             // Two letters after four digits are a Dutch postcode unless the country is known to be another one ("9170 De Klinge" in Belgium); without any hint they must be capitals.
+            StripCountryBeforePostcode(units, ref named);
             string? known = named?.Code ?? (!hint.IsUnknown && T2Rules.Handles(hint) ? hint.Code : null);
             _county = null;
             _province = null;
@@ -197,6 +198,7 @@ internal static partial class Tier2Reader
                 && !FindHungarian(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindStateLine(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindPostcodeAlone(units, known, out unitIndex, out tokenIndex, out match)
+                && !FindPostcodeFirst(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindNoPostcode(units, known, out unitIndex, out tokenIndex, out match))
             {
                 detail = ParseDetail.Failure(ReasonCode.AddressNoLastLine, new SourceSpan(0, text.Length));
@@ -2148,7 +2150,7 @@ internal static partial class Tier2Reader
 
             if (type is null && country.Profile == "es")
             {
-                return ParseTypeLast(toks, country);
+                return ParseTypeLast(toks, country) ?? ParseUntypedStreet(toks, country);
             }
 
             if (type is null || toks.Count <= typeWords)

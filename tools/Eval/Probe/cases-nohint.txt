@@ -1,0 +1,28 @@
+# no-hint cases: evidence-free (refused), evidence in the text (inferred), US/CA, and ambiguous shared postcode forms. Written for this repository.
+|123 Main Street, Springfield, IL 62704
+|45 Oak Avenue, Toronto ON M5V 2T6
+|Hauptstrasse 5, 8001 Zürich
+|Hauptstrasse 5, 1010 Wien
+|Rue de la Loi 16, 1000 Bruxelles
+|Kerkstraat 3, 1000 Brussel
+|Rue de Rivoli 12, 75001 Paris
+|Musterstraße 12, 10115 Berlin
+|Calle Mayor 5, 28013 Madrid
+|Via Roma 10, 00184 Roma RM
+|ul. Złota 59, 00-120 Warszawa
+|Václavské náměstí 1, 110 00 Praha 1
+|Hlavná 5, 811 01 Bratislava
+|Strandvejen 10, 2900 Hellerup
+|Storgata 5, 0155 Oslo
+|Drottninggatan 4, 111 51 Stockholm
+|Mannerheimintie 1, 00100 Helsinki
+|Kossuth Lajos utca 5, 1053 Budapest
+|Ilica 5, 10000 Zagreb
+|Slovenska cesta 5, 1000 Ljubljana
+|Avenida de la Reforma 100, 06600 Ciudad de México
+|Somewhere 12, 1234 Anywhere
+|Some Street 7, 5555 Nowhere
+|12 Rue Nowhere, 99999 Nowhere
+|Great Western Road 100, Glasgow G12 8HJ
+|12 High Street, London SW1A 2AA
+|Unit 3, Park Road, Dublin D02 X285
