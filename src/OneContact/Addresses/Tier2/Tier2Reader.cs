@@ -122,6 +122,7 @@ internal static partial class Tier2Reader
             _multiLine = multiLine;
             List<Unit> units = Units(multiLine);
             DropAddressLabels(units);
+            DropOuterBrackets(units);
             if (units.Count == 0)
             {
                 detail = ParseDetail.Failure(ReasonCode.Empty, new SourceSpan(0, text.Length));
@@ -679,6 +680,23 @@ internal static partial class Tier2Reader
                     countryName ??= island;
                     leading.RemoveAll(l => l.Span.Start == placeSpan.Start);
                     delivery.RemoveAll(d => d.Parts.Count == 1 && d.Parts[0].Span.Start == placeSpan.Start);
+                }
+            }
+
+            // "Douglas Isle of Man IM1 1AA": the island's name written right after the town with no comma is the country, and the words before it are the locality.
+            if (code is "JE" or "GG" or "IM" && countryName is null && localityToks.Count >= 2 && TrailingIslandWords(localityToks, code) is int islandWords and > 0 && localityToks.Count > islandWords)
+            {
+                int nameAt = fields.FindIndex(f => f.Name == "locality");
+                if (nameAt >= 0)
+                {
+                    List<Tok> town = localityToks.GetRange(0, localityToks.Count - islandWords);
+                    List<Tok> island = localityToks.GetRange(localityToks.Count - islandWords, islandWords);
+                    SourceSpan townSpan = Span(town);
+                    SourceSpan islandSpan = Span(island);
+                    locality = fields[nameAt] with { Text = Slice(townSpan), Standard = Slice(townSpan), Span = townSpan };
+                    fields[nameAt] = locality.Value;
+                    countryName = new ParsedAddressField("country", Slice(islandSpan), country.CountryLine, islandSpan, 1f, DecisionSource.Rule, "country-name");
+                    fields.Add(countryName.Value);
                 }
             }
 

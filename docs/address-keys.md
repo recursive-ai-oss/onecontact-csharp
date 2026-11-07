@@ -26,3 +26,13 @@ Examples:
 | PSC 3022 Box 684 / FPO AE 09397-0007 | `us|psc 3022 box 684|fpo|ae|09397` |
 
 Two addresses that differ only in the unit designator word (`Apt 4` and `Ste 4`) share a key on purpose: the key is for finding duplicates. Different house numbers, different postal codes or different units never share one.
+
+## Addresses without a country
+
+An address read with the country left unknown (`AddressFacts.CountryUndetermined`, see `address-country-undetermined.md`) has the key `zz|<street words>|<locality words>|<admin area>|<postal code>`:
+
+- `zz` stands where the country code stands;
+- the street words are the text of the address's `street.*` fields in input order, folded and with the dictionaries' abbreviations replaced as for any other address (the language of the dictionaries is not known, so the default English-and-French set is used);
+- the locality is folded the same way; the admin area is folded; the postal code keeps only its letters and digits, folded.
+
+No country-specific rule applies (no ZIP+4 truncation, no Canadian unit reordering, no particle rules). The same address read with a hint or with a country in the text has a different key by design: `zz|...` and `be|...` are never equal, so an address without a country never matches one with a country by accident.

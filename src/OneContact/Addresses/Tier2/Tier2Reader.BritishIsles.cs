@@ -18,6 +18,14 @@ internal static partial class Tier2Reader
             t.Key != "ST" && T2Rules.FindTailType(t.Key) is { Full: "ROAD" or "STREET" or "LANE" or "AVENUE" or "DRIVE" or "CLOSE" or "CRESCENT" or "TERRACE" or "GARDENS" or "WAY" or "SQUARE" or "PLACE"
                 or "COURT" or "RISE" or "GROVE" or "MEWS" or "WALK" or "LAWN" or "LAWNS" or "PARADE" or "ROW" };
 
+        // The number of words at the end of the locality that are the name of the hinted island ("Isle of Man" is three words), or 0.
+        private static int TrailingIslandWords(List<Tok> toks, string code)
+        {
+            string name = code switch { "IM" => "ISLE OF MAN", "JE" => "JERSEY", _ => "GUERNSEY" };
+            int words = name.Count(c => c == ' ') + 1;
+            return toks.Count > words && T2Rules.Key(Join(toks.GetRange(toks.Count - words, words))) == name ? words : 0;
+        }
+
         // Jersey, Guernsey and the Isle of Man write the name of the island on the line above the postcode.
         private static bool IsIslandName(List<Tok> toks) =>
             toks.Count > 0 && T2Rules.Key(Join(toks)) is "JERSEY" or "GUERNSEY" or "ISLE OF MAN";

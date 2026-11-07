@@ -41,4 +41,28 @@ public class AddressLabelAndIslandFormTests
         Assert.Equal("Ballasalla", a!.Locality!.Value.Text);
         Assert.Equal("Isle of Man", a.CountryName!.Value.Text);
     }
+
+    [Theory]
+    [InlineData("(1053 Budapest, Kossuth Lajos utca 5.)")]
+    [InlineData("[1053 Budapest, Kossuth Lajos utca 5.]")]
+    [InlineData("Iroda: (1053 Budapest, Kossuth Lajos utca 5.)")]
+    [InlineData("Telefon: 1053 Budapest, Kossuth Lajos utca 5.")]
+    public void BracketsAroundTheWholeAddressAndAnyOneWordLabelAreNotPartOfIt(string text)
+    {
+        Assert.Equal(OperationStatus.Done, RuleAddressParser.TryParse(text, Region.Parse("HU"), out ParsedAddress? a, out _));
+        Assert.Equal("1053", a!.PostalCode!.Value.Text);
+        Assert.DoesNotContain(a.Fields, f => f.Text.Contains('(', StringComparison.Ordinal) || f.Text.Contains(')', StringComparison.Ordinal) || f.Text.Contains('[', StringComparison.Ordinal) || f.Text.Contains(']', StringComparison.Ordinal));
+        Assert.Equal("5.", a.Fields.Single(f => f.Name == "street.house-number").Text);
+    }
+
+    [Theory]
+    [InlineData("12 Athol Street, Douglas Isle of Man IM1 1AA")]
+    [InlineData("12 Athol Street, Douglas, Isle of Man IM1 1AA")]
+    public void TheIslandNameAfterTheTownIsTheCountryWithOrWithoutAComma(string text)
+    {
+        Assert.Equal(OperationStatus.Done, RuleAddressParser.TryParse(text, Region.Parse("IM"), out ParsedAddress? a, out _));
+        Assert.Equal("Douglas", a!.Locality!.Value.Text);
+        Assert.Equal("Isle of Man", a.CountryName!.Value.Text);
+        Assert.Equal("IM1 1AA", a.PostalCode!.Value.Text);
+    }
 }
