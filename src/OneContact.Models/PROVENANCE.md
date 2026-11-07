@@ -28,7 +28,7 @@ The trained weights in this package (`models.onenlp`) and everything that went i
 - **Name heads** (`names.sh`, encoder frozen): 250,000 examples of `names-us-ca-v1`; 100,000 of `names-tier2-2` (manifest `19bb5bbaf7c2c1ff6d65fa0323f27addf706ae4f4bd4cd70f58a0e088d6710a0`; person names drawn from open national name statistics, seed 20261107, `tools/data/provenance/names-tier2.md`); all 123,948 Tier 2 company examples of `names-tier2-v1` (GLEIF Level 1 golden copy 2026-11-05 and ISO 20275 v1.6, CC0). 5,380 steps, 4 epochs, one chunk of 40 seconds; dev 0.9770, 0.9779, 0.9776, **0.9781** (kept).
 - **Contact-span head** (`spans.sh`, encoder frozen): 500,000 blocks of `blocks-us-ca-v3` (generator `blocks-3`, seed 20261107) and `blocks-tier2-v1` (seed 20261108); 294,646 steps, 4 epochs, 3 chunks; dev 0.8940, 0.8855, 0.8826, **0.8963** (kept, the last epoch). Confidence cut used by extraction: 0.4.
 - **Tier 2 name override.** Allowed in AU, EE, FR, GB, IT, LI and MT at confidence 0.8, as chosen for the previous weights on their development names. With the current rules the same development rule (a gain of at least 0.3 points over the rules at confidence 0.8 on a country with at least 150 items) selects no country for these weights or the previous ones; the list is kept as shipped.
-- Evaluation sets were never read by training; selection used the development splits only. The weights were scored once on the real-page sets (`docs/models-challenger.md`).
+- Evaluation sets were never read by training; selection used the development splits only. The weights were scored once on the real-page sets (`docs/maintainers/models-challenger.md`).
 
 ## Earlier training run (previous weights `0e31f3fd…`): address and name heads
 
@@ -42,7 +42,7 @@ The trained weights in this package (`models.onenlp`) and everything that went i
 - Data: 250,000 examples of `names-us-ca-v1`; 100,000 of `names-tier2-2` persons, several-people strings and non-names (1,556,803 rendered; person names drawn from open national name statistics, seed 20261107, `tools/data/provenance/names-tier2.md`); all 123,948 company examples of `names-tier2-v1` (GLEIF Level 1 golden copy 2026-11-05 and ISO 20275 v1.6, CC0). Development: 4,000 + 8,000 + 3,000 examples.
 - Seed 1, learning rate 0.001, 100 warm-up steps, dropout 0.1, batches of about 1,500 words, 4 epochs of 2,114 steps, patience 3; best development epoch kept (epoch 1: 0.9820; the first run's heads scored 0.9656 on the same development names). One chunk of 38 seconds on 8 CPU threads (OneNLP 0.2.0-preview.1, OneModel 1.0.0).
 - Labels from the renderers' templates; no hosted-model labels. Evaluation sets were never read by training. Several mixes (450,000, 300,000, 100,000, 50,000 Tier 2 persons; a seed; no English-language units) were scored on the real-page sets of the United States and Canada while the mix was chosen, so those two rows are not an untouched test.
-- The Tier 2 name override is allowed in AU, EE, FR, GB, IT, LI and MT at confidence 0.8, chosen on the development names (`docs/models-superset.md`).
+- The Tier 2 name override is allowed in AU, EE, FR, GB, IT, LI and MT at confidence 0.8, chosen on the development names (`docs/maintainers/models-superset.md`).
 
 ## Earlier contact-span head (same data as the current one)
 
@@ -76,7 +76,7 @@ Each source's licence was read at the publisher before use; the quoted terms, ve
 
 ## Known limits
 
-- For languages without an open name list (Czech, Slovak, Croatian, Hungarian, Romanian, Portuguese, Spanish, Italian, Maltese, Catalan, Estonian, Lithuanian, Icelandic) the person-name head has seen few distinct names, and German, Austrian and Dutch persons use Swiss and Belgian surname lists as stand-ins. So for Tier 2 texts the parsers use the name model only where the rules leave a string open, except in the seven countries listed above where it may also replace the rules' default person reading; see `docs/models-superset.md`.
+- For languages without an open name list (Czech, Slovak, Croatian, Hungarian, Romanian, Portuguese, Spanish, Italian, Maltese, Catalan, Estonian, Lithuanian, Icelandic) the person-name head has seen few distinct names, and German, Austrian and Dutch persons use Swiss and Belgian surname lists as stand-ins. So for Tier 2 texts the parsers use the name model only where the rules leave a string open, except in the seven countries listed above where it may also replace the rules' default person reading; see `docs/maintainers/models-superset.md`.
 - Dependent-locality (settlement, sector) lines are learned by the address head, but the rules read most such lines as street text first, so the model rarely gets to label them (Czech, Croatian, Romanian).
 - A text with no country hint that the Tier 2 rules cannot place is read as a United States or Canada address only when it carries a state or province; otherwise it is refused as country-undetermined.
 

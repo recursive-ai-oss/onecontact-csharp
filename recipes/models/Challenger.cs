@@ -7,7 +7,7 @@ namespace OneContact.Recipe.Models;
 /// The address-challenger mode of the recipe. It trains the same pipeline shape on the converted OpenStreetMap address sets (<c>--osm</c>, <c>--osm-dev</c>),
 /// optionally mixed with the register-rendered sets of the default recipe (<c>--addresses</c>, <c>--addresses-dev</c>). Without <c>--osm</c> or
 /// <c>--osm-dev</c> the default recipe's data loading runs untouched. The challenger sets are ODbL data: a model trained with this mode is a challenger and
-/// is never packed (see docs/models-challenger.md).
+/// is never packed (see docs/maintainers/models-challenger.md).
 /// <para>
 /// The converted sets label a whole street as <c>street.road</c> and keep official districts apart as <c>dependent-locality.district</c> and
 /// <c>admin-area.district</c>. The address head's labels are those of the registers, so the loader writes the street as one <c>street.name</c> and merges

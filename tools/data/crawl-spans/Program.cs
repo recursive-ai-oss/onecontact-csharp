@@ -16,7 +16,7 @@ namespace OneContact.Data.CrawlSpans;
 // DIR holds pages.jsonl and pages/<id>.html as written by tools/Eval/extraction/fetch.py. For every page the tool reads the structured markup
 // (JSON-LD, microdata, RDFa, h-card, mailto/tel links) with the library's own readers, finds where its names, organizations and contact values
 // repeat in the page's visible text, and writes training pieces (text plus labelled spans) as JSON Lines, split train/dev by host.
-// The method is written down in docs/extraction-crawl-training.md. Page text is written only to --out, on the machine that holds the pages.
+// The method is written down in docs/maintainers/extraction-crawl-training.md. Page text is written only to --out, on the machine that holds the pages.
 internal static class Program
 {
     // Same piece size as the model reads at run time (TextFieldReader.Model.cs).

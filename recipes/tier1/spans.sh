@@ -3,7 +3,7 @@
 #   BASE       the trained Tier 1 pipeline (tier1.onenlp) to add the head to
 #   BLOCKS     folder of rendered contact blocks (train/ and dev/ inside), see tools/data/provenance/blocks-us-ca.md
 #   OUT        checkpoint and model folder
-#   CRAWL_POSITIVE, CRAWL_NEGATIVE, CRAWL_DEV   optional files of labelled crawl pieces (tools/data/crawl-spans; docs/extraction-crawl-training.md),
+#   CRAWL_POSITIVE, CRAWL_NEGATIVE, CRAWL_DEV   optional files of labelled crawl pieces (tools/data/crawl-spans; docs/maintainers/extraction-crawl-training.md),
 #              CRAWL_REPEAT and CRAWL_NEGATIVE_REPEAT how often each training piece is repeated (default 1)
 #   BUDGET     seconds for this chunk (default 1500); THREADS, SEED, EPOCHS, BLOCKS_COUNT as in recipes/tier1/Program.cs
 set -euo pipefail

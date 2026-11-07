@@ -284,6 +284,18 @@ public class ApiShapeTests
     }
 
     [Fact]
+    public void The_postal_address_converter_can_be_given_a_region()
+    {
+        const string json = "\"Calle Mayor 5, 28013 Madrid\"";
+        var options = new JsonSerializerOptions();
+        options.Converters.Add(new PostalAddressJsonConverter(Region.Parse("ES")));
+        PostalAddress hinted = JsonSerializer.Deserialize<PostalAddress>(json, options);
+        Assert.Equal(Region.Parse("ES"), hinted.Country);
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<PostalAddress>(json));
+        Assert.Equal(hinted, JsonSerializer.Deserialize<PostalAddress>(JsonSerializer.Serialize(hinted, options), options));
+    }
+
+    [Fact]
     public void A_postal_address_has_one_json_shape_and_reads_back_equal()
     {
         PostalAddress parsed = PostalAddress.Parse("1 main street apt 4, springfield, va 22162");

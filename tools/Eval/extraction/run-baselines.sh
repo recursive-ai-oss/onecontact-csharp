@@ -9,7 +9,7 @@
 #
 # Environment: EVAL_EXTRACT (the built eval-extract tool), JAVA and the jars (default: ~/onecontact/oracles/...), SPACY_PYTHON.
 # The reference systems are only run: libphonenumber's findNumbers at the VALID leniency, Microsoft.Recognizers.Text's phone, email
-# and URL finders, and spaCy's released English transformer pipeline. Their mapping to field types is in docs/extraction-eval-sets.md.
+# and URL finders, and spaCy's released English transformer pipeline. Their mapping to field types is in docs/maintainers/extraction-eval-sets.md.
 set -euo pipefail
 kind=$1; set_path=$2; work=$3
 here=$(cd "$(dirname "$0")/../.." && pwd)
