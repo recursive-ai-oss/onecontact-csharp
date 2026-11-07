@@ -133,6 +133,18 @@ internal readonly struct PrefixMap
     /// <returns><see langword="true"/> when some key is a prefix of the digits (the empty key counts).</returns>
     internal bool TryFindLongest(ReadOnlySpan<char> digits, out int description)
     {
+        // Every key that is a prefix of the digits sorts at or before the digits, and a longer prefix sorts after a shorter one. So the
+        // longest prefix key is the last prefix key in the block holding the largest key not after the digits, when that block has any;
+        // otherwise it lies in an earlier block and the lengths are tried one by one.
+        if (_entryCount > 0 && digits.Length <= MaxKeyLength)
+        {
+            int block = FloorBlock(digits);
+            if (block >= 0 && ScanBlockForLongestPrefix(block, digits, out description))
+            {
+                return true;
+            }
+        }
+
         for (int length = Math.Min(digits.Length, _maxKey); length >= 0; length--)
         {
             if (TryFindExact(digits[..length], out description))
@@ -157,14 +169,20 @@ internal readonly struct PrefixMap
             return false;
         }
 
-        // The last block whose first key does not sort after the target.
+        int found = FloorBlock(key);
+        return found >= 0 && ScanBlock(found, key, out description);
+    }
+
+    // The last block whose first key does not sort after the target; -1 when the target sorts before every key.
+    private int FloorBlock(ReadOnlySpan<char> target)
+    {
         int low = 0;
         int high = _blockCount - 1;
         int found = -1;
         while (low <= high)
         {
             int mid = (low + high) >>> 1;
-            int order = CompareFirstKey(mid, key);
+            int order = CompareFirstKey(mid, target);
             if (order <= 0)
             {
                 found = mid;
@@ -176,7 +194,7 @@ internal readonly struct PrefixMap
             }
         }
 
-        return found >= 0 && ScanBlock(found, key, out description);
+        return found;
     }
 
     /// <summary>Decodes every entry, checking the layout end to end.</summary>
@@ -254,6 +272,53 @@ internal readonly struct PrefixMap
 
         description = -1;
         return false;
+    }
+
+    private bool ScanBlockForLongestPrefix(int block, ReadOnlySpan<char> target, out int description)
+    {
+        // Bounds: a key is at most MaxKeyLength digits (a small fixed buffer).
+        Span<byte> key = stackalloc byte[MaxKeyLength];
+        int keyLength = 0;
+        int current = 0;
+        int pos = BlockStart(block);
+        int end = block + 1 < _blockCount ? BlockStart(block + 1) : _data.Length;
+        int inBlock = block + 1 < _blockCount ? BlockSize : _entryCount - (block * BlockSize);
+        description = -1;
+        bool any = false;
+        for (int i = 0; i < inBlock; i++)
+        {
+            DecodeEntry(ref pos, end, key, ref keyLength, ref current, i == 0);
+            if (CompareKey(key[..keyLength], target) > 0)
+            {
+                break;
+            }
+
+            if (IsPrefix(key[..keyLength], target))
+            {
+                description = current;
+                any = true;
+            }
+        }
+
+        return any;
+    }
+
+    private static bool IsPrefix(ReadOnlySpan<byte> key, ReadOnlySpan<char> target)
+    {
+        if (key.Length > target.Length)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < key.Length; i++)
+        {
+            if (key[i] != target[i])
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     // Keys compare as ordinal strings of digits: the shorter of two keys with a common start sorts first.
