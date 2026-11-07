@@ -3,6 +3,9 @@
 
 usage: select-pages.py <crawl-id> <out-dir> <seed> <blocks-us> <blocks-ca> [balanced]
 
+With EXCLUDE_HOSTS=<file> (one host per line, see ../u50/exclude.py) hosts listed there are skipped, so a host used by another evaluation
+set never appears in a new one. A leading `www.` is ignored when comparing.
+
 With `balanced` the United States blocks are drawn evenly across the host TLDs instead of in proportion to their size (a top-up draw:
 .org, .edu, .gov and .us hosts are far more often American than the very large .com share).
 
@@ -37,6 +40,10 @@ for line in open(idx_path, encoding="utf-8"):
 US_TLDS = ("com", "org", "net", "us", "edu", "gov", "biz", "info")
 def host_tld(b):
     return b[0].split(",")[0]
+
+EXCLUDE = set()
+if os.environ.get("EXCLUDE_HOSTS"):
+    EXCLUDE = {l.strip().lower().removeprefix("www.") for l in open(os.environ["EXCLUDE_HOSTS"], encoding="utf-8") if l.strip()}
 
 rng = random.Random(seed)
 us_blocks = [b for b in blocks if host_tld(b) in US_TLDS]
@@ -81,6 +88,8 @@ with open(os.path.join(out, "candidates.jsonl"), "w", encoding="utf-8") as fo:
             if not m:
                 continue
             host, path = m.group(1).lower(), m.group(2) or "/"
+            if host.removeprefix("www.") in EXCLUDE:
+                continue
             if not (PATH.search(path) or path in ("/", "/index.html", "/index.php")):
                 continue
             # at most two pages per host per block, so one large site doesn't dominate.
