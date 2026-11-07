@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Turns crawled pages into labelled training pieces for the contact-span head: the labels come from the page's own structured markup
+       (JSON-LD, microdata, RDFa, h-card, mailto/tel links) wherever its values repeat in the visible text. Run only on the machine that holds the pages. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>OneContact.Data.CrawlSpans</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <NoWarn>$(NoWarn);CA1303;CA1848;CA1307;CA1305;CA1310;CA1304;CA1311;CA1859;CA1822;CA1002;CA1051;CA1034;CA5394;CA2201;CA1031;CA1812;CA1861;CA1865;CA1866;CA1867;CA1845;CA1847;CA1852</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../src/OneContact/OneContact.csproj" />
+    <ProjectReference Include="../../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
+  </ItemGroup>
+
+</Project>
