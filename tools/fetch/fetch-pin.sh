@@ -18,7 +18,8 @@ dest=${2:-${ONECONTACT_UPSTREAM:-$root/.upstream}/$source_name}
 proto=${FETCH_PROTO:-=https}
 
 sha256_of() {
-  if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | cut -d' ' -f1; else shasum -a 256 "$1" | cut -d' ' -f1; fi
+  # sha256sum on Windows (Git Bash) prefixes the hash with a backslash when the path holds one; drop it.
+  if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | cut -d' ' -f1 | tr -d '\\'; else shasum -a 256 "$1" | cut -d' ' -f1; fi
 }
 
 status=0

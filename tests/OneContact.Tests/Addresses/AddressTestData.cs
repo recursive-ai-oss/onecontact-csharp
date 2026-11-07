@@ -2,7 +2,8 @@ using RecursiveAI.OneContact.Addresses.Parsing;
 
 namespace RecursiveAI.OneContact.Tests.Addresses;
 
-/// <summary>Finds the committed test data under <c>testdata/</c> by walking up from the test binaries to the repository root.</summary>
+/// <summary>Finds the committed test data under <c>testdata/</c>: the repository root above the test binaries, or, when the build output
+/// lives outside the checkout (as in CI), the root above this source file.</summary>
 internal static class AddressTestData
 {
     internal static string Root
@@ -15,9 +16,15 @@ internal static class AddressTestData
                 dir = Path.GetDirectoryName(dir);
             }
 
-            return dir ?? throw new DirectoryNotFoundException("The repository root (OneContact.slnx) was not found above the test binaries.");
+            dir ??= SourceRoot();
+            return File.Exists(Path.Combine(dir, "OneContact.slnx"))
+                ? dir
+                : throw new DirectoryNotFoundException("The repository root (OneContact.slnx) was not found above the test binaries or the test sources.");
         }
     }
+
+    private static string SourceRoot([System.Runtime.CompilerServices.CallerFilePath] string here = "") =>
+        Path.GetFullPath(Path.Combine(Path.GetDirectoryName(here)!, "..", "..", ".."));
 
     internal static IEnumerable<string[]> Rows(string relativePath, int columns)
     {
