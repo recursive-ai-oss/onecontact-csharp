@@ -32,6 +32,17 @@ internal static class Uts46
     /// <returns><see langword="false"/> when an error was recorded.</returns>
     internal static bool TryToAscii(string domain, Uts46Options options, out string result)
     {
+        if (TryToAsciiOfAsciiText(domain, options, out result, out bool fastOk))
+        {
+            return fastOk;
+        }
+
+        return TryToAsciiGeneral(domain, options, out result);
+    }
+
+    /// <summary>ToASCII by the general route alone (map, normalize, convert and validate every label); the short route is held to this one in tests.</summary>
+    internal static bool TryToAsciiGeneral(string domain, Uts46Options options, out string result)
+    {
         bool ok = Process(domain, options, out List<int[]> labels);
         var sb = new StringBuilder();
         for (int i = 0; i < labels.Count; i++)
@@ -88,6 +99,108 @@ internal static class Uts46
         }
 
         return ok;
+    }
+
+    // ToASCII of a domain made only of ASCII letters, digits, hyphens and dots, which is what a domain with Punycode labels looks like when it
+    // arrives already encoded. Nothing in the general route changes such text except lower-casing it and checking its labels, so this does
+    // the same checks label by label, without code point arrays: a plain label is checked as it stands, and a label of xn-- form is decoded
+    // (UTS #46 section 4 step 4), validated as the general route validates it, and kept as written, because Punycode is its own inverse
+    // (RFC 3492 section 6: the encoder emits the one shortest form). Returns false, leaving the answer to the general route, for anything
+    // else: other characters, invalid Punycode that is to be ignored, or a label that decodes to right-to-left text, which changes how the
+    // Bidi rule treats every other label.
+    internal static bool TryToAsciiOfAsciiText(string domain, Uts46Options options, out string result, out bool ok)
+    {
+        result = domain;
+        ok = false;
+        if (domain.Length is 0 or > MaxDomainLength)
+        {
+            return false;
+        }
+
+        bool upper = false;
+        foreach (char c in domain)
+        {
+            if (char.IsAsciiLetterUpper(c))
+            {
+                upper = true;
+            }
+            else if (!(char.IsAsciiLetterOrDigit(c) || c is '-' or '.'))
+            {
+                return false;
+            }
+        }
+
+        string lower = upper ? domain.ToLowerInvariant() : domain;
+        bool good = true;
+        bool dnsLength = (options & Uts46Options.VerifyDnsLength) != 0;
+        bool checkHyphens = (options & Uts46Options.CheckHyphens) != 0;
+        int start = 0;
+        for (int i = 0; i <= lower.Length; i++)
+        {
+            if (i < lower.Length && lower[i] != '.')
+            {
+                continue;
+            }
+
+            ReadOnlySpan<char> label = lower.AsSpan(start, i - start);
+            start = i + 1;
+            if (dnsLength && label.Length is 0 or > 63)
+            {
+                good = false;
+            }
+
+            if (label.Length == 0)
+            {
+                continue;
+            }
+
+            if (label.Length >= 4 && label[0] == 'x' && label[1] == 'n' && label[2] == '-' && label[3] == '-')
+            {
+                if (!Punycode.TryDecode(label[4..], out int[] decoded))
+                {
+                    if ((options & Uts46Options.IgnoreInvalidPunycode) != 0)
+                    {
+                        return false;
+                    }
+
+                    good = false;
+                    continue;
+                }
+
+                bool allAscii = true;
+                foreach (int cp in decoded)
+                {
+                    allAscii &= cp <= 0x7F;
+                    if ((options & Uts46Options.CheckBidi) != 0 && IdnaTables.GetBidiClass(cp) is BidiClass.R or BidiClass.AL or BidiClass.AN)
+                    {
+                        return false;
+                    }
+                }
+
+                if (decoded.Length == 0 || allAscii)
+                {
+                    good = false;
+                }
+
+                good &= ValidateLabel(decoded, options, true, false);
+                continue;
+            }
+
+            // A plain label: lower-case letters, digits and hyphens are valid, and the hyphen rules are all that is left to check.
+            if (checkHyphens && ((label.Length >= 4 && label[2] == '-' && label[3] == '-') || label[0] == '-' || label[^1] == '-'))
+            {
+                good = false;
+            }
+        }
+
+        if (dnsLength && lower.Length is < 1 or > 253)
+        {
+            good = false;
+        }
+
+        result = lower;
+        ok = good;
+        return true;
     }
 
     /// <summary>ToUnicode (UTS #46 section 4.3).</summary>

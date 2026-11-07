@@ -56,7 +56,7 @@ static int Dev(List<Block> blocks, Tier1Model model)
     Dictionary<string, Tally> rules = Score(blocks, extractor, "rules only");
     foreach (string label in rules.Keys.Order(StringComparer.Ordinal))
     {
-        Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{label,-9} rules only: exact P {rules[label].Precision(false):F4} R {rules[label].Recall(false):F4} F1 {rules[label].F1(false):F4}; overlap P {rules[label].Precision(true):F4} R {rules[label].Recall(true):F4}; gold {rules[label].Gold}"));
+        Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{label,-9} rules only: exact P {rules[label].Precision(false):F4} R {rules[label].Recall(false):F4} F1 {rules[label].F1(false):F4}; overlap P {rules[label].Precision(true):F4} R {rules[label].Recall(true):F4}; gold {rules[label].Gold} found {rules[label].Found}"));
     }
 
     if (Environment.GetEnvironmentVariable("RULES_ONLY") is { Length: > 0 })
@@ -318,6 +318,8 @@ internal sealed class Tally
     private long _exactTp, _overlapTp, _found, _foundOverlap;
 
     public long Gold { get; private set; }
+
+    public long Found => _found;
 
     public void Add(List<(string Label, int S, int E)> gold, List<(int S, int E)> found)
     {
