@@ -57,3 +57,7 @@ Compiled into `RecursiveAI.OneContact.Phones.Geo`: the area description (`resour
 ## Unicode CLDR territory names (Unicode License v3)
 
 Compiled into `RecursiveAI.OneContact.Phones.Geo`: the territory display names of every locale (`cldr-localenames-full/main/*/territories.json`) and the parent-locale table (`cldr-core/supplemental/parentLocales.json`) of the CLDR JSON distribution, release 43 (https://github.com/unicode-org/cldr-json at commit c3349f36f4d4808a0c5e52b63fff16de8b867edf; file hashes in `upstream/cldr-territories/PIN`). Copyright (c) 1991-2023 Unicode, Inc., distributed under the Unicode, Inc. License Agreement for Data Files and Software (the text shipped with the CLDR JSON distribution; the same permissive terms as the Unicode License v3); the licence text is packed under `notices/cldr/`.
+
+## OpenStreetMap (ODbL 1.0), trained into the `RecursiveAI.OneContact.Models` weights
+
+Contains information from OpenStreetMap, which is made available under the Open Database License (ODbL) 1.0, https://opendatacommons.org/licenses/odbl/1-0/. © OpenStreetMap contributors, ODbL 1.0, https://www.openstreetmap.org/copyright. The address-field model of `RecursiveAI.OneContact.Models` was trained in part on OpenStreetMap addresses; the weights are a produced work under ODbL section 4.3 and the data itself is not redistributed. The package's own `THIRD-PARTY-NOTICES.md` and `PROVENANCE.md` list every other source.

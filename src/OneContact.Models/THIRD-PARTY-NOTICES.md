@@ -37,6 +37,10 @@ The code of this package is licensed `MIT OR Apache-2.0`, Copyright (c) Recursiv
 - Postcode and place names for Italy, Portugal, Ireland, Malta, San Marino, the Vatican, Andorra, Jersey, Guernsey, the Isle of Man, Denmark, Sweden, Finland, Iceland, Åland, Hungary and Australia: GeoNames postal codes, www.geonames.org, CC BY 4.0.
 - Denmark, Sweden, Portugal, Ireland, Malta, San Marino, the Vatican, Andorra, Jersey, Guernsey, the Isle of Man, Hungary and Monaco have no open register in the training data: their street names are our own, over real postcode places.
 
+## Addresses: OpenStreetMap
+
+- Contains information from OpenStreetMap, which is made available under the Open Database License (ODbL) 1.0, https://opendatacommons.org/licenses/odbl/1-0/. © OpenStreetMap contributors, ODbL 1.0, https://www.openstreetmap.org/copyright. Addresses from the libpostal parser training data of 2017-03-04 (https://archive.org/details/libpostal-parser-training-data-20170304), rendered through our own templates. The weights are a produced work under ODbL section 4.3; the OpenStreetMap data itself is not redistributed.
+
 ## Names and companies
 
 - U.S. Census Bureau, "Frequently Occurring Surnames from the 2010 Census"; U.S. Social Security Administration, "Popular Baby Names" (U.S. Government works).
@@ -70,4 +74,4 @@ The contact-span head trained on text assembled by our own templates from the ad
 
 This package depends on `RecursiveAI.OneNlp.Neural` and `RecursiveAI.OneModel`, which carry their own notices.
 
-No data from OpenStreetMap, OpenAddresses, Common Crawl or G-NAF was used. No labels came from a hosted language model.
+OpenStreetMap addresses were used (above). No data from OpenAddresses, Common Crawl or G-NAF was used. No labels came from a hosted language model.

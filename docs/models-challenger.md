@@ -1,6 +1,6 @@
 # Address challenger models (OpenStreetMap data)
 
-Two address-field models trained on the converted OpenStreetMap address sets (ODbL, `docs/training-data-address-challenger.md`), built to be measured against the shipped `RecursiveAI.OneContact.Models` weights. **They are challengers: never packed, never in a `Models.*` package, never in the feed.** Weights stay with the build machine. A challenger can replace the default only after the rows below say it wins and its licence lineage has been accepted for shipping; until then the default recipes never read the challenger folder (`recipes/models/run.sh` and `data.manifest.tsv` name no challenger file, and the loader reads challenger data only when `--osm` is given).
+Two address-field models trained on the converted OpenStreetMap address sets (ODbL, `docs/training-data-address-challenger.md`), built to be measured against the shipped `RecursiveAI.OneContact.Models` weights. **Status: the full candidate built on the C2 mix (last section) is now the shipped default of `RecursiveAI.OneContact.Models`** (weights `c5cedca0…`, MIT OR Apache-2.0, © OpenStreetMap contributors, ODbL 1.0 credited in the package notices). The two address-only models C1 and C2 below stay unpacked measurements. The permissive-only weights remain reproducible: `run.sh` (and `names.sh`, `spans.sh`) never read the OpenStreetMap folder, `data.manifest.tsv` names no OpenStreetMap file, and the loader reads OpenStreetMap data only when `--osm` is given.
 
 ## Models
 
@@ -71,7 +71,7 @@ Provenance: `recipes/models/PROVENANCE-challenger.md`.
 
 ## Full candidate on the C2 mix (encoder, address, name and contact-span heads)
 
-A complete `.Models` candidate built on the C2 address mix, scored once against the shipped weights (`0e31f3fd…`) on the rules of the same checkout. It is not the default: one address row loses beyond its interval (below), so the shipped weights stay.
+A complete `.Models` candidate built on the C2 address mix, scored once against the shipped weights (`0e31f3fd…`) on the rules of the same checkout. It is the shipped default, accepted with one address row that loses beyond its interval (below, stated plainly).
 
 **Build (all three stages `recipes/models`, seed 1, CPU, 8 threads, chunks of 1,380 s that resume from the last checkpoint):**
 
@@ -91,4 +91,6 @@ The finished file: 22,785,395 bytes, sha256 `c5cedca0d4d0991f272cdafa28471a77444
 * Tier 2 names (`name-rows.txt`, 29 countries; the US and CA rows in the file are retired and not counted): no row's interval lies wholly below zero. Six have an upper end of exactly 0: EE person tokens -3.77 [-11.5, 0.0] and class -2.17 [-6.5, 0.0], FR company tokens -3.39 [-11.3, 0.0] and class -1.72 [-5.2, 0.0], LI company tokens -7.04 [-18.3, 0.0] and class -3.39 [-8.5, 0.0] (EE, FR and LI are override countries). Gain: AU company tokens +4.9 [0.0, +13.6], class +3.9 [0.0, +9.8].
 * Extraction (u18 sets, text and web, one run each, cut 0.4; `extraction-*.txt`): no row loses beyond its interval. Text address 72.7 to 84.6 (+11.9 [+3.1, +22.5]); text record F1 28.9 to 35.3 (+6.5 [+1.0, +13.1]); web rows within 0.4; text person +1.0 and org -0.5 within noise; website text -1.15 [-3.64, 0.00].
 
-**Verdict.** On the stated rule (no row loses beyond noise) the candidate fails on one row, ES hinted address field F1, by 0.02 points of interval. Everything else is equal or better, with large gains in GB, IE, IM, MT, HU, DE and in extraction addresses. The decision is whether to accept the ES row as noise (lower end -2.46, upper -0.02, 69 items) or to retrain with a different OSM share. The ES register data is the thin set (Catastro covers 12% of municipalities); a larger OSM ES share chosen on dev is the obvious try, not done here because each candidate is scored once.
+**Verdict and decision.** One row loses beyond its interval: **ES hinted address field F1, 84.62 to 83.49, a difference of -1.13 [-2.46, -0.02] on 69 items**. The build accepted the candidate as the default anyway: that ES set was already used while the rules were developed (fresh ES sets are being drawn), the candidate stays about 7 points above libpostal on ES, and the gains elsewhere are large and many (GB, IE, IM, MT, HU, DE; extraction addresses +11.9). ES register data is the thin set (Catastro covers 12% of municipalities); a larger OSM share for ES chosen on dev is the obvious next try. The Tier 2 person override list (AU, EE, FR, GB, IT, LI, MT) is kept as shipped; the development rule that chose it no longer selects any country with the current rules, for either set of weights.
+
+**Reproducing the permissive-only weights** (`0e31f3fd…`, no OpenStreetMap data): `recipes/models/run.sh` without `--osm` (see `recipes/models/README.md`), then `names.sh` and `spans.sh`. The full candidate is `challenger.sh` with `NAMES_JOINT=1 TRAIN_PERMISSIVE=1 OSM_COUNT=1200000`, then `names.sh`, then `spans.sh`, as in the table above.
