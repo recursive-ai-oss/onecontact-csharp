@@ -33,4 +33,5 @@ First release. All packages share one version. `KeyVersion.V1` is frozen with th
 - The trained model packages (`RecursiveAI.OneContact.Models.Tier1`, `RecursiveAI.OneContact.Models` and `RecursiveAI.OneContact.Models.Accurate`) ship in 1.1, after OneNLP 1.0. The `ContactModels` seam in core, which they register through, is part of 1.0.
 - Everything runs offline. No package opens a socket, resolves a name or downloads a file.
 - `CultureInfo` never affects a result.
-- A hinted German, Spanish, Croatian or Mexican address whose postcode also exists in France's overseas range (97xxx, 98xxx) is read in the hinted country.
+- A hinted German, Spanish, Croatian or Mexican address whose postcode also exists in France's overseas range (97xxx, 98xxx) is read in the hinted country. Without a hint, a 97xxx or 98xxx postcode with a German or Mexican cue is not read as French.
+- Without a hint, the United States and Canada rules read a text only when it shows the country (a state or province the country has, a ZIP+4, a Canadian postal code, or the country written out). A bare five-digit number after a word, `N.L.` or `B.C.` with a five-digit postcode, and `Baja California` are no longer read as American or Canadian. A Canadian postal code outweighs a five-digit house number, and `6980 LA ROCHE` is not a Dutch postcode.

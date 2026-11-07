@@ -63,6 +63,16 @@ public static class RuleAddressParser
         if (hint.IsUnknown)
         {
             otherStatus = Tier2.Tier2Reader.TryParse(input.ToString(), hint, out other, out otherDetail, out Tier2.T2Country? otherCountry);
+
+            // A Canadian postal code in the text (A1A 1A1) is evidence of Canada that a five-digit number elsewhere in the text (a house number) must not outweigh: the
+            // Canadian rules read the text, and the Tier 2 reading is dropped.
+            if (ContainsCanadianPostalCode(input))
+            {
+                other = null;
+                otherStatus = OperationStatus.InvalidData;
+                otherCountry = null;
+            }
+
             if (otherStatus == OperationStatus.Done && other is { CountryConfidence: >= 0.97f })
             {
                 address = other;
@@ -86,6 +96,18 @@ public static class RuleAddressParser
         }
 
         OperationStatus status = TryParseUsCa(input, hint, out address, out detail);
+
+        // Without a hint the United States and Canada rules read a text only when it shows it is American or Canadian: a state or province the country has, a ZIP+4, a
+        // Canadian postal code, or the country written out. A bare five-digit number after a word is a postcode of many countries (Mexico, Estonia, Lithuania and others), and "N.L." or "B.C." with a
+        // five-digit postcode is a Mexican state, not a Canadian province (a Canadian postcode is A1A 1A1). The text is refused rather than read in a guessed country.
+        // A reading made by a model is left to the model rules below.
+        if (status == OperationStatus.Done && hint.IsUnknown && address is not null && detail.Fields.Count > 0 && !detail.Fields.All(f => f.Source == DecisionSource.Model)
+            && !ShowsUsOrCanada(address))
+        {
+            address = null;
+            detail = ParseDetail.Failure(ReasonCode.AddressNoLastLine, default);
+            status = OperationStatus.InvalidData;
+        }
 
         // A United States or Canada reading made by the model never displaces a Tier 2 reading the rules made: the model fills what the rules leave open only.
         bool usCaReadByModel = status == OperationStatus.Done && address is not null && detail.Fields.Count > 0 && detail.Fields.All(f => f.Source == DecisionSource.Model);
@@ -176,6 +198,113 @@ public static class RuleAddressParser
         address.PostalCode is { } p && (p.Standard.Any(char.IsAsciiLetter)
             || p.Standard.Length == 10 && p.Standard[5] == '-' && p.Standard.Count(char.IsAsciiDigit) == 9
             || p.Standard.Length == 9 && p.Standard.All(char.IsAsciiDigit));
+
+    // Whether a reading by the United States or Canada rules shows that the text is American or Canadian: for Canada a Canadian postal code, for the United States a state it has or a ZIP+4.
+    private static bool ShowsUsOrCanada(ParsedAddress address)
+    {
+        // A country written in the text ("USA", "Canada") is not an inference.
+        if ((address.Facts & AddressFacts.CountryInferred) == 0)
+        {
+            return true;
+        }
+
+        if (address.Country == Region.CA)
+        {
+            // Canadian postal code present: Canadian. Otherwise the province must be one: BC and NL are also the Mexican states Baja California and Nuevo León, written "B.C." and
+            // "N.L." before or after a five-digit postcode, so with a five-digit number in the text they are not Canadian.
+            if (address.PostalCode is { } cp && cp.Standard.Any(char.IsAsciiLetter))
+            {
+                return true;
+            }
+
+            string province = address.AdminArea is { } a ? a.Standard.Replace(".", string.Empty, StringComparison.Ordinal).ToUpperInvariant() : string.Empty;
+            return !(province is "BC" or "NL" && HasFiveDigitNumber(address.SourceText));
+        }
+
+        if (IsUsCaPostalForm(address))
+        {
+            return true;
+        }
+
+        // "Baja California" and "Nuevo México" end in the names of two American states: the word before the name says it is a Mexican state.
+        return address.AdminArea is { } f && Standardization.UsCaRules.UsStateNames.ContainsKey(f.Standard.ToUpperInvariant()) && !FollowsSpanishStateWord(address.SourceText, f.Span.Start);
+    }
+
+    private static bool FollowsSpanishStateWord(string text, int start)
+    {
+        int end = start;
+        while (end > 0 && text[end - 1] == ' ')
+        {
+            end--;
+        }
+
+        int begin = end;
+        while (begin > 0 && char.IsLetter(text[begin - 1]))
+        {
+            begin--;
+        }
+
+        return text.AsSpan(begin, end - begin).Equals("baja", StringComparison.OrdinalIgnoreCase) || text.AsSpan(begin, end - begin).Equals("nuevo", StringComparison.OrdinalIgnoreCase)
+            || text.AsSpan(begin, end - begin).Equals("nueva", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool HasFiveDigitNumber(string? text)
+    {
+        if (text is null)
+        {
+            return false;
+        }
+
+        int run = 0;
+        for (int i = 0; i <= text.Length; i++)
+        {
+            if (i < text.Length && char.IsAsciiDigit(text[i]))
+            {
+                run++;
+                continue;
+            }
+
+            if (run == 5)
+            {
+                return true;
+            }
+
+            run = 0;
+        }
+
+        return false;
+    }
+
+    // A Canadian postal code anywhere in the text: letter, digit, letter, an optional space, digit, letter, digit, not part of a longer word. The first letter is one Canada Post uses.
+    private static bool ContainsCanadianPostalCode(ReadOnlySpan<char> text)
+    {
+        for (int i = 0; i + 6 <= text.Length; i++)
+        {
+            if (i > 0 && char.IsAsciiLetterOrDigit(text[i - 1]))
+            {
+                continue;
+            }
+
+            char a = char.ToUpperInvariant(text[i]);
+            if ("ABCEGHJKLMNPRSTVXY".IndexOf(a, StringComparison.Ordinal) < 0 || !char.IsAsciiDigit(text[i + 1]) || !char.IsAsciiLetter(text[i + 2]))
+            {
+                continue;
+            }
+
+            int j = i + 3;
+            if (j < text.Length && text[j] == ' ')
+            {
+                j++;
+            }
+
+            if (j + 3 <= text.Length && char.IsAsciiDigit(text[j]) && char.IsAsciiLetter(text[j + 1]) && char.IsAsciiDigit(text[j + 2]) && (j + 3 == text.Length || !char.IsAsciiLetterOrDigit(text[j + 3])))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private static bool HasKnownUsCaAdmin(ParsedAddress address) =>
         address.AdminArea is { } f && (Standardization.UsCaRules.UsStateNames.ContainsKey(f.Standard.ToUpperInvariant()) || Standardization.UsCaRules.CaProvinceNames.ContainsKey(f.Standard.ToUpperInvariant()));

@@ -1465,6 +1465,20 @@ internal static partial class Tier2Reader
             return null;
         }
 
+        // Two capitals after four digits are Dutch postcode letters, but also the first word of a Belgian or French locality (6980 LA ROCHE EN ARDENNE) when they are an article or
+        // preposition of the Romance languages and the text has French street words. Without a hint and without a Dutch cue that is a conflict of evidence, so the country is not
+        // guessed. (EN, AM, IM and ZU are Dutch or German words too, and 6832 AM is a real Dutch postcode: they are not in the list.)
+        private static bool DutchLettersAreARomanceWord(PostcodeMatch match, List<Unit> before, List<Tok> lastToks)
+        {
+            if (match.Standard.Length != 7 || match.Standard[4] != ' ' || lastToks.Count <= match.Length
+                || match.Standard[5..] is not ("LA" or "LE" or "EL" or "ET" or "AU" or "UN" or "DU" or "DI" or "DA" or "DO"))
+            {
+                return false;
+            }
+
+            return lastToks.Concat(before.SelectMany(u => u.Toks)).Any(t => t.Key is "RUE" or "CHEMIN" or "AVENUE" or "ROUTE" or "BOULEVARD" or "IMPASSE" or "QUAI" or "ALLEE" or "PLACE" or "RUELLE" or "SENTIER" or "CHAUSSEE");
+        }
+
         private static string Family(string code) => code is "GP" or "MQ" or "GF" or "RE" or "YT" ? "FR" : code;
 
         private bool DecideCountry(PostcodeMatch match, string? named, List<Unit> before, List<Tok> lastToks, out string code, out float confidence, out bool inferred)
@@ -1524,6 +1538,22 @@ internal static partial class Tier2Reader
                 return true;
             }
 
+            // 97xxx and 98xxx are the French overseas departments' range, but also German and Mexican postcodes (Würzburg, Suhl, Yucatán). Without a hint France is the reading,
+            // unless the text carries a German or Mexican cue: then the evidence conflicts and the country is not guessed.
+            if (match.Candidates.Count == 1 && match.Candidates[0] == "FR" && match.PrefixCountry is null && match.Standard.Length == 5
+                && (match.Standard.StartsWith("97", StringComparison.Ordinal) || match.Standard.StartsWith("98", StringComparison.Ordinal) && !match.Standard.StartsWith("980", StringComparison.Ordinal))
+                && ForeignCueInOverseasRange(match, before, lastToks))
+            {
+                _failure = ParseDetail.Failure(ReasonCode.AddressCountryUndetermined, new SourceSpan(0, text.Length));
+                return false;
+            }
+
+            if (match.Candidates.Count == 1 && match.Candidates[0] == "NL" && DutchLettersAreARomanceWord(match, before, lastToks))
+            {
+                _failure = ParseDetail.Failure(ReasonCode.AddressCountryUndetermined, new SourceSpan(0, text.Length));
+                return false;
+            }
+
             string? only = match.Candidates.Count == 1 ? match.Candidates[0] : CountryFromCues(match, before, lastToks);
             if (only is null && _province is not null && match.Candidates.Contains("ES"))
             {
@@ -1540,6 +1570,24 @@ internal static partial class Tier2Reader
             code = only;
             confidence = match.PrefixCountry is not null ? 0.97f : match.Candidates.Count == 1 ? 0.93f : 0.8f;
             return true;
+        }
+
+        // German legal forms and street words, Mexican colonia words, C.P. and a Mexican state name: cues that a 97xxx or 98xxx postcode is not a French overseas one.
+        private static bool ForeignCueInOverseasRange(PostcodeMatch match, List<Unit> before, List<Tok> lastToks)
+        {
+            foreach (Tok t in lastToks.Concat(before.SelectMany(u => u.Toks)))
+            {
+                string k = t.Key;
+                if (k is "GMBH" or "AG" or "KG" or "UG" or "OHG" or "GBR" or "POSTFACH" or "COL" or "COLONIA" or "FRACC" or "FRACCIONAMIENTO" or "CP" or "C.P." or "C.P"
+                    || k.EndsWith("STRASSE", StringComparison.Ordinal) || k.EndsWith("WEG", StringComparison.Ordinal) || k.EndsWith("GASSE", StringComparison.Ordinal)
+                    || k.EndsWith("PLATZ", StringComparison.Ordinal) || k.EndsWith("UFER", StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            List<Tok> tail = lastToks.GetRange(Math.Min(match.Length, lastToks.Count), Math.Max(0, lastToks.Count - match.Length));
+            return tail.Count >= 2 && StateTail("MX", tail, out int w, out _) && w < tail.Count;
         }
 
         // Language cues that separate countries sharing a postcode form: CEDEX, BP and French street types point to France; Straße, Weg, Postfach to Germany.

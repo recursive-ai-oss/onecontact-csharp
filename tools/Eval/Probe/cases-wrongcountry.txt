@@ -1,0 +1,26 @@
+# no-hint cases that were read in a wrong country; written for this repository
+|Av. Constitución 100, Centro, 64000 Monterrey, N.L.
+|Calle Hidalgo 12, Centro, 22014 Tijuana, B.C.
+|Pärnu tn 1 Paide, Järvamaa 72711
+|Parko str. 1, Plunge 90100
+|Gedimino street 1 // Vilnius, LT- 08237
+|Calle Uno 10, Col. Nápoles // Ciudad de México, C.P. 03810
+|Industrial 100 Los Españoles // Tijuana, Baja California C.P. 22104
+|Musterweg 4, 97478 Knetzgau
+|Muster Werbung GmbH, Seeweg 4, 97478 Knetzgau
+|Calle 60 100 Fracc. Floresta, C.P. 97306 Mérida Yucatán
+|10000 Kingsway Ave, Suite 100, Edmonton, AB T5G 3J5
+|Chemin du Moulin 1 // 6980 LA ROCHE EN ARDENNE
+|Rue de la Gare 3 // 6980 La Roche-en-Ardenne
+|Hlavná 1, 040 01 Košice
+|12 rue de la Paix, 97400 Saint-Denis
+|1 Main Street, Springfield 22162
+|1 Main Street, Springfield, VA 22162
+|Toronto, ON M5V 2T6
+|1 Main Street, Springfield 22162, USA
+|45 Oak Avenue, Toronto, Canada
+|12 Calle Real, Mérida, Yucatán 97000
+|Hauptstraße 4, 97070 Würzburg
+|Dorpsstraat 12, 1234 DE Dorp
+|Dorpsstraat 12, 1234 AB Amsterdam
+|Rue Haute 5, 5000 EN Namur
