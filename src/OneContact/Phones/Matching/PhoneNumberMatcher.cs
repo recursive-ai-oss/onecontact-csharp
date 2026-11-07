@@ -106,7 +106,7 @@ public sealed class PhoneNumberMatcher
             return false;
         }
 
-        while (triesLeft > 0 && Candidate.Find(text, index, default, out int start, out int end))
+        while (triesLeft > 0 && PhoneCandidateScanner.Find(text, index, out int start, out int end))
         {
             // A second number may follow after a slash and an x; only the first belongs here.
             ReadOnlySpan<char> candidate = text[start..end];
