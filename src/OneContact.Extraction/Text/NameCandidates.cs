@@ -39,6 +39,7 @@ internal sealed class NameCandidates
     private readonly List<Tok>?[] _tokens;
     private readonly List<NameHit> _hits = [];
     private readonly bool[] _own;
+    private readonly List<(FieldKind Kind, int Start, int End)>?[] _linked;
 
     private NameCandidates(TextView view, List<(FieldKind, int, int, int)> fields, Func<int, int, bool> isTaken, Func<int, int, bool> separated)
     {
@@ -50,11 +51,17 @@ internal sealed class NameCandidates
         _kinds = new byte[view.Lines.Count];
         _tokens = new List<Tok>?[view.Lines.Count];
         _own = new bool[view.Text.Length];
-        foreach ((FieldKind kind, _, _, int line) in fields)
+        _linked = new List<(FieldKind, int, int)>?[view.Lines.Count];
+        foreach ((FieldKind kind, int fieldStart, int fieldEnd, int line) in fields)
         {
             if (line < 0 || line >= _kinds.Length)
             {
                 continue;
+            }
+
+            if (kind is FieldKind.Email or FieldKind.Phone or FieldKind.Address)
+            {
+                (_linked[line] ??= []).Add((kind, fieldStart, fieldEnd));
             }
 
             _kinds[line] |= kind switch
@@ -81,7 +88,21 @@ internal sealed class NameCandidates
         return finder._hits;
     }
 
-    private readonly record struct Tok(int Start, int End, int CoreStart, int CoreEnd, bool LeadPunct, bool TrailPunct);
+    // A word of a line. The folded and lower-case spellings and the kind are worked out once, on first use: the passes below ask for them
+    // over and over for the same word.
+    private sealed class Tok(int start, int end, int coreStart, int coreEnd, bool leadPunct, bool trailPunct)
+    {
+        public readonly int Start = start;
+        public readonly int End = end;
+        public readonly int CoreStart = coreStart;
+        public readonly int CoreEnd = coreEnd;
+        public readonly bool LeadPunct = leadPunct;
+        public bool TrailPunct = trailPunct;
+        public string? Text;
+        public string? Lower;
+        public string? Fold;
+        public Kind? KindCache;
+    }
 
     // ---------------------------------------------------------------- tokens
 
@@ -92,7 +113,7 @@ internal sealed class NameCandidates
             return cached;
         }
 
-        var list = new List<Tok>();
+        var list = new List<Tok>(8);
         TextLine l = _view.Lines[line];
         int i = l.Start;
         bool breakBefore = false;
@@ -131,7 +152,7 @@ internal sealed class NameCandidates
                 breakBefore = true;
                 if (list.Count > 0)
                 {
-                    list[^1] = list[^1] with { TrailPunct = true };
+                    list[^1].TrailPunct = true;
                 }
 
                 continue;
@@ -151,12 +172,19 @@ internal sealed class NameCandidates
 
     private static bool IsTrailPunct(char c) => !(char.IsLetterOrDigit(c) || c is '.' or '&' or '+' or '\'' or '\u2019');
 
-    private string Word(Tok t) => _text.Substring(t.CoreStart, t.CoreEnd - t.CoreStart);
+    private string Word(Tok t) => t.Text ??= _text.Substring(t.CoreStart, t.CoreEnd - t.CoreStart);
+
+    private string LowerWord(Tok t) => t.Lower ??= Word(t).ToLowerInvariant();
 
     private string Folded(Tok t)
     {
+        if (t.Fold is { } cached)
+        {
+            return cached;
+        }
+
         ReadOnlySpan<char> w = _text.AsSpan(t.CoreStart, t.CoreEnd - t.CoreStart);
-        return NameFolding.LettersAndDigits(w.TrimEnd('.'));
+        return t.Fold = NameFolding.LettersAndDigits(w.TrimEnd('.'));
     }
 
     // Words in a run are joined by white space alone: no comma, bracket or other mark between them.
@@ -250,7 +278,7 @@ internal sealed class NameCandidates
             return false;
         }
 
-        string folded = NameFolding.LettersAndDigits(bare);
+        string folded = Folded(t);
         if (!NameVocabulary.LegalForms.Contains(folded))
         {
             // "L.L.C." and "S.A." fold to the same letters.
@@ -283,7 +311,7 @@ internal sealed class NameCandidates
 
     private bool IsConnector(Tok t)
     {
-        return NameVocabulary.Connectors.Contains(Word(t).ToLowerInvariant());
+        return NameVocabulary.Connectors.Contains(LowerWord(t));
     }
 
     private void OrganizationsWithLegalForm(int line)
@@ -375,7 +403,7 @@ internal sealed class NameCandidates
     {
         for (int i = formStart - 1; i > first; i--)
         {
-            string c = Word(toks[i]).ToLowerInvariant();
+            string c = LowerWord(toks[i]);
             if (c is not ("of" or "de" or "du" or "von" or "van" or "at" or "from") || i - first < 2)
             {
                 continue;
@@ -405,7 +433,7 @@ internal sealed class NameCandidates
             return end;
         }
 
-        string marker = Word(toks[i]).ToLowerInvariant();
+        string marker = LowerWord(toks[i]);
         bool two = false;
         if (marker is "d/b/a" or "dba" or "t/a" or "c/o" or "a/k/a" or "aka" or "fka" or "f/k/a")
         {
@@ -679,7 +707,7 @@ internal sealed class NameCandidates
         for (int k = 1; k + 1 < toks.Count; k++)
         {
             string f = Folded(toks[k]);
-            if (f is not ("at" or "for" or "with" or "by") && Word(toks[k]) != "@")
+            if (f is not ("at" or "for" or "with" or "by") && !(toks[k].CoreEnd - toks[k].CoreStart == 1 && _text[toks[k].CoreStart] == '@'))
             {
                 continue;
             }
@@ -747,7 +775,9 @@ internal sealed class NameCandidates
 
     private enum Kind { None, Word, Initial, Particle, Honorific, Ending }
 
-    private Kind KindOf(Tok t)
+    private Kind KindOf(Tok t) => t.KindCache ??= ComputeKind(t);
+
+    private Kind ComputeKind(Tok t)
     {
         ReadOnlySpan<char> w = _text.AsSpan(t.CoreStart, t.CoreEnd - t.CoreStart);
         ReadOnlySpan<char> bare = w.TrimEnd('.');
@@ -756,7 +786,7 @@ internal sealed class NameCandidates
             return Kind.None;
         }
 
-        string folded = NameFolding.LettersAndDigits(bare);
+        string folded = Folded(t);
         if (char.IsLower(bare[0]))
         {
             return folded.Length > 0 && NameVocabulary.Particles.Contains(folded) && !t.TrailPunct ? Kind.Particle : Kind.None;
@@ -931,7 +961,7 @@ internal sealed class NameCandidates
             }
         }
 
-        if (NameVocabulary.Roles.Contains(Folded(toks[to])) || (peeledJob && !StartsJobPhrase(_text.Substring(toks[to].CoreEnd, _view.Lines[line].End - toks[to].CoreEnd), false)))
+        if (NameVocabulary.Roles.Contains(Folded(toks[to])) || (peeledJob && !StartsJobPhrase(_text.AsSpan(toks[to].CoreEnd, _view.Lines[line].End - toks[to].CoreEnd), false)))
         {
             return;
         }
@@ -975,13 +1005,8 @@ internal sealed class NameCandidates
         why = string.Empty;
 
         // An email address or a phone number that introduces or follows the name.
-        foreach ((FieldKind kind, int fs, int fe, int fl) in _fields)
+        foreach ((FieldKind kind, int fs, int fe) in _linked[line] ?? NoFields)
         {
-            if (fl != line || kind is not (FieldKind.Email or FieldKind.Phone or FieldKind.Address))
-            {
-                continue;
-            }
-
             if ((fs >= end && GapIsLink(end, fs, kind == FieldKind.Address)) || (fe <= start && GapIsLink(fe, start, kind == FieldKind.Address)))
             {
                 why = "next-to-" + kind;
@@ -989,8 +1014,8 @@ internal sealed class NameCandidates
             }
         }
 
-        string after = _text.Substring(end, l.End - end);
-        string before = _text.Substring(l.Start, start - l.Start);
+        ReadOnlySpan<char> after = _text.AsSpan(end, l.End - end);
+        ReadOnlySpan<char> before = _text.AsSpan(l.Start, start - l.Start);
 
         // A job title next to the name: "Jane Doe, Sales Manager", "Sales Manager: Jane Doe", "Director Jane Doe".
         if ((words >= 2 || honorific) && (StartsJobPhrase(after, true) || EndsWithJob(before)))
@@ -1038,7 +1063,7 @@ internal sealed class NameCandidates
         return why.Length > 0;
     }
 
-    private static bool IsOnlySeparators(string s)
+    private static bool IsOnlySeparators(ReadOnlySpan<char> s)
     {
         foreach (char c in s)
         {
@@ -1066,15 +1091,30 @@ internal sealed class NameCandidates
         return f.Length > 1 && NameLexicon.IsGivenName(f);
     }
 
-    private static bool AllEndings(string after)
+    private static bool AllEndings(ReadOnlySpan<char> after)
     {
-        string[] parts = after.Split([' ', ',', '.', '(', ')', ';', '-', '\u2013', '\u2014', '|'], StringSplitOptions.RemoveEmptyEntries);
-        foreach (string p in parts)
+        // The words between separators; each must be a name ending.
+        int i = 0;
+        while (i < after.Length)
         {
-            string f = NameFolding.LettersAndDigits(p);
-            if (f.Length > 0 && !NameVocabulary.NameEndings.Contains(f))
+            while (i < after.Length && after[i] is ' ' or ',' or '.' or '(' or ')' or ';' or '-' or '\u2013' or '\u2014' or '|')
             {
-                return false;
+                i++;
+            }
+
+            int s = i;
+            while (i < after.Length && !(after[i] is ' ' or ',' or '.' or '(' or ')' or ';' or '-' or '\u2013' or '\u2014' or '|'))
+            {
+                i++;
+            }
+
+            if (i > s)
+            {
+                string f = NameFolding.LettersAndDigits(after[s..i]);
+                if (f.Length > 0 && !NameVocabulary.NameEndings.Contains(f))
+                {
+                    return false;
+                }
             }
         }
 
@@ -1164,18 +1204,17 @@ internal sealed class NameCandidates
         return words <= 4;
     }
 
-    private static bool CuePhraseBefore(string before)
+    private static bool CuePhraseBefore(ReadOnlySpan<char> before)
     {
-        string t = before.TrimEnd(' ', '\t', '\u00A0', ':', ',', '-', '\u2013');
+        ReadOnlySpan<char> t = before.TrimEnd(" \t\u00A0:,-\u2013");
         if (t.Length == 0)
         {
             return false;
         }
 
-        string lower = t.ToLowerInvariant();
         foreach (string cue in CuePhrases)
         {
-            if (lower.EndsWith(cue, StringComparison.Ordinal) && (lower.Length == cue.Length || !char.IsLetter(lower[lower.Length - cue.Length - 1])))
+            if (t.EndsWith(cue, StringComparison.OrdinalIgnoreCase) && (t.Length == cue.Length || !char.IsLetter(t[t.Length - cue.Length - 1])))
             {
                 return true;
             }
@@ -1196,7 +1235,7 @@ internal sealed class NameCandidates
     // ---------------------------------------------------------------- jobs
 
     // After a name: a separator, then words that begin a job title.
-    private static bool StartsJobPhrase(string after, bool needSeparator)
+    private static bool StartsJobPhrase(ReadOnlySpan<char> after, bool needSeparator)
     {
         int i = 0;
         bool separated = false;
@@ -1213,12 +1252,12 @@ internal sealed class NameCandidates
             return false;
         }
 
-        return IsJobWords(after.AsSpan(i), 4);
+        return IsJobWords(after[i..], 4);
     }
 
-    private static bool EndsWithJob(string before)
+    private static bool EndsWithJob(ReadOnlySpan<char> before)
     {
-        string t = before.TrimEnd(' ', '\t', '\u00A0', ':', ',', '-', '\u2013', '\u2014', '|');
+        ReadOnlySpan<char> t = before.TrimEnd(" \t\u00A0:,-\u2013\u2014|");
         if (t.Length == 0)
         {
             return false;
@@ -1231,7 +1270,7 @@ internal sealed class NameCandidates
             s--;
         }
 
-        string last = NameFolding.LettersAndDigits(t.AsSpan(s, e - s));
+        string last = NameFolding.LettersAndDigits(t[s..e]);
         return NameVocabulary.Roles.Contains(last);
     }
 
@@ -1305,19 +1344,37 @@ internal sealed class NameCandidates
 
     // ---------------------------------------------------------------- employers by position
 
+    // The people found before the organization passes begin, by line (later passes add organizations only), in the order they were found.
+    private List<NameHit>?[]? _peopleByLine;
+
+    private List<NameHit> PeopleOn(int line)
+    {
+        if (_peopleByLine is null)
+        {
+            _peopleByLine = new List<NameHit>?[_view.Lines.Count];
+            foreach (NameHit h in _hits)
+            {
+                if (!h.Organization && h.Line >= 0 && h.Line < _peopleByLine.Length)
+                {
+                    (_peopleByLine[h.Line] ??= []).Add(h);
+                }
+            }
+        }
+
+        return _peopleByLine[line] ?? NoHits;
+    }
+
+    private static readonly List<NameHit> NoHits = [];
+    private static readonly List<(FieldKind Kind, int Start, int End)> NoFields = [];
+
     private static readonly string[] EmployerWords = ["at", "of", "from", "chez", "with", "for", "@"];
 
     // "Lara Mendez at Caisse Populaire", "Thomas Orsi de 6659 Québec": the capitalized words after a person and "at" are the employer.
     private void EmployerAfterPerson(int line)
     {
         List<Tok> toks = TokensOf(line);
-        foreach (NameHit h in _hits.ToArray())
+        foreach (NameHit h in PeopleOn(line))
         {
-            if (h.Organization || h.Line != line)
-            {
-                continue;
-            }
-
             int k = 0;
             while (k < toks.Count && toks[k].CoreEnd < h.End)
             {
@@ -1332,7 +1389,7 @@ internal sealed class NameCandidates
             }
 
             string w = Word(toks[c]);
-            bool connector = Array.IndexOf(EmployerWords, w.ToLowerInvariant()) >= 0 || (w.Equals("de", StringComparison.OrdinalIgnoreCase));
+            bool connector = Array.IndexOf(EmployerWords, LowerWord(toks[c])) >= 0 || (w.Equals("de", StringComparison.OrdinalIgnoreCase));
             if (!connector || toks[c].TrailPunct || c + 1 >= toks.Count)
             {
                 continue;
@@ -1348,6 +1405,9 @@ internal sealed class NameCandidates
         "using", "used", "kiosque de", "chez", "spoke with", "from", "no longer at", "now at", "work at", "works at", "works for", "work for",
     ];
 
+    // The last word of every cue above, so that a word that ends none of them costs no string building.
+    private static readonly HashSet<string> OrganizationCueEnds = new(OrganizationCues.Select(static c => c[(c.LastIndexOf(' ') + 1)..]), StringComparer.Ordinal);
+
     // "Highly recommend Smith Plumbing", "Kiosque de Gestion Alpha": the cue is no proof; the words must also read as a business (a word like Plumbing or a legal form).
     private void OrganizationAfterCue(int line)
     {
@@ -1359,10 +1419,15 @@ internal sealed class NameCandidates
                 continue;
             }
 
+            string one = LowerWord(toks[k]);
+            if (!OrganizationCueEnds.Contains(one))
+            {
+                continue;
+            }
+
             bool cue = false;
-            string one = Word(toks[k]).ToLowerInvariant();
-            string two = k > 0 ? Word(toks[k - 1]).ToLowerInvariant() + " " + one : one;
-            string three = k > 1 ? Word(toks[k - 2]).ToLowerInvariant() + " " + two : two;
+            string two = k > 0 ? LowerWord(toks[k - 1]) + " " + one : one;
+            string three = k > 1 ? LowerWord(toks[k - 2]) + " " + two : two;
             foreach (string c in OrganizationCues)
             {
                 cue |= c == one || c == two || c == three;
@@ -1503,16 +1568,13 @@ internal sealed class NameCandidates
     {
         // Only under a name on a line of its own that this reader took.
         NameHit? person = null;
-        foreach (NameHit h in _hits)
+        TextLine tl = _view.Lines[line];
+        foreach (NameHit h in PeopleOn(line))
         {
-            if (h is { Organization: false } && h.Line == line)
+            if (_text.AsSpan(tl.Start, h.Start - tl.Start).Trim().IsEmpty)
             {
-                TextLine tl = _view.Lines[line];
-                if (_text.AsSpan(tl.Start, h.Start - tl.Start).Trim().IsEmpty)
-                {
-                    person = h;
-                    break;
-                }
+                person = h;
+                break;
             }
         }
 
