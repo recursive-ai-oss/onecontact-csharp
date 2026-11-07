@@ -3,8 +3,8 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup Label="Recursive AI libraries">
-    <PackageVersion Include="RecursiveAI.OneHtml" Version="1.6.0-preview.1" />
-    <PackageVersion Include="RecursiveAI.OneHtml.Accessibility" Version="1.6.0-preview.1" />
+    <PackageVersion Include="RecursiveAI.OneHtml" Version="1.6.0-preview.2" />
+    <PackageVersion Include="RecursiveAI.OneHtml.Accessibility" Version="1.6.0-preview.2" />
     <!-- Preview builds come from the local feeds named in ONECONTACT_LOCAL_FEEDS (see Directory.Build.props). -->
     <PackageVersion Include="RecursiveAI.OneNlp.Neural" Version="0.2.0-preview.1" />
     <PackageVersion Include="RecursiveAI.OneModel" Version="1.0.0" />

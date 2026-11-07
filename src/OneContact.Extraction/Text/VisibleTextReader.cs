@@ -68,16 +68,16 @@ internal sealed class VisibleTextReader
         try
         {
             _styles = DocumentStyles.Create(page.Document);
-            AccessibilityTree tree = AccessibilityTree.Build(page.Document, _styles);
-            NavigationLists lists = tree.CreateNavigationLists();
-            foreach (LandmarkEntry l in lists.Landmarks)
+            // Only the landmark roles and the heading elements are read, so the outline form is enough (no names, no facts).
+            PageOutline outline = PageOutline.Create(page.Document, _styles, includeHeadingNames: false);
+            foreach (OutlineLandmark l in outline.Landmarks)
             {
-                _landmarks[l.Node.DomNode.Index] = l.Role;
+                _landmarks[l.Node.Index] = l.Role;
             }
 
-            foreach (HeadingEntry h in lists.Headings)
+            foreach (OutlineHeading h in outline.Headings)
             {
-                _headings.Add(h.Node.DomNode.Index);
+                _headings.Add(h.Node.Index);
             }
         }
         catch (Exception e) when (e is not OutOfMemoryException)
