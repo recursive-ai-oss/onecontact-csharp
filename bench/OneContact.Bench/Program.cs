@@ -173,6 +173,11 @@ internal static class Program
             return PhoneFindProfile.Run();
         }
 
+        if (args.Length == 2 && args[0] == "first-use")
+        {
+            return FirstUse.Run(args[1]);
+        }
+
         if (args.Length == 2 && args[0] == "dump-geo")
         {
             return GeoDump.Run(args[1]);
