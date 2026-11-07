@@ -1,0 +1,17 @@
+# Estonian rural forms in the register style, from or modelled on the Estonian Address Data System (ADS), Maa- ja Ruumiamet, CC BY 4.0; read with no hint, then with EE.
+|Kodukassi-1, Kanepi vald, 63105 Erastvere küla
+|Kanepi vald, 63105 Erastvere küla
+|Kodukassi 1, Kanepi vald, 63105 Erastvere küla
+|Kodukassi-1, 63105 Erastvere küla
+|Kodukassi-1, Kanepi vald, 63105
+|Pärna allee 10, 60532 Tartu
+|Kodukassi 1, 63105 Erastvere küla
+|Elu-3, 91101 Nõva küla
+EE|Kodukassi-1, Kanepi vald, 63105 Erastvere küla
+EE|Kanepi vald, 63105 Erastvere küla
+EE|Kodukassi 1, Kanepi vald, 63105 Erastvere küla
+EE|Kodukassi-1, 63105 Erastvere küla
+EE|Kodukassi-1, Kanepi vald, 63105
+EE|Pärna allee 10, 60532 Tartu
+EE|Kodukassi 1, 63105 Erastvere küla
+EE|Elu-3, 91101 Nõva küla

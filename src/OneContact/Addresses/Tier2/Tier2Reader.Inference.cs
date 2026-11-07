@@ -640,6 +640,9 @@ internal static partial class Tier2Reader
             return owners;
         }
 
+        // Whether the word is a place name the country's rows list (a town of Estonia, a municipality of Liechtenstein).
+        internal bool IsPlace(string country, string key) => _places.TryGetValue(country, out HashSet<string>? p) && p.Contains(key);
+
         // Whether the word is evidence for any country.
         internal bool SupportsAny(string key, bool numberAfter, bool numberBefore)
         {

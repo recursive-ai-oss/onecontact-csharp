@@ -1,0 +1,19 @@
+# Addresses rendered from the Estonian Address Data System (ADS), Maa- ja Ruumiamet, CC BY 4.0; read with no hint, then with EE.
+|Kirsi tee 2 Luunja vald 62212 Põvvatu küla Tartu maakond
+|Pärna allee 10-36, Tartu vald, 60532 Raadi alev Tartu maakond
+|Kooli tn 2 Setomaa vald 65301 Obinitsa küla
+|Suur-Kaare tn 35g-30, 71015 Viljandi
+|Elu-3, 91101 Nõva küla
+|Järve põik 2 Elva vald 61504 Elva Tartu maakond
+|Sõpruse pst 12-10 Kristiine linnaosa 10615 Tallinn
+|Pikk 5, 10133 Tallinn
+|Narva mnt 5, 10117 Tallinn, Estonia
+EE|Kirsi tee 2 Luunja vald 62212 Põvvatu küla Tartu maakond
+EE|Pärna allee 10-36, Tartu vald, 60532 Raadi alev Tartu maakond
+EE|Kooli tn 2 Setomaa vald 65301 Obinitsa küla
+EE|Suur-Kaare tn 35g-30, 71015 Viljandi
+EE|Elu-3, 91101 Nõva küla
+EE|Järve põik 2 Elva vald 61504 Elva Tartu maakond
+EE|Sõpruse pst 12-10 Kristiine linnaosa 10615 Tallinn
+EE|Pikk 5, 10133 Tallinn
+EE|Narva mnt 5, 10117 Tallinn, Estonia

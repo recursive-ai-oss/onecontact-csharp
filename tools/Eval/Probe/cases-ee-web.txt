@@ -1,0 +1,61 @@
+# Estonian web-style addresses written for this probe (no real data); each is read with no hint, then with EE.
+|Pärnu mnt 139c, 11317 Tallinn
+|Tartu mnt 83, 10115 Tallinn, Eesti
+|Narva mnt 7, Tallinn 10117
+|Ülikooli 18, 51003 Tartu
+|Lai 36, Tallinn 10133
+|Rüütli 11, 51006 Tartu, Estonia
+|Kalevi 1, Pärnu 80010
+|Lossi plats 1a, 15165 Tallinn
+|Jaama tn 4, 40231 Sillamäe, Ida-Virumaa
+|Mustamäe tee 1, 10616 Tallinn
+|Viru väljak 4, 10111 Tallinn
+|Pärnu maantee 158, 11317 Tallinn
+|Riia 24, 51010 Tartu
+|Aia 12, Tartu, Tartumaa
+|Kooli 3, Viljandi, 71020
+|Pikk 5, Rakvere 44313, Lääne-Virumaa
+|Posti 6, 90502 Haapsalu, Läänemaa
+|Tallinn, Harju maakond, Pärnu mnt 139c
+|Rävala puiestee 5, 10143 Tallinn
+|Kesk 1, Kuressaare, Saaremaa 93819
+|Tartu 51003, Ülikooli 18
+|Estonia, Tallinn 10117, Narva mnt 7
+|Tehnika 21, Tallinn 10152
+|Sõpruse pst 164, 13421 Tallinn
+|Vabaduse väljak 8, 51004 Tartu, Eesti
+|Pikk tänav 24, 10123 Tallinn
+|Kauba 4a-12, 10125 Tallinn
+|Mere pst 8, Tallinn 10111, tel 5551234
+|Suur-Karja 23, 10148 Tallinn
+|Raekoja plats 14, 10146 Tallinn
+EE|Pärnu mnt 139c, 11317 Tallinn
+EE|Tartu mnt 83, 10115 Tallinn, Eesti
+EE|Narva mnt 7, Tallinn 10117
+EE|Ülikooli 18, 51003 Tartu
+EE|Lai 36, Tallinn 10133
+EE|Rüütli 11, 51006 Tartu, Estonia
+EE|Kalevi 1, Pärnu 80010
+EE|Lossi plats 1a, 15165 Tallinn
+EE|Jaama tn 4, 40231 Sillamäe, Ida-Virumaa
+EE|Mustamäe tee 1, 10616 Tallinn
+EE|Viru väljak 4, 10111 Tallinn
+EE|Pärnu maantee 158, 11317 Tallinn
+EE|Riia 24, 51010 Tartu
+EE|Aia 12, Tartu, Tartumaa
+EE|Kooli 3, Viljandi, 71020
+EE|Pikk 5, Rakvere 44313, Lääne-Virumaa
+EE|Posti 6, 90502 Haapsalu, Läänemaa
+EE|Tallinn, Harju maakond, Pärnu mnt 139c
+EE|Rävala puiestee 5, 10143 Tallinn
+EE|Kesk 1, Kuressaare, Saaremaa 93819
+EE|Tartu 51003, Ülikooli 18
+EE|Estonia, Tallinn 10117, Narva mnt 7
+EE|Tehnika 21, Tallinn 10152
+EE|Sõpruse pst 164, 13421 Tallinn
+EE|Vabaduse väljak 8, 51004 Tartu, Eesti
+EE|Pikk tänav 24, 10123 Tallinn
+EE|Kauba 4a-12, 10125 Tallinn
+EE|Mere pst 8, Tallinn 10111, tel 5551234
+EE|Suur-Karja 23, 10148 Tallinn
+EE|Raekoja plats 14, 10146 Tallinn

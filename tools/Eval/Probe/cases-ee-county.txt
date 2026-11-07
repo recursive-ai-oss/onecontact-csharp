@@ -1,0 +1,53 @@
+# Estonian addresses with a county, written for this probe (no real data); each is read with no hint, then with EE.
+|Pärnu mnt 12, 10148 Tallinn, Harju maakond
+|Pärnu mnt 12, Tallinn, Harju maakond 10148
+|Pärnu mnt 12, 10148 Tallinn Harju maakond
+|Kesk 1, 93819 Kuressaare, Saare maakond, Eesti
+|Kesk 1, Kuressaare, Saare maakond, 93819
+|Tartu mnt 5, 10117 Tallinn, Harjumaa
+|Tartu mnt 5, 10117 Tallinn, Harju County, Estonia
+|Ravala 5, 10143 Tallinn, Estonia
+|Ravala 5, Tallinn, Estonia
+|Ravala pst 5, Tallinn
+|Ravala pst 5, Tallinn, Harju maakond
+|Aia 12, Tartu, Tartu maakond
+|Aia 12, 51003 Tartu, Tartumaa
+|Kooli 3, Viljandi, Viljandi maakond, 71020, Eesti
+|Kooli 3, 71020 Viljandi, Estonia
+|OU Kuld, Kuld 3, 71020 Viljandi
+|OU Kuld, Pikk 3, 10123 Tallinn, Estonia
+|Pikk 3-5, 10123 Tallinn
+|Pikk 3 - 5, 10123 Tallinn
+|Pikk 3, korter 5, 10123 Tallinn
+|Pikk 3, 5. korrus, 10123 Tallinn
+|Pikk 3, II korrus, 10123 Tallinn
+|Pikk 3, 10123 Tallinn, Estonia
+|Pikk 3, EE-10123 Tallinn
+|Pikk 3, EE 10123 Tallinn
+|Pikk 3 10123 Tallinn
+EE|Pärnu mnt 12, 10148 Tallinn, Harju maakond
+EE|Pärnu mnt 12, Tallinn, Harju maakond 10148
+EE|Pärnu mnt 12, 10148 Tallinn Harju maakond
+EE|Kesk 1, 93819 Kuressaare, Saare maakond, Eesti
+EE|Kesk 1, Kuressaare, Saare maakond, 93819
+EE|Tartu mnt 5, 10117 Tallinn, Harjumaa
+EE|Tartu mnt 5, 10117 Tallinn, Harju County, Estonia
+EE|Ravala 5, 10143 Tallinn, Estonia
+EE|Ravala 5, Tallinn, Estonia
+EE|Ravala pst 5, Tallinn
+EE|Ravala pst 5, Tallinn, Harju maakond
+EE|Aia 12, Tartu, Tartu maakond
+EE|Aia 12, 51003 Tartu, Tartumaa
+EE|Kooli 3, Viljandi, Viljandi maakond, 71020, Eesti
+EE|Kooli 3, 71020 Viljandi, Estonia
+EE|OU Kuld, Kuld 3, 71020 Viljandi
+EE|OU Kuld, Pikk 3, 10123 Tallinn, Estonia
+EE|Pikk 3-5, 10123 Tallinn
+EE|Pikk 3 - 5, 10123 Tallinn
+EE|Pikk 3, korter 5, 10123 Tallinn
+EE|Pikk 3, 5. korrus, 10123 Tallinn
+EE|Pikk 3, II korrus, 10123 Tallinn
+EE|Pikk 3, 10123 Tallinn, Estonia
+EE|Pikk 3, EE-10123 Tallinn
+EE|Pikk 3, EE 10123 Tallinn
+EE|Pikk 3 10123 Tallinn

@@ -108,4 +108,42 @@ public class Tier2IslandsAndEstoniaFormsTests
         Assert.Equal("Kodu küla", Field(a, "locality"));
         Assert.Equal("Harju maakond", Field(a, "admin-area"));
     }
+
+    // Estonian towns and counties are evidence of the country (t2-inference.tsv), so a street, a postcode and a town need no hint; the road type allee is Estonian as well as French.
+    [Theory]
+    [InlineData("Pikk 5, 10133 Tallinn", "Tallinn")]
+    [InlineData("Pärna allee 10, 60532 Tartu", "Tartu")]
+    [InlineData("Lai 36, Tallinn 10133", "Tallinn")]
+    public void EstonianTownIsEvidenceWithoutAHint(string input, string locality)
+    {
+        ParsedAddress a = Read(input);
+        Assert.Equal(Region.Parse("EE"), a.Country);
+        Assert.Equal(locality, Field(a, "locality"));
+    }
+
+    // Web pages often leave the postcode out: a town of Estonia on the last line, alone or with its county, after a delivery line.
+    [Theory]
+    [InlineData("Ravala pst 5, Tallinn", "Tallinn", null)]
+    [InlineData("Ravala pst 5, Tallinn, Harju maakond", "Tallinn", "Harju maakond")]
+    [InlineData("Aia 12, Tartu, Tartu maakond", "Tartu", "Tartu maakond")]
+    [InlineData("Ravala 5, Tallinn, Estonia", "Tallinn", null)]
+    public void EstonianLastLineWithoutAPostcode(string input, string locality, string? county)
+    {
+        foreach (string? hint in new string?[] { null, "EE" })
+        {
+            ParsedAddress a = Read(input, hint);
+            Assert.Equal(Region.Parse("EE"), a.Country);
+            Assert.Equal(locality, Field(a, "locality"));
+            Assert.Equal(county, Field(a, "admin-area"));
+            Assert.Null(a.PostalCode);
+        }
+    }
+
+    [Theory]
+    [InlineData("Pikk 5, Springfield")]
+    [InlineData("Pikk 5, Tallinna")]
+    public void BareTownNotOnTheEstonianListIsNotRead(string input)
+    {
+        Assert.NotEqual(OperationStatus.Done, RuleAddressParser.TryParse(input, Region.Unknown, out _, out _));
+    }
 }

@@ -103,12 +103,12 @@ public class Tier2GroupCNorthTests
     }
 
     [Theory]
-    [InlineData("Kase 7\n10117 Tallinn")]
+    [InlineData("Kase 7\n76001 Aegviidu")]
     [InlineData("Skogen 15\n0161 Oslo")]
     [InlineData("Hiomo 10a\n00380 Helsinki")]
     public void SharedPostcodeFormsWithoutAnyEvidenceAreNotGuessed(string text)
     {
-        // No street ending, abbreviation or letter of the text belongs to one country; with one (Narva mnt, Storgata, Hiomotie) the country is inferred (Tier2NordicBalticFormsTests).
+        // No street ending, abbreviation or letter of the text belongs to one country; with one (Narva mnt, Storgata, Hiomotie, or a town of Estonia such as Tallinn) the country is inferred (Tier2NordicBalticFormsTests).
         Assert.True(AddressTestData.NamesNoCountry(text), text);
     }
 
