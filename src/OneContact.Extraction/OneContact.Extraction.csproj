@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- Last version published on nuget.org: a pack fails on an unintended breaking change against it. -->
+    <PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion>
     <IsPackable>true</IsPackable>
     <Description>libphonenumber- and libpostal-class contact data for .NET: contact extraction for OneContact. Reads structured markup (JSON-LD, microdata, RDFa Lite, h-card, mailto and tel links, address elements) and visible text from web pages, plain text and sets of pages from one site into person and organization records, every field with its source, offsets, confidence and normalized value.</Description>
   </PropertyGroup>

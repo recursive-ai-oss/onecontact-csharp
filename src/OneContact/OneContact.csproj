@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- Last version published on nuget.org: a pack fails on an unintended breaking change against it. -->
+    <PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion>
     <IsPackable>true</IsPackable>
     <Description>libphonenumber- and libpostal-class contact data for .NET: phone numbers, email addresses, web addresses, postal addresses, person and company names, with canonical forms, versioned comparison keys and offsets back into the input. Clean-room, no native code, no network, NativeAOT and trim clean.</Description>
   </PropertyGroup>

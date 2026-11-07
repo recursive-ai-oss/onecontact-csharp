@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- Last version published on nuget.org: a pack fails on an unintended breaking change against it. -->
+    <PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion>
     <IsPackable>true</IsPackable>
     <Description>libphonenumber- and libpostal-class contact data for .NET: Geocoder, carrier and time-zone mappers for phone numbers, an add-on to RecursiveAI.OneContact. The carrier mapper names the carrier a number range was first assigned to, which may not be its carrier today.</Description>
   </PropertyGroup>

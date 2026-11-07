@@ -94,7 +94,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <!-- No baseline until the first release is published; set PackageValidationBaselineVersion after it. -->
+    <!-- Each package published on nuget.org sets PackageValidationBaselineVersion to its last published version in its project file. -->
     <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
 
