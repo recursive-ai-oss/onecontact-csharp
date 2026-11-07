@@ -5,7 +5,6 @@ using RecursiveAI.OneModel.Tensors;
 using RecursiveAI.OneNlp;
 using RecursiveAI.OneNlp.Data;
 using RecursiveAI.OneNlp.Neural;
-using RecursiveAI.OneNlp.Neural.Training;
 
 namespace OneContact.Recipe.Tier1;
 

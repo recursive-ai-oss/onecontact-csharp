@@ -17,7 +17,7 @@ for l in open(sys.argv[1]): print(json.loads(l)['id'])" "$FROZEN/gold-web.jsonl"
 for sys in default cand; do
   case $sys in default) m=$DEFAULT_MODEL;; cand) m=$CAND_MODEL;; esac
   tool=$EVAL_EXTRACT; var=ONECONTACT_MODELS_MODEL
-  # CAND_EVAL_EXTRACT: the candidate is an accurate-tier pipeline, run by its own build of the tool (it needs a newer OneNLP).
+  # CAND_EVAL_EXTRACT: the candidate is an accurate-tier pipeline, run by its own build of the tool (a separate tool, so that only the accurate tier is registered).
   if [ "$sys" = cand ] && [ -n "${CAND_EVAL_EXTRACT:-}" ]; then tool=$CAND_EVAL_EXTRACT; var=ONECONTACT_ACCURATE_MODEL; fi
   env "$var=$m" ONECONTACT_SPAN_CUT=$cut "$tool" ours-web "$WEB_SET" "$tmp/web-$sys.jsonl" --ids "$tmp/web.ids" > /dev/null
   env "$var=$m" ONECONTACT_SPAN_CUT=$cut "$tool" ours-text "$BASELINES/ugc/in.jsonl" "$tmp/text-$sys.jsonl" > /dev/null

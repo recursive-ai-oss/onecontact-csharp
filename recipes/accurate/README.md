@@ -14,4 +14,4 @@ Each run trains for `BUDGET` seconds (default 1500), writes `last.ckpt`/`best.ck
 - `probe` times the encoder alone; `dev` and `spans-dev` score a saved file on the development splits.
 - Data choice and sizes are in `src/OneContact.Models.Accurate/PROVENANCE.md`. `data.manifest.tsv` lists the files the run may read with their roles (`train` or `dev`); evaluation sets are not among them.
 - The finished file is `OUT/accurate.onenlp`; embed it with `ONECONTACT_ACCURATE_WEIGHTS` after updating `weights.manifest.props` and the provenance together.
-- OneNLP 0.4 is referenced from this project and from the Accurate package only (`VersionOverride`); the rest of the solution is on an older OneNLP until its models are retrained.
+- The whole solution is on one OneNLP version (set in `Directory.Packages.props`); the fast-tier weights trained on OneNLP 0.2 load and read identically under it.

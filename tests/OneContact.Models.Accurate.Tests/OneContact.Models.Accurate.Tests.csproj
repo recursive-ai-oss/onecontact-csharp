@@ -11,7 +11,7 @@
     <PackageReference Include="xunit.v3" />
   </ItemGroup>
 
-  <!-- The accurate tier only: it runs on a newer OneNLP than the fast tiers, so the two cannot be referenced from one project. The registry is process-wide,
+  <!-- The accurate tier only: the model registry is process-wide,
        so this project holds one ordered test for it. -->
   <ItemGroup>
     <ProjectReference Include="../../src/OneContact.Models.Accurate/OneContact.Models.Accurate.csproj" />

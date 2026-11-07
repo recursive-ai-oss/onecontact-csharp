@@ -12,8 +12,8 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/OneContact.Models.Accurate/OneContact.Models.Accurate.csproj" />
-    <PackageReference Include="RecursiveAI.OneNlp.Neural" VersionOverride="0.4.0-preview.1" />
-    <PackageReference Include="RecursiveAI.OneNlp.Models.Multilingual.FrozenEncoder" VersionOverride="0.4.0-preview.1" />
+    <PackageReference Include="RecursiveAI.OneNlp.Neural" />
+    <PackageReference Include="RecursiveAI.OneNlp.Models.Multilingual.FrozenEncoder" />
     <PackageReference Include="RecursiveAI.OneModel.Training" />
   </ItemGroup>
 

@@ -18,8 +18,8 @@
   <ItemGroup>
     <ProjectReference Include="../OneContact/OneContact.csproj" />
     <!-- The accurate tier runs on OneNLP 0.4, the rest of the solution on 0.2 until its models are retrained; one project cannot reference both. -->
-    <PackageReference Include="RecursiveAI.OneNlp.Neural" VersionOverride="0.4.0-preview.1" />
-    <PackageReference Include="RecursiveAI.OneNlp.Models.Multilingual.FrozenEncoder" VersionOverride="0.4.0-preview.1" />
+    <PackageReference Include="RecursiveAI.OneNlp.Neural" />
+    <PackageReference Include="RecursiveAI.OneNlp.Models.Multilingual.FrozenEncoder" />
     <PackageReference Include="RecursiveAI.OneModel" />
   </ItemGroup>
 

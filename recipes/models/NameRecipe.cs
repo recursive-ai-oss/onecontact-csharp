@@ -4,7 +4,6 @@ using RecursiveAI.OneContact.Models.Superset;
 using RecursiveAI.OneNlp;
 using RecursiveAI.OneNlp.Data;
 using RecursiveAI.OneNlp.Neural;
-using RecursiveAI.OneNlp.Neural.Training;
 
 namespace OneContact.Recipe.Models;
 

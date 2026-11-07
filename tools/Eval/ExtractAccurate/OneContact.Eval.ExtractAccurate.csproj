@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!-- The extraction evaluation tool with the accurate-tier model registered from ONECONTACT_ACCURATE_MODEL. It shares the sources of the fast-tier tool
-       except its model loader. A separate project because the accurate tier runs on a newer OneNLP than the fast tiers. -->
+       except its model loader. A separate project so that only the accurate tier is registered. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
