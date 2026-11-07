@@ -75,19 +75,21 @@ public readonly struct ContactPage
     internal bool IsDefault => _form == Form.None;
 
     /// <summary>Reads the page with the given readers; the region is the caller's default for values that name none.</summary>
-    internal ExtractResult Read(ExtractionSources sources, Region defaultRegion)
+    internal ExtractResult Read(ExtractionSources sources, Region defaultRegion, ExtractionLimits limits)
     {
         switch (_form)
         {
             case Form.HtmlString:
-                return ExtractionPipeline.Run(new PageContext(Document.Parse(_text!), _text), sources, defaultRegion);
+                return ExtractionPipeline.Run(new PageContext(limits.ParseHtml(_text!), _text), sources, defaultRegion, limits.MaxFields);
             case Form.HtmlBytes:
                 return ExtractionPipeline.Run(
-                    new PageContext(Document.Parse(_bytes, new ParseOptions { ContentType = _contentType }), null, bytesInput: true),
+                    new PageContext(limits.ParseHtml(_bytes, _contentType), null, bytesInput: true),
                     sources,
-                    defaultRegion);
+                    defaultRegion,
+                    limits.MaxFields);
             case Form.PlainText:
-                return ExtractionPipeline.Run(PageContext.ForPlainText(_text!), sources, defaultRegion);
+                limits.CheckText(_text!);
+                return ExtractionPipeline.Run(PageContext.ForPlainText(_text!), sources, defaultRegion, limits.MaxFields);
             default:
                 throw new ArgumentException("The page is a default value: build it with ContactPage.FromHtml or FromText.");
         }

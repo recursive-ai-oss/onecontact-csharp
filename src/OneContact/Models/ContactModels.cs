@@ -101,8 +101,17 @@ public static class ContactModels
         }
     }
 
-    /// <summary>Uses the given models in the current async flow until the returned object is disposed; for tests.</summary>
-    internal static IDisposable Scope(IAddressFieldModel? address, INameModel? name, IContactSpanModel? spans = null)
+    /// <summary>
+    /// Uses the given models, instead of the registered ones, in the current async flow until the returned object is disposed. A <see langword="null"/> argument
+    /// means no model of that kind, so <c>Use(null, null, null)</c> reads by rules only (a reproducible batch run, whatever model packages are referenced),
+    /// and a model you loaded yourself (for example <c>Tier1Model.Load(stream)</c>) can be compared with the registered one in one process. Scopes nest;
+    /// disposing restores the outer one. Work started on other threads outside the flow does not see the scope.
+    /// </summary>
+    /// <param name="address">The address model for the scope, or <see langword="null"/> for none.</param>
+    /// <param name="name">The name model for the scope, or <see langword="null"/> for none.</param>
+    /// <param name="spans">The contact-span model for the scope, or <see langword="null"/> for none.</param>
+    /// <returns>An object that ends the scope when disposed.</returns>
+    public static IDisposable Use(IAddressFieldModel? address, INameModel? name, IContactSpanModel? spans = null)
     {
         Registration? previous = s_scoped.Value;
         s_scoped.Value = new Registration("scoped", int.MaxValue, address, name, spans);

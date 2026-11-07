@@ -15,6 +15,14 @@ public class UndeterminedCountryTests
     // "Somewhere 12, 1234 Anywhere": four digits (Belgium, Austria, Switzerland, Denmark, Norway and others read it alike), no word or letter of any one language.
     private const string Shared = "Somewhere 12, 1234 Anywhere";
 
+    // The partial reading is what the status-returning form keeps; the happy-path Parse refuses these texts.
+    private static PostalAddress Partial(string text)
+    {
+        Assert.Equal(OperationStatus.Done, PostalAddress.TryParse(text.AsSpan(), out PostalAddress value, out _));
+        Assert.False(PostalAddress.TryParse(text, out _));
+        return value;
+    }
+
     [Fact]
     public void SameFieldsInEveryCandidateCountryAreReturnedWithoutACountry()
     {
@@ -73,7 +81,7 @@ public class UndeterminedCountryTests
     [Fact]
     public void ValidateReportsTheMissingCountry()
     {
-        PostalAddress address = PostalAddress.Parse(Shared);
+        PostalAddress address = Partial(Shared);
         Assert.True(address.Country.IsUnknown);
         Assert.True(address.Flags.HasFlag(AddressFacts.CountryUndetermined));
         Assert.Contains(address.Validate(), i => i.Field == AddressField.Country && i.Kind == AddressIssueKind.MissingRequiredField);
@@ -83,7 +91,7 @@ public class UndeterminedCountryTests
     [Fact]
     public void RenderingsKeepTheTextAsWritten()
     {
-        PostalAddress address = PostalAddress.Parse("SOMEWHERE 12\n1234 anywhere");
+        PostalAddress address = Partial("SOMEWHERE 12\n1234 anywhere");
         Assert.Equal("SOMEWHERE 12\n1234 anywhere", address.ToString(AddressStyle.Postal, AddressLayout.Label));
         Assert.Equal("SOMEWHERE 12\n1234 anywhere", address.ToString(AddressStyle.Display, AddressLayout.Label, includeCountry: true));
         Assert.Equal("SOMEWHERE 12, 1234 anywhere", address.ToString(AddressStyle.Postal, AddressLayout.SingleLine));
@@ -93,17 +101,17 @@ public class UndeterminedCountryTests
     [Fact]
     public void KeyIsMadeFromTheFieldsUnderTheUnknownCountryPrefix()
     {
-        PostalAddress a = PostalAddress.Parse(Shared);
-        PostalAddress b = PostalAddress.Parse("SOMEWHERE 12,\n1234 ANYWHERE");
+        PostalAddress a = Partial(Shared);
+        PostalAddress b = Partial("SOMEWHERE 12,\n1234 ANYWHERE");
         Assert.StartsWith("zz|", a.Key, StringComparison.Ordinal);
         Assert.Equal(a.Key, b.Key);
-        Assert.NotEqual(a.Key, PostalAddress.Parse("Somewhere 13, 1234 Anywhere").Key);
+        Assert.NotEqual(a.Key, Partial("Somewhere 13, 1234 Anywhere").Key);
     }
 
     [Fact]
     public void JsonRoundTripKeepsTheFlagAndTheRenderings()
     {
-        PostalAddress original = PostalAddress.Parse(Shared);
+        PostalAddress original = Partial(Shared);
         string json = JsonSerializer.Serialize(original);
         PostalAddress back = JsonSerializer.Deserialize<PostalAddress>(json);
         Assert.Equal(original, back);

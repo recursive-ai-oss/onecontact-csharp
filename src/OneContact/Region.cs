@@ -6,8 +6,10 @@ using RecursiveAI.OneContact.Serialization;
 namespace RecursiveAI.OneContact;
 
 /// <summary>
-/// A region code: two ASCII letters, as in ISO 3166-1 alpha-2 (<c>US</c>, <c>DE</c>), always uppercase. The type checks the shape
-/// only; whether a region exists in a given data set is for that data set to say. <c>default</c> is <see cref="Unknown"/> (<c>ZZ</c>).
+/// A region code: an assigned ISO 3166-1 alpha-2 code (<c>US</c>, <c>DE</c>), always uppercase, plus <c>AC</c>, <c>TA</c> and <c>XK</c>,
+/// which phone and address data use for Ascension Island, Tristan da Cunha and Kosovo. <c>ZZ</c> parses to <see cref="Unknown"/>, which is
+/// what <c>default</c> is, so the unspecified region survives a round trip through text and JSON. Codes that are not assigned (<c>UK</c>,
+/// <c>XX</c>) are refused; the United Kingdom is <c>GB</c>. Whether a data set has an entry for an assigned region is for that data set to say.
 /// Never affected by the current culture.
 /// </summary>
 [JsonConverter(typeof(RegionJsonConverter))]
@@ -34,6 +36,27 @@ public readonly partial struct Region :
     /// <summary>Gets Canada, <c>CA</c>.</summary>
     public static Region CA => new('C', 'A');
 
+    private const string KnownCodes =
+        "ADAEAFAGAIALAMAOAQARASATAUAWAXAZBABBBDBEBFBGBHBIBJBLBMBNBOBQBRBSBTBVBWBYBZCACCCDCFCGCHCICKCLCMCNCOCRCUCVCWCXCYCZ" +
+        "DEDJDKDMDODZECEEEGEHERESETFIFJFKFMFOFRGAGBGDGEGFGGGHGIGLGMGNGPGQGRGSGTGUGWGYHKHMHNHRHTHUIDIEILIMINIOIQIRISITJEJMJOJP" +
+        "KEKGKHKIKMKNKPKRKWKYKZLALBLCLILKLRLSLTLULVLYMAMCMDMEMFMGMHMKMLMMMNMOMPMQMRMSMTMUMVMWMXMYMZNANCNENFNGNINLNONPNRNUNZ" +
+        "OMPAPEPFPGPHPKPLPMPNPRPSPTPWPYQARERORSRURWSASBSCSDSESGSHSISJSKSLSMSNSOSRSSSTSVSXSYSZTCTDTFTGTHTJTKTLTMTNTOTRTTTVTWTZ" +
+        "UAUGUMUSUYUZVAVCVEVGVIVNVUWFWSYEYTZAZMZW" +
+        "ACTAXK";
+
+    private static readonly bool[] Known = BuildKnown();
+
+    private static bool[] BuildKnown()
+    {
+        var table = new bool[26 * 26];
+        for (int i = 0; i < KnownCodes.Length; i += 2)
+        {
+            table[((KnownCodes[i] - 'A') * 26) + (KnownCodes[i + 1] - 'A')] = true;
+        }
+
+        return table;
+    }
+
     /// <summary>Gets a value indicating whether this is <see cref="Unknown"/>.</summary>
     public bool IsUnknown => _packed == 0;
 
@@ -45,10 +68,10 @@ public readonly partial struct Region :
     });
 
     /// <summary>Parses a region code, in either letter case.</summary>
-    /// <param name="s">Two ASCII letters.</param>
+    /// <param name="s">An assigned region code, or <c>ZZ</c> for <see cref="Unknown"/>.</param>
     /// <returns>The region.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="s"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ContactParseException"><paramref name="s"/> is not two ASCII letters.</exception>
+    /// <exception cref="ContactParseException"><paramref name="s"/> is not an assigned region code.</exception>
     public static Region Parse(string s)
     {
         ArgumentNullException.ThrowIfNull(s);
@@ -56,37 +79,48 @@ public readonly partial struct Region :
     }
 
     /// <summary>Parses a region code, in either letter case.</summary>
-    /// <param name="s">Two ASCII letters.</param>
+    /// <param name="s">An assigned region code, or <c>ZZ</c> for <see cref="Unknown"/>.</param>
     /// <returns>The region.</returns>
-    /// <exception cref="ContactParseException"><paramref name="s"/> is not two ASCII letters.</exception>
+    /// <exception cref="ContactParseException"><paramref name="s"/> is not an assigned region code.</exception>
     public static Region Parse(ReadOnlySpan<char> s)
     {
         if (!TryParse(s, out Region result))
         {
-            throw new ContactParseException(ContactKind.Unknown, ReasonCode.InvalidRegion, new SourceSpan(0, s.Length), "A region is two ASCII letters, such as US (invalid-region).");
+            throw new ContactParseException(ContactKind.Unknown, ReasonCode.InvalidRegion, new SourceSpan(0, s.Length), s.Equals("UK", StringComparison.OrdinalIgnoreCase) ? "UK is not a region code; the United Kingdom is GB (invalid-region)." : "A region is an assigned two-letter code such as US; '" + s.ToString() + "' is not one (invalid-region).");
         }
 
         return result;
     }
 
     /// <summary>Tries to parse a region code, in either letter case.</summary>
-    /// <param name="s">Two ASCII letters.</param>
+    /// <param name="s">An assigned region code, or <c>ZZ</c> for <see cref="Unknown"/>.</param>
     /// <param name="result">The region, or <see cref="Unknown"/> when parsing fails.</param>
-    /// <returns><see langword="true"/> when <paramref name="s"/> is two ASCII letters.</returns>
+    /// <returns><see langword="true"/> when <paramref name="s"/> is an assigned region code or <c>ZZ</c>.</returns>
     public static bool TryParse([NotNullWhen(true)] string? s, out Region result) =>
         TryParse(s.AsSpan(), out result);
 
     /// <summary>Tries to parse a region code, in either letter case.</summary>
-    /// <param name="s">Two ASCII letters.</param>
+    /// <param name="s">An assigned region code, or <c>ZZ</c> for <see cref="Unknown"/>.</param>
     /// <param name="result">The region, or <see cref="Unknown"/> when parsing fails.</param>
-    /// <returns><see langword="true"/> when <paramref name="s"/> is two ASCII letters.</returns>
+    /// <returns><see langword="true"/> when <paramref name="s"/> is an assigned region code or <c>ZZ</c>.</returns>
     public static bool TryParse(ReadOnlySpan<char> s, out Region result)
     {
         if (s.Length == 2 && char.IsAsciiLetter(s[0]) && char.IsAsciiLetter(s[1]))
         {
             // Ordinal ASCII folding: no culture involved.
-            result = new Region(char.ToUpperInvariant(s[0]), char.ToUpperInvariant(s[1]));
-            return true;
+            char first = char.ToUpperInvariant(s[0]);
+            char second = char.ToUpperInvariant(s[1]);
+            if (first == 'Z' && second == 'Z')
+            {
+                result = default;
+                return true;
+            }
+
+            if (Known[((first - 'A') * 26) + (second - 'A')])
+            {
+                result = new Region(first, second);
+                return true;
+            }
         }
 
         result = default;

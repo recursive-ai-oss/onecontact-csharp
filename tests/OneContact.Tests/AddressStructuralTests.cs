@@ -290,7 +290,22 @@ public sealed class AddressStructuralTests : IDisposable
     [Fact]
     public void A_country_the_data_does_not_describe_is_unknown_and_none_is_missing()
     {
-        Assert.Contains(new AddressIssue(AddressField.Country, AddressIssueKind.UnknownValue), PostalAddress.Create(Region.Parse("ZZ"), locality: "x", streetLines: ["a"]).Validate());
+        // An assigned code that the address data does not describe is unknown; the unspecified region is missing, not unknown.
+        Region undescribed = default;
+        for (char a = 'A'; a <= 'Z' && undescribed.IsUnknown; a++)
+        {
+            for (char b = 'A'; b <= 'Z' && undescribed.IsUnknown; b++)
+            {
+                if (Region.TryParse(new string([a, b]), out Region r) && !r.IsUnknown && !AddressRegions.All.Contains(r))
+                {
+                    undescribed = r;
+                }
+            }
+        }
+
+        Assert.False(undescribed.IsUnknown);
+        Assert.Contains(new AddressIssue(AddressField.Country, AddressIssueKind.UnknownValue), PostalAddress.Create(undescribed, locality: "x", streetLines: ["a"]).Validate());
+        Assert.Contains(new AddressIssue(AddressField.Country, AddressIssueKind.MissingRequiredField), PostalAddress.Create(Region.Unknown, locality: "x", streetLines: ["a"]).Validate());
         Assert.Contains(new AddressIssue(AddressField.Country, AddressIssueKind.MissingRequiredField), default(PostalAddress).Validate());
         Assert.Equal(Region.Unknown, default(PostalAddress).Country);
     }

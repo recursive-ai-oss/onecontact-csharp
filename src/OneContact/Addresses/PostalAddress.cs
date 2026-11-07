@@ -90,24 +90,52 @@ public readonly partial struct PostalAddress :
 
     ContactKind IContactValue.Kind => ContactKind.Address;
 
-    /// <summary>Parses a value.</summary>
+    /// <summary>
+    /// Parses free text as an address, telling the country from its content (postcode forms, region names, a country line).
+    /// </summary>
     /// <param name="s">The text to parse. Surrounding white space is ignored.</param>
-    /// <returns>The parsed value.</returns>
+    /// <returns>The parsed value, whose <see cref="Country"/> is never unknown.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="s"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ContactParseException">The text is not a valid value; <see cref="ContactParseException.Reason"/> says why.</exception>
+    /// <exception cref="ContactParseException">The text is not an address, or its country cannot be told from the content
+    /// (<see cref="ReasonCode.AddressCountryUndetermined"/>): use <see cref="Parse(string, Region)"/> with the country. The partial reading is
+    /// available from the status-returning <see cref="TryParse(ReadOnlySpan{char}, out PostalAddress, out ParseDetail)"/>.</exception>
     public static PostalAddress Parse(string s)
     {
         ArgumentNullException.ThrowIfNull(s);
         return Parse(s.AsSpan());
     }
 
-    /// <summary>Parses a value.</summary>
+    /// <summary>
+    /// Parses free text as an address, telling the country from its content (postcode forms, region names, a country line).
+    /// </summary>
     /// <param name="s">The text to parse. Surrounding white space is ignored.</param>
+    /// <returns>The parsed value, whose <see cref="Country"/> is never unknown.</returns>
+    /// <exception cref="ContactParseException">The text is not an address, or its country cannot be told from the content
+    /// (<see cref="ReasonCode.AddressCountryUndetermined"/>): use <see cref="Parse(ReadOnlySpan{char}, Region)"/> with the country.</exception>
+    public static PostalAddress Parse(ReadOnlySpan<char> s) => Parse(s, Region.Unknown);
+
+    /// <summary>Parses free text as an address in a country.</summary>
+    /// <param name="s">The text to parse. Surrounding white space is ignored.</param>
+    /// <param name="country">The country the text is in; <see cref="Region.Unknown"/> tells it from the content, as <see cref="Parse(string)"/> does.</param>
     /// <returns>The parsed value.</returns>
-    /// <exception cref="ContactParseException">The text is not a valid value; <see cref="ContactParseException.Reason"/> says why.</exception>
-    public static PostalAddress Parse(ReadOnlySpan<char> s)
+    /// <exception cref="ArgumentNullException"><paramref name="s"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ContactParseException">The text is not an address, or the country is only described structurally
+    /// (<see cref="ReasonCode.AddressFreeTextRefused"/>).</exception>
+    public static PostalAddress Parse(string s, Region country)
     {
-        OperationStatus status = TryParse(s, out PostalAddress value, out ParseDetail detail);
+        ArgumentNullException.ThrowIfNull(s);
+        return Parse(s.AsSpan(), country);
+    }
+
+    /// <summary>Parses free text as an address in a country.</summary>
+    /// <param name="s">The text to parse. Surrounding white space is ignored.</param>
+    /// <param name="country">The country the text is in; <see cref="Region.Unknown"/> tells it from the content, as <see cref="Parse(string)"/> does.</param>
+    /// <returns>The parsed value.</returns>
+    /// <exception cref="ContactParseException">The text is not an address, or the country is only described structurally
+    /// (<see cref="ReasonCode.AddressFreeTextRefused"/>).</exception>
+    public static PostalAddress Parse(ReadOnlySpan<char> s, Region country)
+    {
+        OperationStatus status = TryParseStrict(s, country, out PostalAddress value, out ParseDetail detail);
         if (status != OperationStatus.Done)
         {
             throw ContactParseException.FromDetail(ContactKind.Address, detail, s.Length);
@@ -116,10 +144,10 @@ public readonly partial struct PostalAddress :
         return value;
     }
 
-    /// <summary>Tries to parse a value.</summary>
+    /// <summary>Tries to parse free text as an address, telling the country from its content.</summary>
     /// <param name="s">The text to parse.</param>
-    /// <param name="result">The parsed value, or the default value when parsing fails.</param>
-    /// <returns><see langword="true"/> when the text was parsed.</returns>
+    /// <param name="result">The parsed value, or the default value when parsing fails, including when the country cannot be told.</param>
+    /// <returns><see langword="true"/> when the text was parsed and its country is known.</returns>
     public static bool TryParse([NotNullWhen(true)] string? s, out PostalAddress result)
     {
         if (s is null)
@@ -131,20 +159,65 @@ public readonly partial struct PostalAddress :
         return TryParse(s.AsSpan(), out result);
     }
 
-    /// <summary>Tries to parse a value.</summary>
+    /// <summary>Tries to parse free text as an address, telling the country from its content.</summary>
     /// <param name="s">The text to parse.</param>
+    /// <param name="result">The parsed value, or the default value when parsing fails, including when the country cannot be told.</param>
+    /// <returns><see langword="true"/> when the text was parsed and its country is known.</returns>
+    public static bool TryParse(ReadOnlySpan<char> s, out PostalAddress result) =>
+        TryParseStrict(s, Region.Unknown, out result, out _) == OperationStatus.Done;
+
+    /// <summary>Tries to parse free text as an address in a country.</summary>
+    /// <param name="s">The text to parse.</param>
+    /// <param name="country">The country the text is in; <see cref="Region.Unknown"/> tells it from the content.</param>
     /// <param name="result">The parsed value, or the default value when parsing fails.</param>
     /// <returns><see langword="true"/> when the text was parsed.</returns>
-    public static bool TryParse(ReadOnlySpan<char> s, out PostalAddress result) =>
-        TryParse(s, out result, out _) == OperationStatus.Done;
+    public static bool TryParse([NotNullWhen(true)] string? s, Region country, out PostalAddress result)
+    {
+        if (s is null)
+        {
+            result = default;
+            return false;
+        }
 
-    /// <summary>The low-level parse: returns a status and a <see cref="ParseDetail"/> instead of throwing.</summary>
+        return TryParseStrict(s, country, out result, out _) == OperationStatus.Done;
+    }
+
+    /// <summary>Tries to parse free text as an address in a country.</summary>
+    /// <param name="s">The text to parse.</param>
+    /// <param name="country">The country the text is in; <see cref="Region.Unknown"/> tells it from the content.</param>
+    /// <param name="result">The parsed value, or the default value when parsing fails.</param>
+    /// <returns><see langword="true"/> when the text was parsed.</returns>
+    public static bool TryParse(ReadOnlySpan<char> s, Region country, out PostalAddress result) =>
+        TryParseStrict(s, country, out result, out _) == OperationStatus.Done;
+
+    /// <summary>
+    /// The low-level parse: returns a status and a <see cref="ParseDetail"/> instead of throwing, and keeps a partial reading. When the country cannot be told from the
+    /// content the fields are returned with <see cref="OperationStatus.Done"/> and <see cref="AddressFacts.CountryUndetermined"/> set, and <see cref="Country"/> unknown;
+    /// the happy-path <c>Parse</c> and <c>TryParse</c> overloads treat that case as a failure instead.
+    /// </summary>
     /// <param name="s">The text to parse.</param>
     /// <param name="value">The parsed value, or the default value when the status is not <see cref="OperationStatus.Done"/>.</param>
     /// <param name="detail">Issues with reason codes, per-field offsets and confidence, and whether a rule or a model decided each field.</param>
     /// <returns><see cref="OperationStatus.Done"/>, or <see cref="OperationStatus.InvalidData"/> with the reason in <paramref name="detail"/>.</returns>
     public static OperationStatus TryParse(ReadOnlySpan<char> s, out PostalAddress value, out ParseDetail detail) =>
         PostalAddressParser.TryParse(s, Region.Unknown, out value, out detail);
+
+    // The happy-path rule: an address is returned only when its country is known (given, or told from the content). The partial reading with an undetermined
+    // country stays available from the status-returning overload above.
+    internal static OperationStatus TryParseStrict(ReadOnlySpan<char> s, Region country, out PostalAddress value, out ParseDetail detail)
+    {
+        OperationStatus status = country.IsUnknown
+            ? PostalAddressParser.TryParse(s, Region.Unknown, out value, out detail)
+            : TryParse(s, country, out value, out detail);
+        if (status == OperationStatus.Done && value.Flags.HasFlag(AddressFacts.CountryUndetermined))
+        {
+            value = default;
+            detail = ParseDetail.Failure(ReasonCode.AddressCountryUndetermined, new SourceSpan(0, s.Length));
+            return OperationStatus.InvalidData;
+        }
+
+        return status;
+    }
 
     static PostalAddress IParsable<PostalAddress>.Parse(string s, IFormatProvider? provider) => Parse(s);
 

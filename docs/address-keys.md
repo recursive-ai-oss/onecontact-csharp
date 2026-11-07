@@ -36,3 +36,7 @@ An address read with the country left unknown (`AddressFacts.CountryUndetermined
 - the locality is folded the same way; the admin area is folded; the postal code keeps only its letters and digits, folded.
 
 No country-specific rule applies (no ZIP+4 truncation, no Canadian unit reordering, no particle rules). The same address read with a hint or with a country in the text has a different key by design: `zz|...` and `be|...` are never equal, so an address without a country never matches one with a country by accident.
+
+## Countries described only by their fields
+
+An address in a country the rules do not read (the structurally described countries, `Coverage` is `Structural`) has the key `<country>|<street words>|<dependent locality>|<locality>|<admin area>|<postal code>`: the country code in lower case, the street lines folded and joined with spaces, then the other fields in this fixed order whatever the country's own label layout is, each folded as above, the postal code keeping only letters and digits. Before this rule the key had no country segment and followed the layout, so equal fields in two countries shared a key; that was a defect, not a version, because no key version had been published.

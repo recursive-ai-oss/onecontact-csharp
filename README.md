@@ -38,10 +38,6 @@ The program below is [samples/OneContact.QuickStart](samples/OneContact.QuickSta
 
 ```csharp
 using RecursiveAI.OneContact;
-using RecursiveAI.OneContact.Addresses;
-using RecursiveAI.OneContact.Addresses.Standardization;
-using RecursiveAI.OneContact.Names;
-using RecursiveAI.OneContact.Phones;
 
 // Phones: national input needs a region; international input does not.
 PhoneNumber phone = PhoneNumber.Parse("(202) 456-1111", Region.US);
@@ -63,10 +59,14 @@ Console.WriteLine(address.ToString(AddressStyle.Postal, AddressLayout.SingleLine
 Console.WriteLine(address.ToString(AddressStyle.Display, AddressLayout.SingleLine));
 Console.WriteLine($"{address.Validate().Count} structural issues");
 
+// Text that does not say which country it is in is refused; give the country.
+Console.WriteLine(PostalAddress.TryParse("Unter den Linden 77, 10117 Berlin", out _) ? "parsed" : "the country cannot be told: give one");
+Console.WriteLine(PostalAddress.Parse("Unter den Linden 77, 10117 Berlin", Region.Parse("DE")).Country.Code);
+
 // Names and companies.
-PersonName person = PersonName.Parse("DR. MARÍA JOSÉ GARCÍA LÓPEZ", NameHints.ForCountry(Region.Parse("ES")));
+PersonName person = PersonName.Parse("DR. MARÍA JOSÉ GARCÍA LÓPEZ", Region.Parse("ES"));
 Console.WriteLine($"{person.Prefix.Text} | {person.Given.Text} | {person.Family.Text} | {person.SecondFamily.Text} | key {person.Key}");
-CompanyName company = CompanyName.Parse("Muster Aktiengesellschaft", NameHints.ForCountry(Region.Parse("DE")));
+CompanyName company = CompanyName.Parse("Muster Aktiengesellschaft", Region.Parse("DE"));
 Console.WriteLine($"{company.Canonical} | {company.Base.Text} | {company.LegalForm?.ElfCode}");
 
 // The same key means the same thing, whatever the kind.
@@ -85,6 +85,8 @@ US | springfield | 22162 | Full
 1 MAIN ST APT 4, SPRINGFIELD VA 22162
 1 Main St Apt 4, Springfield, VA 22162
 0 structural issues
+the country cannot be told: give one
+DE
 Dr. | María | García | López | key maria j garcialopez
 Muster AG | Muster | 6QQB
 Email
@@ -104,7 +106,7 @@ foreach (ContactRecord r in note.Records)
 
 For pages, `ContactExtractor.Extract(html)` returns the records and `ExtractHtml` returns every field with its source, confidence and byte offsets into the original HTML. Pages of one site merge with `ExtractSite`. Disagreeing values (a stale phone in markup, a different one in the text) are kept, each with its source. Extraction runs on what you give it and stores nothing; responsibility for lawful processing of the personal data it finds sits with the caller (see [docs/extraction.md](docs/extraction.md)).
 
-Low-level forms take spans and return `OperationStatus` plus a `ParseDetail`, and phones, addresses and names have batch forms. Explicit metadata (`PhoneMetadata.LoadXml`) and models (the `Models*` seam) can be supplied instead of the built-in ones.
+Low-level forms take spans and return `OperationStatus` plus a `ParseDetail`; phones, names and emails also have batch forms (`PhoneNumberParser.ParseMany`, `NameParsing.SplitMany`, `EmailParser.ParseMany`), and addresses are parsed one at a time. The low-level address form keeps a partial reading when the country cannot be told (`AddressFacts.CountryUndetermined`), where `PostalAddress.Parse` refuses. Explicit metadata (`PhoneMetadata.LoadXml`; numbers parsed with it answer from it) and models (`ContactModels.Use`, or the `model` argument of the low-level forms) can be supplied instead of the built-in ones.
 
 ## Coming from another library
 

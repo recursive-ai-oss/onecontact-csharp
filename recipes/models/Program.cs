@@ -209,7 +209,7 @@ internal static class Program
         var rows = new List<(string Class, string Region, bool Default, RecursiveAI.OneContact.Models.NameModelResult M, RecursiveAI.OneContact.Names.NameClass Rules)>();
         for (int i = 0; i < items.Count; i += step)
         {
-            var hints = new RecursiveAI.OneContact.Names.NameHints(RecursiveAI.OneContact.Region.Parse(items[i].Region), items[i].Lang);
+            var hints = new RecursiveAI.OneContact.NameHints(RecursiveAI.OneContact.Region.Parse(items[i].Region), items[i].Lang);
             RecursiveAI.OneContact.Names.NameParseResult r = RecursiveAI.OneContact.Names.NameParsing.Split(items[i].Text, hints);
             bool isDefault = r.Class == RecursiveAI.OneContact.Names.NameClass.Person && r.Detail.Issues.Any(x => x.Reason.Equals(RecursiveAI.OneContact.ReasonCode.PersonNoEvidence));
             rows.Add((items[i].Class, items[i].Region, isDefault, model.Analyze(items[i].Text), r.Class));

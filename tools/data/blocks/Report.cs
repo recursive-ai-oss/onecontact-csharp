@@ -145,7 +145,7 @@ internal static class RuleReport
 
                 addrSeen[loc] = addrSeen.GetValueOrDefault(loc) + 1;
                 string a = text.Substring(g.Start, g.End - g.Start);
-                if (PostalAddress.TryParse(a, out _))
+                if (PostalAddress.TryParse(a.AsSpan(), out _, out _) == System.Buffers.OperationStatus.Done)
                 {
                     addrParse[loc] = addrParse.GetValueOrDefault(loc) + 1;
                 }

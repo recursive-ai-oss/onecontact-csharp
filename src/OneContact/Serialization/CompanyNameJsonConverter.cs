@@ -12,7 +12,7 @@ public sealed class CompanyNameJsonConverter : JsonConverter<CompanyName>
 {
     /// <inheritdoc/>
     public override CompanyName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-        Parse(reader.TokenType == JsonTokenType.String ? reader.GetString() : null);
+        Parse(reader.TokenType == JsonTokenType.String ? reader.GetString() : null, reader.TokenStartIndex);
 
     /// <inheritdoc/>
     public override void Write(Utf8JsonWriter writer, CompanyName value, JsonSerializerOptions options)
@@ -23,7 +23,7 @@ public sealed class CompanyNameJsonConverter : JsonConverter<CompanyName>
 
     /// <inheritdoc/>
     public override CompanyName ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-        Parse(reader.GetString());
+        Parse(reader.GetString(), reader.TokenStartIndex);
 
     /// <inheritdoc/>
     public override void WriteAsPropertyName(Utf8JsonWriter writer, [DisallowNull] CompanyName value, JsonSerializerOptions options)
@@ -32,13 +32,20 @@ public sealed class CompanyNameJsonConverter : JsonConverter<CompanyName>
         JsonText.WritePropertyName(writer, value.Canonical);
     }
 
-    private static CompanyName Parse(string? text)
+    private static CompanyName Parse(string? text, long tokenStart)
     {
-        if (!CompanyName.TryParse(text, out CompanyName value))
+        if (text is null)
         {
-            throw new JsonException("The JSON value is not a valid CompanyName.");
+            throw JsonText.Invalid("CompanyName", null, tokenStart);
         }
 
-        return value;
+        try
+        {
+            return CompanyName.Parse(text);
+        }
+        catch (ContactParseException e)
+        {
+            throw JsonText.Invalid("CompanyName", e, tokenStart);
+        }
     }
 }

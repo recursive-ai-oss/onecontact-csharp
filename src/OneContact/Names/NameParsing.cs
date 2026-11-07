@@ -46,6 +46,13 @@ public sealed class NameParseResult
 /// </summary>
 public static class NameParsing
 {
+    /// <summary>
+    /// The longest text, in UTF-16 code units, that is read as a person's or a company's name; 1,000. Longer text is refused with
+    /// <see cref="ReasonCode.PersonTooLong"/> (<see cref="ReasonCode.CompanyTooLong"/> for a company), so a hostile string cannot make the
+    /// rules work in proportion to its size.
+    /// </summary>
+    public const int MaxInputLength = 1000;
+
     /// <summary>Tells what a name string is.</summary>
     /// <param name="text">The text.</param>
     /// <param name="hints">The country and language the text is written in; neither is needed.</param>
@@ -115,6 +122,28 @@ public static class NameParsing
         }
 
         return new NameParseResult(analysis.Class, persons, default, new ParseDetail(issues, fields));
+    }
+
+    /// <summary>Tells what a name string is, with an explicit name model used instead of the registered one for this call.</summary>
+    /// <param name="text">The text.</param>
+    /// <param name="hints">The country and language the text is written in; neither is needed.</param>
+    /// <param name="model">The model that reads what the rules leave open, for example one loaded from a file; <see langword="null"/> reads by rules only, whatever model package is referenced.</param>
+    /// <returns>The class.</returns>
+    public static NameClass Classify(ReadOnlySpan<char> text, NameHints hints, Models.INameModel? model)
+    {
+        using IDisposable scope = Models.ContactModels.Use(Models.ContactModels.Address, model, Models.ContactModels.Spans);
+        return Classify(text, hints);
+    }
+
+    /// <summary>Reads a name string of unknown kind, with an explicit name model used instead of the registered one for this call.</summary>
+    /// <param name="text">The text.</param>
+    /// <param name="hints">The country and language the text is written in; neither is needed.</param>
+    /// <param name="model">The model that reads what the rules leave open, for example one loaded from a file; <see langword="null"/> reads by rules only, whatever model package is referenced.</param>
+    /// <returns>The class and the people or company in it; <see cref="NameParseResult.Detail"/> says per field whether a rule or the model decided it.</returns>
+    public static NameParseResult Split(ReadOnlySpan<char> text, NameHints hints, Models.INameModel? model)
+    {
+        using IDisposable scope = Models.ContactModels.Use(Models.ContactModels.Address, model, Models.ContactModels.Spans);
+        return Split(text, hints);
     }
 
     /// <summary>Reads many name strings, one result for each, in order.</summary>

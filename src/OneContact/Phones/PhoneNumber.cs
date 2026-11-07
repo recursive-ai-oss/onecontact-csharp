@@ -38,6 +38,9 @@ public readonly partial struct PhoneNumber :
     // The line type by the default metadata plus one, set by the parser so Type and IsValid need no second look at the plan; 0 when unknown.
     private readonly byte _typePlusOne;
 
+    // The parser over user-supplied metadata that produced this value; null for the built-in metadata. Members answer through it.
+    private readonly PhoneNumberParser? _engine;
+
     internal PhoneNumber(
         int countryCode,
         ulong nationalNumber,
@@ -48,8 +51,10 @@ public readonly partial struct PhoneNumber :
         string? carrierCode,
         SourceSpan source,
         PhoneFacts flags,
-        PhoneNumberType? lineType = null)
+        PhoneNumberType? lineType = null,
+        PhoneNumberParser? engine = null)
     {
+        _engine = engine;
         _typePlusOne = lineType is { } t ? (byte)((int)t + 1) : (byte)0;
         _countryCode = countryCode;
         _nationalNumber = nationalNumber;
@@ -220,23 +225,69 @@ public readonly partial struct PhoneNumber :
     /// <returns><see cref="Canonical"/>.</returns>
     public override string ToString() => Canonical;
 
-    /// <summary>Formats the value. Only the canonical form (<c>null</c>, empty or <c>"C"</c>) is defined for now.</summary>
-    /// <param name="format">The format: <see langword="null"/>, empty or <c>"C"</c>.</param>
+    /// <summary>Formats the value.</summary>
+    /// <param name="format">
+    /// <see langword="null"/>, empty or <c>"C"</c>: the canonical form (<see cref="Canonical"/>). <c>"E"</c>: E.164 without the extension
+    /// (<see cref="PhoneFormat.E164"/>). <c>"I"</c>: international (<see cref="PhoneFormat.International"/>). <c>"N"</c>: national
+    /// (<see cref="PhoneFormat.National"/>). <c>"R"</c>: RFC 3966 (<see cref="PhoneFormat.Rfc3966"/>). A letter is read in either case.
+    /// The default value formats as the empty string in every format.
+    /// </param>
     /// <param name="formatProvider">Ignored; results never depend on culture.</param>
     /// <returns>The formatted text.</returns>
-    /// <exception cref="FormatException"><paramref name="format"/> is not a defined format.</exception>
-    public string ToString(string? format, IFormatProvider? formatProvider) =>
-        ValueFormatting.Format(Canonical, format);
+    /// <exception cref="FormatException"><paramref name="format"/> is not one of the formats above.</exception>
+    public string ToString(string? format, IFormatProvider? formatProvider) => FormatBy(format);
 
     /// <summary>Tries to write the formatted value to a span.</summary>
     /// <param name="destination">Where to write.</param>
     /// <param name="charsWritten">The number of characters written.</param>
-    /// <param name="format">The format: empty or <c>"C"</c>.</param>
+    /// <param name="format">The format: see <see cref="ToString(string?, IFormatProvider?)"/>.</param>
     /// <param name="provider">Ignored; results never depend on culture.</param>
     /// <returns><see langword="false"/> when <paramref name="destination"/> is too small.</returns>
     /// <exception cref="FormatException"><paramref name="format"/> is not a defined format.</exception>
-    public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) =>
-        ValueFormatting.TryFormat(Canonical, destination, out charsWritten, format);
+    public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
+    {
+        string text = FormatBy(format.ToString());
+        if (text.TryCopyTo(destination))
+        {
+            charsWritten = text.Length;
+            return true;
+        }
+
+        charsWritten = 0;
+        return false;
+    }
+
+    private string FormatBy(string? format)
+    {
+        if (string.IsNullOrEmpty(format))
+        {
+            return Canonical;
+        }
+
+        if (format.Length == 1)
+        {
+            PhoneFormat? chosen = format[0] switch
+            {
+                'C' or 'c' => null,
+                'E' or 'e' => PhoneFormat.E164,
+                'I' or 'i' => PhoneFormat.International,
+                'N' or 'n' => PhoneFormat.National,
+                'R' or 'r' => PhoneFormat.Rfc3966,
+                _ => (PhoneFormat)(-1),
+            };
+            if (chosen is not { } f)
+            {
+                return Canonical;
+            }
+
+            if (f != (PhoneFormat)(-1))
+            {
+                return _countryCode == 0 ? string.Empty : Format(f);
+            }
+        }
+
+        throw new FormatException($"The format '{format}' is not defined for a phone number; use C, E, I, N or R.");
+    }
 
     /// <summary>Compares canonical forms ordinally.</summary>
     /// <param name="other">The value to compare with.</param>

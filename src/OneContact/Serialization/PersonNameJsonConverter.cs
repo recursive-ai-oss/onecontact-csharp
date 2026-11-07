@@ -12,7 +12,7 @@ public sealed class PersonNameJsonConverter : JsonConverter<PersonName>
 {
     /// <inheritdoc/>
     public override PersonName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-        Parse(reader.TokenType == JsonTokenType.String ? reader.GetString() : null);
+        Parse(reader.TokenType == JsonTokenType.String ? reader.GetString() : null, reader.TokenStartIndex);
 
     /// <inheritdoc/>
     public override void Write(Utf8JsonWriter writer, PersonName value, JsonSerializerOptions options)
@@ -23,7 +23,7 @@ public sealed class PersonNameJsonConverter : JsonConverter<PersonName>
 
     /// <inheritdoc/>
     public override PersonName ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-        Parse(reader.GetString());
+        Parse(reader.GetString(), reader.TokenStartIndex);
 
     /// <inheritdoc/>
     public override void WriteAsPropertyName(Utf8JsonWriter writer, [DisallowNull] PersonName value, JsonSerializerOptions options)
@@ -32,13 +32,20 @@ public sealed class PersonNameJsonConverter : JsonConverter<PersonName>
         JsonText.WritePropertyName(writer, value.Canonical);
     }
 
-    private static PersonName Parse(string? text)
+    private static PersonName Parse(string? text, long tokenStart)
     {
-        if (!PersonName.TryParse(text, out PersonName value))
+        if (text is null)
         {
-            throw new JsonException("The JSON value is not a valid PersonName.");
+            throw JsonText.Invalid("PersonName", null, tokenStart);
         }
 
-        return value;
+        try
+        {
+            return PersonName.Parse(text);
+        }
+        catch (ContactParseException e)
+        {
+            throw JsonText.Invalid("PersonName", e, tokenStart);
+        }
     }
 }

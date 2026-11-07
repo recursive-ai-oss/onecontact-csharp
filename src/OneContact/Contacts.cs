@@ -64,7 +64,7 @@ public static class Contacts
                 value = web == OperationStatus.Done ? ContactValue.From(w) : default;
                 return web;
             case ContactKind.Address:
-                OperationStatus address = PostalAddress.TryParse(text, out PostalAddress a, out detail);
+                OperationStatus address = PostalAddress.TryParseStrict(text, Region.Unknown, out PostalAddress a, out detail);
                 value = address == OperationStatus.Done ? ContactValue.From(a) : default;
                 return address;
             default:

@@ -43,17 +43,23 @@ public sealed class ContactExtractor
     /// </summary>
     public Region DefaultRegion { get; init; }
 
+    /// <summary>
+    /// The bounds on one input (size, nesting, nodes, fields). The default is <see cref="ExtractionLimits.Default"/>; lower them for untrusted pages. An input past a
+    /// bound throws <see cref="ContactExtractionException"/>.
+    /// </summary>
+    public ExtractionLimits Limits { get; init; } = ExtractionLimits.Default;
+
     /// <summary>Extracts the records of an HTML string with every reader: the markup readers and the visible-text rules.</summary>
     /// <param name="html">The page.</param>
     /// <returns>The records, in the order their markup begins. Fields not tied to a record are not included; use an instance for the full <see cref="ExtractResult"/>.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="html"/> is null.</exception>
-    /// <exception cref="HtmlLimitExceededException">The page exceeds OneHtml's default parse limits.</exception>
+    /// <exception cref="ContactExtractionException">The page is past the default <see cref="ExtractionLimits"/>.</exception>
     public static IReadOnlyList<ContactRecord> Extract(string html) => new ContactExtractor().ExtractHtml(html).Records;
 
     /// <summary>Extracts the records of an HTML page given as bytes with every reader. The encoding is sniffed as a browser would.</summary>
     /// <param name="html">The page bytes; kept by reference while the call runs.</param>
     /// <returns>The records, in the order their markup begins.</returns>
-    /// <exception cref="HtmlLimitExceededException">The page exceeds OneHtml's default parse limits.</exception>
+    /// <exception cref="ContactExtractionException">The page is past the default <see cref="ExtractionLimits"/>.</exception>
     public static IReadOnlyList<ContactRecord> Extract(ReadOnlyMemory<byte> html) => new ContactExtractor().ExtractHtml(html).Records;
 
     /// <summary>
@@ -64,12 +70,12 @@ public sealed class ContactExtractor
     /// <returns>The merged records, in the order their first page and markup begin.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="pages"/> is null.</exception>
     /// <exception cref="ArgumentException">A page is a default value or two pages share an id.</exception>
-    /// <exception cref="HtmlLimitExceededException">A page exceeds OneHtml's default parse limits.</exception>
+    /// <exception cref="ContactExtractionException">A page is past the default <see cref="ExtractionLimits"/>.</exception>
     public static IReadOnlyList<ContactRecord> Extract(IEnumerable<ContactPage> pages) => new ContactExtractor().ExtractSite(pages).Records;
 
     /// <summary>Starts reading a site page by page; the low-level form of <see cref="ExtractSite(IEnumerable{ContactPage})"/>.</summary>
     /// <returns>A new <see cref="SiteExtraction"/> that reads with this extractor's <see cref="Sources"/> and <see cref="DefaultRegion"/>.</returns>
-    public SiteExtraction BeginSite() => new(Sources, DefaultRegion);
+    public SiteExtraction BeginSite() => new(Sources, DefaultRegion, Limits);
 
     /// <summary>
     /// Extracts a set of pages from one site and merges them. Each page is read on its own (its fields keep its id, source and offsets),
@@ -80,7 +86,7 @@ public sealed class ContactExtractor
     /// <returns>The merged result.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="pages"/> is null.</exception>
     /// <exception cref="ArgumentException">A page is a default value or two pages share an id.</exception>
-    /// <exception cref="HtmlLimitExceededException">A page exceeds OneHtml's default parse limits.</exception>
+    /// <exception cref="ContactExtractionException">A page is past the default <see cref="ExtractionLimits"/>.</exception>
     public SiteExtractResult ExtractSite(IEnumerable<ContactPage> pages)
     {
         ArgumentNullException.ThrowIfNull(pages);
@@ -116,11 +122,11 @@ public sealed class ContactExtractor
     /// <param name="html">The page.</param>
     /// <returns>The records, every field flat, and what the readers could not read. Offsets count UTF-16 code units of <paramref name="html"/>.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="html"/> is null.</exception>
-    /// <exception cref="HtmlLimitExceededException">The page exceeds OneHtml's default parse limits.</exception>
+    /// <exception cref="ContactExtractionException">The page is past the default <see cref="ExtractionLimits"/>.</exception>
     public ExtractResult ExtractHtml(string html)
     {
         ArgumentNullException.ThrowIfNull(html);
-        Document document = Document.Parse(html);
+        Document document = Limits.ParseHtml(html);
         return Run(new PageContext(document, html));
     }
 
@@ -128,10 +134,10 @@ public sealed class ContactExtractor
     /// <param name="html">The page bytes; kept by reference while the call runs.</param>
     /// <param name="contentType">The transport <c>Content-Type</c>, if known, as a hint for the encoding; null for none.</param>
     /// <returns>The result. Offsets are byte offsets into <paramref name="html"/>.</returns>
-    /// <exception cref="HtmlLimitExceededException">The page exceeds OneHtml's default parse limits.</exception>
+    /// <exception cref="ContactExtractionException">The page is past the default <see cref="ExtractionLimits"/>.</exception>
     public ExtractResult ExtractHtml(ReadOnlyMemory<byte> html, string? contentType = null)
     {
-        Document document = Document.Parse(html, new ParseOptions { ContentType = contentType });
+        Document document = Limits.ParseHtml(html, contentType);
         return Run(new PageContext(document, null, bytesInput: true));
     }
 
@@ -146,6 +152,7 @@ public sealed class ContactExtractor
     public ExtractResult ExtractText(string text)
     {
         ArgumentNullException.ThrowIfNull(text);
+        Limits.CheckText(text);
         return Run(PageContext.ForPlainText(text));
     }
 
@@ -159,5 +166,5 @@ public sealed class ContactExtractor
         return Run(new PageContext(document, null));
     }
 
-    private ExtractResult Run(PageContext page) => ExtractionPipeline.Run(page, Sources, DefaultRegion);
+    private ExtractResult Run(PageContext page) => ExtractionPipeline.Run(page, Sources, DefaultRegion, Limits.MaxFields);
 }

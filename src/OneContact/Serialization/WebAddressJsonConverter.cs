@@ -12,7 +12,7 @@ public sealed class WebAddressJsonConverter : JsonConverter<WebAddress>
 {
     /// <inheritdoc/>
     public override WebAddress Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-        Parse(reader.TokenType == JsonTokenType.String ? reader.GetString() : null);
+        Parse(reader.TokenType == JsonTokenType.String ? reader.GetString() : null, reader.TokenStartIndex);
 
     /// <inheritdoc/>
     public override void Write(Utf8JsonWriter writer, WebAddress value, JsonSerializerOptions options)
@@ -23,7 +23,7 @@ public sealed class WebAddressJsonConverter : JsonConverter<WebAddress>
 
     /// <inheritdoc/>
     public override WebAddress ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-        Parse(reader.GetString());
+        Parse(reader.GetString(), reader.TokenStartIndex);
 
     /// <inheritdoc/>
     public override void WriteAsPropertyName(Utf8JsonWriter writer, [DisallowNull] WebAddress value, JsonSerializerOptions options)
@@ -32,13 +32,20 @@ public sealed class WebAddressJsonConverter : JsonConverter<WebAddress>
         JsonText.WritePropertyName(writer, value.Canonical);
     }
 
-    private static WebAddress Parse(string? text)
+    private static WebAddress Parse(string? text, long tokenStart)
     {
-        if (!WebAddress.TryParse(text, out WebAddress value))
+        if (text is null)
         {
-            throw new JsonException("The JSON value is not a valid WebAddress.");
+            throw JsonText.Invalid("WebAddress", null, tokenStart);
         }
 
-        return value;
+        try
+        {
+            return WebAddress.Parse(text);
+        }
+        catch (ContactParseException e)
+        {
+            throw JsonText.Invalid("WebAddress", e, tokenStart);
+        }
     }
 }

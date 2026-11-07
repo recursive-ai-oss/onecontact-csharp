@@ -5,15 +5,17 @@ using System.Text.Json.Serialization;
 namespace RecursiveAI.OneContact.Serialization;
 
 /// <summary>
-/// Reads and writes a <see cref="PostalAddress"/>. An address parsed from text is written as its canonical string, which parses back to the same address (offsets then index the canonical string);
-/// an address made from fields is written as an object holding its canonical form, its fields and its flags, and reads back equal. The default value is written as the empty string, which does not read back (as for every value type). As a property name the canonical
+/// Reads and writes a <see cref="PostalAddress"/> as one object shape for every address: <c>canonical</c>, <c>country</c>, <c>language</c> (when set), the fields
+/// (<c>adminArea</c>, <c>locality</c>, <c>dependentLocality</c>, <c>postalCode</c>, <c>sortingCode</c>, <c>organization</c>, <c>recipient</c>), <c>streetLines</c>, <c>flags</c>,
+/// <c>sourceStart</c> and <c>sourceLength</c>. An address parsed from text also carries <c>text</c> (the text the rules read) and <c>hint</c> (the country hint, when one was given), and
+/// reads back through the rules; an address made from fields reads back from its stored fields. Property names are fixed camelCase and ignore the naming policy of the serializer options. The default value is written as the empty string, which does not read back (as for every value type). As a property name the canonical
 /// string is used and read back by parsing. No reflection: it works with source-generated serialization and under NativeAOT. A value that does not read throws <see cref="JsonException"/>.
 /// </summary>
 public sealed class PostalAddressJsonConverter : JsonConverter<PostalAddress>
 {
     /// <inheritdoc/>
     public override PostalAddress Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-        reader.TokenType == JsonTokenType.StartObject ? ReadObject(ref reader) : Parse(reader.TokenType == JsonTokenType.String ? reader.GetString() : null);
+        reader.TokenType == JsonTokenType.StartObject ? ReadObject(ref reader) : Parse(reader.TokenType == JsonTokenType.String ? reader.GetString() : null, reader.TokenStartIndex);
 
     /// <inheritdoc/>
     public override void Write(Utf8JsonWriter writer, PostalAddress value, JsonSerializerOptions options)
@@ -26,25 +28,18 @@ public sealed class PostalAddressJsonConverter : JsonConverter<PostalAddress>
             return;
         }
 
+        writer.WriteStartObject();
+        JsonText.WriteString(writer, "canonical", value.Canonical);
         if (value.ParsedForJson is { } parsed)
         {
-            // The text the rules read is stored beside the canonical form, so reading it back gives the same renderings in the same casing.
-            writer.WriteStartObject();
-            JsonText.WriteString(writer, "canonical", value.Canonical);
+            // The text the rules read is stored beside the fields, so reading it back gives the same renderings in the same casing.
             JsonText.WriteString(writer, "text", parsed.SourceText.Substring(parsed.Span.Start, parsed.Span.Length));
             if (!parsed.Hint.IsUnknown)
             {
                 JsonText.WriteString(writer, "hint", parsed.Hint.Code);
             }
-
-            writer.WriteNumber("sourceStart", value.Source.Start);
-            writer.WriteNumber("sourceLength", value.Source.Length);
-            writer.WriteEndObject();
-            return;
         }
 
-        writer.WriteStartObject();
-        JsonText.WriteString(writer, "canonical", value.Canonical);
         JsonText.WriteString(writer, "country", parts.Country.IsUnknown ? string.Empty : parts.Country.Code);
         if (parts.Language is not null)
         {
@@ -73,7 +68,7 @@ public sealed class PostalAddressJsonConverter : JsonConverter<PostalAddress>
 
     /// <inheritdoc/>
     public override PostalAddress ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-        Parse(reader.GetString());
+        Parse(reader.GetString(), reader.TokenStartIndex);
 
     /// <inheritdoc/>
     public override void WriteAsPropertyName(Utf8JsonWriter writer, [DisallowNull] PostalAddress value, JsonSerializerOptions options)
@@ -82,14 +77,21 @@ public sealed class PostalAddressJsonConverter : JsonConverter<PostalAddress>
         JsonText.WritePropertyName(writer, value.Canonical);
     }
 
-    private static PostalAddress Parse(string? text)
+    private static PostalAddress Parse(string? text, long tokenStart)
     {
-        if (!PostalAddress.TryParse(text, out PostalAddress value))
+        if (text is null)
         {
-            throw new JsonException("The JSON value is not a valid PostalAddress.");
+            throw JsonText.Invalid("PostalAddress", null, tokenStart);
         }
 
-        return value;
+        try
+        {
+            return PostalAddress.Parse(text);
+        }
+        catch (ContactParseException e)
+        {
+            throw JsonText.Invalid("PostalAddress", e, tokenStart);
+        }
     }
 
     private static PostalAddress ReadObject(ref Utf8JsonReader reader)

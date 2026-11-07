@@ -1,10 +1,7 @@
 using System.Text.Json;
 using RecursiveAI.OneContact;
-using RecursiveAI.OneContact.Addresses;
-using RecursiveAI.OneContact.Addresses.Standardization;
 using RecursiveAI.OneContact.Extraction;
 using RecursiveAI.OneContact.Extraction.Records;
-using RecursiveAI.OneContact.Names;
 using RecursiveAI.OneContact.Phones;
 using RecursiveAI.OneContact.Phones.Geo;
 using RecursiveAI.OneContact.Serialization;
@@ -34,10 +31,14 @@ Console.WriteLine(address.ToString(AddressStyle.Postal, AddressLayout.SingleLine
 Console.WriteLine(address.ToString(AddressStyle.Display, AddressLayout.SingleLine));
 Console.WriteLine($"{address.Validate().Count} structural issues");
 
+// Text that does not say which country it is in is refused; give the country.
+Console.WriteLine(PostalAddress.TryParse("Unter den Linden 77, 10117 Berlin", out _) ? "parsed" : "the country cannot be told: give one");
+Console.WriteLine(PostalAddress.Parse("Unter den Linden 77, 10117 Berlin", Region.Parse("DE")).Country.Code);
+
 // Names and companies.
-PersonName person = PersonName.Parse("DR. MARÍA JOSÉ GARCÍA LÓPEZ", NameHints.ForCountry(Region.Parse("ES")));
+PersonName person = PersonName.Parse("DR. MARÍA JOSÉ GARCÍA LÓPEZ", Region.Parse("ES"));
 Console.WriteLine($"{person.Prefix.Text} | {person.Given.Text} | {person.Family.Text} | {person.SecondFamily.Text} | key {person.Key}");
-CompanyName company = CompanyName.Parse("Muster Aktiengesellschaft", NameHints.ForCountry(Region.Parse("DE")));
+CompanyName company = CompanyName.Parse("Muster Aktiengesellschaft", Region.Parse("DE"));
 Console.WriteLine($"{company.Canonical} | {company.Base.Text} | {company.LegalForm?.ElfCode}");
 
 // The same key means the same thing, whatever the kind.

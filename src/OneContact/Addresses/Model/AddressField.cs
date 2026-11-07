@@ -1,4 +1,4 @@
-namespace RecursiveAI.OneContact.Addresses;
+namespace RecursiveAI.OneContact;
 
 /// <summary>
 /// The fields of a postal address, at the level of detail postal address metadata describes (country, administrative area,

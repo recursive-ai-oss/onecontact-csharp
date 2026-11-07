@@ -25,6 +25,12 @@ public readonly partial struct ReasonCode : IEquatable<ReasonCode>
     /// <summary>Gets the number, unique within <see cref="Kind"/>. Zero is the default value, meaning no reason.</summary>
     public ushort Number { get; }
 
+    /// <summary>
+    /// Gets the code as an enumeration member for <c>switch</c> and <c>case</c>: <c>case ReasonValue.PhoneTooShort:</c>. A code that this version
+    /// does not list reads as an undefined value, so keep a default branch.
+    /// </summary>
+    public ReasonValue Value => (ReasonValue)(((int)Kind << 16) | Number);
+
     /// <summary>Gets the short lower-case name, such as <c>region-required</c>. Empty text for the default value.</summary>
     public string Name => _name ?? "none";
 

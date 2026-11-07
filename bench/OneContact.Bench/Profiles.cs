@@ -173,7 +173,7 @@ internal static class Profiles
         using FileStream stream = File.OpenRead(Environment.GetEnvironmentVariable("ONECONTACT_TIER1_MODEL") ?? throw new InvalidOperationException("set ONECONTACT_TIER1_MODEL"));
         Tier1Model model = Tier1Model.Load(stream);
         var counting = new CountingModel(model);
-        using IDisposable scope = ContactModels.Scope(model, counting, model);
+        using IDisposable scope = ContactModels.Use(model, counting, model);
         List<string> names = [.. Inputs.Names];
         string? dev = Environment.GetEnvironmentVariable("ONECONTACT_NAMES_DEV");
         if (dev is not null)

@@ -23,6 +23,7 @@ Start with the [README](../README.md) for the packages, the quick start and the 
 - [address-last-line-orders.md](address-last-line-orders.md): how the last line (postcode, town, region) is read in each country's order.
 - [address-country-undetermined.md](address-country-undetermined.md): inferring the country from the text, and what is reported when several fit.
 - [address-dictionaries.md](address-dictionaries.md) and [address-keys.md](address-keys.md): expansion dictionaries and the address key.
+- [api-shapes.md](api-shapes.md): parse overloads, reasons, regions, formats, explicit models, JSON and limits.
 
 ### Names and companies
 - [names.md](names.md): person names: hints, classes, parts, casing restoration, order, multi-person splits.

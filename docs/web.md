@@ -52,7 +52,7 @@ Names are matched ignoring ASCII case, on the name as written (not percent-decod
 
 ## Facts
 
-`WebFacts` reports what was found; it never changes the value: `SchemeAssumed`, `IpHost`, `InternationalizedDomain` (some label is `xn--`), `NonWebScheme` (not http or https), `HasCredentials`, `TrackingParametersRemoved`, `FragmentRemoved`, and the social-profile shapes.
+`WebFacts` reports what was found; it never changes the value: `SchemeAssumed`, `IpHost`, `InternationalizedDomain` (some label is `xn--`), `NonWebScheme` (not http or https; `IsWebsite` is false for those values: parsing accepts any WHATWG URL, including `javascript:` and `data:`, so check `IsWebsite` before using a value as a link), `HasCredentials`, `TrackingParametersRemoved`, `FragmentRemoved`, and the social-profile shapes.
 
 ### Social-profile shapes
 
