@@ -11,7 +11,7 @@ A clean-room library for .NET 10 with no native code and no network, NativeAOT a
 - **Names**: Western-pattern person names (titles, suffixes, particles, order, several people in one string, casing restoration) and company names with ISO 20275 legal forms.
 - **Extraction**: people, organizations, addresses, phones, emails and websites from pages (JSON-LD, microdata, RDFa Lite, h-card, `mailto:`/`tel:`, `<address>`, visible text) and from plain text.
 
-Everything runs offline. Nothing in the packages opens a socket, resolves a name or downloads a file; a missing model is an error that names the package to add. The library keeps no state about what you parse, and `CultureInfo` never changes a result.
+Everything runs offline. Nothing in the packages opens a socket, resolves a name or downloads a file. The library keeps no state about what you parse, and `CultureInfo` never changes a result.
 
 ## Packages
 
@@ -21,12 +21,11 @@ All packages share one version.
 |---|---|---|
 | `RecursiveAI.OneContact` | the .NET base class library only | The value types, `Contacts`, keys and flags, JSON converters; phones, email, web addresses, addresses (structural layer for every country; rules for the Tier 1 and Tier 2 countries), names and companies |
 | `RecursiveAI.OneContact.Phones.Geo` | core | Geocoder, carrier and time-zone mappers for phone numbers |
-| `RecursiveAI.OneContact.Models.Tier1` | core, OneNLP, OneModel | The trained models for free-text address and name parsing in the United States and Canada (about 10 MB) |
-| `RecursiveAI.OneContact.Models` | core, OneNLP, OneModel | The same for the United States, Canada and the Tier 2 countries (about 23 MB). Preferred over `.Models.Tier1` when both are referenced |
-| `RecursiveAI.OneContact.Extraction` | core, OneHtml | `ContactExtractor`: markup readers, visible-text reading, obfuscation decoding, records, site merge. Markup and rules work without a model package; text spans use a model package when one is referenced |
-| `RecursiveAI.OneContact.Models.Accurate` | | The same heads over a larger multilingual encoder. Not available yet |
+| `RecursiveAI.OneContact.Extraction` | core, OneHtml | `ContactExtractor`: markup readers, visible-text reading, obfuscation decoding, records, site merge |
 
-The rules read what is certain (phone metadata, postcode patterns, region names, authority abbreviations, legal forms, titles, line structure). A model fills in only what the rules leave open and never overrules a rule hit, and `ParseDetail` says per field which of the two decided. Without a model package, text the rules cannot read is refused with a reason that names the package to add.
+Version 1.0 runs on rules and markup alone. The trained model packages (`RecursiveAI.OneContact.Models.Tier1`, `.Models` and `.Models.Accurate`) follow in 1.1, after OneNLP 1.0.
+
+The rules read what is certain (phone metadata, postcode patterns, region names, authority abbreviations, legal forms, titles, line structure) and say so in `ParseDetail`. They never read a text in the wrong country and never print a value the text does not contain. Text they cannot read is refused with a reason: when only a trained model could fill a field, the reason names the package that does so, available from 1.1; when the country cannot be told, `address.country-undetermined` asks you to give one.
 
 ## Quick start
 
@@ -106,7 +105,7 @@ foreach (ContactRecord r in note.Records)
 
 For pages, `ContactExtractor.Extract(html)` returns the records and `ExtractHtml` returns every field with its source, confidence and byte offsets into the original HTML. Pages of one site merge with `ExtractSite`. Disagreeing values (a stale phone in markup, a different one in the text) are kept, each with its source. Extraction runs on what you give it and stores nothing; responsibility for lawful processing of the personal data it finds sits with the caller (see [docs/extraction.md](docs/extraction.md)).
 
-Low-level forms take spans and return `OperationStatus` plus a `ParseDetail`; phones, names and emails also have batch forms (`PhoneNumberParser.ParseMany`, `NameParsing.SplitMany`, `EmailParser.ParseMany`), and addresses are parsed one at a time. The low-level address form keeps a partial reading when the country cannot be told (`AddressFacts.CountryUndetermined`), where `PostalAddress.Parse` refuses. Explicit metadata (`PhoneMetadata.LoadXml`; numbers parsed with it answer from it) and models (`ContactModels.Use`, or the `model` argument of the low-level forms) can be supplied instead of the built-in ones.
+Low-level forms take spans and return `OperationStatus` plus a `ParseDetail`; phones, names and emails also have batch forms (`PhoneNumberParser.ParseMany`, `NameParsing.SplitMany`, `EmailParser.ParseMany`), and addresses are parsed one at a time. The low-level address form keeps a partial reading when the country cannot be told (`AddressFacts.CountryUndetermined`), where `PostalAddress.Parse` refuses. Explicit metadata (`PhoneMetadata.LoadXml`; numbers parsed with it answer from it) can be supplied instead of the built-in tables.
 
 ## Coming from another library
 
@@ -118,11 +117,10 @@ Low-level forms take spans and return `OperationStatus` plus a `ParseDetail`; ph
 - Metadata, structural tables, authority rules, dictionaries and legal-form tables are compiled into the assembly as data and read on first use.
 - `IsAotCompatible` and `IsTrimmable` are on, with warnings as errors. [samples/OneContact.AotSmoke](samples/OneContact.AotSmoke/Program.cs) is published with NativeAOT and exercises the library.
 - JSON uses `Utf8JsonReader`/`Utf8JsonWriter` and a source-generated context (`ContactJsonContext`).
-- The trained models are small OneNLP pipelines run by OneModel; no ONNX Runtime or other native runtime is involved.
 
 ## Results
 
-The library is measured against the leaders it replaces. Rows below that carry a number have been measured; every other row says **measured at 1.0** and is filled in only from a measured run. Quality rows for trained parts are scored on private real-text sets and published only as aggregates, with paired-bootstrap 95% confidence intervals (1000 resamples).
+The library is measured against the leaders it replaces. Every number below was measured; the evaluation sets behind real-text rows are private and only aggregates are published.
 
 ### Exact agreement
 
@@ -141,43 +139,37 @@ The library is measured against the leaders it replaces. Rows below that carry a
 | Address standardization, Tier 2 countries | the posts' and UPU's published examples, five example sets | examples reproduced | 316 / 316 (five example sets of 57, 54, 51, 65 and 89) | national postal authorities, UPU addressing sheets | exact |
 | Structural address layer | every libaddressinput region, generated cases | mismatches | 0 of 32,883, with 4 documented intended differences | libaddressinput (released build) | exact, with the 4 differences |
 
-Fuzzing: every parser and loader the packages ship (20 targets: phone strings, the matcher, as-you-type, phone and short-number metadata, email, web addresses, IDNA, addresses, names, companies, `Contacts.Normalize`, HTML and text extraction, both model loaders, JSON converters and the compiled-table reader) was fuzzed for 600 seconds each with AFL++ and SharpFuzz. One bug turned up (a negative span length in the address reader) and is fixed with a regression test; the rerun of that target found none. See [fuzz/README.md](fuzz/README.md).
+Fuzzing: every parser and loader the packages ship (20 targets: phone strings, the matcher, as-you-type, phone and short-number metadata, email, web addresses, IDNA, addresses, names, companies, `Contacts.Normalize`, HTML and text extraction, the model-file loader that ships with the 1.1 packages, JSON converters and the compiled-table reader) was fuzzed for 600 seconds each with AFL++ and SharpFuzz. One bug turned up (a negative span length in the address reader) and is fixed with a regression test; the rerun of that target found none. See [fuzz/README.md](fuzz/README.md).
 
 The four intended differences of the structural layer: (1) we ship a newer data snapshot than the reference build's built-in table; (2) a country with no separate Latin layout uses its main layout, where the reference uses a default one; (3) any language tag with a `Latn` script subtag selects the Latin layout; (4) the convenience `Create` lowercases tags and maps `_` to `-`.
 
-### Trained parts
+### Honest refusal
 
-| Part | Country or tier | Metric | OneContact (95% CI) | Reference | Verdict |
-|---|---|---|---|---|---|
-| Address parsing | US, CA | field F1, full-parse accuracy | measured at 1.0 | libpostal 1.1, Senzing's libpostal model | measured at 1.0 |
-| Address parsing | each Tier 2 country, hinted and not | field F1, full-parse accuracy | measured at 1.0 | libpostal 1.1, Senzing's libpostal model | measured at 1.0 |
-| Address keys and expansion | United States, Canada | same / different pair precision and recall | measured at 1.0 | libpostal `expand_address` | measured at 1.0 |
-| Person names | each country | token accuracy, classification accuracy | measured at 1.0 | probablepeople, python-nameparser | measured at 1.0 |
-| Company legal forms | each jurisdiction | detection and ELF-code accuracy | measured at 1.0 | cleanco | measured at 1.0 |
-| Extraction, web pages | Tier 1, Tier 1+2 | field F1 per type, record F1 | measured at 1.0 | libphonenumber matcher, Microsoft.Recognizers.Text, spaCy | measured at 1.0 |
-| Extraction, CRM and plain text | Tier 1, Tier 1+2 | field F1 per type, record F1 | measured at 1.0 | same | measured at 1.0 |
+The rules never read a text in the wrong country and never print a value the text does not contain; what they cannot read they refuse with a reason. Measured on 4,623 items of real pages (the United States, Canada, every Tier 2 country), with and without the country given: with it, 0 readings in a wrong country; without it, 29 of 3,120 readings with a country were in a wrong country and 920 more were returned without a country rather than guessed; one standardized state abbreviation (`D.F.` written `CDMX`) was the only printed word not found in its input. Every cause is listed in [docs/maintainers/refusal-rows.md](docs/maintainers/refusal-rows.md).
 
 ### Speed
 
 | Operation | Comparator | Ratio (ours / comparator time) | Allocations | Verdict |
 |---|---|---|---|---|
-| Phone parse, validate, format, type, match | libphonenumber-csharp | measured at 1.0 | measured at 1.0 | measured at 1.0 |
-| Email parse | MimeKit `MailboxAddress`, `System.Net.Mail.MailAddress` | measured at 1.0 | measured at 1.0 | measured at 1.0 |
-| URL parse | AngleSharp `Url` | measured at 1.0 | measured at 1.0 | measured at 1.0 |
-| Public suffix lookup | Nager.PublicSuffix | measured at 1.0 | measured at 1.0 | measured at 1.0 |
-| Person name parse | NameParserSharp | measured at 1.0 | measured at 1.0 | measured at 1.0 |
-| Address parse | US regex address parsers (at matched or better accuracy) | measured at 1.0 | measured at 1.0 | measured at 1.0 |
-| Extraction | Microsoft.Recognizers.Text sequence finding | measured at 1.0 | measured at 1.0 | measured at 1.0 |
+| Phone parse, validate, format, type, match | libphonenumber-csharp | _to be filled from the 1.0 benchmark run_ | | |
+| Email parse | MimeKit `MailboxAddress`, `System.Net.Mail.MailAddress` | _to be filled_ | | |
+| URL parse | AngleSharp `Url` | _to be filled_ | | |
+| Public suffix lookup | Nager.PublicSuffix | _to be filled_ | | |
+| Person name parse | NameParserSharp | _to be filled_ | | |
+| Address parse | US regex address parsers (at matched or better accuracy) | _to be filled_ | | |
+| Extraction | Microsoft.Recognizers.Text sequence finding | _to be filled_ | | |
 
 ### Size
 
-| Item | Size | libpostal |
+| Package | Size | libpostal |
 |---|---|---|
-| `RecursiveAI.OneContact.Models.Tier1` model | about 10.2 MB | about 2 GB of data |
-| `RecursiveAI.OneContact.Models` model | about 22.8 MB | about 2 GB of data |
-| Resident memory, load time | measured at 1.0 | |
+| `RecursiveAI.OneContact` | 1.39 MB | about 2 GB of data |
+| `RecursiveAI.OneContact.Phones.Geo` | 1.52 MB | |
+| `RecursiveAI.OneContact.Extraction` | 0.21 MB | |
 
-How the rows are measured, and the evaluation sets behind them, are described in [docs/index.md](docs/index.md) under evaluation.
+Trained-model quality rows (address parsing, names, legal forms and extraction against libpostal, probablepeople, python-nameparser, cleanco and spaCy) are published with the model packages in 1.1.
+
+How the rows are measured is described in [docs/index.md](docs/index.md) under evaluation.
 
 ## Building
 

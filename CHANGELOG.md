@@ -17,19 +17,11 @@ First release. All packages share one version. `KeyVersion.V1` is frozen with th
 - Addresses: a structural layer for every region in libaddressinput's data (fields, layout, required fields, postcode patterns, `Validate()`); parsing, standardization to each postal authority's published style (`AddressStyle.Postal` and `AddressStyle.Display`, single-line and multi-line), structural validation and libpostal-style expansions for the United States, Canada, Mexico, Australia, the United Kingdom with Jersey, Guernsey and the Isle of Man, and the Latin-script countries of Europe (Austria, Belgium, Croatia, Czechia, Denmark, Estonia, Finland, France, Germany, Hungary, Iceland, Ireland, Italy, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Monaco, the Netherlands, Norway, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, Andorra and the Vatican). Country inference from the text when no country is given; `address.country-undetermined` when the text does not say. `PostalAddressJsonConverter(Region)` reads strings as free text of a country.
 - Person names (titles, suffixes, particles, second family names, name order, several people in one string, casing restoration traced to offsets) and company names (ISO 20275 legal forms with ELF codes, DBA and c/o, a leading "The"). Nothing is inferred about gender, origin or salutation.
 - Czech, Slovak and Croatian settlement lines between the street and the postcode line are read as the dependent locality, and a Bucharest sector as the dependent locality of the town; an addressee written in front of the street name without a comma (Hungarian and Nordic forms) is left to the model rather than read as part of the street name.
-- `ContactModels` and the model seam: a referenced model package registers itself, the rules decide what is certain, and `ParseDetail` says per field whether a rule or a model decided it.
+- `ContactModels`, the seam through which a model package registers itself (the packages follow in 1.1); `ParseDetail` says per field whether a rule or a model decided it.
 
 **`RecursiveAI.OneContact.Phones.Geo`**
 
 - `PhoneGeocoder`, carrier and time-zone mappers, with the original-carrier caveat in their documentation.
-
-**`RecursiveAI.OneContact.Models.Tier1` and `RecursiveAI.OneContact.Models`**
-
-- Trained fast-tier models on OneNLP and OneModel: an address-field head, name-part and name-class heads, and a contact-span head for extraction from plain text. Tier 1 covers the United States and Canada; `Models` also covers the Tier 2 countries and is preferred when both are referenced. The weights are embedded; `Models` is trained on open national registers mixed with OpenStreetMap addresses (© OpenStreetMap contributors, ODbL 1.0), as its readme and notices state.
-
-**`RecursiveAI.OneContact.Models.Accurate`**
-
-- The same address-field, name and contact-span heads over OneNLP's distilled multilingual encoder (`RecursiveAI.OneNlp.Models.Multilingual.FrozenEncoder`), for running text. About 10 MB of head weights in the package; the encoder is a dependency. With a fast-tier package referenced too, the fast tier keeps normalizing single addresses and names and this package reads running text. `ContactModels.Register` gained an optional `normalizationRank`.
 
 **`RecursiveAI.OneContact.Extraction`**
 
@@ -37,6 +29,8 @@ First release. All packages share one version. `KeyVersion.V1` is frozen with th
 
 ### Notes
 
-- Everything runs offline. No package opens a socket, resolves a name or downloads a file; a missing model is an error that names the package to add.
+- Version 1.0 runs on rules and markup alone: `RecursiveAI.OneContact`, `RecursiveAI.OneContact.Phones.Geo` and `RecursiveAI.OneContact.Extraction`. Text the rules cannot read is refused with a reason, and nothing is read in a wrong country or printed that the text does not contain.
+- The trained model packages (`RecursiveAI.OneContact.Models.Tier1`, `RecursiveAI.OneContact.Models` and `RecursiveAI.OneContact.Models.Accurate`) ship in 1.1, after OneNLP 1.0. The `ContactModels` seam in core, which they register through, is part of 1.0.
+- Everything runs offline. No package opens a socket, resolves a name or downloads a file.
 - `CultureInfo` never affects a result.
-- `RecursiveAI.OneContact.Models.Accurate` is not part of this release.
+- A hinted German, Spanish, Croatian or Mexican address whose postcode also exists in France's overseas range (97xxx, 98xxx) is read in the hinted country.

@@ -9,6 +9,7 @@
 !/Directory.Build.targets
 !/Directory.Packages.props
 !/OneContact.slnx
+!/OneContact.Release.slnx
 !/LICENSE-MIT
 !/LICENSE-APACHE
 !/README.md

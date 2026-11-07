@@ -82,7 +82,7 @@ jobs:
           global-json-file: global.json
 
       - name: Restore
-        run: dotnet restore OneContact.slnx
+        run: dotnet restore OneContact.Release.slnx
 
       - name: Tag matches the package version
         env:
@@ -97,15 +97,20 @@ jobs:
 
       # A tag that does not build and pass its tests never publishes.
       - name: Build
-        run: dotnet build OneContact.slnx -c Release --no-restore
+        run: dotnet build OneContact.Release.slnx -c Release --no-restore
       - name: Test
-        run: dotnet test --solution OneContact.slnx -c Release --no-build --results-directory "$ONECONTACT_ARTIFACTS/TestResults"
+        run: dotnet test --solution OneContact.Release.slnx -c Release --no-build --results-directory "$ONECONTACT_ARTIFACTS/TestResults"
 
       - name: Pack
         # The shipped packages, from the binaries the tests ran on. Symbols come out as a .snupkg file.
         run: |
-          dotnet pack OneContact.slnx -c Release --no-build -o "$RUNNER_TEMP/packages"
+          # Only the rules-only packages ship in 1.0. The model projects stay in the solution and are never packed here.
+          for project in src/OneContact src/OneContact.Phones.Geo src/OneContact.Extraction; do
+            dotnet pack "$project" -c Release --no-build -o "$RUNNER_TEMP/packages"
+          done
           ls -l "$RUNNER_TEMP/packages"
+          count=$(find "$RUNNER_TEMP/packages" -name '*.nupkg' | wc -l)
+          [ "$count" -eq 3 ] || { echo "::error::expected exactly 3 packages, found $count"; exit 1; }
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2

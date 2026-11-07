@@ -69,7 +69,7 @@ Concepts that differ:
 
 ## libpostal → OneContact
 
-libpostal gives two calls: `parse_address` (free text to labelled components) and `expand_address` (free text to normalized variants), plus near-duplicate hashing. OneContact folds them into `PostalAddress` (parse, standardize, render, validate, key) and `AddressExpander`. The big differences: OneContact reads rules first and uses a small model only for what the rules leave open (the `RecursiveAI.OneContact.Models*` packages; without one the rules still run and a refusal names the package to add), it has no multi-gigabyte data directory, and it renders addresses back in each national postal authority's own style.
+libpostal gives two calls: `parse_address` (free text to labelled components) and `expand_address` (free text to normalized variants), plus near-duplicate hashing. OneContact folds them into `PostalAddress` (parse, standardize, render, validate, key) and `AddressExpander`. The big differences: OneContact reads rules first; in 1.0 that is all it does, and a text the rules cannot read is refused with a reason (small model packages for what the rules leave open follow in 1.1), it has no multi-gigabyte data directory, and it renders addresses back in each national postal authority's own style.
 
 | libpostal | OneContact |
 |---|---|
@@ -90,16 +90,16 @@ libpostal gives two calls: `parse_address` (free text to labelled components) an
 | `expand_address(text, languages=[...])` | `AddressExpander.Expand(text, ExpansionLanguages.English \| ExpansionLanguages.German, maxVariants)`; the languages are flags (`English`, `French`, `German`, `Dutch`, `Italian`, `Luxembourgish`, `Spanish`, `Portuguese`, `Catalan`, `Basque`, `Galician`, `Maltese`, `Irish`; English and French by default) |
 | Expansion options (which transformations to apply) | no per-transformation switches: the variants come back with the fully expanded one first, capped by `maxVariants` (default 16) |
 | Near-duplicate hashing and duplicate classification | `PostalAddress.Key` / `GetKey(KeyVersion)`: one deterministic string built from the parsed parts and the expansions; equal keys mean the same address under the documented rules (see [address-keys.md](address-keys.md)). There is no probabilistic classifier |
-| `libpostal_setup()` and the data directory (about 2 GB) | nothing to set up; rules and dictionaries are compiled in, and a model package is 10 to 23 MB |
+| `libpostal_setup()` and the data directory (about 2 GB) | nothing to set up; rules and dictionaries are compiled in (the core package is 1.4 MB); the model packages of 1.1 will be 10 to 23 MB |
 | Language classification (`libpostal_place_languages`) | not a call: the reader chooses languages from the country and the evidence |
 | Normalizing for display or labels | `address.ToString(AddressStyle.Postal / Display, AddressLayout.Label / SingleLine, includeCountry)`; `GetLabelLines()` and `ToSingleLine()` for the country's own field layout |
 | Checking an address is plausible | `address.Validate()` returns `AddressIssue`s from structural rules only (required fields, postcode pattern, postcode and region agreement). There are no reference-data lookups |
 
-Not equivalent: libpostal's training data and models are not used or read. The OneContact models are trained on open registers and our own renderers, with their provenance in the model packages.
+Not equivalent: libpostal's training data and models are not used or read. The OneContact models (from 1.1) are trained on open registers, our own renderers and, for the default `Models` package, OpenStreetMap-derived addresses, with their provenance in the model packages.
 
 ## python-nameparser and probablepeople → OneContact
 
-python-nameparser (`HumanName`) splits a person name by rules, with customizable lists. probablepeople tags a person or corporation string with a trained CRF. OneContact does both jobs in `PersonName`, `CompanyName` and `NameParsing`: rules first, a small model for the unclear remainder, with the decision source reported.
+python-nameparser (`HumanName`) splits a person name by rules, with customizable lists. probablepeople tags a person or corporation string with a trained CRF. OneContact does both jobs in `PersonName`, `CompanyName` and `NameParsing`: rules first, with the decision source reported (a small model for the unclear remainder follows in 1.1).
 
 | python-nameparser | OneContact |
 |---|---|
@@ -133,6 +133,6 @@ python-nameparser (`HumanName`) splits a person name by rules, with customizable
 | `CorporationLegalType` | `CompanyName.LegalForm`: an ISO 20275 entity legal form with its ELF code (`ElfCode`) and canonical abbreviation; `LegalFormBeforeName`, `LegalFormAmbiguous` and `LegalFormInactive` flags |
 | Other corporation labels (branch, committee, ...) | not parts. DBA and c/o are split out as `TradingAs` and `CareOf`; a leading "The" is `LeadingArticle` |
 | Model confidence | `ParseDetail` per field: `Confidence` and `Source` (`Rule` or `Model`) |
-| Training your own model | the recipes in `recipes/` use the `Train` API of OneNLP; see [models.md](models.md) |
+| Training your own model | from 1.1: the recipes in `recipes/` use the `Train` API of OneNLP; see [models.md](models.md) |
 
 Not equivalent: neither library's data or models are used. OneContact never infers gender, origin or a salutation from a name.

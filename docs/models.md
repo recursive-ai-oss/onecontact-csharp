@@ -1,5 +1,7 @@
 # Models
 
+> **From 1.1.** The model packages described here ship in 1.1, after OneNLP 1.0. Version 1.0 runs on rules and markup alone; the seam in core that registers a model (`ContactModels`) is part of 1.0.
+
 The Tier 1 + Tier 2 package `RecursiveAI.OneContact.Models` is described in `models-superset.md`.
 
 Normative notes on how trained models reach the parsers, what a model package carries, and how a model is trained. Rules first: a model only fills what the rules leave open.

@@ -1,5 +1,7 @@
 # The Tier 1 + Tier 2 model (`RecursiveAI.OneContact.Models`)
 
+> **From 1.1.** The model packages described here ship in 1.1, after OneNLP 1.0. Version 1.0 runs on rules and markup alone; the seam in core that registers a model (`ContactModels`) is part of 1.0.
+
 The same design as the Tier 1 package (see `models.md`): one fast-tier encoder shared by an address-field head, a name-part head, a name-class head and a contact-span head, trained with OneNLP's `Train` on OneModel. It covers the United States, Canada and every Tier 2 country. Rules run first; the model reads only what the rules leave open, and never replaces a rule hit. `ParseDetail` says per field whether a rule or the model decided it.
 
 - **Size.** About 23 MB of weights, embedded in the package. Load time and memory are reported with the results at each release.
