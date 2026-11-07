@@ -51,19 +51,22 @@ public class Tier2GroupBTests
     }
 
     [Fact]
-    public void BritishAddressWithTwoLinesAboveThePostcodeInTheSameCaseIsLeftToTheModel()
+    public void BritishCountyLineIsTheAdminAreaAndThePostTownIsTheLineAboveIt()
     {
-        // Royal Mail: the post town is in capitals and the county, which is optional, follows it; two lines in one style cannot be told apart.
-        Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse("58 Hordley Avenue\nShrewsbury\nShropshire\nSY4 1AA", Region.Parse("GB"), out _, out ParseDetail d));
-        Assert.Equal(ReasonCode.AddressModelRequired, d.PrimaryReason);
+        // Royal Mail PAF Programmers' Guide: the post town is mandatory and the county, which is optional, follows it.
+        ParsedAddress a = Parse("58 Hordley Avenue\nShrewsbury\nShropshire\nSY4 1AA", "GB", out _);
+        Assert.Equal("SHREWSBURY", a.Locality!.Value.Standard);
+        Assert.Equal("SHROPSHIRE", a.AdminArea!.Value.Standard);
         Assert.Equal("SHREWSBURY", Parse("58 Hordley Avenue\nShrewsbury\nSY4 1AA", "GB", out _).Locality!.Value.Standard);
     }
 
     [Fact]
     public void CountryNameAbovePostcodeIsNotAPostTown()
     {
-        // Jersey Post writes the nation above the postcode for addresses in Britain.
-        Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse("Miss P Jones\n1 Castle Road\nHeswall\nBournemouth\nENGLAND\nBH1 1AA", Region.Unknown, out _, out _));
+        // Jersey Post writes the nation above the postcode for addresses in Britain: it is no post town, and the line below the street that precedes it is.
+        ParsedAddress a = Parse("Miss P Jones\n1 Castle Road\nHeswall\nBournemouth\nENGLAND\nBH1 1AA", "GB", out _);
+        Assert.Equal("BOURNEMOUTH", a.Locality!.Value.Standard);
+        Assert.Equal("ENGLAND", a.AdminArea!.Value.Standard);
     }
 
     [Theory]

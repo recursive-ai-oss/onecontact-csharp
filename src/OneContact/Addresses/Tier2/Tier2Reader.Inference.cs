@@ -23,6 +23,12 @@ internal static partial class Tier2Reader
             return false;
         }
 
+        // "Via Toledo 100, Napoli NA": a last line of locality and province code with no postcode. Only Italy reads such a line without a hint, and the code is the evidence.
+        if (failure.PrimaryReason.Equals(ReasonCode.AddressNoLastLine) && TryInferProvinceLine(text, out address, out detail))
+        {
+            return true;
+        }
+
         // Most text that reaches here is an address of the United States or Canada, which has no evidence of any country in it: the cheap look comes before the trial readings.
         if (!HasAnyEvidence(text))
         {
@@ -76,6 +82,23 @@ internal static partial class Tier2Reader
         found.Hint = Region.Unknown;
         address = found;
         detail = foundDetail;
+        return true;
+    }
+
+    private static bool TryInferProvinceLine(string text, out ParsedAddress? address, out ParseDetail detail)
+    {
+        address = null;
+        detail = default!;
+        Reader trial = new(text, Region.Parse("IT")) { Inferring = true };
+        if (trial.Run(out ParsedAddress? read, out ParseDetail readDetail) != OperationStatus.Done || read is not { PostalCode: null, AdminArea: not null } || read.Country != Region.Parse("IT") || !LettersHold(text, "IT"))
+        {
+            return false;
+        }
+
+        read.SourceText = text;
+        read.Hint = Region.Unknown;
+        address = read;
+        detail = readDetail;
         return true;
     }
 
