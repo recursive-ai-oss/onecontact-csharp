@@ -34,10 +34,27 @@ public class UndeterminedCountryTests
     }
 
     [Fact]
-    public void CandidatesThatDisagreeAreRefused()
+    public void CandidatesThatDisagreeOnAPartLeaveThatPartOut()
     {
-        // A French house number can follow the street name or lead it, and the countries that share the form read the line differently: no country, no fields.
-        Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse("Rue de la Gare 3, 1000 Lausanne", Region.Unknown, out _, out ParseDetail detail));
+        // "12-14" is one house number in Germany and a house and a flat in Estonia and Lithuania, and nothing in the text says which country this is: the postcode, the locality and
+        // the street name, which every country reads alike, come back; the house number and the flat do not, and the read says so.
+        Assert.Equal(OperationStatus.Done, RuleAddressParser.TryParse("Muster 12-14, 10115 Berlin", Region.Unknown, out ParsedAddress? address, out ParseDetail detail));
+        Assert.True(address!.Country.IsUnknown);
+        Assert.True(address.Facts.HasFlag(AddressFacts.CountryUndetermined));
+        Assert.True(address.Facts.HasFlag(AddressFacts.FieldsDisputed));
+        Assert.Equal("10115", address.PostalCode!.Value.Text);
+        Assert.Equal("Berlin", address.Locality!.Value.Text);
+        Assert.Contains(address.Fields, f => f.Name == "street.name" && f.Text == "Muster");
+        Assert.DoesNotContain(address.Fields, f => f.Name is "street.house-number" or "street.unit-number");
+        Assert.Contains(detail.Issues, i => i.Reason.Equals(ReasonCode.AddressFieldsDisputed) && i.Severity == IssueSeverity.Warning);
+        Assert.Contains(detail.Issues, i => i.Reason.Equals(ReasonCode.AddressCountryUndetermined));
+    }
+
+    [Fact]
+    public void EvidenceForACountryThatCannotReadTheTextStillRefuses()
+    {
+        // The letter belongs to Poland only, and Poland does not write the postcode this way: a conflict, not an absence of evidence.
+        Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse("Rue de la Gare 3, 1000 Łódź", Region.Unknown, out _, out ParseDetail detail));
         Assert.True(detail.PrimaryReason.Equals(ReasonCode.AddressCountryUndetermined));
     }
 

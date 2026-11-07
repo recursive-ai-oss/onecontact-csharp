@@ -213,3 +213,50 @@ word	PL	UL
 word	PL	PLAC
 marked	HU	TER
 marked	HU	KRT
+
+# language: the languages a country's word and suffix rows above are written in, where that is not all the languages the country writes (Belgium's endings are Dutch, Luxembourg's
+#   Luxembourgish) or where two neighbours understand each other's street words (Danish and Norwegian). A text that holds a word of some language can only be a text of a country
+#   that writes that language; without this row a country's rows belong to every language it writes (t2-countries*.tsv).
+language	BE	nl
+language	LU	lb
+language	DK	da,nb
+language	NO	nb,da
+# lang: a whole word that belongs to a language although no country's evidence rows above list it, or that a language shares with a language the rows give it to (the words of the
+#   rows are French in the first group: allee, chaussee are also French street types; ulica is Croatian and Slovak as well as Slovenian and Polish; aleja is also Croatian
+#   and Slovenian). Street types of the UPU sheets and the posts' guides (La Poste Guide pratique courrier, Correos, CTT, Poczta Polska, Hrvatska posta).
+lang	fr	RUE
+lang	fr	CHEMIN
+lang	fr	IMPASSE
+lang	fr	FAUBOURG
+lang	fr	ALLEE
+lang	fr	CHAUSSEE
+lang	es	CALLE
+lang	es	AVENIDA
+lang	es	AVDA
+lang	es	PASEO
+lang	es	PLAZA
+lang	es	CARRETERA
+lang	pt	RUA
+lang	pt	TRAVESSA
+lang	hr	ULICA
+lang	sk	ULICA
+lang	hr	ALEJA
+lang	sl	ALEJA
+lang	hr	PLAC
+lang	sl	PLAC
+lang	de	ALLEE
+lang	de	CHAUSSEE
+lang	nl	ALLEE
+lang	nl	CHAUSSEE
+lang	it	CALLE
+lang	pt	AVENIDA
+lang	pt	AVDA
+lang	gl	RUA
+lang	gl	TRAVESSA
+lang	ca	TRAVESSA
+lang	sk	UL
+lang	cs	UL
+lang	sl	UL
+lang	hr	UL
+lang	gl	AVENIDA
+lang	gl	PRAZA

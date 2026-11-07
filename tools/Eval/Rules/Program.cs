@@ -6,17 +6,20 @@ using RecursiveAI.OneContact.Addresses.Parsing;
 using RecursiveAI.OneContact.Addresses.Streets;
 using RecursiveAI.OneContact.Names;
 
-// usage: eval-rules address|name <gold.jsonl> <predictions.jsonl> [hint]
+// usage: eval-rules address|name|diag <gold.jsonl> <predictions.jsonl> [hint]
 //
 // With `hint`, an address is parsed with its item's country as the region hint (the optional hint the happy path also accepts);
 // without it the parser infers the country from the text.
 //
+// `diag` writes, per item, the Tier 2 countries that read the text when given as the hint, grouped by identical fields, and the labels in which the groups differ:
+// counts for the outcome tables, never the text.
+//
 // Reads an evaluation set (one JSON object per line, as tools/Eval/score.py documents) and writes one prediction per item in the
 // scorer's format. Values are the text as written in the input (the parts' own text), never the standardized text, because the
 // gold values are surface text. Nothing is printed except counts.
-if (args.Length is not (3 or 4) || args[0] is not ("address" or "name"))
+if (args.Length is not (3 or 4) || args[0] is not ("address" or "name" or "diag"))
 {
-    Console.Error.WriteLine("usage: eval-rules address|name <gold.jsonl> <predictions.jsonl> [hint]");
+    Console.Error.WriteLine("usage: eval-rules address|name|diag <gold.jsonl> <predictions.jsonl> [hint]");
     return 64;
 }
 
@@ -27,6 +30,14 @@ foreach (string line in File.ReadLines(args[1]))
 {
     if (string.IsNullOrWhiteSpace(line))
     {
+        continue;
+    }
+
+    if (args[0] == "diag")
+    {
+        using JsonDocument d = JsonDocument.Parse(line);
+        Diag(d.RootElement, output);
+        n++;
         continue;
     }
 
@@ -63,12 +74,107 @@ foreach (string line in File.ReadLines(args[1]))
 Console.WriteLine($"items {n}, address refused {refused}");
 return 0;
 
+static void Diag(JsonElement root, StreamWriter output)
+{
+    string text = root.GetProperty("text").GetString()!;
+    string gold = root.TryGetProperty("country", out JsonElement c) ? c.GetString()! : string.Empty;
+    string[] codes = ["AT", "BE", "HR", "CZ", "DK", "EE", "FI", "FR", "DE", "HU", "IS", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "NO", "PL", "PT", "RO", "SK", "SI", "ES", "SE", "CH", "LI", "AD", "MC", "SM", "VA", "GB", "MX", "AU"];
+    List<(string Code, string Key, Dictionary<string, string> Fields)> reads = [];
+    foreach (string code in codes)
+    {
+        if (Extract(text, Region.Parse(code), out ParsedAddress? a, out Dictionary<string, string> f, out _) && a!.Country == Region.Parse(code))
+        {
+            f.Remove("recipient");
+            string key = string.Join('|', f.OrderBy(kv => kv.Key, StringComparer.Ordinal).Select(kv => kv.Key + "=" + kv.Value.Trim().ToLowerInvariant()));
+            reads.Add((code, key, f));
+        }
+    }
+
+    List<List<(string Code, string Key, Dictionary<string, string> Fields)>> groups = [.. reads.GroupBy(r => r.Key).Select(g => g.ToList())];
+    // How the readings differ, as shapes only (digits 9, letters a): the label, whether one value is inside the other, and the shape of the extra words.
+    HashSet<string> differing = [];
+    for (int i = 1; i < groups.Count; i++)
+    {
+        foreach (string label in groups[0][0].Fields.Keys.Union(groups[i][0].Fields.Keys))
+        {
+            groups[0][0].Fields.TryGetValue(label, out string? x);
+            groups[i][0].Fields.TryGetValue(label, out string? y);
+            x = x?.Trim() ?? string.Empty;
+            y = y?.Trim() ?? string.Empty;
+            if (string.Equals(x, y, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            string rel = x.Length == 0 ? "absent-in-first" : y.Length == 0 ? "absent-in-other" : y.Contains(x, StringComparison.OrdinalIgnoreCase) ? "first-inside-other" : x.Contains(y, StringComparison.OrdinalIgnoreCase) ? "other-inside-first" : "differ";
+            string longer = x.Length >= y.Length ? x : y;
+            string shorter = x.Length >= y.Length ? y : x;
+            string extra = string.Join(' ', longer.Split(' ', StringSplitOptions.RemoveEmptyEntries).Where(word => !shorter.Contains(word, StringComparison.OrdinalIgnoreCase)).Select(Shape));
+            differing.Add(label + ":" + rel + ":" + extra);
+        }
+    }
+
+    using MemoryStream ms = new();
+    using (Utf8JsonWriter w = new(ms))
+    {
+        w.WriteStartObject();
+        w.WriteString("id", root.GetProperty("id").GetString());
+        w.WriteString("gold", gold);
+        w.WriteStartArray("reads");
+        foreach (var r in reads) { w.WriteStringValue(r.Code); }
+        w.WriteEndArray();
+        w.WriteStartArray("groups");
+        foreach (var g in groups)
+        {
+            w.WriteStartArray();
+            foreach (var r in g) { w.WriteStringValue(r.Code); }
+            w.WriteEndArray();
+        }
+
+        w.WriteEndArray();
+        w.WriteStartArray("differ");
+        foreach (string label in differing.Order(StringComparer.Ordinal)) { w.WriteStringValue(label); }
+        w.WriteEndArray();
+        w.WriteEndObject();
+    }
+
+    output.WriteLine(Encoding.UTF8.GetString(ms.ToArray()));
+}
+
+static string Shape(string word)
+{
+    StringBuilder sb = new();
+    char last = ' ';
+    foreach (char ch in word)
+    {
+        char k = char.IsDigit(ch) ? '9' : char.IsLetter(ch) ? 'a' : ch;
+        if (k != last || k is not ('9' or 'a'))
+        {
+            sb.Append(k);
+        }
+
+        last = k;
+    }
+
+    return sb.ToString();
+}
+
 static bool WriteAddress(Utf8JsonWriter w, string text, Region region)
 {
+    bool ok = Extract(text, region, out ParsedAddress? a, out Dictionary<string, string> fields, out Dictionary<string, string> parts);
+    // The country the parser settled on (empty when none): lets the outcome tables tell a right country from a wrong one without showing any item.
+    w.WriteString("decided_country", ok && a!.Country != Region.Unknown ? a.Country.ToString() : string.Empty);
+    WriteMap(w, "fields", fields);
+    WriteMap(w, "parts", parts);
+    return ok;
+}
+
+static bool Extract(string text, Region region, out ParsedAddress? a, out Dictionary<string, string> fields, out Dictionary<string, string> parts)
+{
     // The scorer expects blank/absent fields to be omitted.
-    Dictionary<string, string> fields = [];
-    Dictionary<string, string> parts = [];
-    bool ok = RuleAddressParser.TryParse(text, region, out ParsedAddress? a, out _) == OperationStatus.Done && a is not null;
+    fields = [];
+    parts = [];
+    bool ok = RuleAddressParser.TryParse(text, region, out a, out _) == OperationStatus.Done && a is not null;
     if (ok)
     {
         List<string> road = [], unit = [], box = [];
@@ -122,8 +228,6 @@ static bool WriteAddress(Utf8JsonWriter w, string text, Region region)
         Add(fields, "country", a.CountryName?.Text);
     }
 
-    WriteMap(w, "fields", fields);
-    WriteMap(w, "parts", parts);
     return ok;
 }
 

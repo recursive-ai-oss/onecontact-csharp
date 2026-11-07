@@ -33,4 +33,10 @@ public enum AddressFacts : uint
     /// <see cref="Region.Unknown"/>, the renderings keep the text as written, and <see cref="PostalAddress.Validate"/> reports the missing country.
     /// </summary>
     CountryUndetermined = 128,
+
+    /// <summary>
+    /// Only the parts of the text on which every country that can read it agrees were returned; the others (a house number and a flat, say) are left out because the countries read them differently.
+    /// Set together with <see cref="CountryUndetermined"/>.
+    /// </summary>
+    FieldsDisputed = 256,
 }

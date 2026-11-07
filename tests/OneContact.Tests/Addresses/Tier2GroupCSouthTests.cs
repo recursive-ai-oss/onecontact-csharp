@@ -107,8 +107,11 @@ public class Tier2GroupCSouthTests
     public void CzechAndSlovakPostcodesNeedACountryToTellThemApart()
     {
         // The form is the same: without a country line, prefix or hint the text is not guessed.
-        Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse("Ladova 3/64\n251 66 Hrusice", Region.Unknown, out _, out ParseDetail d));
-        Assert.Equal(ReasonCode.AddressCountryUndetermined, d.PrimaryReason);
+        // Both countries read it alike, so the fields come back and the country stays unknown.
+        Assert.Equal(OperationStatus.Done, RuleAddressParser.TryParse("Ladova 3/64\n251 66 Hrusice", Region.Unknown, out ParsedAddress? shared, out _));
+        Assert.True(shared!.Country.IsUnknown);
+        Assert.True(shared.Facts.HasFlag(AddressFacts.CountryUndetermined));
+        Assert.Equal("251 66", shared.PostalCode!.Value.Text);
         Assert.Equal(Region.Parse("SK"), Parse("Ladova 3/64\nSK-251 66 Hrusice", null).Country);
     }
 
