@@ -16,8 +16,8 @@ string label = address.ToString(AddressStyle.Display, AddressLayout.SingleLine);
 
 - **Phones** for every region: parse, validate, type, every format, as-you-type formatter, matcher with leniency levels, short numbers, examples.
 - **Email** (RFC 5322, RFC 6531), **web addresses** (WHATWG URL, Public Suffix List), **addresses** (a structural layer for every country; parsing, postal-authority standardization, validation and expansion for the United States, Canada and the Tier 2 countries), **person and company names** (ISO 20275 legal forms).
-- Free-text address and name parsing uses rules first; add `RecursiveAI.OneContact.Models.Tier1` or `RecursiveAI.OneContact.Models` for what the rules leave open. Without one, a refusal names the package to add.
-- Related packages: `RecursiveAI.OneContact.Phones.Geo`, `RecursiveAI.OneContact.Models.Tier1`, `RecursiveAI.OneContact.Models`, `RecursiveAI.OneContact.Extraction`.
+- Free-text address and name parsing runs on rules. They never read a text in the wrong country and never print a value the text does not contain; text they cannot read is refused with a reason. Trained model packages for what the rules leave open follow in 1.1.
+- Related packages: `RecursiveAI.OneContact.Phones.Geo` (geocoder, carrier and time zones) and `RecursiveAI.OneContact.Extraction` (people, organizations and contact fields from pages and text).
 
 It depends on the .NET base class library only. Nothing opens a socket or downloads a file.
 

@@ -1,0 +1,16 @@
+<!-- The projects that build, test and ship with the rules-only 1.0 packages. The model packages and their recipes need preview builds of
+     other libraries that are not on nuget.org, so they live only in OneContact.slnx. -->
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/OneContact/OneContact.csproj" />
+    <Project Path="src/OneContact.Phones.Geo/OneContact.Phones.Geo.csproj" />
+    <Project Path="src/OneContact.Extraction/OneContact.Extraction.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/OneContact.Tests/OneContact.Tests.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/OneContact.AotSmoke/OneContact.AotSmoke.csproj" />
+    <Project Path="samples/OneContact.QuickStart/OneContact.QuickStart.csproj" />
+  </Folder>
+</Solution>

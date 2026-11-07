@@ -8,8 +8,8 @@ Normative notes on how the code and its data fit together. Behaviour of each con
 |---|---|
 | `src/OneContact` | `RecursiveAI.OneContact`: the value types, `Contacts`, parse results, keys, JSON converters and every kind's parsing. Base class library only. |
 | `src/OneContact.Phones.Geo` | Geocoder, carrier and time-zone mappers. References core. |
-| `src/OneContact.Extraction` | Extraction of structured markup into person and organization records (`docs/extraction.md`). References core and OneHtml; not packable yet. |
-| `src/OneContact.Models.*` | Placeholders until their stage; not packable yet. |
+| `src/OneContact.Extraction` | Extraction of structured markup into person and organization records (`docs/extraction.md`). References core and OneHtml. |
+| `src/OneContact.Models.*` | The model packages (shipping from 1.1): they stay in the solution but are not packed or published with 1.0. |
 | `tests/OneContact.Tests` | xUnit v3 tests. |
 | `tools/Ingest`, `tools/Ingest.<Source>` | The ingest harness and one converter per upstream source. |
 | `tools/fetch` | Fetch scripts: exact files at a pinned ref into a cache outside the repository. |

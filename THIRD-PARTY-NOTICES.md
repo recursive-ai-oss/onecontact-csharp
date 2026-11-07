@@ -60,4 +60,6 @@ Compiled into `RecursiveAI.OneContact.Phones.Geo`: the territory display names o
 
 ## OpenStreetMap (ODbL 1.0), trained into the `RecursiveAI.OneContact.Models` weights
 
+The model packages ship from 1.1 and are not part of the 1.0 packages; this notice is kept so that it travels with the repository.
+
 Contains information from OpenStreetMap, which is made available under the Open Database License (ODbL) 1.0, https://opendatacommons.org/licenses/odbl/1-0/. © OpenStreetMap contributors, ODbL 1.0, https://www.openstreetmap.org/copyright. The address-field model of `RecursiveAI.OneContact.Models` was trained in part on OpenStreetMap addresses; the weights are a produced work under ODbL section 4.3 and the data itself is not redistributed. The package's own `THIRD-PARTY-NOTICES.md` and `PROVENANCE.md` list every other source.

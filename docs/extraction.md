@@ -77,7 +77,10 @@ JSON nesting 64; microdata, RDFa and h-card item nesting 32; 200,000 item visits
 
 **Confidence** is fixed per rule: emails 0.9 (0.8 when decoded), phones 0.65–0.85, websites 0.6–0.85, addresses 0.7, labelled names 0.8, Cloudflare emails 0.9.
 
-## The span model
+## The span model (from 1.1)
+
+Version 1.0 registers no span model, so extraction is rules and markup; this section describes what the 1.1 model packages add through the `ContactModels` seam.
+
 
 **Plain text only.** The Tier 1 package registers its contact-span head, and `ExtractText` uses it. A web page (`Extract` over HTML) does not: scored on real pages, the head made the record and address rows worse than the rules alone, and no model may make a row worse than rules. Pages are read by the markup readers and the rules, with or without the package.
 
@@ -120,7 +123,7 @@ Development rows for these rules are in the repository's `tools/Eval/extraction/
 Word lists (titles, cues, places, region codes, industry words, legal-form words) are our own, in `NameVocabulary` and `NameLists`.
 
 
-## The span model on real pages
+## The span model on real pages (from 1.1)
 
 On a web page the span model is not used: scored on real pages, it lowered the record and address rows below the rules and markup alone, and no model may make a row worse than the rules. Pages are read by markup first, then by the rules over visible text. A gated way of letting the model add people and organizations near fields the rules found was also scored and left off. The measured rows are kept in `docs/maintainers/extraction-measurements.md`.
 

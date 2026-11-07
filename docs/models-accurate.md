@@ -1,5 +1,7 @@
 # The accurate tier
 
+> **From 1.1.** The model packages described here ship in 1.1, after OneNLP 1.0. Version 1.0 runs on rules and markup alone; the seam in core that registers a model (`ContactModels`) is part of 1.0.
+
 `RecursiveAI.OneContact.Models.Accurate` is the opt-in model package for harder text. It carries the same four heads as the fast tier on one frozen encoder: OneNLP's distilled multilingual student (`RecursiveAI.OneNlp.Models.Multilingual.FrozenEncoder`, six layers, width 384, 113 languages).
 
 ## Using it

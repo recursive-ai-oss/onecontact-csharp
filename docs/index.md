@@ -1,6 +1,6 @@
 # OneContact documentation
 
-Start with the [README](../README.md) for the packages, the quick start and the results. Coming from another library? Read [migrating.md](migrating.md) first. The rest of this folder is ordered the way you will probably need it. Documents marked *maintainer* describe how the project is built and measured, not how to use it.
+Start with the [README](../README.md) for the packages, the quick start and the results. Documents about the trained model packages are marked *from 1.1*. Coming from another library? Read [migrating.md](migrating.md) first. The rest of this folder is ordered the way you will probably need it. Documents marked *maintainer* describe how the project is built and measured, not how to use it.
 
 ## Using the library
 
@@ -33,9 +33,11 @@ Start with the [README](../README.md) for the packages, the quick start and the 
 ### Extraction
 - [extraction.md](extraction.md): `ContactExtractor`: structured markup, visible text, obfuscation decoding, records, site merge, disagreements, limits. It carries the data-protection note.
 
-### Models
+### Models (from 1.1)
+Version 1.0 runs on rules and markup alone. The model packages follow in 1.1, after OneNLP 1.0; these documents describe them and the seam in core that they plug into.
 - [models.md](models.md): how a model package reaches the parsers, what the Tier 1 model is, how it was trained.
 - [models-superset.md](models-superset.md): the `RecursiveAI.OneContact.Models` package (United States, Canada and the Tier 2 countries).
+- [models-accurate.md](models-accurate.md): the `RecursiveAI.OneContact.Models.Accurate` package.
 
 ### Keys, data and notices
 - Keys are described next to each kind: [phones.md](phones.md), [email.md](email.md), [web.md](web.md), [address-keys.md](address-keys.md), [name-keys.md](name-keys.md), [company-names.md](company-names.md). Any change to key rules ships as a new `KeyVersion`; a published version never changes.
@@ -46,5 +48,6 @@ Start with the [README](../README.md) for the packages, the quick start and the 
 
 - [architecture.md](architecture.md) *(maintainer)*: how code and compiled data fit together, the data file format, how value types are shaped.
 - [tools-environment.md](tools-environment.md) *(maintainer)*: where the tools keep data, models and evaluation sets.
+- [maintainers/refusal-rows.md](maintainers/refusal-rows.md) *(maintainer)*: the honest-refusal rows, how wrong-country and invented readings are counted, and every cause found.
 - [maintainers/](maintainers/) *(maintainer notes)*: measured rows and tuning history ([models-superset.md](maintainers/models-superset.md), [models-tier1-measurements.md](maintainers/models-tier1-measurements.md), [extraction-measurements.md](maintainers/extraction-measurements.md), [address-recovery.md](maintainers/address-recovery.md)), the address challenger models ([models-challenger.md](maintainers/models-challenger.md)), the crawl-labelled span head ([extraction-crawl-training.md](maintainers/extraction-crawl-training.md)), and how the real-text evaluation sets are built, labelled and scored ([evaluation-sets.md](maintainers/evaluation-sets.md), [extraction-eval-sets.md](maintainers/extraction-eval-sets.md)). The sets themselves are private; only aggregate numbers are published.
 - Training data *(maintainer)*: [training-data-address-us-ca.md](training-data-address-us-ca.md), [training-data-address-tier2-a.md](training-data-address-tier2-a.md), [training-data-address-tier2-b.md](training-data-address-tier2-b.md), [training-data-address-tier2-c.md](training-data-address-tier2-c.md), [training-data-address-challenger.md](training-data-address-challenger.md): which open registers are rendered into training examples, under which licences.

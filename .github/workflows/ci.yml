@@ -42,9 +42,9 @@ jobs:
           echo "ONECONTACT_UPSTREAM=$RUNNER_TEMP/upstream" >> "$GITHUB_ENV"
           ONECONTACT_UPSTREAM="$RUNNER_TEMP/upstream" tools/fetch/all.sh
       - name: Build
-        run: dotnet build OneContact.slnx -c Release
+        run: dotnet build OneContact.Release.slnx -c Release
       - name: Test
-        run: dotnet test --solution OneContact.slnx -c Release --no-build
+        run: dotnet test --solution OneContact.Release.slnx -c Release --no-build
       - name: Run the README quick start
         run: dotnet run --project samples/OneContact.QuickStart -c Release --no-build
 
@@ -90,12 +90,16 @@ jobs:
           echo "ONECONTACT_UPSTREAM=$RUNNER_TEMP/upstream" >> "$GITHUB_ENV"
           ONECONTACT_UPSTREAM="$RUNNER_TEMP/upstream" tools/fetch/all.sh
       - name: Pack
-        run: dotnet pack OneContact.slnx -c Release -o "$RUNNER_TEMP/packages"
+        run: |
+          # The packages that ship: the model projects are not packed.
+          for project in src/OneContact src/OneContact.Phones.Geo src/OneContact.Extraction; do
+            dotnet pack "$project" -c Release -o "$RUNNER_TEMP/packages"
+          done
       - name: Packages carry both licences, the notices and the readme
         run: |
           shopt -s nullglob
           packages=("$RUNNER_TEMP"/packages/*.nupkg)
-          [ "${#packages[@]}" -ge 2 ] || { echo "::error::expected at least two packages"; exit 1; }
+          [ "${#packages[@]}" -eq 3 ] || { echo "::error::expected exactly three packages"; exit 1; }
           for p in "${packages[@]}"; do
             listing=$(unzip -Z1 "$p")
             for f in LICENSE-MIT LICENSE-APACHE THIRD-PARTY-NOTICES.md PACKAGE.md; do

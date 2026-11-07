@@ -1447,6 +1447,7 @@ internal static partial class Tier2Reader
                     : digits == "00120" ? ["VA"]
                     : digits.StartsWith("4789", StringComparison.Ordinal) ? ["SM"]
                     : known == "IT" ? ["IT"]
+                    : known is "DE" or "ES" or "HR" or "MX" ? [known] // 97xxx and 98xxx are German and Mexican postcodes too (Würzburg, Suhl, Yucatán): the hint decides, as for 00120
                     : digits.StartsWith("980", StringComparison.Ordinal) ? ["MC"]
                     : digits.StartsWith("97", StringComparison.Ordinal) ? ["FR"]
                     : ["FR", "DE", "ES", "IT", "HR", "MX"];
