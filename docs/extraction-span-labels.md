@@ -32,3 +32,26 @@ Each distinct person or organization in a piece is a record; a contact value bel
 One line per piece: `c0007 -2 ; -5 ; +P:Jane Smith ; +O:Acme Dental`, `c0008 ok`, `c0009 skip`. `-N` removes proposal N as numbered in the review file, `-P`, `-O` and `-all` remove every person, organization or both, and `+X:text` labels every whole-word occurrence of `text` (P person, O organization, A address, T phone, E email, W website). `apply` writes `all.jsonl`, `dev.jsonl` (hosts hashed into 8%), `train-positive.jsonl` and `train-negative.jsonl` in the form `crawl-spans check` and `recipes/tier1 spans --crawl` read.
 
 The labelled pieces, the review file and the corrections stay on the machine that holds the pages; only counts, hashes and scores leave it.
+
+## First run and result
+
+Pages: the 10,375 pages of the crawl draw (`CC-MAIN-2026-39`), 0 hosts or URLs in any evaluation store (checked per store file; the only list that names these hosts is a later evaluation draw's own exclusion list, which was built from the training draws). Draw: seed 57001, quota person 1,100 / organization 600 / fields 200 / cue 250 / look-alike 300, at most three windows per page; 2,450 candidates. The first 1,120 (candidate order is the draw's hash order) were read and labelled; 128 were skipped as undecidable (non-Latin scripts, spam, unclear ownership).
+
+Labelled pieces: 1,120 read, 992 kept, split by host (8% dev): train 237 positive and 680 negative pieces, dev 17 positive and 58 negative. Spans in train: 220 organization, 82 person, 102 phone, 83 email, 39 website, 21 address. Most windows the rules and the name-shaped-line test proposed for a person were not contact persons (running text, bylines, credits, commenters), which is why the person count is small.
+
+Training: `recipes/tier1 spans` on the Tier 1 encoder, frozen (seed 1, 4 epochs, 400,000 rendered blocks), hand-labelled positive pieces repeated 10 times and negative pieces twice, the hand-labelled dev pieces added to the development examples. The best development epoch was the first (0.9137); later epochs fit the repeated pieces and lose on dev. Address, name-part and name-class scores on 15,920 held-out examples are identical to the shipped model's (`address_field_f1 0.9972`, `name_part_f1 0.9835`, `name_class_word_accuracy 0.9954`).
+
+On the private extraction sets (value F1, 1000-resample bootstrap, differences paired with the shipped configuration):
+
+| Row | shipped | candidate | spaCy trf |
+|---|---|---|---|
+| text person | 34.78 | 35.56 (+0.77 [-3.49, +4.96]) | 61.29 |
+| text org | 55.56 | 54.29 (-1.27 [-7.62, +3.31]) | 32.86 |
+| text address | 71.70 | 71.43 (-0.27 [-12.70, +11.46]) | |
+| text record F1 | 31.48 | 32.08 (+0.59 [-4.34, +5.95]) | |
+| web person (model off) | 19.35 | 19.35 | 8.41 |
+| web org / address / record F1 | 35.87 / 83.97 / 25.44 | identical | |
+| web person with the model on | | 16.90 (-2.45 [-5.71, -0.47]) | |
+| phone, email, website, both sets | | identical | |
+
+Verdict: no row moves beyond noise, so the shipped head stays and the model reading stays off on web pages. Hand labels of 82 person mentions are too few to teach a head that tells a contact person from the many other names on a page.

@@ -351,10 +351,28 @@ internal static partial class Program
         int skipped = 0;
         int bad = 0;
         var counts = new Dictionary<string, int>();
-        foreach (string raw in File.ReadLines(o["decisions"]))
+        // "@reviewed c0001 c0080" marks a range of pieces as read: those without a line of their own count as "ok".
+        var decisionLines = new List<string>(File.ReadAllLines(o["decisions"]));
+        var explicitIds = new HashSet<string>(decisionLines.Where(l => l.StartsWith('c')).Select(l => l.Split(' ')[0]), StringComparer.Ordinal);
+        foreach (string range in decisionLines.Where(l => l.StartsWith("@reviewed ", StringComparison.Ordinal)).ToList())
+        {
+            string[] ends = range.Split(' ');
+            int from = int.Parse(ends[1][1..]);
+            int to = int.Parse(ends[2][1..]);
+            for (int n = from; n <= to; n++)
+            {
+                string id = "c" + n.ToString("0000", System.Globalization.CultureInfo.InvariantCulture);
+                if (!explicitIds.Contains(id))
+                {
+                    decisionLines.Add(id + " ok");
+                }
+            }
+        }
+
+        foreach (string raw in decisionLines)
         {
             string line = raw.Trim();
-            if (line.Length == 0 || line[0] == '#')
+            if (line.Length == 0 || line[0] is '#' or '@')
             {
                 continue;
             }
