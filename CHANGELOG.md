@@ -2,7 +2,7 @@
 
 All notable changes are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.0.0] - 2026-11-07
 
 First release. All packages share one version. `KeyVersion.V1` is frozen with this release: from here on, any change to a key rule ships as a new version.
 

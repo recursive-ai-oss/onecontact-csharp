@@ -149,15 +149,28 @@ The rules never read a text in the wrong country and never print a value the tex
 
 ### Speed
 
-| Operation | Comparator | Ratio (ours / comparator time) | Allocations | Verdict |
+Median time, ours divided by the comparator's (below 1 is faster), measured with BenchmarkDotNet on an x64 machine (AMD Ryzen 9 7950X3D) and an arm64 machine (Apple M2), each alone on the machine. Times, allocations and peak memory per row: [docs/maintainers/speed-gate.md](docs/maintainers/speed-gate.md).
+
+| Operation | Comparator | x64 | arm64 | Verdict |
 |---|---|---|---|---|
-| Phone parse, validate, format, type, match | libphonenumber-csharp | _to be filled from the 1.0 benchmark run_ | | |
-| Email parse | MimeKit `MailboxAddress`, `System.Net.Mail.MailAddress` | _to be filled_ | | |
-| URL parse | AngleSharp `Url` | _to be filled_ | | |
-| Public suffix lookup | Nager.PublicSuffix | _to be filled_ | | |
-| Person name parse | NameParserSharp | _to be filled_ | | |
-| Address parse | US regex address parsers (at matched or better accuracy) | _to be filled_ | | |
-| Extraction | Microsoft.Recognizers.Text sequence finding | _to be filled_ | | |
+| Phone parse | libphonenumber-csharp 9.0.42 | 0.71 | 0.75 | faster |
+| Phone parse and validate | same | 0.27 | 0.31 | faster |
+| Phone format | same | 0.23 | 0.23 | faster |
+| Phone number type | same | < 0.01 | < 0.01 | faster |
+| As-you-type formatter | same | 0.51 | 0.49 | faster |
+| Find numbers in text (Possible / Valid / StrictGrouping / ExactGrouping) | same | 0.87 / 0.53 / 0.54 / 0.53 | 0.97 / 0.60 / 0.60 / 0.59 | faster |
+| Short numbers (validity and cost / emergency) | same | 0.34 / 0.67 | 0.26 / 0.66 | faster |
+| Geocoder / carrier / time zones | same | 0.80 / 0.53 / 0.59 | 0.83 / 0.53 / 0.59 | faster |
+| Email parse (mixed / ASCII / IDN) | MimeKit 4.18.2 `MailboxAddress` | 0.84 / 0.86 / 0.82 | 0.81 / 0.80 / 0.94 | faster |
+| Email parse (mixed / ASCII / IDN) | `System.Net.Mail.MailAddress` | 1.98 / 1.85 / 2.82 | 1.50 / 1.43 / 2.45 | slower; more accurate (agrees with the RFC verdict on 32 of 33 cases, against 30) |
+| URL parse | AngleSharp 1.9.1 `Url` | 1.01 | 0.94 | at par; more accurate (WPT 896 / 896, against 503 / 896) |
+| Public suffix lookup | Nager.PublicSuffix 3.8.0 | 0.24 | 0.29 | faster |
+| Person name parse | NameParserSharp 1.5.0 | 0.70 | 0.73 | faster |
+| US address parse, country given | AddressParser 1.0.3 (US-only regex parser) | 0.10 | 0.10 | faster and more accurate |
+| Extraction from text | Microsoft.Recognizers.Text 1.8.13 sequence finding | 0.51 | 0.34 | faster |
+| Extraction from HTML | same | 0.77 | 0.50 | faster |
+
+The US-only comparator assumes a US address, so the address row gives OneContact the country too; without it, OneContact first works out which country the text is in (0.96 on x64, 1.05 on arm64). First call in a fresh process: 13 to 75 ms per kind, 359 ms for HTML extraction (x64).
 
 ### Size
 
@@ -174,11 +187,11 @@ How the rows are measured is described in [docs/index.md](docs/index.md) under e
 ## Building
 
 ```
-dotnet build -c Release
-dotnet test --solution OneContact.slnx -c Release
+dotnet build OneContact.Release.slnx -c Release
+dotnet test --solution OneContact.Release.slnx -c Release
 ```
 
-Build output goes outside the source tree: set `ONECONTACT_ARTIFACTS` to a directory, or leave it unset to use `artifacts/`. How the code and its data fit together: [docs/architecture.md](docs/architecture.md). Where the tools keep data, models and evaluation sets: [docs/tools-environment.md](docs/tools-environment.md). All documentation: [docs/index.md](docs/index.md).
+`OneContact.Release.slnx` holds the packages, their tests and samples, and restores from nuget.org; `OneContact.slnx` adds the model packages, tools and benchmarks, which need preview packages that are not on nuget.org yet. Build output goes outside the source tree: set `ONECONTACT_ARTIFACTS` to a directory, or leave it unset to use `artifacts/`. How the code and its data fit together: [docs/architecture.md](docs/architecture.md). Where the tools keep data, models and evaluation sets: [docs/tools-environment.md](docs/tools-environment.md). All documentation: [docs/index.md](docs/index.md).
 
 Licensed `MIT OR Apache-2.0`. Copyright (c) Recursive AI, LLC. Third-party data is listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
