@@ -19,8 +19,10 @@ public sealed class ParseDetail
     {
         ArgumentNullException.ThrowIfNull(issues);
         ArgumentNullException.ThrowIfNull(fields);
-        Issues = new ReadOnlyCollection<ParseIssue>([.. issues]);
-        Fields = new ReadOnlyCollection<ParsedField>([.. fields]);
+        ParseIssue[] issueArray = issues.ToArray();
+        ParsedField[] fieldArray = fields.ToArray();
+        Issues = issueArray.Length == 0 ? NoIssues : new ReadOnlyCollection<ParseIssue>(issueArray);
+        Fields = fieldArray.Length == 0 ? NoFields : new ReadOnlyCollection<ParsedField>(fieldArray);
     }
 
     private ParseDetail()

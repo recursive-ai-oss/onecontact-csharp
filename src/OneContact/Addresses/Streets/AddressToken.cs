@@ -1,13 +1,29 @@
 namespace RecursiveAI.OneContact.Addresses.Streets;
 
 /// <summary>One word of the input with where it sits in the original text. Offsets are UTF-16 code units into the text the caller passed.</summary>
-/// <param name="Text">The word as written, without surrounding punctuation.</param>
-/// <param name="Start">The offset of the first code unit.</param>
-/// <param name="Length">The number of code units.</param>
-internal readonly record struct AddressToken(string Text, int Start, int Length)
+internal readonly record struct AddressToken
 {
+    internal AddressToken(string text, int start, int length)
+    {
+        Text = text;
+        Start = start;
+        Length = length;
+
+        // Worked out once: the rule tables ask for it again and again.
+        Key = (text.Contains('.', StringComparison.Ordinal) ? text.Replace(".", string.Empty, StringComparison.Ordinal) : text).ToUpperInvariant();
+    }
+
+    /// <summary>Gets the word as written, without surrounding punctuation.</summary>
+    internal string Text { get; }
+
+    /// <summary>Gets the offset of the first code unit.</summary>
+    internal int Start { get; }
+
+    /// <summary>Gets the number of code units.</summary>
+    internal int Length { get; }
+
     /// <summary>Gets the word in upper case with periods removed, the form rule tables are matched against (<c>P.O.</c> is <c>PO</c>).</summary>
-    internal string Key => Text.Replace(".", string.Empty, StringComparison.Ordinal).ToUpperInvariant();
+    internal string Key { get; }
 
     /// <summary>Gets where the word is.</summary>
     internal SourceSpan Span => new(Start, Length);
