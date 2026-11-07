@@ -11,7 +11,10 @@ internal static partial class Tier2Reader
 {
     private sealed partial class Reader
     {
-        // Royal Mail and the UPU Ireland sheet print the country name on a line of its own; written between the post town and the postcode on one line it is still the country.
+        // Royal Mail and the UPU Ireland sheet print the country name on a line of its own; written between the post town and the postcode on one line it is still the country
+        // ("Belfast, UK BT1 1GH"), and so is a name on the unit above a postcode that stands alone ("Surrey, England, GU1 3AA"). The postcode forms of the Crown dependencies belong to
+        // one island each (UPU Isle of Man, Jersey and Guernsey sheets), so the same holds there: "Douglas, Isle of Man (UK) IM1 1AA", "St Helier, Jersey, Channel Islands JE2 4AB".
+        // "(UK)" beside the postcode names no country the postcode does not already name; it is taken as the country text and the postcode decides.
         private static void StripCountryBeforePostcode(List<Unit> units, ref (string Code, SourceSpan Span, string Written)? named)
         {
             if (named is not null || units.Count == 0)
@@ -21,21 +24,79 @@ internal static partial class Tier2Reader
 
             List<Tok> toks = units[^1].Toks;
             PostcodeMatch? m = TrailingAt(toks);
-            if (m is null || m.Candidates.Count != 1 || m.Candidates[0] is not ("GB" or "IE"))
+            if (m is null || m.Candidates.Count != 1 || m.Candidates[0] is not ("GB" or "IE" or "IM" or "JE" or "GG"))
             {
                 return;
             }
 
+            string own = m.Candidates[0];
             int pcStart = toks.Count - m.Length;
-            for (int n = Math.Min(T2Rules.MaxCountryWords, pcStart); n >= 1; n--)
+            Unit holder = units[^1];
+            if (pcStart == 0)
             {
-                string key = string.Join(' ', toks.Skip(pcStart - n).Take(n).Select(t => t.Key));
-                if (T2Rules.CountryNames.TryGetValue(key, out string? code) && code == m.Candidates[0] && (pcStart > n || units.Count > 1))
+                // The postcode alone on its unit: the words before it are the end of the unit above.
+                if (units.Count < 2)
                 {
-                    List<Tok> name = toks.GetRange(pcStart - n, n);
-                    named = (code, Span(name), Join(name));
-                    toks.RemoveRange(pcStart - n, n);
                     return;
+                }
+
+                holder = units[^2];
+            }
+
+            List<Tok> words = holder.Toks;
+            int end = pcStart == 0 ? words.Count : pcStart;
+            bool paren = end > 0 && words[end - 1].Text.Replace(".", string.Empty, StringComparison.Ordinal).Equals("(UK)", StringComparison.OrdinalIgnoreCase);
+            int nameEnd = paren ? end - 1 : end;
+            bool Alone(int n) => nameEnd > n || units.Count > 1 || pcStart == 0 && paren;
+            for (int n = Math.Min(T2Rules.MaxCountryWords, nameEnd); n >= 1; n--)
+            {
+                string key = string.Join(' ', words.Skip(nameEnd - n).Take(n).Select(t => t.Key));
+                if (!T2Rules.CountryNames.TryGetValue(key, out string? code) || !Alone(n))
+                {
+                    continue;
+                }
+
+                // A nation on a unit of its own above the postcode is the admin area ("Bournemouth / ENGLAND / BH1 1AA", Jersey Post): it is the country only when a county stands above it
+                // ("Guildford, Surrey, England, GU1 3AA").
+                if (pcStart == 0 && code == own && own == "GB" && !(units.Count >= 3 && IsBareCounty("GB", units[^3].Toks)))
+                {
+                    continue;
+                }
+
+                int from = nameEnd - n;
+                string? resolved = code == own || code == "BI" || code == "CI" && own is "JE" or "GG" ? own : null;
+                if (resolved is null || code == own && own is "IM" or "JE" or "GG" && !paren)
+                {
+                    // An island's own name beside its postcode is read by the island rules (the name above the postcode is the country, the line above it the place).
+                    continue;
+                }
+
+                // "Jersey, Channel Islands": the island named just before the group is the country.
+                if (code == "CI" && from > 0 && words[from - 1].Key == (own == "JE" ? "JERSEY" : "GUERNSEY"))
+                {
+                    from--;
+                }
+
+                int stop = paren ? end : nameEnd;
+                List<Tok> name = words.GetRange(from, stop - from);
+                named = (resolved, Span(name), Join(name));
+                words.RemoveRange(from, stop - from);
+                if (words.Count == 0 && pcStart == 0)
+                {
+                    units.Remove(holder);
+                }
+
+                return;
+            }
+
+            if (paren)
+            {
+                List<Tok> name = [words[end - 1]];
+                named = (own, Span(name), Join(name));
+                words.RemoveAt(end - 1);
+                if (words.Count == 0 && pcStart == 0)
+                {
+                    units.Remove(holder);
                 }
             }
         }

@@ -1,0 +1,68 @@
+# British Isles and Estonian forms written for this probe (no real data).
+IM|12 Athol Street, Douglas, Isle of Man IM1 1AA, British Isles
+|12 Athol Street, Douglas, Isle of Man IM1 1AA, British Isles
+|12 Athol Street, Douglas, IM1 1AA, IOM
+|12 Athol Street, Douglas, IM1 1AA, IoM
+|12 Athol Street, Douglas, IM1 1AA (UK)
+|12 Athol Street, Douglas, Isle of Man (UK) IM1 1AA
+|Peel Road, Douglas IM1 5PZ
+|Strand Street, Douglas, IM1 2QA, Isle of Man
+|The Strand, Ramsey, IM8 1BA
+|Church Road, Port Erin, IM9 6AQ
+IE|Main Street, Naas, Co. Kildare, W91 X123
+|Main Street, Naas, Co. Kildare W91 X123
+|12 Grafton Street, Dublin 2, D02 X285
+|12 Grafton Street, Dublin 2, D02 X285, Ireland
+|12 Grafton Street, Dublin D02 X285
+|The Mall, Westport, Co. Mayo, F28 AB12
+|Patrick Street, Cork, T12 AB34
+|Patrick Street, Cork, Ireland T12 AB34
+|Patrick Street, Cork, Co. Cork
+|Oakpark Road, Tralee, Co. Kerry V92 AB12
+|Unit 4, Business Park, Letterkenny, Co. Donegal, F92 A1B2
+|Dame Street, Dublin 2, Ireland
+|Dame Street, Dublin 2
+|Main Street, Dundrum, Dublin 14, D14 X123
+|O'Connell Street, Limerick, V94 AB12, Eire
+GB|Belfast, UK BT1 1GH
+|1 Royal Avenue, Belfast, UK BT1 1GH
+|1 Royal Avenue, Belfast, United Kingdom BT1 1GH
+|High Street, Guildford, Surrey, England GU1 3AA
+|High Street, Guildford, Surrey, England, GU1 3AA
+|High Street, Guildford, Surrey, UK GU1 3AA
+|High Street, Guildford, Surrey, England
+|Surrey, England
+|Church Lane, Bangor, Co. Down, Northern Ireland BT20 4AA
+JE|La Rue du Pont, St Helier, Jersey JE2 3AB
+|Le Hocq, St Clement, Jersey JE2 6LF
+|Bagot Road, St Helier, Jersey, Channel Islands JE2 4AB
+JE|Le Hocq, St Clement // Jersey JE2 6LF
+JE|Mon Plaisir, La Rue du Hocq, St Clement // Jersey JE2 6LF
+|Mon Plaisir, La Rue du Hocq, St Clement, Jersey JE2 6LF
+GG|Le Vauquiedor, St Peter Port, Guernsey GY1 1AA
+|Rue des Landes, St Sampson, Guernsey, GY2 4AB
+EE|Pärnu mnt 12, 10148 Tallinn
+|Pärnu mnt 12, Tallinn 10148
+|Pärnu mnt 12, Tallinn 10148, Harju maakond
+|Pärnu mnt 12, 10148 Tallinn, Harju maakond
+|Pärnu mnt 12, 10148 Tallinn Harju maakond
+|Pärnu mnt 12, Tallinn, Harju maakond 10148
+|Harju maakond, Tallinn, Pärnu mnt 12, 10148
+|Ülikooli 18, 51003 Tartu, Tartumaa
+|Ülikooli 18, 51003 Tartu, Tartu maakond
+|Ülikooli 18, Tartu, Tartu maakond, 51003
+|Viru tn 1, 10140 Tallinn, Eesti
+|Viru tn 1, 10140 Tallinn, Estonia
+|Viru väljak 4, Tallinn 10111, Estonia
+|Kooli 3-5, Põltsamaa linn, Jõgeva maakond, 48103
+|Kooli 3, Rae vald, Harju maakond, 75301
+|Kooli 3, Kodu küla, Rae vald, 75301 Harju maakond
+|Raekoja plats 1, Tartu 51004
+|Raekoja plats 1, Tartu linn 51004
+|Lai tn 5, 80010 Pärnu, Pärnu maakond
+|Lai 5, Pärnu, EE-80010
+|Lai tn 5-2, Pärnu linn, Pärnu maakond 80010
+|Mon Plaisir, La Rue du Hocq, St Clement // Jersey JE2 6LF
+IM|Athol House, Athol Street, Douglas // Isle of Man IM1 1AA
+|Athol House, Athol Street, Douglas // Isle of Man IM1 1AA
+JE|Le Hocq, St Clement // Jersey JE2 6LF

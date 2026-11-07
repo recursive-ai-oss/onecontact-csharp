@@ -88,7 +88,7 @@ Read for web pages, from the Royal Mail PAF Programmers' Guide (the county is op
 - `nº`, `n.º`, `Nr` and `Nº` before a number are dropped from the standard form; `CL.MAYOR` is split into type and name; Catalan ordinals (`3r 2a`), `baixos`, `bis`, `ter`, `km 5`, `nave`, `parcela`, `lote`, `loja`, polígono and zona industrial types, and the Basque `Name Kalea 5` order are read.
 - A country in parentheses after the locality (`(Italy)`, `(RSM)`, `(AD)`) is the country text. `AD-500` is read as AD500. `80134 Napoli, NA` and `Napoli NA` give the province; an Italian address with a province code needs no postcode.
 
-Not read yet, and refused to the model: `28013 Madrid, Calle Mayor 5` (postcode first), a country name between the post town and the postcode (`Belfast, UK BT1 1GH`), `Surrey, England` as two levels, an untyped Spanish street (`Nagusia 5`), and an Italian `Via` address with no hint and no province code (shared with Catalan).
+Not read yet, and refused to the model: `28013 Madrid, Calle Mayor 5` (postcode first), an untyped Spanish street (`Nagusia 5`), and an Italian `Via` address with no hint and no province code (shared with Catalan).
 
 ## Sources
 
@@ -97,3 +97,11 @@ UPU country sheets (addressing unit, upu.int, `PostalEntitiesFiles/addressingUni
 ## Island lines without commas
 
 Jersey, Guernsey and the Isle of Man are also written on one line with no commas: `Victoria Road Douglas IM1 1AA`, `Tromode Road Douglas Isle of Man IM2 5AA`, `Hill Street Jersey JE4 7BR`, `Douglas Isle of Man IM1 2AB`. The street ends at the last road type that leaves one to three words for the post town (Royal Mail PAF Programmers' Guide: the thoroughfare, then the post town); the island's name after the town is the country text, and when only the island name follows the road it is read as the town. Nothing is added to the input.
+
+## Country text beside the island and Irish postcodes
+
+- `IOM` (and `IoM`) after an Isle of Man postcode is the island's name as the Manx pages abbreviate it; `(UK)` beside a British, Manx, Jersey or Guernsey postcode names no country the postcode does not already name, so the postcode area decides (Royal Mail PAF Programmers' Guide and the UPU Isle of Man, Jersey and Guernsey sheets give the postcode areas). `Douglas, Isle of Man (UK) IM1 1AA` keeps `Isle of Man (UK)` as the country text.
+- `Jersey, Channel Islands` before a Jersey or Guernsey postcode is read as the island (UPU Jersey and Guernsey sheets print the island above the postcode).
+- A British nation or country (`England`) on a unit of its own above the postcode is the country when a county stands above it (`Guildford, Surrey, England, GU1 3AA`); with no county above it the nation stays the admin area, as Jersey Post prints it (`Bournemouth / ENGLAND / BH1 1AA`).
+- A Jersey or Guernsey line that holds a house name, a road and the parish with commas above the island name is cut before its last piece when that piece is a place with no digits; `Mon Plaisir, La Rue du Hocq, St Clement` above `Jersey JE2 6LF` gives the locality `St Clement` (Jersey Post prints the parish on its own line). A line that ends in a street and number is not cut.
+- An Irish text with no postcode is recognised without a hint only when it ends in `Co.` or `County` and a county of the Republic, or in a Dublin postal district (`Dublin 8`; UPU Ireland sheet: `CO. CORK`, `DUBLIN 24`). A bare town name never is, and `CO` without a period is left to the United States (Colorado).
