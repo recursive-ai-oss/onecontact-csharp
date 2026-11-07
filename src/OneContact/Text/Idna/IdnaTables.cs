@@ -38,6 +38,20 @@ internal static class IdnaTables
     internal static IdnaStatus GetStatus(int codePoint, out ReadOnlySpan<char> mapping)
     {
         Loaded d = Data.Value;
+        if ((uint)codePoint < Loaded.AsciiCount)
+        {
+            // Domain names are mostly ASCII: answer from the table filled with this same search.
+            mapping = d.AsciiMappingLength[codePoint] == 0 ? default : d.MappingChars.AsSpan(d.AsciiMappingOffset[codePoint], d.AsciiMappingLength[codePoint]);
+            return (IdnaStatus)d.AsciiStatus[codePoint];
+        }
+
+        return Search(d, codePoint, out mapping);
+    }
+
+    internal static IdnaStatus SearchStatus(int codePoint, out ReadOnlySpan<char> mapping) => Search(Data.Value, codePoint, out mapping);
+
+    private static IdnaStatus Search(Loaded d, int codePoint, out ReadOnlySpan<char> mapping)
+    {
         ReadOnlySpan<byte> ranges = d.IdnaRanges.Span;
         int lo = 0;
         int hi = (ranges.Length / 12) - 1;
@@ -70,16 +84,49 @@ internal static class IdnaTables
         return IdnaStatus.Disallowed;
     }
 
-    internal static byte CombiningClass(int codePoint) => Lookup(Data.Value.Ccc.Span, codePoint, 0);
+    // Where the mapping of a code point starts in MappingChars (the table entry's offset field).
+    private static int MappingOffset(Loaded d, int codePoint)
+    {
+        ReadOnlySpan<byte> ranges = d.IdnaRanges.Span;
+        int lo = 0;
+        int hi = (ranges.Length / 12) - 1;
+        while (lo <= hi)
+        {
+            int mid = (lo + hi) >>> 1;
+            ReadOnlySpan<byte> e = ranges.Slice(mid * 12, 12);
+            uint first = BinaryPrimitives.ReadUInt32LittleEndian(e);
+            uint last = BinaryPrimitives.ReadUInt32LittleEndian(e[4..]);
+            if (codePoint < first)
+            {
+                hi = mid - 1;
+            }
+            else if (codePoint > last)
+            {
+                lo = mid + 1;
+            }
+            else
+            {
+                return (int)(BinaryPrimitives.ReadUInt32LittleEndian(e[8..]) >> 11);
+            }
+        }
 
-    internal static bool IsMark(int codePoint) => Lookup(Data.Value.Mark.Span, codePoint, 0) != 0;
+        return 0;
+    }
+
+    internal static byte CombiningClass(int codePoint) =>
+        (uint)codePoint < Loaded.AsciiCount ? Data.Value.AsciiCcc[codePoint] : Lookup(Data.Value.Ccc.Span, codePoint, 0);
+
+    internal static bool IsMark(int codePoint) =>
+        (uint)codePoint < Loaded.AsciiCount ? Data.Value.AsciiMark[codePoint] != 0 : Lookup(Data.Value.Mark.Span, codePoint, 0) != 0;
 
     internal static bool IsCompositionExcluded(int codePoint) => Lookup(Data.Value.CompositionExclusion.Span, codePoint, 0) != 0;
 
     // Code points the file does not list default to L (unassigned code points are disallowed before this matters).
-    internal static BidiClass GetBidiClass(int codePoint) => (BidiClass)Lookup(Data.Value.Bidi.Span, codePoint, (byte)BidiClass.L);
+    internal static BidiClass GetBidiClass(int codePoint) =>
+        (BidiClass)((uint)codePoint < Loaded.AsciiCount ? Data.Value.AsciiBidi[codePoint] : Lookup(Data.Value.Bidi.Span, codePoint, (byte)BidiClass.L));
 
-    internal static JoiningType GetJoiningType(int codePoint) => (JoiningType)Lookup(Data.Value.Joining.Span, codePoint, (byte)JoiningType.U);
+    internal static JoiningType GetJoiningType(int codePoint) =>
+        (JoiningType)((uint)codePoint < Loaded.AsciiCount ? Data.Value.AsciiJoining[codePoint] : Lookup(Data.Value.Joining.Span, codePoint, (byte)JoiningType.U));
 
     /// <summary>Gets the canonical decomposition of a code point (one or two code points), or <see langword="false"/> when it has none.</summary>
     internal static bool TryGetDecomposition(int codePoint, out int first, out int second)
@@ -165,6 +212,24 @@ internal static class IdnaTables
             Bidi = tables.GetTable("bidi");
             Joining = tables.GetTable("joining");
 
+            // The answers for ASCII, from the same searches, so the common case needs none.
+            for (int c = 0; c < AsciiCount; c++)
+            {
+                IdnaStatus status = Search(this, c, out ReadOnlySpan<char> mapping);
+                AsciiStatus[c] = (byte)status;
+                if (!mapping.IsEmpty)
+                {
+                    // The mapping is a slice of MappingChars; find where it starts by the table entry again.
+                    AsciiMappingLength[c] = (byte)mapping.Length;
+                    AsciiMappingOffset[c] = MappingOffset(this, c);
+                }
+
+                AsciiCcc[c] = Lookup(Ccc.Span, c, 0);
+                AsciiMark[c] = Lookup(Mark.Span, c, 0);
+                AsciiBidi[c] = Lookup(Bidi.Span, c, (byte)BidiClass.L);
+                AsciiJoining[c] = Lookup(Joining.Span, c, (byte)JoiningType.U);
+            }
+
             // UAX #15 section 3.11: the primary composites are the canonical decompositions into two code points that are not
             // excluded from composition (Full_Composition_Exclusion also covers singletons and non-starter decompositions).
             ReadOnlySpan<byte> d = Decomposition.Span;
@@ -179,6 +244,22 @@ internal static class IdnaTables
                 }
             }
         }
+
+        internal const int AsciiCount = 128;
+
+        internal byte[] AsciiStatus { get; } = new byte[AsciiCount];
+
+        internal byte[] AsciiMappingLength { get; } = new byte[AsciiCount];
+
+        internal int[] AsciiMappingOffset { get; } = new int[AsciiCount];
+
+        internal byte[] AsciiCcc { get; } = new byte[AsciiCount];
+
+        internal byte[] AsciiMark { get; } = new byte[AsciiCount];
+
+        internal byte[] AsciiBidi { get; } = new byte[AsciiCount];
+
+        internal byte[] AsciiJoining { get; } = new byte[AsciiCount];
 
         internal ReadOnlyMemory<byte> IdnaRanges { get; }
 

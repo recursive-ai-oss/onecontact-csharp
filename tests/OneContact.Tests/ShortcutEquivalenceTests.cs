@@ -4,6 +4,7 @@ using System.Text.Json;
 using RecursiveAI.OneContact.Email;
 using RecursiveAI.OneContact.Phones;
 using RecursiveAI.OneContact.Phones.Metadata;
+using RecursiveAI.OneContact.Text.Idna;
 using RecursiveAI.OneContact.Web;
 
 namespace RecursiveAI.OneContact.Tests;
@@ -99,6 +100,17 @@ public sealed class ShortcutEquivalenceTests
 
         Assert.True(shortcut > 100, $"the shortcut applied to only {shortcut} of {total} inputs");
         Assert.True(differences.Count == 0, $"{differences.Count} of {total} differ (shortcut applied to {shortcut}):\n" + string.Join('\n', differences.Take(25)));
+    }
+
+    [Fact]
+    public void Idna_ascii_answers_equal_the_table_search()
+    {
+        for (int cp = 0; cp < 128; cp++)
+        {
+            IdnaStatus fast = IdnaTables.GetStatus(cp, out ReadOnlySpan<char> fastMapping);
+            IdnaStatus slow = IdnaTables.SearchStatus(cp, out ReadOnlySpan<char> slowMapping);
+            Assert.True(fast == slow && fastMapping.SequenceEqual(slowMapping), $"U+{cp:X4}: {fast} '{fastMapping}' vs {slow} '{slowMapping}'");
+        }
     }
 
     // ---- Public suffix ---------------------------------------------------------------------------------------------------------
