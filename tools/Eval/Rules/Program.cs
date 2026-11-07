@@ -74,11 +74,24 @@ static bool WriteAddress(Utf8JsonWriter w, string text, Region region)
         List<string> road = [], unit = [], box = [];
         foreach (StreetLine line in a!.DeliveryLines)
         {
-            foreach (StreetPart p in line.Parts)
+            for (int pi = 0; pi < line.Parts.Count; pi++)
             {
+                StreetPart p = line.Parts[pi];
                 switch (p.Role)
                 {
-                    case StreetPartRole.HouseNumber: Add(fields, "house_number", p.Text); break;
+                    case StreetPartRole.HouseNumber:
+                        // Scoring convention: a building number and a flat number written "12/3" are one house_number in the scorer's labels (the gold sets and the
+                        // reference systems write them so); the library keeps the two numbers apart as a house number and a unit number.
+                        if (pi + 1 < line.Parts.Count && line.Parts[pi + 1] is { Role: StreetPartRole.UnitNumber } flat && flat.Span.Start > p.Span.End
+                            && text.Substring(p.Span.End, flat.Span.Start - p.Span.End).Trim() == "/" && Environment.GetEnvironmentVariable("ONECONTACT_EVAL_NO_SLASH_CONVENTION") is null)
+                        {
+                            Add(fields, "house_number", text.Substring(p.Span.Start, flat.Span.End - p.Span.Start));
+                            pi++;
+                            break;
+                        }
+
+                        Add(fields, "house_number", p.Text);
+                        break;
                     case StreetPartRole.PreDirectional: Add(parts, "pre_directional", p.Text); road.Add(p.Text); break;
                     case StreetPartRole.StreetName: Add(parts, "street_name", p.Text); road.Add(p.Text); break;
                     case StreetPartRole.StreetType: Add(parts, "street_type", p.Text); road.Add(p.Text); break;

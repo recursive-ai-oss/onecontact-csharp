@@ -119,12 +119,11 @@ public class Tier2AuthorityTests
     }
 
     [Fact]
-    public void AmbiguousPostcodeWithoutHintIsRefused()
+    public void AmbiguousPostcodeWithoutHintDoesNotGuessACountry()
     {
-        // Four digits are a postcode in Belgium, Austria, Switzerland, Liechtenstein and Luxembourg; the rules do not guess.
-        OperationStatus s = RuleAddressParser.TryParse("Hauptplatz 1\n1010 Wien", Region.Unknown, out _, out ParseDetail d);
-        Assert.Equal(OperationStatus.InvalidData, s);
-        Assert.Equal(ReasonCode.AddressCountryUndetermined, d.PrimaryReason);
+        // Four digits are a postcode in Belgium, Austria, Switzerland, Liechtenstein and Luxembourg; the rules do not guess: the fields come back with the country left unknown
+        // when every country that can read the text finds the same ones, and the text is refused when they disagree.
+        Assert.True(AddressTestData.NamesNoCountry("Hauptplatz 1\n1010 Wien"));
     }
 
     [Fact]

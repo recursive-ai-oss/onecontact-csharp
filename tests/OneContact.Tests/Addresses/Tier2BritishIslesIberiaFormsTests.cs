@@ -130,6 +130,6 @@ public class Tier2BritishIslesIberiaFormsTests
     {
         Assert.Equal(Region.Parse("SM"), Read("Via del Voltone 12, 47890 San Marino (RSM)", null).Country);
         Assert.Equal(Region.Parse("IT"), Read("Via Toledo 100, 80134 Napoli, NA", null).Country);
-        Assert.NotEqual(OperationStatus.Done, RuleAddressParser.TryParse("Via Roma 12, 00184 Roma", Region.Unknown, out _, out _));
+        Assert.True(AddressTestData.NamesNoCountry("Via Roma 12, 00184 Roma"));
     }
 }

@@ -148,6 +148,12 @@ internal static class AddressRenderer
             return a.Tier2.Render(style, layout, includeCountry);
         }
 
+        // No country: no authority's style applies, so the lines are the text as written (nothing is rewritten or added).
+        if (a.Facts.HasFlag(AddressFacts.CountryUndetermined))
+        {
+            return string.Join(layout == AddressLayout.Label ? "\n" : ", ", WrittenLines(a));
+        }
+
         List<string> lines = [];
         foreach (ParsedAddressText lead in a.LeadingLines)
         {
@@ -173,6 +179,14 @@ internal static class AddressRenderer
         }
 
         return string.Join(layout == AddressLayout.Label ? "\n" : ", ", lines);
+    }
+
+    // The lines of the address as the caller wrote them: the lines of a multi-line input, or the comma-separated parts of a one-line input.
+    internal static List<string> WrittenLines(ParsedAddress a)
+    {
+        string written = a.SourceText.Substring(a.Span.Start, a.Span.Length);
+        char[] separators = written.Contains('\n', StringComparison.Ordinal) ? ['\n'] : [',', ';', '|'];
+        return [.. written.Split(separators).Select(l => l.Trim()).Where(l => l.Length > 0)];
     }
 
     // Names and organizations are not ours to rewrite: a line the caller wrote in mixed case stays as written; one in capitals becomes title case.

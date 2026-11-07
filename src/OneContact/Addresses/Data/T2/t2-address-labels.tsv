@@ -1,0 +1,39 @@
+# Words that label an address on a page ("Cím: 1053 Budapest, ..."). A label is written before the address and is not part of it, so it is left out of every field.
+# Columns: label in the form T2Rules.Key gives (upper case, no accents, periods dropped, several words allowed). The label counts only when it starts a line of the text and is
+# followed by a colon. The words are the ordinary words of each language for "address", "registered office", "premises" and "postal address" (our own list).
+# Hungarian
+CIM
+POSTACIM
+LEVELEZESI CIM
+SZEKHELY
+CEGSZEKHELY
+TELEPHELY
+IRODA
+# Polish
+ADRES
+ADRES SIEDZIBY
+ADRES KORESPONDENCYJNY
+SIEDZIBA
+BIURO
+# Czech and Slovak
+ADRESA
+SIDLO
+PROVOZOVNA
+PREVADZKA
+# English, German, French, Dutch, Spanish, Portuguese, Italian
+ADDRESS
+POSTAL ADDRESS
+MAILING ADDRESS
+ADRESSE
+ANSCHRIFT
+POSTANSCHRIFT
+SITZ
+ADRESSE POSTALE
+SIEGE SOCIAL
+SIEGE
+DIRECCION
+DOMICILIO
+ENDERECO
+MORADA
+INDIRIZZO
+SEDE

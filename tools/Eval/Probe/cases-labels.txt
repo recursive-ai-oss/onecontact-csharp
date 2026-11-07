@@ -1,0 +1,45 @@
+# hand-written forms for the Hungarian, Polish and Isle of Man rows (hinted). Written for this repository.
+HU|Cím: 1053 Budapest, Kossuth Lajos utca 5.
+HU|Székhely: 1053 Budapest, Kossuth Lajos utca 5.
+HU|Cím: Kossuth Lajos utca 5., 1053 Budapest
+HU|Kiss Béla Kossuth Lajos utca 5., 1053 Budapest
+HU|Kovács Kft., 1053 Budapest, Kossuth Lajos utca 5. 2. emelet 3.
+HU|Budapest, Kossuth Lajos u. 5., 1053
+HU|1053 Budapest Kossuth Lajos utca 5
+HU|Telephely: 6720 Szeged, Széchenyi tér 9.
+PL|ul. Marszałkowska 12/3, 00-001 Warszawa
+PL|ul. Marszałkowska 12 m. 3, 00-001 Warszawa
+PL|ul. Marszałkowska 12A/3, 00-001 Warszawa
+PL|Marszałkowska 12/3 // 00-001 Warszawa
+PL|ul. Długa 5-7, 80-827 Gdańsk
+IM|12 Athol Street, Douglas, Isle of Man, IM1 1AA
+IM|12 Athol Street Douglas Isle of Man IM1 1AA
+IM|12 Athol Street, Douglas, IM1 1AA
+IM|12 Athol Street, Douglas IM1 1AA, Isle of Man
+IM|Peel Road, Douglas, Isle of Man IM1 5PZ
+IM|The Old Mill, Peel Road, Peel, Isle of Man IM5 1AB
+IM|Ballasalla, Isle of Man, IM9 2AA
+IM|12 Athol Street, Douglas IM1 1AA British Isles
+IM|12 Athol Street Douglas, Isle of Man IM1 1AA
+IM|12 Athol Street, Douglas, Isle of Man IM1 1AA
+IM|Douglas Isle of Man IM1 1AA
+IM|12 Athol Street, Douglas, IM1 1AA, United Kingdom
+IM|12 Athol Street // Douglas // Isle of Man // IM1 1AA
+IM|12 Athol Street, Douglas, Isle Of Man
+IM|Athol House, 12 Athol Street, Douglas, IM1 1AA, Isle of Man, British Isles
+IM|Douglas, Isle of Man
+IM|12 Athol Street, Douglas, IM1 1AA, Isle of Man (UK)
+IM|Isle of Man, IM1 1AA
+IM|12 Athol Street, Douglas IM1 1AA IOM
+IM|12 Athol Street, Douglas, IM1 1AA, IoM
+HU|Kossuth Lajos utca 5., Budapest 1053
+HU|H-1053 Budapest, Kossuth Lajos utca 5.
+HU|Magyarország, 1053 Budapest, Kossuth Lajos utca 5.
+HU|Kossuth Lajos utca 5. // 1053 Budapest
+HU|Kossuth Lajos u. 5. 1. em. 3., 1053 Budapest
+HU|Budapest Kossuth Lajos utca 5., 1053
+HU|1053 Budapest, Kossuth Lajos utca 5. fszt. 1.
+HU|Postacím: 1053 Budapest, Pf. 12.
+PL|Pl. Zbawiciela 3/5 lok. 2, 00-001 Warszawa
+PL|ul. Piękna 1a, m. 5, 00-001 Warszawa
+PL|Piękna 1/5, 00-001 Warszawa
