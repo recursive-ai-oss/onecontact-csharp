@@ -97,7 +97,8 @@ public class AddressParsingTests
     [Fact]
     public void NothingIsInvented()
     {
-        ParsedAddress zipOnly = Parse("123 Main St, 22042");
+        // With the United States given: without a hint a bare five-digit number does not show the country (Mexico, Estonia and others write it too).
+        ParsedAddress zipOnly = Parse("123 Main St, 22042", Region.US);
         Assert.Null(zipOnly.Locality);
         Assert.Null(zipOnly.AdminArea);
         Assert.Equal("123 MAIN ST, 22042", zipOnly.ToString());

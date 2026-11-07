@@ -145,7 +145,7 @@ The four intended differences of the structural layer: (1) we ship a newer data 
 
 ### Honest refusal
 
-The rules never read a text in the wrong country and never print a value the text does not contain; what they cannot read they refuse with a reason. Measured on 4,623 items of real pages (the United States, Canada, every Tier 2 country), with and without the country given: with it, 0 readings in a wrong country; without it, 29 of 3,120 readings with a country were in a wrong country and 920 more were returned without a country rather than guessed; one standardized state abbreviation (`D.F.` written `CDMX`) was the only printed word not found in its input. Every cause is listed in [docs/maintainers/refusal-rows.md](docs/maintainers/refusal-rows.md).
+The rules never read a text in the wrong country and never print a value the text does not contain; what they cannot read they refuse with a reason. Measured on 4,623 items of real pages (the United States, Canada, every Tier 2 country), with and without the country given: with it, 0 readings in a wrong country; without it, 1 of 3,098 readings with a country was in a wrong country (a Czech-labelled item whose text is Slovak) and 925 more were returned without a country rather than guessed; one standardized state abbreviation (`D.F.` written `CDMX`) was the only printed word not found in its input. Every cause is listed in [docs/maintainers/refusal-rows.md](docs/maintainers/refusal-rows.md).
 
 ### Speed
 

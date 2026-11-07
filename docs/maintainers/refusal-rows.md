@@ -26,12 +26,12 @@ Rules only, `RecursiveAI.OneContact` as released in 1.0.
 
 | Set / country | Items | Hinted: refused | read, right | read, wrong country | invented | No hint: refused | read, no country | read, right | read, wrong country | invented |
 |---|---|---|---|---|---|---|---|---|---|---|
-| tier1/CA | 231 | 6 | 225 | 0 | 0 | 5 | 0 | 225 | 1 | 0 |
+| tier1/CA | 231 | 6 | 225 | 0 | 0 | 6 | 0 | 225 | 0 | 0 |
 | tier1/US | 229 | 8 | 221 | 0 | 0 | 8 | 0 | 221 | 0 | 0 |
 | group-a/AT | 90 | 8 | 82 | 0 | 0 | 4 | 55 | 31 | 0 | 0 |
-| group-a/BE | 95 | 9 | 86 | 0 | 0 | 6 | 33 | 55 | 1 | 0 |
+| group-a/BE | 95 | 9 | 86 | 0 | 0 | 6 | 34 | 55 | 0 | 0 |
 | group-a/CH | 99 | 8 | 91 | 0 | 0 | 6 | 59 | 34 | 0 | 0 |
-| group-a/DE | 117 | 12 | 105 | 0 | 0 | 12 | 28 | 76 | 1 | 0 |
+| group-a/DE | 117 | 12 | 105 | 0 | 0 | 12 | 28 | 77 | 0 | 0 |
 | group-a/FR | 101 | 9 | 92 | 0 | 0 | 11 | 8 | 82 | 0 | 0 |
 | group-a/LI | 117 | 11 | 106 | 0 | 0 | 11 | 2 | 104 | 0 | 0 |
 | group-a/LU | 92 | 4 | 88 | 0 | 0 | 5 | 9 | 78 | 0 | 0 |
@@ -50,10 +50,10 @@ Rules only, `RecursiveAI.OneContact` as released in 1.0.
 | group-b/SM | 61 | 13 | 48 | 0 | 0 | 13 | 0 | 48 | 0 | 0 |
 | group-b/VA | 6 | 1 | 5 | 0 | 0 | 1 | 0 | 5 | 0 | 0 |
 | c-north/DK | 81 | 10 | 71 | 0 | 0 | 8 | 24 | 49 | 0 | 0 |
-| c-north/EE | 91 | 5 | 86 | 0 | 0 | 7 | 4 | 79 | 1 | 0 |
+| c-north/EE | 91 | 5 | 86 | 0 | 0 | 8 | 4 | 79 | 0 | 0 |
 | c-north/FI | 103 | 3 | 100 | 0 | 0 | 3 | 21 | 79 | 0 | 0 |
 | c-north/IS | 40 | 1 | 39 | 0 | 0 | 33 | 0 | 7 | 0 | 0 |
-| c-north/LT | 19 | 1 | 18 | 0 | 0 | 2 | 1 | 14 | 2 | 0 |
+| c-north/LT | 19 | 1 | 18 | 0 | 0 | 4 | 1 | 14 | 0 | 0 |
 | c-north/LV | 66 | 17 | 49 | 0 | 0 | 17 | 0 | 49 | 0 | 0 |
 | c-north/NO | 85 | 8 | 77 | 0 | 0 | 8 | 28 | 49 | 0 | 0 |
 | c-north/SE | 49 | 1 | 48 | 0 | 0 | 2 | 8 | 39 | 0 | 0 |
@@ -61,7 +61,7 @@ Rules only, `RecursiveAI.OneContact` as released in 1.0.
 | c-south/CZ | 92 | 7 | 85 | 0 | 0 | 7 | 50 | 34 | 1 | 0 |
 | c-south/HR | 116 | 7 | 109 | 0 | 0 | 9 | 49 | 58 | 0 | 0 |
 | c-south/HU | 103 | 15 | 88 | 0 | 0 | 16 | 1 | 86 | 0 | 0 |
-| c-south/MX | 27 | 14 | 13 | 0 | 0 | 14 | 1 | 9 | 3 | 0 |
+| c-south/MX | 27 | 14 | 13 | 0 | 0 | 16 | 2 | 9 | 0 | 0 |
 | c-south/PL | 128 | 7 | 121 | 0 | 0 | 7 | 0 | 121 | 0 | 0 |
 | c-south/RO | 28 | 15 | 13 | 0 | 0 | 15 | 0 | 13 | 0 | 0 |
 | c-south/SI | 114 | 6 | 108 | 0 | 0 | 7 | 18 | 89 | 0 | 0 |
@@ -74,37 +74,36 @@ Rules only, `RecursiveAI.OneContact` as released in 1.0.
 | fresh-addresses/HR | 133 | 13 | 120 | 0 | 0 | 15 | 35 | 83 | 0 | 0 |
 | fresh-addresses/IM | 25 | 4 | 21 | 0 | 0 | 5 | 0 | 20 | 0 | 0 |
 | fresh-addresses/SK | 134 | 9 | 125 | 0 | 0 | 9 | 64 | 61 | 0 | 0 |
-| fresh-ro-mx/MX | 144 | 56 | 88 | 0 | 2 | 53 | 6 | 66 | 19 | 2 |
+| fresh-ro-mx/MX | 144 | 56 | 88 | 0 | 2 | 64 | 9 | 71 | 0 | 2 |
 | fresh-ro-mx/RO | 141 | 45 | 96 | 0 | 0 | 48 | 0 | 93 | 0 | 0 |
-| **All** | 4623 | 565 | 4058 | 0 | 2 | 583 | 920 | 3091 | 29 | 2 |
+| **All** | 4623 | 565 | 4058 | 0 | 2 | 600 | 925 | 3097 | 1 | 2 |
 
 | Reason | Hinted | No hint |
 |---|---|---|
-| `address.no-last-line` | 254 | 446 |
-| `address.model-required` | 279 | 70 |
-| `address.country-undetermined` | 0 | 67 |
+| `address.no-last-line` | 254 | 461 |
+| `address.model-required` | 279 | 71 |
+| `address.country-undetermined` | 0 | 68 |
 | `address.no-delivery-line` | 24 | 0 |
 | `address.country-conflict` | 8 | 0 |
 
-Reading the table: with a hint nothing was read in a wrong country, and 2 readings print a word the text does not contain (see below). Without a hint a text whose postcode form several countries share is not guessed: it is refused, or returned without a country, which is the honest answer for it.
+Reading the table: with a hint nothing was read in a wrong country. The 2 "invented" items are one text each, counted in the hinted and the no-hint column: the `D.F.` to `CDMX` standardization described below. Without a hint a text whose postcode form several countries share is not guessed: it is refused, or returned without a country, which is the honest answer for it.
 
 ## Findings
 
-**Hinted reads: 0 wrong country.** The measurement found 2 hinted items returned as French: a German address with the postcode 97478 (Würzburg area) and a Mexican one with 97306 (Yucatán), because 97xxx was treated as the French overseas departments' range whatever the hint. Fixed in this release: when the hint is Germany, Spain, Croatia or Mexico, a five-digit postcode that exists there is read there (`HintedPostcodeRangeTests`). Without a hint 97xxx is still French.
+**Hinted reads: 0 wrong country.** A first measurement found 2 hinted items returned as French (a German address with the postcode 97478 and a Mexican one with 97306, both inside France's 97xxx overseas range); with a German, Spanish, Croatian or Mexican hint such a postcode is now read in the hinted country (`HintedPostcodeRangeTests`).
 
-**Invented values: 2 items, one cause.** Two Mexican items write the capital as `D.F.` (the former Distrito Federal). The standardized state is `CDMX`, the abbreviation the UPU Mexico sheet and SEPOMEX use for the state that `D.F.` named. It is a standardized state abbreviation, not new content, and is kept; it is the only word of any reading, hinted or not, that does not trace to the input.
+**Invented values: 2 items, one cause, kept.** Two Mexican items write the capital as `D.F.`. The standardized state is `CDMX`, the abbreviation the UPU Mexico sheet and SEPOMEX use for the state that `D.F.` named. It is a standardized abbreviation, not new content, and it is the only printed word of any reading, hinted or not, that does not trace to the input.
 
-**No-hint reads in the wrong country: 29 items** (of 3,120 no-hint reads with a country). Causes:
+**No-hint reads in the wrong country: 29 items at the first measurement, 1 after the fixes.** What changed (all in the rules; `NoHintWrongCountryTests`):
 
-| Cause | Items | Notes |
+| Cause | Items | Fix |
 |---|---|---|
-| A five-digit postcode without a United States state or a ZIP+4 is taken as a ZIP | 19 (Mexico 16, Estonia 1, Lithuania 2) | The United States rules accept any word before a five-digit number as the state's place. |
-| A Mexican state abbreviation that is also a Canadian province code (`N.L.`, `B.C.`) with a five-digit postcode | 5 (Mexico) | The reader accepts a Canadian province with a plain five-digit postcode. |
-| 97xxx taken as a French overseas postcode | 2 (a German and a Mexican address) | Without a hint, 97xxx is French by rule; the German item has a German legal form in its text. |
-| A Canadian address with a Canadian postal code whose five-digit house number was taken as a Lithuanian postcode | 1 | The Canadian postal code in the same text was not used as evidence. |
-| `6980 LA ROCHE` (a Belgian postcode and a town written in capitals) read as a Dutch postcode, four digits and two capitals | 1 | |
-| A Czech-labelled item whose town and postcode (`040 12`) are Slovak | 1 | The text itself reads as Slovak; the label is probably the issue. |
+| A five-digit number without a United States state was taken for a ZIP, or a Mexican state abbreviation (`N.L.`, `B.C.`) with a five-digit postcode for a Canadian province | 24 (Mexico 21, Estonia 1, Lithuania 2) | Without a hint the United States and Canada rules read a text only when it shows the country: a state it has, a ZIP+4, a Canadian postal code, or the country written out. `N.L.` and `B.C.` with a five-digit number in the text are not Canadian. `Baja California` and `Nuevo México` do not end in an American state. |
+| 97xxx taken as a French overseas postcode | 2 (a German and a Mexican address) | With a German legal form or street word, or a Mexican colonia word, `C.P.` or state, the country is not guessed (`address.country-undetermined`). Text without such a cue is still French. |
+| A five-digit house number taken as a Lithuanian postcode while the text carries a Canadian postal code | 1 | A Canadian postal code in the text drops the Tier 2 reading. |
+| `6980 LA ROCHE` (Belgian) read as a Dutch postcode with letters `LA` | 1 | Romance articles that are also valid Dutch postcode letters (LA, LE, EL, ET, AU, UN, DU, DI, DA, DO) are not read as Dutch when the text has French street words. |
+| A Czech-labelled item whose town and postcode (`040 12`) are Slovak | 1 | Not a rule defect: the text reads as Slovak and the gold label is probably wrong. The one remaining wrong-country read. |
 
-An experiment (not in this release) that refuses a no-hint United States or Canada rule reading when it has neither a known state or province nor a ZIP+4 or Canadian postal code removed the first cause completely (Mexico 19 to 6 on the fresh set, Estonia and Lithuania to 0), changed no United States or Canada row, and turned the readings into refusals. The patch is the proposal for 1.0.1 or 1.1; it needs the full suites.
+Side effect, by design: a no-hint text with a bare ZIP and no state (`1 Main Street, Springfield 22162`) is no longer read as American; it is refused (`address.no-last-line`) or returned without a country. With the United States given it is read as before. On the register dev sets this changes 21 of the 300 no-hint United States dev items from read to refused and 2 to no country.
 
 **Refusal reasons.** `address.no-last-line` (the text has no postcode or locality line the rules can place) and `address.model-required` (the rules left a field open and only a model package, available from 1.1, can fill it; the reason names the package to add) account for nearly all refusals. `address.country-undetermined` is the no-hint refusal of a text whose postcode form several countries share.
