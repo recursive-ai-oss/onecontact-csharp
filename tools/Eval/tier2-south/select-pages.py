@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Step 1 for the Tier 2 countries: picks candidate contact/about/legal-notice pages of one country's TLD from a Common Crawl index.
 
-usage: select-pages.py <crawl-id> <out-dir> <seed> <country> <blocks> [<exclude-hosts-file>]
+usage: select-pages.py <crawl-id> <out-dir> <seed> <country> <blocks> [<exclude-hosts-file> [<max candidates>]]
 
 Like select-pages.py (random blocks of the sorted URL index, HTML captures with status 200, at most two pages per host per block), but
 for one country at a time, with the local-language path words of contact, about-us, team, location and legal-notice pages
@@ -25,8 +25,14 @@ if len(sys.argv) > 6 and os.path.exists(sys.argv[6]):
     exclude = {l.strip().lower() for l in open(sys.argv[6], encoding="utf-8") if l.strip()}
 os.makedirs(out, exist_ok=True)
 
-TLD = {"PL": "pl", "CZ": "cz", "SK": "sk", "SI": "si", "HR": "hr", "HU": "hu", "RO": "ro", "MX": "mx", "AU": "au"}
+TLD = {"PL": "pl", "CZ": "cz", "SK": "sk", "SI": "si", "HR": "hr", "HU": "hu", "RO": "ro", "MX": "mx", "AU": "au", "GB": "uk", "JE": "je", "GG": "gg", "IM": "im", "IE": "ie", "ES": "es", "PT": "pt", "IT": "it", "MT": "mt", "SM": "sm", "VA": "va", "AD": "ad"}
 WORDS = {
+    "GB": "contact|contact-us|contactus|about|about-us|aboutus|team|our-team|staff|people|locations?|find-us|visit|directions|legal|legal-notice|privacy|privacy-policy|terms|get-in-touch|offices|branches|solicitors|clinics?", "JE": "contact|contact-us|contactus|about|about-us|aboutus|team|our-team|staff|people|locations?|find-us|visit|directions|legal|legal-notice|privacy|privacy-policy|terms|get-in-touch|offices|branches|solicitors|clinics?", "GG": "contact|contact-us|contactus|about|about-us|aboutus|team|our-team|staff|people|locations?|find-us|visit|directions|legal|legal-notice|privacy|privacy-policy|terms|get-in-touch|offices|branches|solicitors|clinics?", "IM": "contact|contact-us|contactus|about|about-us|aboutus|team|our-team|staff|people|locations?|find-us|visit|directions|legal|legal-notice|privacy|privacy-policy|terms|get-in-touch|offices|branches|solicitors|clinics?", "IE": "contact|contact-us|contactus|about|about-us|aboutus|team|our-team|staff|people|locations?|find-us|visit|directions|legal|legal-notice|privacy|privacy-policy|terms|get-in-touch|offices|branches|solicitors|clinics?",
+    "ES": "contacto|contactenos|contactanos|contactar|aviso-legal|quienes-somos|quien-somos|sobre-nosotros|nosotros|equipo|donde-estamos|ubicacion|politica-de-privacidad|empresa|oficinas",
+    "PT": "contactos|contacto|contacte|fale-conosco|sobre-nos|quem-somos|empresa|aviso-legal|informacoes-legais|onde-estamos|equipa|politica-de-privacidade|localizacao",
+    "IT": "contatti|contattaci|contatto|chi-siamo|note-legali|privacy|dove-siamo|sedi|sede|azienda|il-nostro-team|informativa-privacy|cookie-policy|team",
+    "MT": "contact|contact-us|contactus|about|about-us|aboutus|team|our-team|staff|people|locations?|find-us|visit|directions|legal|legal-notice|privacy|privacy-policy|terms|get-in-touch|offices|branches|solicitors|clinics?", "SM": "contatti|contattaci|chi-siamo|note-legali|privacy|dove-siamo|sedi|contact|about|azienda", "VA": "contatti|contact|contacts|about|chi-siamo|note-legali|privacy|dove-siamo|sedi|uffici",
+    "AD": "contacte|contacto|contactenos|contact|contactar|qui-som|quienes-somos|about|aviso-legal|avis-legal|nosaltres|on-som|ubicacion|politica-de-privacitat|politica-de-privacidad",
     "PL": "kontakt|kontakty|dane-kontaktowe|o-nas|o-firmie|firma|zespol|nasz-zespol|lokalizacja|lokalizacje|dojazd|gdzie-jestesmy|stopka|polityka-prywatnosci|regulamin|oddzialy|placowki",
     "CZ": "kontakt|kontakty|o-nas|o-firme|tym|nas-tym|kde-nas-najdete|pobocky|provozovny|impressum|obchodni-podminky|ochrana-osobnich-udaju",
     "SK": "kontakt|kontakty|o-nas|o-firme|tim|nas-tim|pobocky|prevadzky|impressum|obchodne-podmienky|ochrana-osobnych-udajov",
@@ -55,9 +61,12 @@ for line in open(idx_path, encoding="utf-8"):
 
 rng = random.Random(seed)
 picked = rng.sample(blocks, min(n_blocks, len(blocks)))
+CAP = int(sys.argv[7]) if len(sys.argv) > 7 else 10**9  # stop after this many candidates (small states)
 n_kept = 0
 with open(os.path.join(out, "candidates.jsonl"), "w", encoding="utf-8") as fo:
     for key, fn, off, ln in picked:
+        if n_kept >= CAP:
+            break
         raw = cc.get(base + fn, (off, ln))
         if raw is None:
             continue

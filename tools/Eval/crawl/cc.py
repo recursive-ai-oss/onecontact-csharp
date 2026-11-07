@@ -6,6 +6,7 @@ Everything these scripts write goes to the private evaluation directory given on
 import gzip
 import html.parser
 import io
+import os
 import re
 import time
 import urllib.request
@@ -15,9 +16,9 @@ DATA = "https://data.commoncrawl.org/"
 USER_AGENT = "onecontact-eval-selection/1.0 (research; evaluation sets only)"
 
 
-def get(url, byte_range=None, tries=8, pause=0.35):
-    """GET with exponential back-off on 5xx/SlowDown; returns bytes or None for a permanent miss."""
-    delay = 2.0
+def get(url, byte_range=None, tries=12, pause=float(os.environ.get("CC_PAUSE", "0.35"))):
+    """GET with back-off on throttling (the host answers 503 to about half the requests of a busy client); None for a permanent miss."""
+    delay = 0.5
     for attempt in range(tries):
         req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
         if byte_range:
@@ -28,13 +29,13 @@ def get(url, byte_range=None, tries=8, pause=0.35):
             time.sleep(pause)
             return data
         except urllib.error.HTTPError as e:
-            if e.code in (404, 403, 416):
+            # 403 is also what the host answers while it throttles a client: retry it a few times before calling it a miss.
+            if e.code in (404, 416) or (e.code == 403 and attempt >= 3):
                 return None
-            time.sleep(delay)
-            delay = min(delay * 2, 60)
         except Exception:
-            time.sleep(delay)
-            delay = min(delay * 2, 60)
+            pass
+        time.sleep(delay)
+        delay = min(delay * 1.6, 10)
     return None
 
 

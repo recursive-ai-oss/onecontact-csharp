@@ -19,7 +19,7 @@ internal static class NameLexicon
         "rev|*", "reverend|*", "hon|*", "honorable|*", "honourable|*", "sen|*", "senator|*", "rep|*", "gov|*", "gen|*", "col|*",
         "capt|*", "cpt|*", "lt|*", "maj|*", "sgt|*", "cpl|*", "adm|*", "cdr|*", "cmdr|*", "pvt|*", "pastor|*", "rabbi|*", "imam|*",
         "bishop|*", "archbishop|*", "cardinal|*", "father|*", "fr|*", "judge|en", "ing|*", "mag|*", "sr|*", "sra|*", "srta|*",
-        "dra|*", "eng|*", "engo|*", "enga|*", "arq|*", "profa|*", "arch|*", "doc|*",
+        "dra|*", "eng|*", "msgr|*", "monsignor|*", "mons|en,fr,es,pt,it,ca,gl,pl,ga,mt", "monsenhor|pt", "monsenor|es,ca,gl", "mestre|pt,ca,gl", "mestra|pt,gl", "revd|*", "rt|en", "engo|*", "enga|*", "arq|*", "profa|*", "arch|*", "doc|*",
 
         // French
         "m|fr", "mme|*", "mlle|*", "mm|fr", "me|fr", "monsieur|*", "madame|*", "mademoiselle|*", "maitre|fr", "abbe|fr",
@@ -30,7 +30,7 @@ internal static class NameLexicon
         "senyor|ca", "senyora|ca", "jauna|eu", "andrea|eu", "jn|eu",
 
         // German, Dutch, Luxembourgish
-        "herr|*", "frau|*", "fraulein|*", "hr|de,da,no,sv,is,et,lb,nl", "dipl|*", "med|de", "rer|de", "nat|de", "jur|de", "phil|de", "hc|de",
+        "herr|*", "frau|*", "fraulein|*", "hr|de,da,no,sv,is,et,lb,nl", "dipl|*", "med|de,hr", "rer|de", "nat|de", "jur|de", "phil|de", "hc|de",
         "habil|de", "univ|de,sl,hr", "dkfm|de", "dhr|nl", "mevr|nl", "mw|nl", "mevrouw|nl", "deheer|nl", "drs|nl", "ir|nl", "bc|nl,cs,sk",
         "har|lb", "madamm|lb",
 
@@ -46,7 +46,7 @@ internal static class NameLexicon
         "pan|pl,cs,sk", "pani|pl,cs,sk", "panna|pl", "mgr|*", "inz|pl,sl,hr,cs,sk", "lek|pl", "hab|pl", "ks|pl", "mec|pl",
         // Polish professional titles as the bars and chambers print them: adwokat (adw.), radca prawny (r.pr.), the habilitated doctor's "dr hab." and the associate professor's "prof. nadzw.".
         "adw|*", "adwokat|pl", "rpr|*", "radcaprawny|pl", "nadzw|pl",
-        "slecna|cs,sk", "mudr|cs,sk", "judr|cs,sk", "phdr|cs,sk", "rndr|cs,sk", "mvdr|cs,sk", "paeddr|cs,sk", "thdr|cs,sk", "dis|cs,sk",
+        "mga|cs,sk", "bca|cs,sk", "prom|cs,sk", "pharmdr|cs,sk", "thlic|cs,sk", "thmgr|cs,sk", "iur|hr", "oec|hr,sl,de", "dent|hr", "spec|hr", "struc|hr", "bacc|hr", "slecna|cs,sk", "mudr|cs,sk", "judr|cs,sk", "phdr|cs,sk", "rndr|cs,sk", "mvdr|cs,sk", "paeddr|cs,sk", "thdr|cs,sk", "dis|cs,sk",
         "g|sl,hr", "ga|sl", "gospod|sl", "gospa|sl", "gda|hr", "gdja|hr", "gospodin|hr", "gospoda|hr", "sc|hr",
         "id|hu", "ifj|hu", "ozv|hu", "dl|ro", "domnul|ro", "doamna|ro", "domnisoara|ro", "conf|ro", "lect|ro", "av|ro",
         "sur|mt", "sinjura|mt", "sinjorina|mt", "perit|mt", "antuasal|ga", "uasal|ga", "antathair|ga", "antollamh|ga", "antsiur|ga", "ollamh|ga", "bean|ga",
@@ -70,7 +70,7 @@ internal static class NameLexicon
     // Short forms that are also names or words; they count as suffixes only after a comma or when written with dots ("M.A.").
     private static readonly FrozenSet<string> AmbiguousProfessional = new[]
     {
-        "ma", "ba", "bs", "ms", "do", "pe", "rn", "pa", "np", "ed",
+        "ma", "ba", "bs", "ms", "do", "pe", "rn", "pa", "np", "ed", "csc", "drsc", "dis", "mga", "bca",
     }.ToFrozenSet(StringComparer.Ordinal);
 
     // The letter casing of titles and suffixes written in capitals when casing is restored (letters only, in order).
@@ -82,18 +82,38 @@ internal static class NameLexicon
         ["ii"] = "II", ["iii"] = "III", ["iv"] = "IV", ["vi"] = "VI", ["vii"] = "VII", ["viii"] = "VIII", ["ix"] = "IX",
         ["mudr"] = "MUDr", ["judr"] = "JUDr", ["phdr"] = "PhDr", ["rndr"] = "RNDr", ["mvdr"] = "MVDr", ["paeddr"] = "PaedDr", ["thdr"] = "ThDr",
         ["ma"] = "MA", ["ba"] = "BA", ["bs"] = "BS", ["ms"] = "MS", ["do"] = "DO", ["pe"] = "PE", ["rn"] = "RN", ["np"] = "NP",
-        ["dipling"] = "DiplIng", ["dis"] = "DiS", ["dott"] = "Dott", ["dottssa"] = "Dott.ssa", ["sigra"] = "Sig.ra",
+        ["dipling"] = "DiplIng", ["dis"] = "DiS", ["csc"] = "CSc", ["drsc"] = "DrSc", ["mga"] = "MgA", ["bca"] = "BcA", ["pharmdr"] = "PharmDr", ["dott"] = "Dott", ["dottssa"] = "Dott.ssa", ["sigra"] = "Sig.ra",
     }.ToFrozenDictionary(StringComparer.Ordinal);
 
     // Particles that stand between the given names and the family name and belong to the family name.
     private static readonly FrozenSet<string> Particles = new[]
     {
         "van", "von", "de", "der", "den", "del", "della", "dei", "degli", "dal", "dalla", "dello", "di", "da", "das", "do", "dos", "du", "des",
-        "la", "le", "les", "lo", "los", "las", "af", "av", "zu", "zur", "zum", "ter", "ten", "te", "tot", "op", "het",
+        "la", "le", "les", "lo", "los", "las", "af", "av", "dels", "zu", "zur", "zum", "ter", "ten", "te", "tot", "op", "het",
     }.ToFrozenSet(StringComparer.Ordinal);
 
     // Irish particles, only with a Irish hint ("Ó" and "Ní" are letters of ordinary words elsewhere).
-    private static readonly FrozenSet<string> IrishParticles = new[] { "o", "ni", "nic", "ui", "mhic" }.ToFrozenSet(StringComparer.Ordinal);
+    private static readonly FrozenSet<string> IrishParticles = new[] { "o", "ni", "nic", "ui", "mhic", "mac" }.ToFrozenSet(StringComparer.Ordinal);
+
+    // Maltese particles ("Ta' Pinu", "tal-Gozo" written apart), only with a Maltese hint: "ta" and "il" are ordinary words elsewhere.
+    private static readonly FrozenSet<string> MalteseParticles = new[] { "ta", "tal", "tas", "tat", "il" }.ToFrozenSet(StringComparer.Ordinal);
+
+    // Given names of the Czech, Slovak, Croatian and Slovenian lists, used only to tell "Surname Given" order from "Given Surname" there.
+    // Names that are also common surnames (Marek, Martin, Matej) are left out on purpose, so that the order stays given-first for them.
+    private static readonly FrozenSet<string> SlavicGivenNames = new[]
+    {
+        "jan", "petr", "pavel", "jiri", "josef", "tomas", "jaroslav", "miroslav", "zdenek", "frantisek", "michal", "david", "lukas",
+        "jakub", "vaclav", "ondrej", "milan", "roman", "radek", "karel", "vladimir", "ladislav", "stanislav", "vojtech", "daniel",
+        "adam", "filip", "libor", "ales", "stepan", "patrik", "rostislav", "marie", "jana", "eva", "hana", "anna", "lenka",
+        "katerina", "lucie", "petra", "veronika", "alena", "martina", "jitka", "ivana", "monika", "zuzana", "tereza", "barbora",
+        "jarmila", "eliska", "kristyna", "michaela", "renata", "blanka", "dagmar", "olga", "vera", "ludmila",
+        "peter", "jozef", "juraj", "ivan", "marian", "stefan", "lubomir", "dusan", "rudolf", "igor", "branislav", "anton",
+        "maria", "katarina", "lucia", "andrea", "viera", "helena", "miroslava", "marta", "gabriela", "jaroslava",
+        "marko", "josip", "ante", "luka", "mate", "tomislav", "nikola", "stjepan", "mario", "ivica", "zvonimir", "davor", "damir",
+        "darko", "goran", "dario", "kristijan", "matija", "maja", "ana", "marija", "jelena", "mirjana", "tanja", "nada", "sanja",
+        "janez", "franc", "marjan", "andrej", "bojan", "tomaz", "primoz", "miha", "jure", "rok", "natasa", "mojca", "tina", "nina",
+        "irena", "sonja", "barbara", "mirko", "zeljko", "vlado", "drago", "zlatko", "hrvoje", "branko", "slavko", "ivo",
+    }.ToFrozenSet(StringComparer.Ordinal);
 
     // Words that join two names: "and" in the tier languages. Case-insensitive ones first, then the one-letter ones.
     private static readonly FrozenSet<string> Connectors = new[]
@@ -339,7 +359,28 @@ internal static class NameLexicon
         Professional.Contains(folded) || (writtenWithDotsOrAfterComma && AmbiguousProfessional.Contains(folded));
 
     internal static bool IsParticle(string folded, string[] languages) =>
-        Particles.Contains(folded) || (Has(languages, "ga") && IrishParticles.Contains(folded));
+        Particles.Contains(folded) || (Has(languages, "ga") && IrishParticles.Contains(folded)) || (Has(languages, "mt") && MalteseParticles.Contains(folded));
+
+    /// <summary>
+    /// Returns whether two words of a Czech, Slovak, Croatian or Slovenian page read as "Surname Given" ("Novak Jan", "Novakova Jana"):
+    /// the second word is a listed given name and the first is not, or the first is a feminine "-ova" surname form. This is a statement about
+    /// the order of the words only; it says nothing about the person.
+    /// </summary>
+    internal static bool SurnameBeforeGiven(string firstFolded, string secondFolded, string[] languages)
+    {
+        if (!(Has(languages, "cs") || Has(languages, "sk") || Has(languages, "hr") || Has(languages, "sl")))
+        {
+            return false;
+        }
+
+        if (SlavicGivenNames.Contains(firstFolded))
+        {
+            return false;
+        }
+
+        bool feminineSurname = firstFolded.Length > 5 && firstFolded.EndsWith("ova", StringComparison.Ordinal) && !secondFolded.EndsWith("ova", StringComparison.Ordinal);
+        return feminineSurname || SlavicGivenNames.Contains(secondFolded);
+    }
 
     internal static bool IsConnector(ReadOnlySpan<char> token, string folded, string[] languages)
     {

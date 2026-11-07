@@ -30,6 +30,12 @@ internal static partial class Tier2Reader
 
         Reader r = new(text, hint);
         OperationStatus status = r.Run(out address, out detail);
+        if (status != OperationStatus.Done && hint.IsUnknown && TryInfer(text, detail, out ParsedAddress? inferred, out ParseDetail inferredDetail))
+        {
+            address = inferred;
+            detail = inferredDetail;
+            status = OperationStatus.Done;
+        }
         if (address is not null)
         {
             address.SourceText = text;
@@ -51,6 +57,9 @@ internal static partial class Tier2Reader
     private sealed class Unit(List<Tok> toks)
     {
         internal List<Tok> Toks { get; set; } = toks;
+
+        // A line that is kept as written above the delivery lines and never read as a street line (a Swedish company registration number with its label).
+        internal bool Leading { get; init; }
     }
 
     // One piece of a delivery line with both renderings.
@@ -93,6 +102,9 @@ internal static partial class Tier2Reader
 
     private sealed partial class Reader(string text, Region hint)
     {
+        // Set when the reader is one of the trial reads of country inference: the hint is then a candidate, not something the caller said, so the country is reported as inferred.
+        internal bool Inferring { get; init; }
+
         private readonly List<ParseIssue> _issues = [];
 
         internal OperationStatus Run(out ParsedAddress? address, out ParseDetail detail)
@@ -132,6 +144,9 @@ internal static partial class Tier2Reader
 
         private bool _multiLine;
 
+        // Whether words stood before the postcode on its own line and were split off as a line of their own ("Tallinn 10111 Harju maakond").
+        private bool _headSplit;
+
         // Group B: the county line of an Irish address and the province line of a Spanish one, taken off the units before the last line is read.
         private List<Tok>? _county;
         private List<Tok>? _province;
@@ -160,15 +175,19 @@ internal static partial class Tier2Reader
             int unitIndex;
             int tokenIndex;
             PostcodeMatch match;
+            MergeTrailingProvince(units, known);
             if (!FindAustralian(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindRomanian(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindHungarianOneLine(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindLastLine(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindMexicanPostcodeWord(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindPostcodeLast(units, known, out unitIndex, out tokenIndex, out match)
+                && !FindEstonianPostcodeLast(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindProvinceLine(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindHungarian(units, known, out unitIndex, out tokenIndex, out match)
-                && !FindStateLine(units, known, out unitIndex, out tokenIndex, out match))
+                && !FindStateLine(units, known, out unitIndex, out tokenIndex, out match)
+                && !FindPostcodeAlone(units, known, out unitIndex, out tokenIndex, out match)
+                && !FindNoPostcode(units, known, out unitIndex, out tokenIndex, out match))
             {
                 detail = ParseDetail.Failure(ReasonCode.AddressNoLastLine, new SourceSpan(0, text.Length));
                 return false;
@@ -176,6 +195,7 @@ internal static partial class Tier2Reader
 
             // Words before the postcode on the same line are a line of their own: "12 rue X 75011 PARIS".
             Unit lastUnit = units[unitIndex];
+            _headSplit = tokenIndex > 0;
             if (tokenIndex > 0)
             {
                 units[unitIndex] = new Unit(lastUnit.Toks.GetRange(tokenIndex, lastUnit.Toks.Count - tokenIndex));
@@ -191,6 +211,18 @@ internal static partial class Tier2Reader
             // The country: the explicit name or prefix, then the hint, then a postcode that fits one country only, then language cues.
             // The Channel Islands line names Jersey and Guernsey alike (UPU Jersey and Guernsey sheets): the postcode area says which.
             string? namedCode = named?.Code;
+            if (namedCode == "BI")
+            {
+                // "British Isles" names no country: the postcode area says which one.
+                namedCode = match.Candidates.FirstOrDefault(c => c is "GB" or "JE" or "GG" or "IM");
+                if (namedCode is null)
+                {
+                    _failure = ParseDetail.Failure(ReasonCode.AddressCountryConflict, new SourceSpan(0, text.Length));
+                    detail = _failure;
+                    return false;
+                }
+            }
+
             if (namedCode == "CI")
             {
                 namedCode = match.Candidates.FirstOrDefault(c => c is "JE" or "GG");
@@ -233,6 +265,11 @@ internal static partial class Tier2Reader
             List<Tok>? northDependent = null;
             if (country.IsNorth)
             {
+                if (country.Profile == "se")
+                {
+                    SplitOrganizationNumber(before);
+                }
+
                 SplitCompanyPrefix(before, country);
                 SplitHouseNameAndParish(before, country);
                 SplitLithuanianPlaces(before, country);
@@ -251,6 +288,11 @@ internal static partial class Tier2Reader
             if (country.IsCentral && !_multiLine)
             {
                 MergeLegalSuffix(before, country);
+            }
+
+            if (country.Profile is "es" or "pt" or "it" or "sm" or "va" or "ad" or "mt")
+            {
+                DropNumberMarkers(before, country);
             }
 
             // "Rheinstr., 53, 52306 Hagen" and "8, VIESSE": a house number set apart by commas belongs to the street name next to it.
@@ -278,7 +320,7 @@ internal static partial class Tier2Reader
             List<Line?> parsed = [];
             for (int i = 0; i < before.Count; i++)
             {
-                Line? line = ParseDeliveryLine(before[i].Toks, ruleCode, country, allowStreet: true);
+                Line? line = before[i].Leading ? null : ParseDeliveryLine(before[i].Toks, ruleCode, country, allowStreet: true);
                 parsed.Add(line);
                 if (first < 0 && line is not null && line.Kind != StreetLineKind.SecondaryOnly)
                 {
@@ -308,7 +350,10 @@ internal static partial class Tier2Reader
             // Only name lines without digits qualify; anything else the rules cannot place goes to the model.
             // Britain and Ireland name properties: a house name is a whole delivery point, so more lines qualify there and there is nothing to warn about.
             bool named2 = country.Profile is "uk" or "ie" || country.IsNorth;
-            bool bulk = first < 0 && before.Count >= 1 && before.Count <= (named2 ? 6 : 3) && before.All(u => !u.Toks.Any(t => t.Text.Any(char.IsAsciiDigit)));
+            // A unit line ("Unit 4", "Flat 3") stands above a building name in Britain, Ireland and Malta: its digits do not make the address a delivery line.
+            bool unitsLead = country.Profile is "uk" or "ie" or "mt" or "pt" or "es";
+            bool bulk = first < 0 && before.Count >= 1 && before.Count <= (named2 ? 6 : 3)
+                && before.Select((u, i) => unitsLead && parsed[i] is { Kind: StreetLineKind.SecondaryOnly } || !u.Toks.Any(t => t.Text.Any(char.IsAsciiDigit))).All(ok => ok);
             if (first < 0 && !bulk)
             {
                 detail = ParseDetail.Failure(before.Count > 0 ? ReasonCode.AddressModelRequired : ReasonCode.AddressNoDeliveryLine, new SourceSpan(0, text.Length));
@@ -324,26 +369,21 @@ internal static partial class Tier2Reader
                 }
             }
 
-            // Britain and Ireland: with two lines between the street and the postcode, either may be the post town (a dependent locality above it, or a county below it).
-            // The Royal Mail convention that the post town is in capitals settles it when the other line is not; anything else is left to the model.
-            if (country.Code is "GB" or "IE" && !bulk && _county is null && !_localityInline)
-            {
-                List<Tok>[] extra = [.. Enumerable.Range(first + 1, Math.Max(0, before.Count - first - 1)).Where(i => parsed[i] is null).Select(i => before[i].Toks)];
-                string loc = Join(localityToks);
-                bool capitals = loc.Any(char.IsLetter) && !loc.Any(char.IsLower);
-                if (extra.Length > 0 && !(capitals && extra.All(e => e.Any(t => t.Text.Any(char.IsLower)))))
-                {
-                    detail = ParseDetail.Failure(ReasonCode.AddressModelRequired, new SourceSpan(0, text.Length));
-                    return false;
-                }
-            }
-
             List<ParsedAddressText> leading = [];
             List<bool> leadingDependent = [];
             List<(string Postal, string Display)> leadingLayout = [];
+            List<Line> leadingUnits = [];
             for (int i = 0; i < first; i++)
             {
                 List<Tok> toks = before[i].Toks;
+                if (unitsLead && parsed[i] is { Kind: StreetLineKind.SecondaryOnly } unitLine)
+                {
+                    // Royal Mail PAF Programmers' Guide: the sub-building ("Unit 4") comes before the building name; it is a unit, not a name line.
+                    leadingUnits.Add(unitLine);
+                    leadingLayout.Add((unitLine.Postal, unitLine.Display));
+                    continue;
+                }
+
                 // The last group's lines keep the commas the writer put in them ("MOTOSPORT, a. s.").
                 string written = country.IsCentral ? Slice(toks) : Join(toks);
                 string standard = country.Afnor ? T2Text.Afnor(written)
@@ -456,9 +496,10 @@ internal static partial class Tier2Reader
                 adminInfo = (Slice(Span(roCounty)), Join(roCounty), Span(roCounty), "t2-romania-county");
                 adminInline = Join(roCounty).ToUpperInvariant();
             }
-            else if (code == "IE" && _county is not null)
+            else if (code is "IE" or "GB" or "JE" or "GG" or "IM" && _county is not null)
             {
-                adminInfo = (Slice(Span(_county)), Join(_county).ToUpperInvariant(), Span(_county), "upu-ireland-county");
+                // UPU Ireland sheet: "CO. CORK" on a line of its own; Royal Mail: the county, optional, after the post town.
+                adminInfo = (Slice(Span(_county)), Join(_county).ToUpperInvariant(), Span(_county), code == "IE" ? "upu-ireland-county" : "royal-mail-county");
                 adminLine = Join(_county).ToUpperInvariant();
                 adminWords = Join(_county);
             }
@@ -498,8 +539,8 @@ internal static partial class Tier2Reader
             else if (country.PostcodeLast)
             {
                 // UPU United Kingdom, Ireland and Malta sheets: the post town, the county where there is one, then the postcode on a line of its own.
-                lastPostal = localityPostal + (adminLine.Length > 0 ? "\n" + adminLine : string.Empty) + "\n" + printed;
-                lastDisplay = localityDisplay + (adminLine.Length > 0 ? "\n" + adminLineDisplay : string.Empty) + "\n" + printed;
+                lastPostal = string.Join('\n', new[] { localityPostal, adminLine, printed }.Where(l => l.Length > 0));
+                lastDisplay = string.Join('\n', new[] { localityDisplay, adminLineDisplay, printed }.Where(l => l.Length > 0));
                 if (country.Profile == "lv")
                 {
                     // UPU Latvia sheet: the locality, a comma, then LV- and the four digits on the same line.
@@ -509,8 +550,8 @@ internal static partial class Tier2Reader
             }
             else
             {
-                lastPostal = printed + separator + localityPostal + (adminInline.Length > 0 ? " " + adminInline : string.Empty) + (adminLine.Length > 0 ? "\n" + adminLine : string.Empty);
-                lastDisplay = printed + " " + localityDisplay + (adminInline.Length > 0 ? " " + (adminInlineDisplay.Length > 0 ? adminInlineDisplay : adminInline) : string.Empty) + (adminLine.Length > 0 ? "\n" + adminLineDisplay : string.Empty);
+                lastPostal = printed + (printed.Length > 0 && localityPostal.Length > 0 ? separator : string.Empty) + localityPostal + (adminInline.Length > 0 ? " " + adminInline : string.Empty) + (adminLine.Length > 0 ? "\n" + adminLine : string.Empty);
+                lastDisplay = printed + (printed.Length > 0 && localityDisplay.Length > 0 ? " " : string.Empty) + localityDisplay + (adminInline.Length > 0 ? " " + (adminInlineDisplay.Length > 0 ? adminInlineDisplay : adminInline) : string.Empty) + (adminLine.Length > 0 ? "\n" + adminLineDisplay : string.Empty);
             }
 
             // Fields in input order, every one with its offsets and the rule that decided it.
@@ -518,6 +559,16 @@ internal static partial class Tier2Reader
             for (int i = 0; i < leading.Count; i++)
             {
                 fields.Add(new ParsedAddressField(leadingDependent[i] ? "dependent-locality" : "leading-line", leading[i].Text, leading[i].Standard, leading[i].Span, 1f, DecisionSource.Rule, leadingDependent[i] ? "t2-dependent-locality" : "line-structure"));
+            }
+
+            foreach (Line unitLine in leadingUnits)
+            {
+                foreach (Piece p in unitLine.Pieces)
+                {
+                    fields.Add(new ParsedAddressField("street." + RoleName(p.Role), Slice(p.Span), p.Standard, p.Span, 1f, DecisionSource.Rule, p.Rule));
+                }
+
+                facts |= AddressFacts.HasUnit;
             }
 
             ParsedAddressField? deliveryAdmin = null;
@@ -536,8 +587,12 @@ internal static partial class Tier2Reader
                 }
             }
 
-            ParsedAddressField? locality = new("locality", Slice(Span(localityToks)), localityPostal, Span(localityToks), 1f, DecisionSource.Rule, "last-line");
-            fields.Add(locality.Value);
+            ParsedAddressField? locality = null;
+            if (localityToks.Count > 0)
+            {
+                locality = new("locality", Slice(Span(localityToks)), localityPostal, Span(localityToks), 1f, DecisionSource.Rule, "last-line");
+                fields.Add(locality.Value);
+            }
             ParsedAddressField? admin = null;
             if (adminInfo is { } info)
             {
@@ -570,8 +625,12 @@ internal static partial class Tier2Reader
                 }
             }
 
-            ParsedAddressField? postal = new("postal-code", Slice(postcodeSpan), postcodeStd, postcodeSpan, 1f, DecisionSource.Rule, "postcode-" + country.Code.ToLowerInvariant());
-            fields.Add(postal.Value);
+            ParsedAddressField? postal = null;
+            if (match.Length > 0)
+            {
+                postal = new("postal-code", Slice(postcodeSpan), postcodeStd, postcodeSpan, 1f, DecisionSource.Rule, "postcode-" + country.Code.ToLowerInvariant());
+                fields.Add(postal.Value);
+            }
             ParsedAddressField? countryName = null;
             if (prefixCountry is not null)
             {
@@ -587,6 +646,25 @@ internal static partial class Tier2Reader
             {
                 countryName = new ParsedAddressField("country", Slice(n.Span), country.CountryLine, n.Span, 1f, DecisionSource.Rule, "country-name");
                 fields.Add(countryName.Value);
+            }
+
+            // Jersey, Guernsey and the Isle of Man: the island's name on the line above the postcode is the country, and the parish or town line above it is the locality
+            // (UPU Jersey, Guernsey and Isle of Man sheets print both). The printed layout stays as the sheets have it.
+            if (code is "JE" or "GG" or "IM" && IsIslandName(localityToks) && before.Count >= 2 && parsed[^1] is null && PlaceFits(before[^1].Toks, false, code))
+            {
+                SourceSpan placeSpan = Span(before[^1].Toks);
+                int placeAt = fields.FindIndex(f => f.Span.Start == placeSpan.Start && f.Span.Length == placeSpan.Length && f.Name is "leading-line" or "street.other");
+                int nameAt = fields.FindIndex(f => f.Name == "locality");
+                if (placeAt >= 0 && nameAt >= 0)
+                {
+                    ParsedAddressField island = fields[nameAt] with { Name = "country", Rule = "country-name" };
+                    locality = fields[placeAt] with { Name = "locality", Rule = "channel-islands-place" };
+                    fields[placeAt] = locality.Value;
+                    fields[nameAt] = island;
+                    countryName ??= island;
+                    leading.RemoveAll(l => l.Span.Start == placeSpan.Start);
+                    delivery.RemoveAll(d => d.Parts.Count == 1 && d.Parts[0].Span.Start == placeSpan.Start);
+                }
             }
 
             fields = [.. fields.OrderBy(f => f.Span.Start)];
@@ -700,6 +778,22 @@ internal static partial class Tier2Reader
         private static (string Code, SourceSpan Span, string Written)? StripCountryName(List<Unit> units)
         {
             List<Tok> last = units[^1].Toks;
+
+            // A country written in parentheses after the locality: "Roma (Italy)", "San Marino (RSM)", "Andorra la Vella (AD)". Two-letter codes are taken only where they are
+            // no Italian province code that could be meant instead.
+            if (last.Count >= 2 && last[^1].Text.Length >= 4 && last[^1].Text[0] == '(' && last[^1].Text[^1] == ')')
+            {
+                string inner = T2Rules.Key(last[^1].Text.Trim('(', ')'));
+                string? parenthesized = inner is "AD" or "IT" or "ES" or "GB" or "IE" or "DE" or "NL" or "BE" ? inner
+                    : T2Rules.CountryNames.TryGetValue(inner, out string? byName) && inner.Length > 2 ? byName : null;
+                if (parenthesized is not null)
+                {
+                    Tok paren = last[^1];
+                    last.RemoveAt(last.Count - 1);
+                    return (parenthesized, new SourceSpan(paren.Start + 1, paren.Text.Length - 2), paren.Text.Trim('(', ')'));
+                }
+            }
+
             for (int words = Math.Min(T2Rules.MaxCountryWords, last.Count); words >= 1; words--)
             {
                 string key = string.Join(' ', last.Skip(last.Count - words).Select(t => t.Key));
@@ -718,6 +812,17 @@ internal static partial class Tier2Reader
                     if (last.Count == 0)
                     {
                         units.RemoveAt(units.Count - 1);
+                    }
+
+                    // "Jersey, Channel Islands": the island named just before the group is the country.
+                    if (code == "CI" && units.Count > 0 && T2Rules.Key(Join(units[^1].Toks)) is "JERSEY" or "GUERNSEY")
+                    {
+                        List<Tok> island = units[^1].Toks;
+                        string islandCode = T2Rules.Key(Join(island)) == "JERSEY" ? "JE" : "GG";
+                        SourceSpan islandSpan = new(island[0].Start, island[^1].End - island[0].Start);
+                        string islandWritten = Join(island);
+                        units.RemoveAt(units.Count - 1);
+                        return (islandCode, islandSpan, islandWritten);
                     }
 
                     return (code, new SourceSpan(first.Start, lastTok.End - first.Start), written);
@@ -747,6 +852,18 @@ internal static partial class Tier2Reader
                     {
                         m = new PostcodeMatch(2, m.Standard, m.Candidates, null);
                         i--;
+                    }
+
+                    // The country letters and the dash may stand apart from the digits ("LT- 08237", "D- 12345"): the prefix and the postcode are one postcode field.
+                    if (i > 0 && m.PrefixCountry is null && SpacedPrefix(toks[i - 1].Text) is { } letters && toks[i - 1].End <= toks[i].Start)
+                    {
+                        string? owner = T2Rules.Countries.Values.FirstOrDefault(c => c.Prefixes[0].Length > 0 && Array.IndexOf(c.Prefixes, letters) >= 0)?.Code;
+                        PostcodeMatch? own = owner is null ? null : MatchAt(toks, i, owner);
+                        if (owner is not null && own is not null && own.PrefixCountry is null && own.Length == m.Length && own.Candidates.Contains(owner))
+                        {
+                            m = new PostcodeMatch(m.Length + 1, own.Standard, [owner], owner);
+                            i--;
+                        }
                     }
 
                     unitIndex = u;
@@ -781,11 +898,14 @@ internal static partial class Tier2Reader
             List<Tok> locality = toks.GetRange(0, pcStart);
             List<Tok>? county = null;
             List<int> taken = [];
-            bool ireland = m.Candidates[0] == "IE";
-            if (ireland)
+            string family = m.Candidates[0];
+            bool ireland = family == "IE";
+            bool british = family is "GB" or "JE" or "GG" or "IM";
+            if (ireland || british)
             {
+                // "Dundalk Co. Louth", "Dundalk Co.Louth": the county word and the county's name end the inline locality.
                 int co = locality.FindIndex(IsCountyWord);
-                if (co >= 0 && co < locality.Count - 1)
+                if (co >= 0 && (co < locality.Count - 1 || IsGluedCounty(locality[co])))
                 {
                     county = locality.GetRange(co, locality.Count - co);
                     locality = locality.GetRange(0, co);
@@ -801,10 +921,16 @@ internal static partial class Tier2Reader
                     return false;
                 }
 
+                // A postcode alone on its line after a delivery line has no post town (Eircode, "12 Main Street, D08 X2Y3").
+                if (county is null && !PlaceFits(units[prev].Toks, ireland, family) && !((ireland || british) && IsCountyWord(units[prev].Toks[0]) && (units[prev].Toks.Count > 1 || IsGluedCounty(units[prev].Toks[0]))))
+                {
+                    return ireland && AcceptPostcodeAlone(units, u, pc, m, out unitIndex, out match);
+                }
+
                 locality = units[prev].Toks;
                 taken.Add(prev);
                 prev--;
-                if (ireland && county is null && IsCountyWord(locality[0]) && locality.Count > 1)
+                if ((ireland || british) && county is null && IsCountyWord(locality[0]) && (locality.Count > 1 || IsGluedCounty(locality[0])))
                 {
                     county = locality;
                     if (prev < 0)
@@ -814,10 +940,54 @@ internal static partial class Tier2Reader
 
                     locality = units[prev].Toks;
                     taken.Add(prev);
+                    prev--;
                 }
             }
+            else if (!PlaceFits(locality, ireland, family) && county is null && family != "MT" && locality.Any(t => t.Text.Any(char.IsAsciiDigit)) && (ireland || british))
+            {
+                // "14 Mill Lane Henley-on-Thames RG9 2AA": the words after the first road type are the post town.
+                int split = -1;
+                for (int i = 2; i <= locality.Count - 2 && split < 0; i++)
+                {
+                    if (IsSplittingRoadType(locality[i]))
+                    {
+                        split = i;
+                    }
+                }
 
-            if (!LocalityFits(locality, ireland) || T2Rules.CountryNames.TryGetValue(T2Rules.Key(Join(locality)), out string? nation) && nation is not ("JE" or "GG"))
+                if (split >= 1 && locality.Count - split - 1 <= 3 && PlaceFits(locality.GetRange(split + 1, locality.Count - split - 1), ireland, family))
+                {
+                    units[u] = new Unit([.. pc, .. locality.GetRange(split + 1, locality.Count - split - 1)]);
+                    units.Insert(u, new Unit(locality.GetRange(0, split + 1)));
+                    unitIndex = u + 1;
+                    match = m;
+                    return true;
+                }
+
+                // "12 Main Street D08 X2Y3": digits before the postcode are a delivery line, not a post town. Only Ireland reads an address with no post town.
+                if (!ireland)
+                {
+                    return false;
+                }
+
+                units[u] = new Unit(pc);
+                units.Insert(u, new Unit(locality));
+                unitIndex = u + 1;
+                match = m;
+                return true;
+            }
+
+            // A county on its own line ("Guildford, Surrey GU1 3AA"; "Ballincollig, Cork, P31 XY12") needs a post town before it and a delivery line before that.
+            if (county is null && (ireland || british) && prev >= 1 && IsBareCounty(family, locality) && PlaceFits(units[prev].Toks, ireland, family))
+            {
+                county = locality;
+                locality = units[prev].Toks;
+                taken.Add(prev);
+                _localityInline = false;
+            }
+
+            bool crownName = british && locality.Count > 0 && T2Rules.CountryNames.TryGetValue(T2Rules.Key(Join(locality)), out string? crown) && crown is "JE" or "GG" or "IM";
+            if (!LocalityFits(locality, ireland) || !crownName && T2Rules.CountryNames.TryGetValue(T2Rules.Key(Join(locality)), out string? nation) && nation is not ("JE" or "GG"))
             {
                 // A country or nation name above the postcode (Jersey Post writes "ENGLAND" there for addresses in Britain) is not a post town.
                 return false;
@@ -835,7 +1005,32 @@ internal static partial class Tier2Reader
             return true;
         }
 
-        private static bool IsCountyWord(Tok t) => t.Key is "CO" or "COUNTY";
+        // Whether a postcode that stands alone is accepted: the words before it are a delivery line, and the address has no post town.
+        private static bool AcceptPostcodeAlone(List<Unit> units, int u, List<Tok> pc, PostcodeMatch m, out int unitIndex, out PostcodeMatch match)
+        {
+            unitIndex = u;
+            match = m;
+            units[u] = new Unit(pc);
+            return true;
+        }
+
+        // Whether a line could be a post town: see LocalityFits; a line that ends in a road type ("Main Street") or opens with a county word is not one.
+        private static bool PlaceFits(List<Tok> toks, bool ireland, string family)
+        {
+            if (toks.Count == 0 || !LocalityFits(toks, ireland) || IsCountyWord(toks[0]))
+            {
+                return false;
+            }
+
+            return !(toks.Count >= 2 && T2Rules.FindTailType(toks[^1].Key) is { Full: "ROAD" or "STREET" or "LANE" or "AVENUE" or "DRIVE" or "CLOSE" or "CRESCENT" or "TERRACE" or "GARDENS" or "WAY" or "SQUARE" or "PLACE" or "COURT" });
+        }
+
+        // Counties and regions that stand alone on a line (see t2-counties.tsv); a dash or "and" does not matter.
+        private static bool IsBareCounty(string family, List<Tok> toks)
+        {
+            string key = T2Rules.Key(Join(toks));
+            return T2Rules.IsCounty(family == "IE" ? "IE" : "GB", key) || family != "IE" && toks.Count >= 3 && (key.StartsWith("COUNTY OF ", StringComparison.Ordinal) || key.StartsWith("CITY OF ", StringComparison.Ordinal));
+        }
 
         // A post town has no digits (Dublin postal districts have a number: "DUBLIN 24"), is not a street or box line and does not start a place inside a building.
         private static bool LocalityFits(List<Tok> locality, bool ireland)
@@ -898,6 +1093,12 @@ internal static partial class Tier2Reader
 
             {
                 string g = toks[^1].Text.ToUpperInvariant();
+                if (g.Length is >= 5 and <= 7 && !(g.Length == 7 && IsEircodeRouting(g[..3])) && IsUkInward(g[^3..]) && UkOutward(g[..^3]) is { } glued && T2Rules.UkAreas.TryGetValue(glued, out string? gluedCountry))
+                {
+                    // "CT161QD": Royal Mail's form written without the space.
+                    return new PostcodeMatch(1, g[..^3] + " " + g[^3..], [gluedCountry], null);
+                }
+
                 if (g.Length == 7 && IsEircodeRouting(g[..3]) && IsEircodeUnique(g[3..]))
                 {
                     return new PostcodeMatch(1, g[..3] + " " + g[3..], ["IE"], null);
@@ -1024,6 +1225,14 @@ internal static partial class Tier2Reader
             return new SourceSpan(start, end - start);
         }
 
+        // One or two capital letters, with a dash after them when there is one letter ("L-", "LT-", "LT"); null otherwise.
+        private static string? SpacedPrefix(string t)
+        {
+            string letters = t.TrimEnd('-');
+            bool dash = letters.Length < t.Length;
+            return letters.Length is >= 1 and <= 2 && letters.All(char.IsAsciiLetterUpper) && (dash || letters.Length == 2) && t.Length - letters.Length <= 1 ? letters : null;
+        }
+
         private static PostcodeMatch? MatchAt(List<Tok> toks, int i, string? known)
         {
             string t = toks[i].Text;
@@ -1045,6 +1254,12 @@ internal static partial class Tier2Reader
                 }
 
                 return north;
+            }
+
+            // "AD-500" is how Andorra's own post offices often write it; the postcode is AD500.
+            if (t.Length == 6 && t[..3].Equals("AD-", StringComparison.OrdinalIgnoreCase) && t[3..].All(char.IsAsciiDigit))
+            {
+                return new PostcodeMatch(1, "AD" + t[3..], ["AD"], null);
             }
 
             // A country letter prefix: L-1234, D-26133, CH-3000, FL-9490, MC-98000.
@@ -1188,8 +1403,8 @@ internal static partial class Tier2Reader
             if (hintCode is not null)
             {
                 code = hintCode;
-                confidence = 0.99f;
-                inferred = false;
+                confidence = Inferring ? 0.97f : 0.99f;
+                inferred = Inferring;
                 return true;
             }
 
@@ -1365,7 +1580,7 @@ internal static partial class Tier2Reader
             }
 
             // Australia: "Flat 2 17 Jones St" and "Unit 4 28 Paxton Ct" are street lines (Australia Post, Address Presentation Standards p. 14), so the place-in-building words do not apply.
-            if (country.Profile != "au" && StartsWithSpatial(toks))
+            if (country.Profile != "au" && StartsWithSpatial(toks) && !(country.Profile == "pt" && toks.Count > 2 && toks[0].Key == "ZONA" && toks[1].Key == "INDUSTRIAL"))
             {
                 return null;
             }
@@ -1481,7 +1696,7 @@ internal static partial class Tier2Reader
             s.Length is >= 1 and <= 4 && s.All(char.IsLetterOrDigit) && (s.Any(char.IsAsciiDigit) || s.Length == 1);
 
         private static bool IsFloorOrDoorFirst(Tok t) =>
-            t.Text.Any(char.IsAsciiDigit) && t.Text.Any(c => c is '\u00BA' or '\u00AA' or '\u00B0') || t.Key is "BAJO" or "ENTRESUELO" or "ATICO" or "SOTANO" or "R/C" or "RC";
+            t.Text.Any(char.IsAsciiDigit) && t.Text.Any(c => c is '\u00BA' or '\u00AA' or '\u00B0') || IsCatalanOrdinal(t.Text) || t.Key is "BAJO" or "ENTRESUELO" or "ATICO" or "SOTANO" or "R/C" or "RC";
 
         private static Line? ParseBoxLine(List<Tok> toks, string code, T2Country country)
         {
@@ -1862,7 +2077,7 @@ internal static partial class Tier2Reader
             {
                 string t = toks[i].Text;
                 bool unitWord = T2Rules.UnitWords.Contains(toks[i].Key);
-                bool ordinal = t.Any(char.IsAsciiDigit) && t.Any(c => c is '\u00BA' or '\u00AA' or '\u00B0');
+                bool ordinal = t.Any(char.IsAsciiDigit) && t.Any(c => c is '\u00BA' or '\u00AA' or '\u00B0') || IsCatalanOrdinal(t);
                 bool letter = t.Length == 1 && char.IsLetter(t[0]);
                 bool plain = afterUnitWord && t.Length <= 4 && t.All(char.IsLetterOrDigit);
                 if (!(unitWord || ordinal || letter || plain))
@@ -1905,6 +2120,7 @@ internal static partial class Tier2Reader
 
         // Name then number, with the floor and door after it: "Plaza de las Descalzas 27, Esc 2, 3º, C" (UPU Spain sheet), "R LEAL DA CAMARA 31 RC ESQ" (UPU Portugal sheet),
         // "VIALE EUROPA 22" (UPU Italy sheet). The street line starts with a road type; without one the rules leave the line alone.
+        // Two more forms are read for web pages: the Basque road word after the name ("Nagusia Kalea 5") and a unit word straight after the name ("Rua das Flores Lote 5").
         private Line? ParseNameThenNumber(List<Tok> toks, T2Country country)
         {
             T2Type? type = null;
@@ -1917,6 +2133,11 @@ internal static partial class Tier2Reader
                     typeWords = words;
                     break;
                 }
+            }
+
+            if (type is null && country.Profile == "es")
+            {
+                return ParseTypeLast(toks, country);
             }
 
             if (type is null || toks.Count <= typeWords)
@@ -1935,7 +2156,18 @@ internal static partial class Tier2Reader
                 }
             }
 
-            List<Tok> nameToks = toks.GetRange(typeWords, (k < 0 ? toks.Count : k) - typeWords);
+            // A unit word straight before that number ("Rua das Flores Lote 5") starts the unit; the street has no house number. A kilometre mark belongs to the number ("Ctra. de Valencia km 5").
+            int unitAt = -1;
+            if (k > typeWords + 1 && T2Rules.IsUnitDesignator(country.Code, toks[k - 1].Key))
+            {
+                unitAt = k - 1;
+            }
+            else if (k > typeWords + 1 && toks[k - 1].Key == "KM")
+            {
+                k--;
+            }
+
+            List<Tok> nameToks = toks.GetRange(typeWords, (unitAt >= 0 ? unitAt : k < 0 ? toks.Count : k) - typeWords);
             if (nameToks.Count == 0)
             {
                 return null;
@@ -1947,59 +2179,126 @@ internal static partial class Tier2Reader
             pieces.Add(new Piece(StreetPartRole.StreetType, typeWritten, Fmt(country, typeWritten), T2Text.Title(typeWritten, capitalsKept: true), TypeSpan(typeToks), "t2-street-type"));
             string nameWritten = Join(nameToks);
             pieces.Add(new Piece(StreetPartRole.StreetName, nameWritten, Fmt(country, nameWritten), DisplayName(nameWritten, afterType: true), Span(nameToks), "t2-street-name"));
-            if (k >= 0)
+            if (unitAt >= 0)
             {
-                // Italy writes "25 D" for number 25, letter D (the letter is part of the civic number); Spain and Portugal write the door after the number.
-                int numberEnd = k;
-                if (country.Profile is "it" or "sm" or "va" && k + 1 < toks.Count && toks[k + 1].Text.Length == 1 && char.IsLetter(toks[k + 1].Text[0]))
+                return AppendUnits(pieces, toks, unitAt, country) ? new Line(StreetLineKind.Street, pieces) : null;
+            }
+
+            return k < 0 || AppendNumber(pieces, toks, k, country) ? new Line(StreetLineKind.Street, pieces) : null;
+        }
+
+        // The Basque road word follows the name: "Nagusia Kalea 5" (name, road word, number).
+        private Line? ParseTypeLast(List<Tok> toks, T2Country country)
+        {
+            int at = toks.FindIndex(1, t => T2Rules.FindLastType(t.Key) is not null);
+            if (at < 1)
+            {
+                return null;
+            }
+
+            int k = -1;
+            for (int j = at + 1; j < toks.Count; j++)
+            {
+                if (IsNumberToken(toks[j].Text) && TailOk(toks, j + 1))
                 {
-                    numberEnd = k + 1;
+                    k = j;
+                    break;
                 }
 
-                List<Tok> numberToks = toks.GetRange(k, numberEnd - k + 1);
-                string numberWritten = Join(numberToks);
-                pieces.Add(new Piece(StreetPartRole.HouseNumber, numberWritten, Fmt(country, numberWritten), numberWritten, Span(numberToks), "t2-house-number"));
-                k = numberEnd;
-                if (k < toks.Count - 1)
+                if (!T2Rules.UnitWords.Contains(toks[j].Key))
                 {
-                    List<Tok> tail = toks.GetRange(k + 1, toks.Count - k - 1);
-                    SourceSpan span = Span(tail);
-
-                    // Correos keeps the commas before the floor and door; the other authorities' lines have none.
-                    bool commas = country.Profile == "es";
-                    string before = commas ? ", " : " ";
-                    if (tail.Count >= 2 && T2Rules.IsUnitDesignator(country.Code, tail[0].Key) && IsUnitNumber(tail[1].Text) && tail.Count == 2)
-                    {
-                        pieces.Add(new Piece(StreetPartRole.UnitDesignator, tail[0].Text, Fmt(country, tail[0].Text), tail[0].Text, tail[0].Span, "t2-unit-designator", before));
-                        pieces.Add(new Piece(StreetPartRole.UnitNumber, tail[1].Text, Fmt(country, tail[1].Text), tail[1].Text, tail[1].Span, "t2-unit-number"));
-                    }
-                    else if (tail.Count > 2 && T2Rules.IsUnitDesignator(country.Code, tail[0].Key))
-                    {
-                        // "Piano 6 Scala B": each designator takes the word after it.
-                        int at = 0;
-                        while (at + 1 < tail.Count && T2Rules.IsUnitDesignator(country.Code, tail[at].Key) && IsUnitNumber(tail[at + 1].Text))
-                        {
-                            pieces.Add(new Piece(StreetPartRole.UnitDesignator, tail[at].Text, Fmt(country, tail[at].Text), tail[at].Text, tail[at].Span, "t2-unit-designator", at == 0 ? before : " "));
-                            pieces.Add(new Piece(StreetPartRole.UnitNumber, tail[at + 1].Text, Fmt(country, tail[at + 1].Text), tail[at + 1].Text, tail[at + 1].Span, "t2-unit-number"));
-                            at += 2;
-                        }
-
-                        if (at < tail.Count)
-                        {
-                            return null;
-                        }
-                    }
-                    else
-                    {
-                        string tailText = commas
-                            ? string.Join(' ', text.Substring(span.Start, span.Length).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))
-                            : Join(tail);
-                        pieces.Add(new Piece(StreetPartRole.UnitNumber, tailText, Fmt(country, tailText), tailText, span, "t2-floor-and-door", before));
-                    }
+                    break;
                 }
             }
 
-            return new Line(StreetLineKind.Street, pieces);
+            if (k < 0 && at < toks.Count - 1)
+            {
+                return null;
+            }
+
+            List<Tok> nameToks = toks.GetRange(0, at);
+            string nameWritten = Join(nameToks);
+            string typeWritten = toks[at].Text;
+            List<Piece> pieces =
+            [
+                new Piece(StreetPartRole.StreetName, nameWritten, Fmt(country, nameWritten), DisplayName(nameWritten), Span(nameToks), "t2-street-name"),
+                new Piece(StreetPartRole.StreetType, typeWritten, Fmt(country, typeWritten), T2Text.Title(typeWritten, capitalsKept: true), toks[at].Span, "t2-street-type"),
+            ];
+            return k < 0 || AppendNumber(pieces, toks, k, country) ? new Line(StreetLineKind.Street, pieces) : null;
+        }
+
+        // The house number at toks[k] with what may follow it: an addition (Italian "12 bis", "12 A"), then the unit words, floor and door.
+        private bool AppendNumber(List<Piece> pieces, List<Tok> toks, int k, T2Country country)
+        {
+            // Italy writes "25 D" for number 25, letter D (the letter is part of the civic number); "bis", "ter" and "quater" are additions in Italy, Spain and Portugal alike.
+            int numberEnd = k;
+            if (toks[k].Key == "KM" && k + 1 < toks.Count)
+            {
+                // A road kilometre mark ("km 5") is the number of a building on a road.
+                numberEnd = k + 1;
+            }
+            else if (k + 1 < toks.Count && (toks[k + 1].Key is "BIS" or "TER" or "QUATER"
+                || country.Profile is "it" or "sm" or "va" && toks[k + 1].Text.Length == 1 && char.IsLetter(toks[k + 1].Text[0])))
+            {
+                numberEnd = k + 1;
+            }
+
+            List<Tok> numberToks = toks.GetRange(k, numberEnd - k + 1);
+            string numberWritten = Join(numberToks);
+            pieces.Add(new Piece(StreetPartRole.HouseNumber, numberWritten, Fmt(country, numberWritten), numberWritten, Span(numberToks), "t2-house-number"));
+            return numberEnd >= toks.Count - 1 || AppendUnits(pieces, toks, numberEnd + 1, country);
+        }
+
+        // What follows the house number or the street name: unit words with their numbers, or the floor and door as one piece.
+        private bool AppendUnits(List<Piece> pieces, List<Tok> toks, int from, T2Country country)
+        {
+            List<Tok> tail = toks.GetRange(from, toks.Count - from);
+            SourceSpan span = Span(tail);
+
+            // Correos keeps the commas before the floor and door; the other authorities' lines have none.
+            bool commas = country.Profile == "es";
+            string before = commas && from > 0 && pieces.Any(p => p.Role == StreetPartRole.HouseNumber) ? ", " : " ";
+            if (tail.Count >= 2 && T2Rules.IsUnitDesignator(country.Code, tail[0].Key) && IsUnitNumber(tail[1].Text) && tail.Count == 2)
+            {
+                pieces.Add(new Piece(StreetPartRole.UnitDesignator, tail[0].Text, Fmt(country, tail[0].Text), tail[0].Text, tail[0].Span, "t2-unit-designator", before));
+                pieces.Add(new Piece(StreetPartRole.UnitNumber, tail[1].Text, Fmt(country, tail[1].Text), tail[1].Text, tail[1].Span, "t2-unit-number"));
+            }
+            else if (tail.Count >= 2 && T2Rules.IsUnitDesignator(country.Code, tail[0].Key))
+            {
+                // "Piano 6 Scala B": each designator takes the word after it; what is left after the last pair is the floor and door.
+                int at = 0;
+                while (at + 1 < tail.Count && T2Rules.IsUnitDesignator(country.Code, tail[at].Key) && IsUnitNumber(tail[at + 1].Text))
+                {
+                    pieces.Add(new Piece(StreetPartRole.UnitDesignator, tail[at].Text, Fmt(country, tail[at].Text), tail[at].Text, tail[at].Span, "t2-unit-designator", at == 0 ? before : " "));
+                    pieces.Add(new Piece(StreetPartRole.UnitNumber, tail[at + 1].Text, Fmt(country, tail[at + 1].Text), tail[at + 1].Text, tail[at + 1].Span, "t2-unit-number"));
+                    at += 2;
+                }
+
+                if (at == 0 && tail.Count > 2)
+                {
+                    return false;
+                }
+
+                if (at == 0)
+                {
+                    pieces.Add(new Piece(StreetPartRole.UnitNumber, Join(tail), Fmt(country, Join(tail)), Join(tail), span, "t2-floor-and-door", before));
+                }
+                else if (at < tail.Count)
+                {
+                    List<Tok> rest = tail.GetRange(at, tail.Count - at);
+                    string restText = Join(rest);
+                    pieces.Add(new Piece(StreetPartRole.UnitNumber, restText, Fmt(country, restText), restText, Span(rest), "t2-floor-and-door", " "));
+                }
+            }
+            else
+            {
+                string tailText = commas
+                    ? string.Join(' ', text.Substring(span.Start, span.Length).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))
+                    : Join(tail);
+                pieces.Add(new Piece(StreetPartRole.UnitNumber, tailText, Fmt(country, tailText), tailText, span, "t2-floor-and-door", before));
+            }
+
+            return true;
         }
 
         private static string RoleName(StreetPartRole role) => role switch

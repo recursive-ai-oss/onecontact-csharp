@@ -70,3 +70,13 @@ See docs/name-keys.md.
 cleanco 2.3 (Python, in a `uv` venv) and NameParserSharp 1.5.0 (NuGet, in the oracle project only), over `testdata/names/gold.tsv`: 522 synthetic person and company strings with gold parts, 28 languages, made by `make-gold.py` with seed 20261105.
 `score.py` scores token accuracy (each gold part's words get the reference's label), class accuracy and legal-form detection. The gold set is made from the same kind of templates our
 rules were written against, so our scores are near 100% by construction. The comparison is information about the references' coverage of these languages, not a quality claim for real-world text.
+
+## Iberian, Irish, Maltese and Slavic forms
+
+Rules only; they read the words of a name and say nothing about gender, origin or salutation.
+
+- Titles `Mons.`, `Msgr.`, `Monsignor`, `Mestre`/`Mestra`, `Revd`, `Rt Hon` are prefixes (the ambiguous ones only with a language hint). `Sen.`, `Senator`, `Hon.`, `Rev.` and `Fr.` were already prefixes.
+- Portuguese: a particle two words from the end keeps its family name: `Ana Maria dos Santos Ferreira` is given `Ana`, middle `Maria`, particle `dos`, family `Santos`, second family `Ferreira`. In a `Family, Given` text a connector between two family names (`Garcia y Lopez, Maria`) is one person.
+- Irish `Mac` standing apart (`Padraig Mac Giolla`) is a particle with an Irish hint; `Ó`, `Ní`, `Nic`, `Uí` and `Mhic` already were. Maltese `ta`, `tal`, `tas`, `tat` and `il` written apart are particles with a Maltese hint (`Josef ta' Cassar`); written with a hyphen (`Il-Borg`) they stay in the family name.
+- Czech, Slovak, Croatian and Slovenian: two words read as `Surname Given` when the second is a listed given name and the first is not, or the first is a feminine `-ová` surname form and the second is not (`Novák Jan`, `Nováková Jana`). Names that are also common surnames (Marek, Martin, Matej) are not listed, so `Marek Jan` and `Jan Marek` keep the order as written. The given-name list is our own.
+- Degrees: `MgA.`, `BcA.`, `Prom.`, `PharmDr.`, `ThLic.`, `ThMgr.` (cs, sk), `dipl. iur.`, `dipl. oec.`, `mag. oec.`, `dr. med.`, `dent.`, `bacc.`, `spec.`, `struč.` (hr) are prefixes; `CSc.`, `DrSc.` and `DiS.` after a comma or with dots are suffixes.
