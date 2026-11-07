@@ -95,7 +95,8 @@ internal static class SpanRecipe
     }
 
     // Pieces of crawled pages (tools/data/crawl-spans, same JSON Lines form as the rendered blocks) are mixed in on request:
-    // --crawl FILES --crawl-repeat N adds each training piece N times (the set is small next to the rendered blocks), and --crawl-dev FILES
+    // --crawl FILES --crawl-repeat N adds each training piece N times (the set is small next to the rendered blocks), --crawl-negative FILES
+    // --crawl-negative-repeat M does the same for the pieces without a labelled person or organization, and --crawl-dev FILES
     // adds the held-out pieces to the development examples. Without --crawl the recipe is exactly what it was.
     private static void AddCrawl(Dictionary<string, string> o, Func<string, string[]> files, Func<string, int, int> num, StringStore strings, List<Example> train, List<Example> dev)
     {
@@ -108,6 +109,16 @@ internal static class SpanRecipe
         for (int i = 0; i < repeat; i++)
         {
             train.AddRange(Data.ReadBlocks(files("crawl"), strings, int.MaxValue, SelectionSalt));
+        }
+
+        // Pieces without any labelled person or organization are far more numerous; they get their own repeat count.
+        if (o.ContainsKey("crawl-negative"))
+        {
+            int negativeRepeat = num("crawl-negative-repeat", 1);
+            for (int i = 0; i < negativeRepeat; i++)
+            {
+                train.AddRange(Data.ReadBlocks(files("crawl-negative"), strings, int.MaxValue, SelectionSalt));
+            }
         }
 
         if (o.ContainsKey("crawl-dev"))

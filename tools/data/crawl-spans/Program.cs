@@ -51,6 +51,10 @@ internal static class Program
         var stats = new Stats();
         using var train = new StreamWriter(Path.Combine(outDir, "train.jsonl"), false, new UTF8Encoding(false));
         using var dev = new StreamWriter(Path.Combine(outDir, "dev.jsonl"), false, new UTF8Encoding(false));
+        // The training pieces are also written split by whether they hold a labelled person or organization, so a recipe can repeat the
+        // rarer positive pieces more often than the negative ones.
+        using var trainPositive = new StreamWriter(Path.Combine(outDir, "train-positive.jsonl"), false, new UTF8Encoding(false));
+        using var trainNegative = new StreamWriter(Path.Combine(outDir, "train-negative.jsonl"), false, new UTF8Encoding(false));
         var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (string line in File.ReadLines(Path.Combine(pagesDir, "pages.jsonl")))
         {
@@ -77,7 +81,12 @@ internal static class Program
                 string region = p.GetProperty("tld").GetString() == "ca" ? "CA" : "US";
                 foreach (Piece piece in LabelPage(bytes, ctype, region, stats))
                 {
-                    (isDev ? dev : train).WriteLine(piece.ToJson(id, host));
+                    string json = piece.ToJson(id, host);
+                    (isDev ? dev : train).WriteLine(json);
+                    if (!isDev)
+                    {
+                        (piece.Kind.StartsWith("negative", StringComparison.Ordinal) ? trainNegative : trainPositive).WriteLine(json);
+                    }
                     stats.Count(piece, isDev);
                 }
             }
@@ -118,6 +127,7 @@ internal static class Program
                     if (!ok)
                     {
                         failures++;
+                        Console.WriteLine($"bad span: start {a} end {b} length {text.Length} previous end {previousEnd} label {s[2].GetString()} start-space {a < text.Length && char.IsWhiteSpace(text[a])} end-space {b > 0 && b <= text.Length && char.IsWhiteSpace(text[b - 1])}");
                     }
 
                     previousEnd = b;
@@ -527,9 +537,30 @@ internal static class Program
         }
 
         var piece = new Piece { Kind = labelled ? kind : "negative-" + kind, Text = body };
+        // Spans that overlap an earlier one (a web address inside an email or an address) are left out; the earlier one wins.
+        int previousEnd = 0;
         foreach ((Span s, _) in inside.Where(x => !x.Span.Label.EndsWith('?')))
         {
-            piece.Spans.Add(s with { Start = s.Start - start, End = s.End - start });
+            // A span never starts or ends on white space (a web address the reader took with its trailing space).
+            int a = s.Start - start;
+            int b = s.End - start;
+            while (a < b && char.IsWhiteSpace(body[a]))
+            {
+                a++;
+            }
+
+            while (b > a && char.IsWhiteSpace(body[b - 1]))
+            {
+                b--;
+            }
+
+            if (a < previousEnd || b <= a)
+            {
+                continue;
+            }
+
+            piece.Spans.Add(s with { Start = a, End = b });
+            previousEnd = b;
         }
 
         return piece;

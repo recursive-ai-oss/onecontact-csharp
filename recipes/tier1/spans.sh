@@ -3,13 +3,21 @@
 #   BASE       the trained Tier 1 pipeline (tier1.onenlp) to add the head to
 #   BLOCKS     folder of rendered contact blocks (train/ and dev/ inside), see tools/data/provenance/blocks-us-ca.md
 #   OUT        checkpoint and model folder
+#   CRAWL_POSITIVE, CRAWL_NEGATIVE, CRAWL_DEV   optional files of labelled crawl pieces (tools/data/crawl-spans; docs/extraction-crawl-training.md),
+#              CRAWL_REPEAT and CRAWL_NEGATIVE_REPEAT how often each training piece is repeated (default 1)
 #   BUDGET     seconds for this chunk (default 1500); THREADS, SEED, EPOCHS, BLOCKS_COUNT as in recipes/tier1/Program.cs
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 dll="${RECIPE_DLL:-$here/../../artifacts/bin/OneContact.Recipe.Tier1/release/RecursiveAI.OneContact.Recipe.Tier1.dll}"
 mkdir -p "$OUT"
+crawl=()
+if [ -n "${CRAWL_POSITIVE:-}" ]; then
+  crawl+=(--crawl "$CRAWL_POSITIVE" --crawl-repeat "${CRAWL_REPEAT:-1}")
+  [ -n "${CRAWL_NEGATIVE:-}" ] && crawl+=(--crawl-negative "$CRAWL_NEGATIVE" --crawl-negative-repeat "${CRAWL_NEGATIVE_REPEAT:-1}")
+  [ -n "${CRAWL_DEV:-}" ] && crawl+=(--crawl-dev "$CRAWL_DEV")
+fi
 exec dotnet "$dll" spans --base "$BASE" \
   --blocks "$BLOCKS/train" --blocks-dev "$BLOCKS/dev" \
   --blocks-count "${BLOCKS_COUNT:-500000}" --blocks-dev-count 6000 \
   --seed "${SEED:-1}" --epochs "${EPOCHS:-6}" --threads "${THREADS:-8}" --budget-seconds "${BUDGET:-1500}" \
-  --checkpoint-every 500 --out "$OUT"
+  --checkpoint-every 500 "${crawl[@]}" --out "$OUT"

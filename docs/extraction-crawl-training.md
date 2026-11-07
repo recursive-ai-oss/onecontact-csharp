@@ -48,3 +48,42 @@ tools/data/crawl-spans/draw.sh CC-MAIN-2026-39 5101 160 50 $WORK/cc/web      # p
 dotnet crawl-spans.dll label --pages $WORK/cc/web --out $WORK/labels/v1       # train.jsonl, dev.jsonl
 dotnet crawl-spans.dll check --in $WORK/labels/v1/train.jsonl $WORK/labels/v1/dev.jsonl
 ```
+
+## First run and result
+
+Data (`tools/data/crawl-spans`, labels `v1`): crawl `CC-MAIN-2026-39`, block-selection seed 5101 (160 United States and 50 `.ca` index blocks), 10,415 captures kept after the site filter (108 dropped), 10,375 pages fetched (1.4 GB, not in any repository), 9,959 distinct pages labelled; 3,479 had a markup record and 1,985 a markup name found in their text. Check against every evaluation page store and exclusion list (`check-stores.py`, including the replacement name sets and the Romanian and Mexican address top-ups): 0 pages with an excluded host, site or URL.
+
+| File | Pieces | SHA-256 |
+|---|---|---|
+| `train-positive.jsonl` | 2,769 (2,021 pieces, 748 windows) | `a488f038…8143` |
+| `train-negative.jsonl` | 14,606 | `7a7d359f…2e9` |
+| `dev.jsonl` | 755 (123 positive, 632 negative) | `b831d15e…8366` |
+
+Training spans: 5,227 organization and 1,135 person mentions from markup, 17,019 web addresses and 463 phone, email and address mentions (markup and rules) from the rules and markup. `crawl-spans check` finds 0 bad spans and 0 hosts in both files.
+
+Two candidates, `recipes/tier1 spans` on the Tier 1 encoder (frozen, seed 1, 4 epochs, 400,000 rendered blocks): **A** repeats each positive piece 6 times and each negative once, **B** 15 and 2 times. The best development epoch was kept (the second in both; later epochs fit the repeated pieces and lose on dev).
+
+| | rendered-block dev (field F1 / block-start F1) | held-out crawl pieces: person F1 / organization F1 |
+|---|---|---|
+| shipped head | 0.9324 / 0.8861 | 0.012 / 0.053 |
+| A | 0.9353 / 0.8694 | 0.000 / 0.023 |
+| B | 0.9322 / 0.8660 | 0.000 / 0.044 |
+
+On pages from hosts it never saw, no head finds the markup's people and organizations: the label says *this phrase is the page's organization*, and nothing in the text of a footer or a heading tells that apart from other capitalized phrases. Weak labels of this kind teach the training pieces, not a rule that carries over.
+
+On the private extraction sets (value F1 of visible-text mentions, 1000-resample bootstrap, differences paired with the shipped configuration):
+
+| Row | shipped | A | B | rules only |
+|---|---|---|---|---|
+| text person | 34.8 | 36.4 (+1.6 [−1.4, +5.5]) | 35.6 (+0.8 [−2.8, +4.8]) | 40.0 (+5.2 [−0.8, +12.3]) |
+| text org | 55.6 | 55.9 (+0.3 [−5.5, +4.7]) | 57.6 (+2.0 [−3.8, +6.8]) | 60.3 (+4.8 [−1.5, +10.4]) |
+| text address | 71.7 | 61.5 (−10.2 [−25.9, +3.3]) | 58.3 (−13.4 [−28.3, −2.0]) | 46.2 |
+| text record F1 | 31.5 | 32.1 (+0.6) | 32.1 (+0.6) | 31.7 |
+| web person | 19.4 | 19.4 (0.0) | 19.4 (0.0) | 17.9 |
+| web org | 35.9 | 35.9 (0.0) | 35.9 (0.0) | 36.7 |
+| web address | 84.0 | 84.0 | 84.0 | 84.0 |
+| web record F1 | 25.4 | 25.4 (0.0) | 25.4 (0.0) | 24.6 |
+
+Letting either head read web pages (the gated mode) changes web person by −0.3, record F1 by −0.1 and nothing else, as the shipped head does by −1.4 and −1.3. Phone, email and website rows are unchanged in every configuration.
+
+Verdict: neither candidate is better than the shipped head. The person and organization gains on text are inside the noise, and text addresses fall (B beyond the interval). The shipped head and its wiring stay. The address, name-part and name-class heads are byte-identical in effect: the same scores on 7,899 held-out address and name examples for all three files.
