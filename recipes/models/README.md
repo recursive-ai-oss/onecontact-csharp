@@ -22,3 +22,7 @@ Each run trains for `BUDGET` seconds, writes `last.ckpt` and `best.ckpt`, and st
 - Data choice: 25,000 address examples per Tier 2 country and 80,000 for each of the United States, Canada and the territories, 250,000 + 250,000 name examples, 500,000 blocks; chosen by a hash of the example text, so every run sees the same examples. Seed 1, learning rate 0.002 (0.003 for the span head), 300 warm-up steps, batches of about 1,500 words, dropout 0.1, patience 6.
 
 Provenance of the data and of the trained weights: `src/OneContact.Models/PROVENANCE.md`.
+
+## Address challenger mode
+
+`challenger.sh` trains an address challenger on the converted OpenStreetMap sets (ODbL), alone or mixed with the register sets, with the same pipeline shape and the same resumable chunks. It is a separate lineage and never feeds a package; `run.sh` and `data.manifest.tsv` never name its data. See `docs/models-challenger.md` and `PROVENANCE-challenger.md`.
