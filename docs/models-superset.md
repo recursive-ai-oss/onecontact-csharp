@@ -106,54 +106,146 @@ Common Crawl evaluation sets (private, aggregates only). Field F1 on coarse labe
 
 ## Real pages: names
 
-Accuracy of person-name tokens (person and multiple items), of the person/company/unknown class and of company-name tokens on the private sets: rules alone, and rules with this package's model before and after the policy below. The best reference (probablepeople 0.5.6, python-nameparser 2.8.2) is in the per-set results kept with the evaluation sets; every row here is at or above the rules alone except where noted.
+Accuracy of person-name tokens (person and multiple items), of company-name tokens and of the person/company/unknown class on the private sets. Columns: rules alone; the weights shipped before (`adde4a66…`, name heads trained on our own Tier 2 lists, Tier 2 override off); the weights of this version (`0e31f3fd…`, name heads retrained on national name lists); the best reference of the row (probablepeople 0.5.6 or python-nameparser 2.8.2, the higher score); this version minus that reference and minus the rules, with paired bootstrap 95% intervals (1000 resamples, seed 20261105). Where the interval of "vs best" lies entirely below zero the row is behind; no row is, though person tokens against python-nameparser in CA, IE and RO have an upper end of exactly 0.
 
-**Policy for Tier 2 names.** The Tier 2 person names this model learned come from small lists of our own (about 20 to 40 names per language). A first version let the model replace the rules' default reading of a string as a person (no title, suffix, particle, comma order, initial or known given name proved it) whenever it said company or unknown with confidence 0.6 or more. On real pages that raised company and class rows in most countries, but it also turned unfamiliar real person names into companies, and person-token and class accuracy fell below the rules alone in DE, NL, LU, LI, DK, FI, IS, EE, LV, LT, JE, IM, IE, ES, IT, AD and RO. Until a licence-checked national name source exists, a text whose country (or, with no country, language) is a Tier 2 one is read by the model only where the rules leave it open: a string the rules classify as unknown (refusals) is classified and split by the model; a rule class or person part is never replaced, and the default person reading is kept. United States and Canada texts (and texts with no country and no language, or in English, French or Spanish) keep the override at confidence 0.6, which the Tier 1 rows support. The policy applies only to the Tier 1 + Tier 2 package; the Tier 1 package is unchanged.
+**Policy for Tier 2 names.** The Tier 2 person names the earlier weights learned came from small lists of our own, and a first version of the override (the model replacing the rules' default reading of a string as a person, when it said company or unknown with confidence 0.6) turned unfamiliar real person names into companies in many countries. The name heads are now retrained (frozen encoder; the address and contact-span heads are byte-identical in their predictions) on person names drawn from open national name statistics (`../tools/data/provenance/names-tier2.md`), and the override is allowed per country, chosen on the development names: where it gained at least 0.3 points of class accuracy at confidence 0.8 on a development country with at least 150 items. Those are AU, EE, FR, GB, IE, IT, JE, LI, MT and RO. On the real-page sets IE, JE and RO each lost one item against the rules alone. The same item is lost with the override off, so it comes from the new heads reading a rule refusal, not from the override; the override was still left off in those three, which showed no real-page gain from it. The enabled list is AU, EE, FR, GB, IT, LI and MT. Every other Tier 2 country reads only what the rules leave open, as before. The list is `OverrideCountries` in `ModelNameReader`; United States and Canada keep confidence 0.6, and the Tier 1 package is unchanged. A first-version table showed company and class gains in AT, CH, NL, DE, NO and others that the development names do not predict; they are not enabled.
 
-Result (columns: before = the first version, after = this policy). No Tier 2 row is below the rules alone; the class and company gains that came from the default override are gone and the remaining gains (DK, FI and LT class; DK and FI company tokens) come from refusals. CA person tokens are 1 item below the rules alone (98.6 to 97.9, unchanged by the policy; Tier 1 behaves the same).
+**Training.** `recipes/models names` retrains the two name heads from the shipped weights with the encoder frozen: 250,000 US/CA name examples, 100,000 Tier 2 person examples (drawn by a hash of the text from the 1.56 million rendered), all 123,948 Tier 2 company examples; 4 epochs of 2,114 steps, seed 1, learning rate 0.001, best dev epoch kept; 38 seconds on 8 CPU threads. Development score (mean of name-part F1 and class accuracy on 14,882 development names): 0.9656 before, 0.9820 after. More Tier 2 persons in the mix lowered the United States and Canada company and class rows (450,000 persons: class -2.5 on the US set), because the head's prior for "person" rises with their share; 100,000 keeps them within noise of the shipped weights (US class -1.0 [-2.5, 0.0], CA -1.0 [-2.4, 0.0]). Variants with 50,000 and 100,000 (seed 2), 300,000 and 450,000 persons, and one without the English-language units were also scored on the real sets of the United States and Canada before this one was chosen, so those two rows are not an untouched test.
 
-| Country | person tokens: rules | before | after | class: rules | before | after | company tokens: rules | before | after |
-|---|---|---|---|---|---|---|---|---|---|
-| PL | 100.0 | 100.0 | 100.0 | 71.0 | 79.0 | 71.0 | 59.8 | 73.8 | 59.8 |
-| CZ | 100.0 | 100.0 | 100.0 | 97.7 | 98.8 | 97.7 | 90.7 | 94.4 | 90.7 |
-| SK | 94.5 | 94.5 | 94.5 | 100.0 | 100.0 | 100.0 | 98.6 | 98.6 | 98.6 |
-| SI | 93.2 | 93.2 | 93.2 | 91.7 | 95.8 | 91.7 | 85.7 | 92.9 | 85.7 |
-| HR | 97.7 | 97.7 | 97.7 | 87.5 | 93.8 | 87.5 | 80.0 | 91.2 | 80.0 |
-| HU | 96.1 | 96.1 | 96.1 | 100.0 | 100.0 | 100.0 | 94.8 | 94.8 | 94.8 |
-| RO | 80.4 | 76.1 | 80.4 | 97.9 | 95.7 | 97.9 | 87.5 | 87.5 | 87.5 |
-| MX | 93.5 | 93.5 | 93.5 | 86.3 | 90.2 | 86.3 | 91.3 | 95.2 | 91.3 |
-| AU | 100.0 | 100.0 | 100.0 | 74.5 | 84.3 | 74.5 | 68.6 | 81.4 | 68.6 |
-| FR | 95.6 | 95.6 | 95.6 | 67.2 | 81.0 | 67.2 | 37.3 | 66.1 | 37.3 |
-| DE | 95.2 | 90.5 | 95.2 | 78.8 | 80.3 | 78.8 | 61.4 | 70.0 | 61.4 |
-| NL | 97.9 | 93.6 | 97.9 | 64.6 | 67.1 | 64.6 | 39.8 | 50.0 | 39.8 |
-| BE | 89.0 | 89.0 | 89.0 | 73.4 | 78.1 | 73.4 | 51.3 | 60.5 | 51.3 |
-| AT | 95.1 | 95.1 | 95.1 | 79.4 | 88.2 | 79.4 | 54.9 | 80.3 | 54.9 |
-| CH | 95.6 | 95.6 | 95.6 | 80.0 | 88.6 | 80.0 | 68.2 | 84.1 | 68.2 |
-| LU | 97.1 | 88.4 | 97.1 | 65.7 | 74.6 | 65.7 | 54.6 | 77.3 | 54.6 |
-| LI | 92.7 | 90.2 | 92.7 | 72.9 | 79.7 | 72.9 | 62.0 | 77.5 | 62.0 |
-| MC | 100.0 | 100.0 | 100.0 | 30.6 | 41.7 | 30.6 | 28.8 | 42.4 | 28.8 |
-| DK | 93.6 | 91.0 | 93.6 | 87.3 | 92.7 | 89.1 | 66.7 | 86.4 | 72.7 |
-| SE | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 87.2 | 87.2 | 87.2 |
-| FI | 89.6 | 80.5 | 89.6 | 94.4 | 88.9 | 96.3 | 77.8 | 87.0 | 87.0 |
-| NO | 95.0 | 93.8 | 95.0 | 94.1 | 96.1 | 94.1 | 82.7 | 94.2 | 82.7 |
-| IS | 100.0 | 90.5 | 100.0 | 100.0 | 95.0 | 100.0 | 96.2 | 96.2 | 96.2 |
-| EE | 100.0 | 84.9 | 100.0 | 100.0 | 91.3 | 100.0 | 98.2 | 98.2 | 98.2 |
-| LV | 100.0 | 96.2 | 100.0 | 100.0 | 97.2 | 100.0 | 100.0 | 100.0 | 100.0 |
-| LT | 91.3 | 82.6 | 91.3 | 97.1 | 94.3 | 100.0 | 90.9 | 90.9 | 90.9 |
-| GB | 91.6 | 91.6 | 91.6 | 97.8 | 98.9 | 97.8 | 95.2 | 96.8 | 95.2 |
-| JE | 100.0 | 98.2 | 100.0 | 100.0 | 98.7 | 100.0 | 99.0 | 99.0 | 99.0 |
-| GG | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 |
-| IM | 100.0 | 94.2 | 100.0 | 100.0 | 97.3 | 100.0 | 100.0 | 100.0 | 100.0 |
-| IE | 93.8 | 91.7 | 93.8 | 100.0 | 98.8 | 100.0 | 100.0 | 100.0 | 100.0 |
-| ES | 100.0 | 98.5 | 100.0 | 100.0 | 98.8 | 100.0 | 99.4 | 99.4 | 99.4 |
-| PT | 98.0 | 98.0 | 98.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 |
-| IT | 97.2 | 96.1 | 97.2 | 100.0 | 99.0 | 100.0 | 99.3 | 99.3 | 99.3 |
-| MT | 95.7 | 95.7 | 95.7 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 |
-| SM | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 99.1 | 99.1 | 99.1 |
-| VA | 90.0 | 90.0 | 90.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 |
-| AD | 100.0 | 88.2 | 100.0 | 100.0 | 94.4 | 100.0 | 97.1 | 97.1 | 97.1 |
-| US | 98.0 | 98.0 | 98.0 | 79.3 | 88.7 | 88.7 | 68.1 | 84.6 | 84.6 |
-| CA | 98.6 | 97.9 | 97.9 | 80.8 | 88.5 | 88.5 | 64.6 | 82.9 | 82.9 |
+### Person tokens
+
+| Country | n | rules | shipped before | this model | best reference | this model vs best [95% CI] | vs rules [95% CI] |
+|---|---|---|---|---|---|---|---|
+| AD | 8 | 100.0 | 100.0 | 100.0 | probab 100.0 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| AT | 37 | 95.1 | 95.1 | 95.1 | namepa 95.1 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| AU | 19 | 100.0 | 100.0 | 100.0 | namepa 100.0 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| BE | 35 | 89.0 | 89.0 | 89.0 | namepa 89.0 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| CA | 126 | 98.6 | 97.9 | 97.9 | namepa 99.6 | -1.8 [-3.9, +0.0] | -0.7 [-2.2, +0.0] |
+| CH | 35 | 95.6 | 95.6 | 95.6 | namepa 100.0 | -4.4 [-10.5, +0.0] | +0.0 [+0.0, +0.0] |
+| CZ | 54 | 100.0 | 100.0 | 100.0 | namepa 97.0 | +3.0 [+0.0, +7.8] | +0.0 [+0.0, +0.0] |
+| DE | 35 | 95.2 | 95.2 | 95.2 | namepa 95.2 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| DK | 31 | 93.6 | 93.6 | 93.6 | namepa 93.6 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| EE | 26 | 100.0 | 100.0 | 100.0 | namepa 100.0 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| ES | 42 | 100.0 | 100.0 | 100.0 | namepa 89.2 | +10.8 [+6.5, +15.0] | +0.0 [+0.0, +0.0] |
+| FI | 36 | 89.6 | 89.6 | 89.6 | namepa 89.6 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| FR | 31 | 95.6 | 95.6 | 95.6 | namepa 97.1 | -1.5 [-4.6, +0.0] | +0.0 [+0.0, +0.0] |
+| GB | 37 | 91.6 | 91.6 | 91.6 | namepa 96.8 | -5.3 [-13.3, +0.0] | +0.0 [+0.0, +0.0] |
+| GG | 40 | 100.0 | 100.0 | 100.0 | namepa 100.0 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| HR | 17 | 97.7 | 97.7 | 97.7 | namepa 97.7 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| HU | 20 | 96.1 | 96.1 | 96.1 | probab 17.6 | +78.4 [+68.4, +89.1] | +0.0 [+0.0, +0.0] |
+| IE | 37 | 93.8 | 93.8 | 91.7 | namepa 97.9 | -6.2 [-13.6, +0.0] | -2.1 [-6.6, +0.0] |
+| IM | 39 | 100.0 | 100.0 | 100.0 | namepa 98.8 | +1.1 [+0.0, +3.5] | +0.0 [+0.0, +0.0] |
+| IS | 9 | 100.0 | 100.0 | 100.0 | namepa 100.0 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| IT | 65 | 97.2 | 97.2 | 97.2 | namepa 98.3 | -1.1 [-4.6, +2.3] | +0.0 [+0.0, +0.0] |
+| JE | 44 | 100.0 | 100.0 | 98.2 | namepa 100.0 | -1.9 [-7.2, +0.0] | -1.9 [-7.2, +0.0] |
+| LI | 29 | 92.7 | 92.7 | 92.7 | namepa 93.9 | -1.2 [-9.9, +8.4] | +0.0 [+0.0, +0.0] |
+| LT | 22 | 91.3 | 91.3 | 91.3 | namepa 95.7 | -4.3 [-12.8, +0.0] | +0.0 [+0.0, +0.0] |
+| LU | 29 | 97.1 | 97.1 | 97.1 | namepa 91.3 | +5.8 [+0.0, +13.5] | +0.0 [+0.0, +0.0] |
+| LV | 26 | 100.0 | 100.0 | 100.0 | namepa 100.0 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| MC | 4 | 100.0 | 100.0 | 100.0 | probab 100.0 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| MT | 45 | 95.7 | 95.7 | 95.7 | namepa 97.4 | -1.7 [-5.3, +0.0] | +0.0 [+0.0, +0.0] |
+| MX | 23 | 93.5 | 93.5 | 93.5 | namepa 88.7 | +4.8 [-3.3, +12.5] | +0.0 [+0.0, +0.0] |
+| NL | 40 | 97.9 | 97.9 | 97.9 | namepa 97.9 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| NO | 32 | 95.0 | 95.0 | 95.0 | namepa 95.0 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| PL | 26 | 100.0 | 100.0 | 100.0 | namepa 89.4 | +10.6 [+2.8, +20.3] | +0.0 [+0.0, +0.0] |
+| PT | 41 | 98.0 | 98.0 | 98.0 | namepa 94.1 | +3.9 [+0.0, +9.8] | +0.0 [+0.0, +0.0] |
+| RO | 20 | 80.4 | 80.4 | 76.1 | namepa 80.4 | -4.3 [-13.9, +0.0] | -4.3 [-13.9, +0.0] |
+| SE | 19 | 100.0 | 100.0 | 100.0 | namepa 100.0 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+| SI | 18 | 93.2 | 93.2 | 93.2 | namepa 97.7 | -4.5 [-13.3, +0.0] | +0.0 [+0.0, +0.0] |
+| SK | 37 | 94.5 | 94.5 | 94.5 | namepa 98.2 | -3.7 [-9.1, +0.0] | +0.0 [+0.0, +0.0] |
+| SM | 36 | 100.0 | 100.0 | 100.0 | namepa 96.5 | +3.5 [+0.0, +10.5] | +0.0 [+0.0, +0.0] |
+| US | 96 | 98.0 | 98.0 | 98.0 | namepa 100.0 | -2.0 [-4.9, +0.0] | +0.0 [+0.0, +0.0] |
+| VA | 13 | 90.0 | 90.0 | 90.0 | namepa 90.0 | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] |
+
+### Company tokens
+
+| Country | n | rules | shipped before | this model | best reference | this model vs best [95% CI] | vs rules [95% CI] |
+|---|---|---|---|---|---|---|---|
+| AD | 10 | 97.1 | 97.1 | 97.1 | probab 62.9 | +34.3 [+19.4, +55.9] | +0.0 [+0.0, +0.0] |
+| AT | 31 | 54.9 | 54.9 | 54.9 | probab 63.4 | -8.4 [-26.7, +10.3] | +0.0 [+0.0, +0.0] |
+| AU | 32 | 68.6 | 68.6 | 78.4 | probab 73.5 | +4.9 [-15.2, +23.0] | +9.8 [+1.8, +20.6] |
+| BE | 29 | 51.3 | 51.3 | 51.3 | probab 61.8 | -10.5 [-33.9, +11.4] | +0.0 [+0.0, +0.0] |
+| CA | 82 | 64.6 | 82.9 | 81.0 | probab 78.3 | +2.7 [-6.1, +10.4] | +16.4 [+8.7, +25.7] |
+| CH | 35 | 68.2 | 68.2 | 68.2 | probab 71.6 | -3.4 [-18.3, +10.0] | +0.0 [+0.0, +0.0] |
+| CZ | 33 | 90.7 | 90.7 | 90.7 | probab 47.2 | +43.5 [+31.5, +56.6] | +0.0 [+0.0, +0.0] |
+| DE | 31 | 61.4 | 61.4 | 61.4 | probab 64.3 | -2.9 [-21.2, +14.5] | +0.0 [+0.0, +0.0] |
+| DK | 24 | 66.7 | 72.7 | 72.7 | probab 62.1 | +10.6 [-9.4, +31.8] | +6.1 [+0.0, +18.2] |
+| EE | 20 | 98.2 | 98.2 | 98.2 | probab 55.6 | +42.6 [+36.2, +50.0] | +0.0 [+0.0, +0.0] |
+| ES | 42 | 99.4 | 99.4 | 99.4 | probab 72.9 | +26.5 [+17.7, +36.3] | +0.0 [+0.0, +0.0] |
+| FI | 18 | 77.8 | 87.0 | 87.0 | probab 40.7 | +46.3 [+31.2, +66.7] | +9.3 [+0.0, +27.3] |
+| FR | 27 | 37.3 | 37.3 | 66.1 | probab 49.1 | +16.9 [-9.5, +39.6] | +28.8 [+12.1, +45.9] |
+| GB | 54 | 95.2 | 95.2 | 96.8 | probab 81.4 | +15.4 [+8.4, +23.5] | +1.6 [+0.0, +5.0] |
+| GG | 27 | 100.0 | 100.0 | 100.0 | probab 91.1 | +8.9 [+3.1, +16.7] | +0.0 [+0.0, +0.0] |
+| HR | 31 | 80.0 | 80.0 | 80.0 | probab 35.0 | +45.0 [+18.1, +71.0] | +0.0 [+0.0, +0.0] |
+| HU | 24 | 94.8 | 94.8 | 94.8 | probab 70.1 | +24.7 [+15.8, +34.2] | +0.0 [+0.0, +0.0] |
+| IE | 43 | 100.0 | 100.0 | 100.0 | probab 90.1 | +9.9 [+5.5, +14.8] | +0.0 [+0.0, +0.0] |
+| IM | 35 | 100.0 | 100.0 | 100.0 | probab 92.6 | +7.4 [+2.5, +13.4] | +0.0 [+0.0, +0.0] |
+| IS | 11 | 96.2 | 96.2 | 96.2 | probab 50.0 | +46.1 [+32.1, +63.6] | +0.0 [+0.0, +0.0] |
+| IT | 40 | 99.3 | 99.3 | 99.3 | probab 57.4 | +41.9 [+30.9, +53.0] | +0.0 [+0.0, +0.0] |
+| JE | 31 | 99.0 | 99.0 | 99.0 | probab 83.3 | +15.6 [+8.6, +24.7] | +0.0 [+0.0, +0.0] |
+| LI | 30 | 62.0 | 62.0 | 74.7 | probab 71.8 | +2.8 [-10.0, +14.1] | +12.7 [+2.6, +26.6] |
+| LT | 13 | 90.9 | 90.9 | 90.9 | probab 42.4 | +48.5 [+30.6, +69.7] | +0.0 [+0.0, +0.0] |
+| LU | 38 | 54.6 | 54.6 | 54.6 | probab 59.8 | -5.2 [-27.2, +14.8] | +0.0 [+0.0, +0.0] |
+| LV | 10 | 100.0 | 100.0 | 100.0 | probab 26.9 | +73.1 [+57.1, +88.5] | +0.0 [+0.0, +0.0] |
+| MC | 32 | 28.8 | 28.8 | 28.8 | probab 27.1 | +1.7 [-17.3, +20.6] | +0.0 [+0.0, +0.0] |
+| MT | 30 | 100.0 | 100.0 | 100.0 | probab 89.7 | +10.3 [+5.6, +15.5] | +0.0 [+0.0, +0.0] |
+| MX | 28 | 91.3 | 91.3 | 91.3 | probab 60.2 | +31.1 [+16.1, +45.3] | +0.0 [+0.0, +0.0] |
+| NL | 42 | 39.8 | 39.8 | 39.8 | probab 45.5 | -5.7 [-25.3, +10.8] | +0.0 [+0.0, +0.0] |
+| NO | 19 | 82.7 | 82.7 | 82.7 | probab 57.7 | +25.0 [-1.8, +49.0] | +0.0 [+0.0, +0.0] |
+| PL | 36 | 59.8 | 59.8 | 59.8 | probab 42.6 | +17.2 [-3.6, +35.0] | +0.0 [+0.0, +0.0] |
+| PT | 40 | 100.0 | 100.0 | 100.0 | probab 75.9 | +24.1 [+13.6, +37.0] | +0.0 [+0.0, +0.0] |
+| RO | 27 | 87.5 | 87.5 | 87.5 | probab 55.2 | +32.3 [+21.8, +44.4] | +0.0 [+0.0, +0.0] |
+| SE | 12 | 87.2 | 87.2 | 87.2 | probab 72.3 | +14.9 [+2.0, +25.0] | +0.0 [+0.0, +0.0] |
+| SI | 30 | 85.7 | 85.7 | 85.7 | probab 33.3 | +52.4 [+30.0, +74.0] | +0.0 [+0.0, +0.0] |
+| SK | 25 | 98.6 | 98.6 | 98.6 | probab 46.5 | +52.1 [+38.2, +67.2] | +0.0 [+0.0, +0.0] |
+| SM | 38 | 99.1 | 99.1 | 99.1 | probab 60.0 | +39.1 [+29.8, +47.7] | +0.0 [+0.0, +0.0] |
+| US | 107 | 68.1 | 84.6 | 83.1 | probab 76.8 | +6.3 [-1.8, +14.0] | +15.1 [+8.5, +22.9] |
+| VA | 8 | 100.0 | 100.0 | 100.0 | probab 64.9 | +35.1 [+13.9, +59.0] | +0.0 [+0.0, +0.0] |
+
+### Class
+
+| Country | n | rules | shipped before | this model | best reference | this model vs best [95% CI] | vs rules [95% CI] |
+|---|---|---|---|---|---|---|---|
+| AD | 18 | 100.0 | 100.0 | 100.0 | probab 88.9 | +11.1 [+0.0, +27.8] | +0.0 [+0.0, +0.0] |
+| AT | 68 | 79.4 | 79.4 | 79.4 | probab 69.1 | +10.3 [-1.5, +22.1] | +0.0 [+0.0, +0.0] |
+| AU | 51 | 74.5 | 74.5 | 82.3 | probab 86.3 | -3.9 [-17.6, +9.8] | +7.8 [+2.0, +15.7] |
+| BE | 64 | 73.4 | 73.4 | 73.4 | probab 75.0 | -1.6 [-15.6, +12.5] | +0.0 [+0.0, +0.0] |
+| CA | 208 | 80.8 | 88.5 | 87.5 | probab 85.6 | +1.9 [-2.9, +6.7] | +6.7 [+3.4, +11.1] |
+| CH | 70 | 80.0 | 80.0 | 80.0 | probab 72.9 | +7.1 [-4.3, +18.6] | +0.0 [+0.0, +0.0] |
+| CZ | 87 | 97.7 | 97.7 | 97.7 | probab 55.2 | +42.5 [+32.2, +54.0] | +0.0 [+0.0, +0.0] |
+| DE | 66 | 78.8 | 78.8 | 78.8 | probab 80.3 | -1.5 [-10.6, +7.6] | +0.0 [+0.0, +0.0] |
+| DK | 55 | 87.3 | 89.1 | 89.1 | probab 81.8 | +7.3 [-5.5, +20.0] | +1.8 [+0.0, +5.5] |
+| EE | 46 | 100.0 | 100.0 | 100.0 | probab 84.8 | +15.2 [+6.5, +28.3] | +0.0 [+0.0, +0.0] |
+| ES | 84 | 100.0 | 100.0 | 100.0 | probab 82.1 | +17.9 [+10.7, +26.2] | +0.0 [+0.0, +0.0] |
+| FI | 54 | 94.4 | 96.3 | 96.3 | probab 66.7 | +29.6 [+16.7, +40.7] | +1.9 [+0.0, +5.6] |
+| FR | 58 | 67.2 | 67.2 | 81.0 | probab 65.5 | +15.5 [+3.5, +31.0] | +13.8 [+5.2, +22.4] |
+| GB | 91 | 97.8 | 97.8 | 98.9 | probab 93.4 | +5.5 [+0.0, +11.0] | +1.1 [+0.0, +3.3] |
+| GG | 67 | 100.0 | 100.0 | 100.0 | probab 92.5 | +7.5 [+1.5, +13.4] | +0.0 [+0.0, +0.0] |
+| HR | 48 | 87.5 | 87.5 | 87.5 | probab 52.1 | +35.4 [+16.7, +54.2] | +0.0 [+0.0, +0.0] |
+| HU | 44 | 100.0 | 100.0 | 100.0 | probab 81.8 | +18.2 [+6.8, +29.6] | +0.0 [+0.0, +0.0] |
+| IE | 80 | 100.0 | 100.0 | 98.8 | probab 91.2 | +7.5 [+2.5, +13.8] | -1.2 [-3.8, +0.0] |
+| IM | 74 | 100.0 | 100.0 | 100.0 | probab 91.9 | +8.1 [+2.7, +14.9] | +0.0 [+0.0, +0.0] |
+| IS | 20 | 100.0 | 100.0 | 100.0 | probab 70.0 | +30.0 [+10.0, +50.0] | +0.0 [+0.0, +0.0] |
+| IT | 105 | 100.0 | 100.0 | 100.0 | probab 65.7 | +34.3 [+25.7, +42.9] | +0.0 [+0.0, +0.0] |
+| JE | 75 | 100.0 | 100.0 | 98.7 | probab 94.7 | +4.0 [+0.0, +8.0] | -1.3 [-4.0, +0.0] |
+| LI | 59 | 72.9 | 72.9 | 79.7 | probab 72.9 | +6.8 [-5.1, +16.9] | +6.8 [+1.7, +13.6] |
+| LT | 35 | 97.1 | 100.0 | 100.0 | probab 80.0 | +20.0 [+8.6, +34.3] | +2.9 [+0.0, +8.6] |
+| LU | 67 | 65.7 | 65.7 | 65.7 | probab 73.1 | -7.5 [-19.4, +4.5] | +0.0 [+0.0, +0.0] |
+| LV | 36 | 100.0 | 100.0 | 100.0 | probab 69.4 | +30.6 [+16.7, +47.2] | +0.0 [+0.0, +0.0] |
+| MC | 36 | 30.6 | 30.6 | 30.6 | probab 36.1 | -5.6 [-19.4, +8.3] | +0.0 [+0.0, +0.0] |
+| MT | 75 | 100.0 | 100.0 | 100.0 | probab 89.3 | +10.7 [+4.0, +18.7] | +0.0 [+0.0, +0.0] |
+| MX | 51 | 86.3 | 86.3 | 86.3 | probab 78.4 | +7.8 [-3.9, +19.6] | +0.0 [+0.0, +0.0] |
+| NL | 82 | 64.6 | 64.6 | 64.6 | probab 67.1 | -2.4 [-13.4, +7.3] | +0.0 [+0.0, +0.0] |
+| NO | 51 | 94.1 | 94.1 | 94.1 | probab 68.6 | +25.5 [+11.8, +41.2] | +0.0 [+0.0, +0.0] |
+| PL | 62 | 71.0 | 71.0 | 71.0 | probab 74.2 | -3.2 [-14.5, +8.1] | +0.0 [+0.0, +0.0] |
+| PT | 81 | 100.0 | 100.0 | 100.0 | probab 81.5 | +18.5 [+9.9, +27.2] | +0.0 [+0.0, +0.0] |
+| RO | 47 | 97.9 | 97.9 | 95.7 | probab 76.6 | +19.1 [+6.4, +31.9] | -2.1 [-6.4, +0.0] |
+| SE | 31 | 100.0 | 100.0 | 100.0 | probab 83.9 | +16.1 [+3.2, +29.0] | +0.0 [+0.0, +0.0] |
+| SI | 48 | 91.7 | 91.7 | 91.7 | probab 47.9 | +43.8 [+29.2, +58.3] | +0.0 [+0.0, +0.0] |
+| SK | 62 | 100.0 | 100.0 | 100.0 | probab 61.3 | +38.7 [+27.4, +50.0] | +0.0 [+0.0, +0.0] |
+| SM | 74 | 100.0 | 100.0 | 100.0 | probab 89.2 | +10.8 [+5.4, +18.9] | +0.0 [+0.0, +0.0] |
+| US | 203 | 79.3 | 88.7 | 87.7 | probab 90.2 | -2.5 [-7.4, +2.5] | +8.4 [+4.9, +12.8] |
+| VA | 21 | 100.0 | 100.0 | 100.0 | probab 81.0 | +19.1 [+4.8, +38.1] | +0.0 [+0.0, +0.0] |
 
 
 ## Extraction (United States and Canada pages, no regression)

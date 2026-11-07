@@ -24,20 +24,20 @@ Generator `tools/data/names` (`render-tier2`, tool tag `names-2`), seed 20261107
 | IE: CSO, VSA50, VSA60, VSA110 (data.gov.ie) | IE given names and surnames (surnames mixed with GB) | "CC-BY-4.0 Creative Commons Attribution 4.0" | OK, credit |
 | BE: Statbel first names 2026 (M, F) and family names 2026 | BE Dutch and French; NL (proxy) | "published under the Creative Commons Attribution 4.0 license (CC BY 4.0)" | OK, credit |
 | AT: Statistik Austria, OGDEXT_VORNAMEN_1 | AT, DE given names | "subject to a Creative Commons Attribution 4.0 International (CC BY 4.0) licence ... Data source: Statistics Austria - data.statistik.gv.at" | OK, credit |
-| CH: FSO last names by canton 2024 (opendata.swiss) | CH surnames; also DE, AT, LI, FR-CH surnames (proxy) | terms_by: "You may use this dataset for commercial purposes. You must provide the source" | **Accepted by the orchestrator** (explicit open terms, no EULA), credit |
+| CH: FSO last names by canton 2024 (opendata.swiss) | CH surnames; also DE, AT, LI, FR-CH surnames (proxy) | terms_by: "You may use this dataset for commercial purposes. You must provide the source" | Accepted (explicit open terms, no licence agreement to sign), credit |
 | CH: Statistik Stadt Zürich, BEV370OD3701 | CH, DE, AT, LI given names | "Lizenz Creative Commons CCZero" | OK |
 | DE: Rostock registry office, newborn first names 2025 | DE given names | "Lizenz CC0 1.0" | OK |
 | GB: ONS baby names 2025 and NRS most common surnames 2025 | GB, JE, GG, IM, IE, AU | "Open Government Licence v3.0" | OK, OGL credit |
 | AU: NSW BDM popular baby names 1952 to 2025 | AU given names | catalogue licence cc-by | OK, credit |
 | NO: SSB tables 10501 and 12891 (2025) | NO | "the APIs use the license CC BY 4.0" | OK, credit |
 | SE: SCB BE0001FNamn10 and ENamn10 (2020) | SE | "Vi använder licensen CC0 för dessa data" | OK |
-| SI: SURS SiStat tables 05X1005S, 05X1010S, 05X1015S to 05X1018S (2026) | SI | free use, including commercial and derivative, "on condition that ... SURS is acknowledged as their source" | **Accepted by the orchestrator** (not a named licence; effect as CC BY), credit |
+| SI: SURS SiStat tables 05X1005S, 05X1010S, 05X1015S to 05X1018S (2026) | SI | free use, including commercial and derivative, "on condition that ... SURS is acknowledged as their source" | Accepted (not a named licence; effect as CC BY), credit |
 | DK: Statistics Denmark name lists 2020 via Digitaliseringsstyrelsen | DK; the lists carry only the order, so names are weighted by rank (Zipf) | Read Me.txt: "Licens: CC 4.0 BY ... (Danmarks Statestik angives som kilde)" | OK, credit |
 | FR (and LU, MC, FR-CH proxy): INSEE | FR given and family names | Licence Ouverte 2.0 (logged in `names-us-ca.md`) | OK, credit |
 
 No licence ambiguity remains. File hashes and sizes are in `tools/data/names/pins/names-tier2.pin`. The fetcher sends a browser-like user agent (Statbel and the Finnish portal each reject one of two), so a failed fetch is retried with the other.
 
-## Proxies and gaps (Agent default)
+## Proxies and gaps
 
 - **Proxies.** DE and AT surnames: the Swiss FSO list (no German or Austrian list found). NL: the Belgian Statbel lists plus 30 given and 30 family names of our own. LU and MC French names: INSEE. AU surnames: GB and IE lists. JE, GG, IM: GB and IE lists.
 - **Our own short lists** (`tools/data/templates/tier2*-names.tsv`, about 25 given and 30 to 40 family names a language) remain for CZ, SK, HR, HU, RO, PT, ES, MX, IT, MT, CA (Catalan), EE, LT and IS: no open list with permissive terms was found (MVČR no longer publishes; the Spanish INE offers a web application only; Italian lists exist for single municipalities; Registrų centras and the Estonian register offer no bulk file; the Icelandic permitted-names list has no counts). The several-people, title and joining-word forms are ours for every language.
