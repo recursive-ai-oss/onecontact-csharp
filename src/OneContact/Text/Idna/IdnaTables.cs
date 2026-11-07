@@ -119,14 +119,62 @@ internal static class IdnaTables
     internal static byte CombiningClass(int codePoint) =>
         (uint)codePoint < Loaded.AsciiCount ? Data.Value.AsciiCcc[codePoint] : Lookup(Data.Value.Ccc.Span, codePoint, 0);
 
-    internal static bool IsMark(int codePoint) =>
-        (uint)codePoint < Loaded.AsciiCount ? Data.Value.AsciiMark[codePoint] != 0 : Lookup(Data.Value.Mark.Span, codePoint, 0) != 0;
+    internal static bool IsMark(int codePoint)
+    {
+        if ((uint)codePoint < Loaded.AsciiCount)
+        {
+            return Data.Value.AsciiMark[codePoint] != 0;
+        }
+
+        int slot = Recent[codePoint & RecentMask];
+        if (slot >> 10 != codePoint || (slot & MarkKnown) == 0)
+        {
+            slot = Remember(codePoint, slot, MarkKnown | (Lookup(Data.Value.Mark.Span, codePoint, 0) != 0 ? MarkBit : 0));
+        }
+
+        return (slot & MarkBit) != 0;
+    }
+
+    // The answers for the code points a domain uses over and over (a script's few letters) are kept in a small table indexed by the code
+    // point, so the binary searches over the Unicode tables are not repeated. An entry holds the code point (bits 10 and up), which of
+    // the answers it knows, and the answers. A writer replaces a whole entry with one aligned store, so a reader sees an entry whole; two
+    // threads can only overwrite each other, which costs a repeated search and never a wrong answer.
+    private const int RecentMask = 1023;
+    private const int MarkBit = 1;
+    private const int NfcBit = 2;
+    private const int BidiShift = 2;
+    private const int BidiMask = 31 << BidiShift;
+    private const int MarkKnown = 1 << 7;
+    private const int NfcKnown = 1 << 8;
+    private const int BidiKnown = 1 << 9;
+    private static readonly int[] Recent = new int[RecentMask + 1];
+
+    private static int Remember(int codePoint, int slot, int answer)
+    {
+        int kept = slot >> 10 == codePoint ? slot & 1023 : 0;
+        int entry = (codePoint << 10) | kept | answer;
+        Recent[codePoint & RecentMask] = entry;
+        return entry;
+    }
 
     internal static bool IsCompositionExcluded(int codePoint) => Lookup(Data.Value.CompositionExclusion.Span, codePoint, 0) != 0;
 
     // Code points the file does not list default to L (unassigned code points are disallowed before this matters).
-    internal static BidiClass GetBidiClass(int codePoint) =>
-        (BidiClass)((uint)codePoint < Loaded.AsciiCount ? Data.Value.AsciiBidi[codePoint] : Lookup(Data.Value.Bidi.Span, codePoint, (byte)BidiClass.L));
+    internal static BidiClass GetBidiClass(int codePoint)
+    {
+        if ((uint)codePoint < Loaded.AsciiCount)
+        {
+            return (BidiClass)Data.Value.AsciiBidi[codePoint];
+        }
+
+        int slot = Recent[codePoint & RecentMask];
+        if (slot >> 10 != codePoint || (slot & BidiKnown) == 0)
+        {
+            slot = Remember(codePoint, slot, BidiKnown | (Lookup(Data.Value.Bidi.Span, codePoint, (byte)BidiClass.L) << BidiShift));
+        }
+
+        return (BidiClass)((slot & BidiMask) >> BidiShift);
+    }
 
     internal static JoiningType GetJoiningType(int codePoint) =>
         (JoiningType)((uint)codePoint < Loaded.AsciiCount ? Data.Value.AsciiJoining[codePoint] : Lookup(Data.Value.Joining.Span, codePoint, (byte)JoiningType.U));
@@ -161,6 +209,34 @@ internal static class IdnaTables
         first = 0;
         second = 0;
         return false;
+    }
+
+    /// <summary>
+    /// True when a code point can never change under NFC, whatever stands beside it: it is a starter, has no decomposition, cannot be
+    /// composed onto a code point before it (it is not the second code point of any primary composite) and is not Hangul.
+    /// A text made only of such code points is in NFC as it stands.
+    /// </summary>
+    internal static bool IsNfcStable(int codePoint)
+    {
+        if ((uint)codePoint < Loaded.AsciiCount)
+        {
+            return true;
+        }
+
+        // Hangul: syllables decompose, and the vowel and trailing-consonant jamo compose onto what comes before them.
+        if (codePoint is >= 0x1161 and <= 0x1175 or >= 0x11A8 and <= 0x11C2 or >= 0xAC00 and <= 0xD7A3)
+        {
+            return false;
+        }
+
+        int slot = Recent[codePoint & RecentMask];
+        if (slot >> 10 != codePoint || (slot & NfcKnown) == 0)
+        {
+            bool stable = CombiningClass(codePoint) == 0 && !TryGetDecomposition(codePoint, out _, out _) && !Data.Value.ComposedOnto.Contains(codePoint);
+            slot = Remember(codePoint, slot, NfcKnown | (stable ? NfcBit : 0));
+        }
+
+        return (slot & NfcBit) != 0;
     }
 
     /// <summary>Gets the primary composite of a starter and a following code point (UAX #15), or 0.</summary>
@@ -244,6 +320,7 @@ internal static class IdnaTables
                 if (b != 0 && Lookup(CompositionExclusion.Span, cp, 0) == 0)
                 {
                     Composition[((long)a << 21) | (uint)b] = cp;
+                    ComposedOnto.Add(b);
                 }
             }
         }
@@ -283,5 +360,8 @@ internal static class IdnaTables
         internal ReadOnlyMemory<byte> Joining { get; }
 
         internal Dictionary<long, int> Composition { get; } = [];
+
+        // The second code point of every primary composite.
+        internal HashSet<int> ComposedOnto { get; } = [];
     }
 }

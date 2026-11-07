@@ -135,6 +135,69 @@ public sealed class ShortcutEquivalenceTests
         }
     }
 
+    [Fact]
+    public void Nfc_stable_code_points_are_left_alone_beside_each_other()
+    {
+        int[] neighbours = [0x61, 0x1100, 0x3042, 0x4F8B, 0x0915, 0xAC00 - 1, 0x1E9E];
+        int stable = 0;
+        int[] one = new int[1];
+        int[] pair = new int[2];
+        for (int cp = 0; cp <= 0x10FFFF; cp++)
+        {
+            if (cp is >= 0xD800 and <= 0xDFFF || !IdnaTables.IsNfcStable(cp))
+            {
+                continue;
+            }
+
+            stable++;
+            one[0] = cp;
+            Assert.True(NormalizationC.NormalizeFull(one).AsSpan().SequenceEqual(one), $"U+{cp:X4} alone");
+            foreach (int n in neighbours)
+            {
+                if (!IdnaTables.IsNfcStable(n))
+                {
+                    continue;
+                }
+
+                pair[0] = n;
+                pair[1] = cp;
+                Assert.True(NormalizationC.NormalizeFull(pair).AsSpan().SequenceEqual(pair), $"U+{n:X4} U+{cp:X4}");
+                pair[0] = cp;
+                pair[1] = n;
+                Assert.True(NormalizationC.NormalizeFull(pair).AsSpan().SequenceEqual(pair), $"U+{cp:X4} U+{n:X4}");
+            }
+        }
+
+        Assert.True(stable > 100_000, $"only {stable} code points count as stable");
+    }
+
+    [Fact]
+    public void Idna_property_answers_do_not_depend_on_what_was_asked_before()
+    {
+        // The code points collide in the small table that remembers answers; walking up, down and in strides must give the same answers.
+        const int Count = 0x110000;
+        var first = new int[Count];
+        for (int cp = 0; cp < Count; cp++)
+        {
+            first[cp] = (IdnaTables.IsMark(cp) ? 1 : 0) | (IdnaTables.IsNfcStable(cp) ? 2 : 0) | ((int)IdnaTables.GetBidiClass(cp) << 2);
+        }
+
+        foreach (int stride in new[] { 1, 1023, 1024, 4099 })
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                int cp = (int)(((long)i * stride + (stride == 1 ? Count - 1 - (2 * i) : 0)) % Count);
+                if (cp < 0)
+                {
+                    cp += Count;
+                }
+
+                int now = (IdnaTables.GetBidiClass(cp) is var b ? (int)b << 2 : 0) | (IdnaTables.IsNfcStable(cp) ? 2 : 0) | (IdnaTables.IsMark(cp) ? 1 : 0);
+                Assert.True(now == first[cp], $"U+{cp:X4}: {now} then {first[cp]}");
+            }
+        }
+    }
+
     // ---- Public suffix ---------------------------------------------------------------------------------------------------------
 
     [Fact]

@@ -132,7 +132,10 @@ public sealed class ExtractedField
         return copy;
     }
 
-    internal string DedupKey => IsNormalized ? Normalized.Key : "raw:" + Text.ToLowerInvariant();
+    // The key of an address, a name or a web address is worked out from the value; grouping and de-duplication ask for it many times.
+    private string? _dedupKey;
+
+    internal string DedupKey => _dedupKey ??= IsNormalized ? Normalized.Key : "raw:" + Text.ToLowerInvariant();
 
     /// <summary>Returns the kind, the source and the text, for debugging.</summary>
     public override string ToString() => $"{Kind} ({Source}): {Text}";
