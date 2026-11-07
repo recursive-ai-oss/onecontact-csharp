@@ -28,8 +28,13 @@ internal static class EmailFinder
         int firstNew = sink.Count;
         FindPlain(text, start, end, sink);
         FindObfuscated(text, start, end, sink, firstNew);
-        sink.Sort(firstNew, sink.Count - firstNew, Comparer<EmailHit>.Create((a, b) => a.Start.CompareTo(b.Start)));
+        if (sink.Count - firstNew > 1)
+        {
+            sink.Sort(firstNew, sink.Count - firstNew, ByStart);
+        }
     }
+
+    private static readonly Comparer<EmailHit> ByStart = Comparer<EmailHit>.Create((a, b) => a.Start.CompareTo(b.Start));
 
     private static bool IsLocalChar(char c) =>
         char.IsAsciiLetterOrDigit(c) || c is '.' or '_' or '-' or '+' or '\'' or '&' || (c > 127 && (char.IsLetterOrDigit(c) || char.IsSurrogate(c)));
@@ -133,16 +138,25 @@ internal static class EmailFinder
 
     private static void FindObfuscated(string text, int start, int end, List<EmailHit> sink, int firstPlain)
     {
-        List<Token> ats = [];
-        var dotsByStart = new Dictionary<int, Token>();
-        var dotEnds = new HashSet<int>();
+        // Most lines have no at-token at all; for those nothing else is looked up or allocated.
+        List<Token>? ats = null;
         for (int p = start; p < end; p++)
         {
             if (TryAtToken(text, p, end, out Token a))
             {
-                ats.Add(a);
+                (ats ??= []).Add(a);
             }
+        }
 
+        if (ats is null)
+        {
+            return;
+        }
+
+        var dotsByStart = new Dictionary<int, Token>();
+        var dotEnds = new HashSet<int>();
+        for (int p = start; p < end; p++)
+        {
             if (TryDotToken(text, p, end, out Token d))
             {
                 dotsByStart[p] = d;

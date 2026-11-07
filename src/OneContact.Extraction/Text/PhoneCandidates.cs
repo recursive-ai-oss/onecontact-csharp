@@ -256,14 +256,35 @@ internal sealed class MatcherPhoneFinder : IPhoneCandidateFinder
     /// <param name="region">The region; it must be known.</param>
     public MatcherPhoneFinder(Region region) => _region = region;
 
+    // A number needs a digit: ASCII, another script's decimal digit, or a surrogate (digits outside the Basic Multilingual Plane).
+    private static bool MayHoldNumber(ReadOnlySpan<char> line)
+    {
+        foreach (char c in line)
+        {
+            if (c is >= '0' and <= '9' || (c > 0x7F && (char.IsDigit(c) || char.IsSurrogate(c))))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void Find(string text, int start, int end, List<PhoneHit> sink)
     {
+        ReadOnlySpan<char> line = text.AsSpan(start, end - start);
+        if (!MayHoldNumber(line))
+        {
+            return;
+        }
+
         var shape = new List<PhoneHit>();
         ShapePhoneFinder.Instance.Find(text, start, end, shape);
 
-        string line = text.Substring(start, end - start);
         var merged = new List<PhoneHit>();
-        foreach (PhoneNumberMatch m in PhoneNumber.FindAll(line, _region, PhoneMatchLeniency.Valid))
+        int index = 0;
+        long tries = long.MaxValue;
+        while (PhoneNumberMatcher.Default.TryFindNext(line, _region, PhoneMatchLeniency.Valid, ref index, ref tries, out PhoneNumberMatch m))
         {
             int s = start + m.Start;
             merged.Add(new PhoneHit(s, s + m.RawString.Length, ShapePhoneFinder.FindLabel(text, start, s)));

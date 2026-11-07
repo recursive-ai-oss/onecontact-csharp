@@ -294,6 +294,47 @@ public sealed class ShortcutEquivalenceTests
         Assert.True(differences.Count == 0, $"{differences.Count} of {inputs} differ over {patterns} patterns:\n" + string.Join('\n', differences.Take(25)));
     }
 
+    [Fact]
+    public void Vectorized_skipping_finds_the_same_matches_as_the_character_loop()
+    {
+        string[] patterns = ["(?:[(+]\\s{0,4}){0,2}\\p{Nd}{1,20}(?:[- .]{0,4}\\p{Nd}{1,20}){0,20}", "\\d{3}-\\d{4}", "[a-c]+@", "x(?:yz)?"];
+        char[] alphabet = "0123456789 -.()+@abcxyz\u0661\u0662\u00e9\ud835\udfce\ud835\udfcf\n".ToCharArray();
+        var rng = new Random(20261106);
+        int searches = 0;
+        foreach (string pattern in patterns)
+        {
+            PhoneRegex plain = PhoneRegex.Compile(pattern, PhoneRegex.CaseMode.Unicode);
+            PhoneRegex skipping = PhoneRegex.Compile(pattern, PhoneRegex.CaseMode.Unicode).WithVectorSkip();
+            for (int t = 0; t < 400; t++)
+            {
+                char[] chars = new char[rng.Next(0, 200)];
+                for (int i = 0; i < chars.Length; i++)
+                {
+                    chars[i] = alphabet[rng.Next(alphabet.Length)];
+                }
+
+                string text = new(chars);
+                int from = 0;
+                int fromSkip = 0;
+                while (true)
+                {
+                    searches++;
+                    bool a = plain.Find(text, from, default, out int s1, out int e1);
+                    bool b = skipping.Find(text, fromSkip, default, out int s2, out int e2);
+                    Assert.True(a == b && s1 == s2 && e1 == e2, $"/{pattern}/ in '{text}' from {from}: plain {a} {s1}-{e1}, skipping {b} {s2}-{e2}");
+                    if (!a)
+                    {
+                        break;
+                    }
+
+                    from = fromSkip = Math.Max(e1, s1 + 1);
+                }
+            }
+        }
+
+        Assert.True(searches > 1000);
+    }
+
     // ---- Phone numbers ---------------------------------------------------------------------------------------------------------
 
     [Fact]

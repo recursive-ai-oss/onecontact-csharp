@@ -49,7 +49,7 @@ public sealed class PhoneNumberMatcher
 
     internal static readonly PhoneRegex Candidate = PhoneRegex.Compile(
         "(?:[" + LeadClassBody + "]" + Punctuation + "){0,2}" + DigitSequence + "(?:" + Punctuation + DigitSequence + "){0,20}(?:" + PhoneText.ExtensionForMatching + ")?",
-        PhoneRegex.CaseMode.Unicode);
+        PhoneRegex.CaseMode.Unicode).WithVectorSkip();
 
     internal static readonly PhoneRegex LeadClass = PhoneRegex.Compile("[" + LeadClassBody + "]");
 
@@ -157,12 +157,13 @@ public sealed class PhoneNumberMatcher
     private PhoneNumberMatch? ExtractMatch(ReadOnlySpan<char> text, ReadOnlySpan<char> candidate, int offset, Region region, PhoneMatchLeniency leniency, ref long triesLeft)
     {
         // A candidate that is more likely a date or a time stamp is not a number.
-        if (SlashSeparatedDates.Find(candidate, 0, default, out _, out _))
+        // Each pattern needs a literal character (a slash, a space, a parenthesis); a candidate without it cannot match, so skip the search.
+        if (candidate.Contains('/') && SlashSeparatedDates.Find(candidate, 0, default, out _, out _))
         {
             return null;
         }
 
-        if (TimeStamps.Find(candidate, 0, default, out _, out _) && TimeStampsSuffix.LookingAt(text[(offset + candidate.Length)..], out _))
+        if (candidate.Contains(' ') && TimeStamps.Find(candidate, 0, default, out _, out _) && TimeStampsSuffix.LookingAt(text[(offset + candidate.Length)..], out _))
         {
             return null;
         }
@@ -222,7 +223,7 @@ public sealed class PhoneNumberMatcher
     private PhoneNumberMatch? ParseAndVerify(ReadOnlySpan<char> text, string candidate, int offset, Region region, PhoneMatchLeniency leniency)
     {
         // Text with formatting that cannot belong to a number is not one.
-        if (!MatchingBrackets.IsMatch(candidate) || PubPages.Find(candidate, 0, default, out _, out _))
+        if (!MatchingBrackets.IsMatch(candidate) || (candidate.Contains('(') && PubPages.Find(candidate, 0, default, out _, out _)))
         {
             return null;
         }

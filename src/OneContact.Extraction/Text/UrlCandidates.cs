@@ -59,7 +59,9 @@ internal static class UrlCandidates
                 }
             }
 
-            if (e - s < 4 || text.AsSpan(s, e - s).Contains('@'))
+            // A web address has a dot (a host name) or a colon (a scheme, a port); most words have neither.
+            ReadOnlySpan<char> token = text.AsSpan(s, e - s);
+            if (e - s < 4 || token.IndexOfAny('.', ':') < 0 || token.Contains('@'))
             {
                 continue;
             }

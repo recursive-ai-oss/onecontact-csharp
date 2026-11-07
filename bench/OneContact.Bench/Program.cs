@@ -118,6 +118,11 @@ internal static class Program
             return PhoneProfile.Run();
         }
 
+        if (args.Length > 0 && args[0] == "profile-compare")
+        {
+            return CompareProfile.Run();
+        }
+
         if (args.Length > 0 && args[0] == "profile-find")
         {
             return PhoneFindProfile.Run();

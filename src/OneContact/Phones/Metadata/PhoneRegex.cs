@@ -252,6 +252,32 @@ internal sealed class PhoneRegex
         }
     }
 
+    private System.Buffers.SearchValues<char>? _nonStartAscii;
+
+    /// <summary>
+    /// Makes <see cref="Find"/> skip stretches of ASCII that cannot begin a match with a vectorized search. Worth it only for a pattern
+    /// that scans long texts; the table costs a little to build.
+    /// </summary>
+    /// <returns>This pattern.</returns>
+    internal PhoneRegex WithVectorSkip()
+    {
+        if (!_canStartEmpty)
+        {
+            var nonStart = new List<char>();
+            for (char c = '\0'; c < 128; c++)
+            {
+                if (!CanStartWith(c))
+                {
+                    nonStart.Add(c);
+                }
+            }
+
+            _nonStartAscii = System.Buffers.SearchValues.Create(nonStart.ToArray());
+        }
+
+        return this;
+    }
+
     // Whether a match could begin with this character.
     private bool CanStartWith(char c)
     {
@@ -280,6 +306,15 @@ internal sealed class PhoneRegex
                 if (pos == input.Length)
                 {
                     break;
+                }
+
+                // Over a long stretch of ASCII that cannot begin a match, one vectorized search finds the next character that might: an
+                // ASCII starter, or anything outside ASCII (which the per-character test above then judges).
+                if (_nonStartAscii is { } skip && input[pos] < 128)
+                {
+                    int next = input[pos..].IndexOfAnyExcept(skip);
+                    pos = next < 0 ? input.Length : pos + next;
+                    continue;
                 }
 
                 pos += char.IsHighSurrogate(input[pos]) && pos + 1 < input.Length && char.IsLowSurrogate(input[pos + 1]) ? 2 : 1;
