@@ -128,8 +128,9 @@ The library is measured against the leaders it replaces. Rows below that carry a
 
 | Part | Scope | Metric | OneContact | Reference | Verdict |
 |---|---|---|---|---|---|
-| Phones: parse, validate, type, every format, region, possibility, examples | every region and non-geographic code | mismatches on generated cases | 0 of about 470,000 | libphonenumber 9.0.43 | exact |
-| Phones: as-you-type, matcher (every leniency), short numbers | every region | mismatches on generated cases | 0 of about 520,000 | libphonenumber 9.0.43 | exact |
+| Phones: parse, validate, type, every format, region, possibility, examples | every region and non-geographic code | mismatches on generated cases | 0 of 2,819,630 results (141,206 cases, 2 seeds) | libphonenumber 9.0.43 | exact |
+| Phones: as-you-type, matcher (every leniency), short numbers | every region | mismatches on generated cases | 0 of 969,881 results (207,679 cases, 2 seeds) | libphonenumber 9.0.43 | exact |
+| Phone geocoder, carrier and time zones (`Phones.Geo`) | every calling code | mismatches on generated cases | 0 of 1,159,521 cases (2 seeds) | libphonenumber geocoder 3.43, carrier 2.43 | exact |
 | URL | WPT `urltestdata.json` | entries passing | 896 / 896 | WHATWG URL Standard conformance data | exact |
 | URL | WPT `setters_tests.json`, `toascii.json` | entries passing | 278 / 278, 87 / 87 | same | exact |
 | Internationalized domain names | `IdnaTestV2.json` | entries passing | 2676 / 2676 | UTS #46 conformance data | exact |
@@ -139,6 +140,8 @@ The library is measured against the leaders it replaces. Rows below that carry a
 | Address standardization, United States and Canada | the authorities' published examples | examples reproduced | 206 / 206 | USPS Publication 28, Canada Post (EN, FR) | exact |
 | Address standardization, Tier 2 countries | the posts' and UPU's published examples, five example sets | examples reproduced | 316 / 316 (five example sets of 57, 54, 51, 65 and 89) | national postal authorities, UPU addressing sheets | exact |
 | Structural address layer | every libaddressinput region, generated cases | mismatches | 0 of 32,883, with 4 documented intended differences | libaddressinput (released build) | exact, with the 4 differences |
+
+Fuzzing: every parser and loader the packages ship (20 targets: phone strings, the matcher, as-you-type, phone and short-number metadata, email, web addresses, IDNA, addresses, names, companies, `Contacts.Normalize`, HTML and text extraction, both model loaders, JSON converters and the compiled-table reader) was fuzzed for 600 seconds each with AFL++ and SharpFuzz. One bug turned up (a negative span length in the address reader) and is fixed with a regression test; the rerun of that target found none. See [fuzz/README.md](fuzz/README.md).
 
 The four intended differences of the structural layer: (1) we ship a newer data snapshot than the reference build's built-in table; (2) a country with no separate Latin layout uses its main layout, where the reference uses a default one; (3) any language tag with a `Latn` script subtag selects the Latin layout; (4) the convenience `Create` lowercases tags and maps `_` to `-`.
 

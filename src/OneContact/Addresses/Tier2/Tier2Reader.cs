@@ -2434,8 +2434,17 @@ internal static partial class Tier2Reader
 
         private static SourceSpan Span(IEnumerable<Tok> toks)
         {
+            // The span covers every token. Merged and split tokens (a hyphenated postcode read as two) are not always in input order, and
+            // subtracting the first token's start from the last token's end then gave a negative length.
             Tok[] a = [.. toks];
-            return a.Length == 0 ? default : new SourceSpan(a[0].Start, a[^1].End - a[0].Start);
+            if (a.Length == 0)
+            {
+                return default;
+            }
+
+            int start = a.Min(t => t.Start);
+            int end = a.Max(t => t.End);
+            return new SourceSpan(start, Math.Max(end, start) - start);
         }
     }
 }
