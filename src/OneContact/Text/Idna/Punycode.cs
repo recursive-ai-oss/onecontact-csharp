@@ -22,7 +22,7 @@ internal static class Punycode
     internal static bool TryDecode(ReadOnlySpan<char> input, out int[] output)
     {
         output = [];
-        var result = new List<int>();
+        var result = new List<int>(input.Length); // the decoded label is never longer than its Punycode
         int basicEnd = input.LastIndexOf('-');
         if (basicEnd < 0)
         {

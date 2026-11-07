@@ -113,7 +113,8 @@ Text a person typed (a string, a note, a comment) is read with more rules than a
 - **Capitals.** The same rules apply to capitalized text. A label word in front ("CUSTOMER", "CLIENT") and a reference word or verb behind ("RE", "CALLED") are not part of the name.
 - **Last, First.** `Lopez, Maria` at the start of a line or after a cue; it needs a given name second or a contact, a job title or a header label after it, and an opener ("Sure, Jim"), a place or a business word before the comma refuses it.
 - **A first name alone** after a cue ("spoke with Dan", "Thank you, Dan.") or in front of a verb ("Sofia called"), for a common given name; lower case only after the strongest cues.
-- **Any input:** a title in front ("Dr. Patel", "Mrs. Alvarez"; "Dr" without a dot after a capitalized word is a street), a header label and colon ("From:", "Attendees:", "Ref:"), and an email address in the same or a neighbouring line whose local part spells a word of the name.
+- **Any input:** a title in front ("Dr. Patel", "Mrs. Alvarez"; "Dr" without a dot after a capitalized word is a street).
+- **Plain text only:** a header label and colon ("From:", "Attendees:", "Ref:"), and an email address in the same or a neighbouring line whose local part spells a word of the name. On a page the same shapes are menus, bylines and addresses of a business, and they added predictions that matched no contact.
 - **Never a contact:** a byline ("By Dana Reyes | May 3"), an attribution after a dash, and a name on its own line under a quotation.
 
 Development rows for these rules are in the repository's `tools/Eval/extraction/crm-texts.py` (synthetic notes and comments from our own templates, with negatives that look like names: "Will Call", "Rose Hill", "Lincoln, Nebraska").

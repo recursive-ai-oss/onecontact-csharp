@@ -31,12 +31,25 @@ public readonly partial struct PostalAddress :
     private readonly AddressParts? _parts;
     private readonly ParsedAddress? _parsed;
 
+    // The last key computed for this value. Computing a key reads the canonical form back through the parser, which costs about as much as the
+    // first parse, and callers ask for the key of one value many times (grouping, de-duplication). The memo is shared by copies of the value;
+    // a racing writer only repeats the work, because an entry is replaced whole.
+    private readonly KeyMemo? _keyMemo;
+
+    private sealed class KeyMemo
+    {
+        internal KeyEntry? Last;
+    }
+
+    private sealed record KeyEntry(KeyVersion Version, string Key);
+
     // Used by the rule parser: the canonical form is the postal-style line, the parts are what the rules read, and the parsed address keeps the street parts and offsets.
     internal PostalAddress(string canonical, AddressParts parts, ParsedAddress? parsed, SourceSpan source, AddressFacts flags)
     {
         _canonical = canonical;
         _parts = parts;
         _parsed = parsed;
+        _keyMemo = new KeyMemo();
         Source = source;
         Flags = flags;
     }
@@ -57,7 +70,23 @@ public readonly partial struct PostalAddress :
     /// <param name="version">The key version.</param>
     /// <returns>The key.</returns>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="version"/> is not a defined <see cref="KeyVersion"/>.</exception>
-    public string GetKey(KeyVersion version) => AddressKey.Compute(this, version);
+    public string GetKey(KeyVersion version)
+    {
+        if (_keyMemo is not { } memo)
+        {
+            return AddressKey.Compute(this, version);
+        }
+
+        KeyEntry? last = memo.Last;
+        if (last is not null && last.Version == version)
+        {
+            return last.Key;
+        }
+
+        string key = AddressKey.Compute(this, version);
+        memo.Last = new KeyEntry(version, key);
+        return key;
+    }
 
     ContactKind IContactValue.Kind => ContactKind.Address;
 

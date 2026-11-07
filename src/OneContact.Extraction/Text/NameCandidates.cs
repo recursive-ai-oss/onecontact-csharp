@@ -1086,14 +1086,14 @@ internal sealed class NameCandidates
         }
 
         // "Nguyen Tran" next to nguyen.tran@example.com: the address spells the name.
-        if (words >= 2 && EmailLocalMatches(line, toks, from, to))
+        if (_loose && words >= 2 && EmailLocalMatches(line, toks, from, to))
         {
             why = "email-local-part";
             return true;
         }
 
         // "From: Jane Doe", "Attendees: ...", "Ref: ...": a label for people, a colon, the name.
-        if (HeaderLabelBefore(before))
+        if (_loose && HeaderLabelBefore(before))
         {
             why = "header-label";
             return true;
