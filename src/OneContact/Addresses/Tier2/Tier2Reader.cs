@@ -52,11 +52,24 @@ internal static partial class Tier2Reader
         return status;
     }
 
-    private readonly record struct Tok(string Text, int Start)
+    private readonly record struct Tok
     {
+        internal Tok(string text, int start)
+        {
+            Text = text;
+            Start = start;
+
+            // Worked out once: the tables ask for it again and again.
+            Key = T2Rules.Key(text);
+        }
+
+        internal string Text { get; }
+
+        internal int Start { get; }
+
         internal int End => Start + Text.Length;
 
-        internal string Key => T2Rules.Key(Text);
+        internal string Key { get; }
 
         internal SourceSpan Span => new(Start, Text.Length);
     }

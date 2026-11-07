@@ -186,9 +186,46 @@ internal sealed class NameCandidates
 
     private static bool IsTrailPunct(char c) => !(char.IsLetterOrDigit(c) || c is '.' or '&' or '+' or '\'' or '\u2019');
 
-    private string Word(Tok t) => t.Text ??= _text.Substring(t.CoreStart, t.CoreEnd - t.CoreStart);
+    // A page repeats its words (labels, names, the words of its prose), so the spelling, lower-case and folded forms of a word are made once per distinct word and
+    // shared, instead of once per occurrence.
+    private readonly HashSet<string> _spellings = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> _lowers = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> _folds = new(StringComparer.Ordinal);
 
-    private string LowerWord(Tok t) => t.Lower ??= Word(t).ToLowerInvariant();
+    private string Word(Tok t)
+    {
+        if (t.Text is { } known)
+        {
+            return known;
+        }
+
+        ReadOnlySpan<char> w = _text.AsSpan(t.CoreStart, t.CoreEnd - t.CoreStart);
+        HashSet<string>.AlternateLookup<ReadOnlySpan<char>> lookup = _spellings.GetAlternateLookup<ReadOnlySpan<char>>();
+        if (!lookup.TryGetValue(w, out string? spelling))
+        {
+            spelling = w.ToString();
+            _spellings.Add(spelling);
+        }
+
+        return t.Text = spelling;
+    }
+
+    private string LowerWord(Tok t)
+    {
+        if (t.Lower is { } known)
+        {
+            return known;
+        }
+
+        string word = Word(t);
+        if (!_lowers.TryGetValue(word, out string? lower))
+        {
+            lower = word.ToLowerInvariant();
+            _lowers[word] = lower;
+        }
+
+        return t.Lower = lower;
+    }
 
     private string Folded(Tok t)
     {
@@ -197,8 +234,15 @@ internal sealed class NameCandidates
             return cached;
         }
 
-        ReadOnlySpan<char> w = _text.AsSpan(t.CoreStart, t.CoreEnd - t.CoreStart);
-        return t.Fold = NameFolding.LettersAndDigits(w.TrimEnd('.'));
+        ReadOnlySpan<char> w = _text.AsSpan(t.CoreStart, t.CoreEnd - t.CoreStart).TrimEnd('.');
+        Dictionary<string, string>.AlternateLookup<ReadOnlySpan<char>> lookup = _folds.GetAlternateLookup<ReadOnlySpan<char>>();
+        if (!lookup.TryGetValue(w, out string? folded))
+        {
+            folded = NameFolding.LettersAndDigits(w);
+            lookup[w] = folded;
+        }
+
+        return t.Fold = folded;
     }
 
     // Words in a run are joined by white space alone: no comma, bracket or other mark between them.

@@ -473,7 +473,8 @@ internal static class NameAnalyzer
 
     private static bool ReadsAsCompanyInReadingOrder(ReadOnlySpan<char> whole, PersonDraft d, bool restoreCase, NameHints hints, string[] langs)
     {
-        string text = PersonNameBuilder.Build(whole, d, restoreCase, hints, out _).Canonical;
+        _ = whole;
+        string text = PersonNameBuilder.CanonicalText(d, restoreCase, langs);
         if (text.Length == 0)
         {
             return false;

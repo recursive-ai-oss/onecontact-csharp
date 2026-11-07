@@ -192,6 +192,22 @@ internal static partial class T2Rules
     /// <summary>Upper case without accents, hyphens and apostrophes read as spaces, periods dropped: the form every table is matched in.</summary>
     internal static string Key(string text)
     {
+        // Plain ASCII with no separator or period is only changed by upper-casing (folding lower-cases it first, and nothing below 0xC0 is rewritten).
+        bool plain = true;
+        foreach (char ch in text)
+        {
+            if (ch >= '\u0080' || ch is '-' or '\'' or '.' or ' ')
+            {
+                plain = false;
+                break;
+            }
+        }
+
+        if (plain)
+        {
+            return text.ToUpperInvariant();
+        }
+
         string folded = AddressExpander.Fold(text);
         StringBuilder sb = new(folded.Length);
         foreach (char c in folded)

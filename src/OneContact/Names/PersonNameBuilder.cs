@@ -33,56 +33,8 @@ internal static class PersonNameBuilder
 {
     internal static PersonName Build(ReadOnlySpan<char> whole, PersonDraft draft, bool restoreCase, NameHints hints, out ParseDetail detail)
     {
-        string[] langs = NameLexicon.Languages(hints);
-        bool lowerParticles = NameLexicon.LowerParticles(langs);
-
-        NamePart Fix(NamePart part, Kind kind) =>
-            part.IsEmpty ? part : new NamePart(restoreCase ? RestorePart(part.Text, kind, lowerParticles) : part.Text, part.Span);
-
-        PersonNameParts parts = new()
-        {
-            Prefix = Fix(draft.Prefix, Kind.Title),
-            Given = Fix(draft.Given, Kind.Word),
-            Middle = Fix(draft.Middle, Kind.Word),
-            Particle = Fix(draft.Particle, Kind.Particle),
-            Family = Fix(draft.Family, Kind.Word),
-            SecondFamily = Fix(draft.SecondFamily, Kind.Word),
-            Suffix = Fix(draft.Suffix, Kind.Suffix),
-            ProfessionalSuffix = Fix(draft.ProfessionalSuffix, Kind.Suffix),
-            Nickname = Fix(draft.Nickname, Kind.Word),
-            FamilyConnector = draft.FamilyConnector,
-            Order = draft.Order,
-        };
-
-        // Reading order: title, given, middle, nickname, particle and family name, second family name, generational suffix,
-        // then professional suffixes after a comma. A family-first input (Hungarian, "Last, First") is written given first, so the
-        // canonical form always parses back to the same parts.
-        StringBuilder sb = new();
-        Append(sb, parts.Prefix.Text);
-        Append(sb, parts.Given.Text);
-        Append(sb, parts.Middle.Text);
-        if (!parts.Nickname.IsEmpty)
-        {
-            Append(sb, "\"" + parts.Nickname.Text + "\"");
-        }
-
-        Append(sb, parts.Particle.Text);
-        Append(sb, parts.Family.Text);
-        if (!parts.SecondFamily.IsEmpty)
-        {
-            if (parts.FamilyConnector.Length > 0)
-            {
-                Append(sb, parts.FamilyConnector);
-            }
-
-            Append(sb, parts.SecondFamily.Text);
-        }
-
-        Append(sb, parts.Suffix.Text);
-        if (!parts.ProfessionalSuffix.IsEmpty)
-        {
-            sb.Append(", ").Append(parts.ProfessionalSuffix.Text.Replace(" ", ", ", StringComparison.Ordinal));
-        }
+        PersonNameParts parts = MakeParts(draft, restoreCase, NameLexicon.Languages(hints));
+        StringBuilder sb = WriteReadingOrder(parts);
 
         NameFacts flags = NameFacts.None;
         if (restoreCase)
@@ -146,6 +98,68 @@ internal static class PersonNameBuilder
 
         _ = whole;
         return new PersonName(sb.ToString(), draft.Source, flags, parts);
+    }
+
+    /// <summary>The canonical text of a draft, written the way <see cref="Build"/> writes it, without the parts object or the detail.</summary>
+    internal static string CanonicalText(PersonDraft draft, bool restoreCase, string[] langs) =>
+        WriteReadingOrder(MakeParts(draft, restoreCase, langs)).ToString();
+
+    private static PersonNameParts MakeParts(PersonDraft draft, bool restoreCase, string[] langs)
+    {
+        bool lowerParticles = NameLexicon.LowerParticles(langs);
+
+        NamePart Fix(NamePart part, Kind kind) =>
+            part.IsEmpty ? part : new NamePart(restoreCase ? RestorePart(part.Text, kind, lowerParticles) : part.Text, part.Span);
+
+        return new PersonNameParts
+        {
+            Prefix = Fix(draft.Prefix, Kind.Title),
+            Given = Fix(draft.Given, Kind.Word),
+            Middle = Fix(draft.Middle, Kind.Word),
+            Particle = Fix(draft.Particle, Kind.Particle),
+            Family = Fix(draft.Family, Kind.Word),
+            SecondFamily = Fix(draft.SecondFamily, Kind.Word),
+            Suffix = Fix(draft.Suffix, Kind.Suffix),
+            ProfessionalSuffix = Fix(draft.ProfessionalSuffix, Kind.Suffix),
+            Nickname = Fix(draft.Nickname, Kind.Word),
+            FamilyConnector = draft.FamilyConnector,
+            Order = draft.Order,
+        };
+    }
+
+    // Reading order: title, given, middle, nickname, particle and family name, second family name, generational suffix,
+    // then professional suffixes after a comma. A family-first input (Hungarian, "Last, First") is written given first, so the
+    // canonical form always parses back to the same parts.
+    private static StringBuilder WriteReadingOrder(PersonNameParts parts)
+    {
+        StringBuilder sb = new();
+        Append(sb, parts.Prefix.Text);
+        Append(sb, parts.Given.Text);
+        Append(sb, parts.Middle.Text);
+        if (!parts.Nickname.IsEmpty)
+        {
+            Append(sb, "\"" + parts.Nickname.Text + "\"");
+        }
+
+        Append(sb, parts.Particle.Text);
+        Append(sb, parts.Family.Text);
+        if (!parts.SecondFamily.IsEmpty)
+        {
+            if (parts.FamilyConnector.Length > 0)
+            {
+                Append(sb, parts.FamilyConnector);
+            }
+
+            Append(sb, parts.SecondFamily.Text);
+        }
+
+        Append(sb, parts.Suffix.Text);
+        if (!parts.ProfessionalSuffix.IsEmpty)
+        {
+            sb.Append(", ").Append(parts.ProfessionalSuffix.Text.Replace(" ", ", ", StringComparison.Ordinal));
+        }
+
+        return sb;
     }
 
     private static void AddField(List<ParsedField> fields, string name, NamePart part)

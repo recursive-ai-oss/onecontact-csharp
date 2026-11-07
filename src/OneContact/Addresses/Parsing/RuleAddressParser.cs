@@ -20,6 +20,11 @@ public static class RuleAddressParser
     internal static readonly HashSet<string> UsCountryNames = new(StringComparer.Ordinal) { "USA", "US", "UNITED STATES", "UNITED STATES OF AMERICA", "U S A" };
     internal static readonly HashSet<string> CaCountryNames = new(StringComparer.Ordinal) { "CANADA", "CAN" };
 
+    // The last words of the names above: a text whose last word is none of them cannot end in a country name, which saves building the candidate names.
+    private static readonly HashSet<string> CountryNameLastWords = new(
+        UsCountryNames.Concat(CaCountryNames).Select(n => n[(n.LastIndexOf(' ') + 1)..]),
+        StringComparer.Ordinal);
+
     /// <summary>Reads an address.</summary>
     /// <param name="input">The text: one or several lines. Offsets in the result index this span.</param>
     /// <param name="hint">The country to assume when the content does not say; <see cref="Region.Unknown"/> for none. A hint outside the United States, Canada and the Tier 2 countries (France with its overseas departments, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland, Liechtenstein; the United Kingdom with Jersey, Guernsey and the Isle of Man, Ireland, Spain, Portugal, Italy, San Marino, the Vatican, Malta, Andorra) is refused.</param>
@@ -219,9 +224,12 @@ public static class RuleAddressParser
 
     private sealed record Unit(List<AddressToken> Tokens);
 
+    private static readonly List<AddressToken> NoTokens = [];
+
     private sealed class LastLine
     {
-        internal List<AddressToken> Locality { get; set; } = [];
+        // Always set before a last line is returned; until then it is the shared empty list, which nothing changes.
+        internal List<AddressToken> Locality { get; set; } = NoTokens;
 
         internal (int First, int Last)? Admin { get; set; }
 
@@ -235,7 +243,7 @@ public static class RuleAddressParser
 
         internal bool PostalIsCa { get; set; }
 
-        internal List<AddressToken> All { get; set; } = [];
+        internal List<AddressToken> All { get; set; } = NoTokens;
     }
 
     private sealed class Reader(string text, Region hint)
@@ -256,7 +264,7 @@ public static class RuleAddressParser
             ParsedAddressField? countryName = null;
             Region namedCountry = Region.Unknown;
             List<AddressToken> lastTokens = units[^1].Tokens;
-            for (int words = Math.Min(4, lastTokens.Count); words >= 1; words--)
+            for (int words = lastTokens.Count > 0 && CountryNameLastWords.Contains(lastTokens[^1].Key) ? Math.Min(4, lastTokens.Count) : 0; words >= 1; words--)
             {
                 string key = string.Join(' ', lastTokens.Skip(lastTokens.Count - words).Select(t => t.Key));
                 Region r = UsCountryNames.Contains(key) ? Region.US : (CaCountryNames.Contains(key) ? Region.CA : Region.Unknown);
@@ -697,7 +705,7 @@ public static class RuleAddressParser
             bool pr,
             out ParseDetail detail)
         {
-            List<ParsedAddressField> fields = [];
+            List<ParsedAddressField> fields = new(16);
             foreach (ParsedAddressText l in leading)
             {
                 fields.Add(new ParsedAddressField("leading-line", l.Text, l.Standard, l.Span, 1f, DecisionSource.Rule, "line-structure"));
@@ -758,7 +766,7 @@ public static class RuleAddressParser
                 AddressToken a = cityTokens[0];
                 AddressToken b = cityTokens[^1];
                 string written = text.Substring(a.Start, b.Start + b.Length - a.Start);
-                string standard = string.Join(' ', cityTokens.Select(t => canada ? t.Text.ToUpperInvariant() : t.Key));
+                string standard = canada ? string.Join(' ', cityTokens.Select(t => t.Text.ToUpperInvariant())) : PhraseKey(cityTokens, 0, cityTokens.Count);
                 locality = new ParsedAddressField("locality", written, standard, new SourceSpan(a.Start, written.Length), 1f, DecisionSource.Rule, canada ? "canada-post-4.4-municipality" : "pub28-221");
                 fields.Add(locality.Value);
                 if (!canada && cityTokens[^1].Key is "APO" or "FPO" or "DPO")
@@ -808,9 +816,28 @@ public static class RuleAddressParser
             }
 
             _ = pr;
-            fields = [.. fields.OrderBy(f => f.Span.Start)];
-            int start = fields.Min(f => f.Span.Start);
-            int end = fields.Max(f => f.Span.End);
+
+            // In input order; equal starts keep the order they were added in (an insertion sort is stable, and the list is short).
+            for (int a = 1; a < fields.Count; a++)
+            {
+                ParsedAddressField moving = fields[a];
+                int b = a - 1;
+                while (b >= 0 && fields[b].Span.Start > moving.Span.Start)
+                {
+                    fields[b + 1] = fields[b];
+                    b--;
+                }
+
+                fields[b + 1] = moving;
+            }
+
+            int start = fields[0].Span.Start;
+            int end = int.MinValue;
+            foreach (ParsedAddressField f in fields)
+            {
+                end = Math.Max(end, f.Span.End);
+            }
+
             ParsedAddress result = new(country, confidence, inferred, leading, delivery, locality, admin, postal, countryName, fields, facts, new SourceSpan(start, end - start));
             detail = new ParseDetail(_issues, fields.Select(f => new ParsedField(f.Name, f.Span, f.Confidence, f.Source)));
             return result;
@@ -889,8 +916,8 @@ public static class RuleAddressParser
         // State, territory or province: the longest phrase of up to four words that ends here.
         for (int words = Math.Min(4, j); words >= 1; words--)
         {
-            string key = string.Join(' ', tokens.Skip(j - words).Take(words).Select(t => t.Key));
-            bool upper = tokens.Skip(j - words).Take(words).All(t => !t.Text.Any(char.IsLower));
+            string key = PhraseKey(tokens, j - words, words);
+            bool upper = HasNoLowerCase(tokens, j - words, words);
             bool shortCode = key.Length == 2;
             if (shortCode && !hasPostal && !upper)
             {
@@ -933,6 +960,53 @@ public static class RuleAddressParser
 
         ll.Locality = tokens.GetRange(0, j);
         return ll;
+    }
+
+    // The keys of count words from the index on, joined by single spaces.
+    private static string PhraseKey(List<AddressToken> tokens, int from, int count)
+    {
+        if (count == 1)
+        {
+            return tokens[from].Key;
+        }
+
+        int length = count - 1;
+        for (int k = 0; k < count; k++)
+        {
+            length += tokens[from + k].Key.Length;
+        }
+
+        return string.Create(length, (tokens, from, count), static (span, s) =>
+        {
+            int at = 0;
+            for (int k = 0; k < s.count; k++)
+            {
+                if (k > 0)
+                {
+                    span[at++] = ' ';
+                }
+
+                string key = s.tokens[s.from + k].Key;
+                key.CopyTo(span[at..]);
+                at += key.Length;
+            }
+        });
+    }
+
+    private static bool HasNoLowerCase(List<AddressToken> tokens, int from, int count)
+    {
+        for (int k = 0; k < count; k++)
+        {
+            foreach (char c in tokens[from + k].Text)
+            {
+                if (char.IsLower(c))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private static bool IsZip(string key, out string standard)

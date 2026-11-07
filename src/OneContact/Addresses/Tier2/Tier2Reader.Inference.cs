@@ -133,15 +133,11 @@ internal static partial class Tier2Reader
     // that own the word. A word owned by several languages (a Dutch and a German ending, say) is held by any of them.
     private static bool LanguagesHold(string text, T2Country country)
     {
-        foreach ((string key, bool numberAfter, bool numberBefore) in Words(text))
+        foreach (HashSet<string> owners in WordsOf(text).Owners)
         {
-            foreach (string part in key.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            if (!owners.Overlaps(country.Languages))
             {
-                HashSet<string>? owners = InferenceTables.Instance.LanguagesOf(part, numberAfter, numberBefore);
-                if (owners is not null && !owners.Overlaps(country.Languages))
-                {
-                    return false;
-                }
+                return false;
             }
         }
 
@@ -352,7 +348,44 @@ internal static partial class Tier2Reader
 
     // The words of the text in the form the tables use, each with whether a house number follows it right away ("g. 5", "tn 24": only spaces and a period between, no comma, and
     // at most four digits, so a postcode is not one) and whether a floor number precedes it ("3. sal").
-    private static List<(string Key, bool NumberAfter, bool NumberBefore)> Words(string text)
+    private static List<(string Key, bool NumberAfter, bool NumberBefore)> Words(string text) => WordsOf(text).Words;
+
+    // Inference asks for the words of one text many times (every candidate country checks the languages of its words), so the last text's words, and the sets of
+    // languages that own them, are kept for the thread. The answer depends on the text and the tables alone.
+    private sealed class TextWords(string text, List<(string Key, bool NumberAfter, bool NumberBefore)> words, List<HashSet<string>> owners)
+    {
+        internal readonly string Text = text;
+        internal readonly List<(string Key, bool NumberAfter, bool NumberBefore)> Words = words;
+        internal readonly List<HashSet<string>> Owners = owners;
+    }
+
+    [ThreadStatic]
+    private static TextWords? t_lastWords;
+
+    private static TextWords WordsOf(string text)
+    {
+        if (t_lastWords is { } last && string.Equals(last.Text, text, StringComparison.Ordinal))
+        {
+            return last;
+        }
+
+        List<(string Key, bool NumberAfter, bool NumberBefore)> words = ReadWords(text);
+        List<HashSet<string>> owners = [];
+        foreach ((string key, bool numberAfter, bool numberBefore) in words)
+        {
+            foreach (string part in key.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (InferenceTables.Instance.LanguagesOf(part, numberAfter, numberBefore) is { } set)
+                {
+                    owners.Add(set);
+                }
+            }
+        }
+
+        return t_lastWords = new TextWords(text, words, owners);
+    }
+
+    private static List<(string Key, bool NumberAfter, bool NumberBefore)> ReadWords(string text)
     {
         List<(string, bool, bool)> words = [];
         int i = 0;
