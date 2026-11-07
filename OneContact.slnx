@@ -17,6 +17,7 @@
   </Folder>
   <Folder Name="/samples/">
     <Project Path="samples/OneContact.AotSmoke/OneContact.AotSmoke.csproj" />
+    <Project Path="samples/OneContact.QuickStart/OneContact.QuickStart.csproj" />
     <Project Path="samples/OneContact.AotSmoke.Models/OneContact.AotSmoke.Models.csproj" />
     <Project Path="samples/OneContact.AotSmoke.ModelsSuperset/OneContact.AotSmoke.ModelsSuperset.csproj" />
   </Folder>
