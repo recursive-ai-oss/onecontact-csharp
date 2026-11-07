@@ -173,13 +173,20 @@ internal static class Program
             return PhoneFindProfile.Run();
         }
 
+        if (args.Length == 2 && args[0] == "dump-geo")
+        {
+            return GeoDump.Run(args[1]);
+        }
+
         if (args.Length > 0 && args[0] == "accuracy")
         {
             return Accuracy.Run();
         }
 
         // The in-process toolchain: the assembly name differs from the project name, so a generated child project cannot find it.
-        ManualConfig config = DefaultConfig.Instance.AddJob((Environment.GetEnvironmentVariable("ONECONTACT_BENCH_JOB") == "default" ? Job.Default : Job.ShortRun).WithToolchain(InProcessNoEmitToolchain.Instance));
+        ManualConfig config = DefaultConfig.Instance.AddJob((Environment.GetEnvironmentVariable("ONECONTACT_BENCH_JOB") == "default" ? Job.Default : Job.ShortRun).WithToolchain(InProcessNoEmitToolchain.Instance))
+            // The AddressParser package is published as a debug build; the validator would refuse to time it. It is the comparator as shipped.
+            .WithOptions(ConfigOptions.DisableOptimizationsValidator);
         BenchmarkSwitcher.FromAssembly(typeof(RegionRow).Assembly).Run(args, config);
         return 0;
     }

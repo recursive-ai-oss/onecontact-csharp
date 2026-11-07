@@ -12,6 +12,7 @@
     <PackageReference Include="libphonenumber-csharp" />
     <PackageReference Include="MimeKit" />
     <PackageReference Include="AngleSharp" />
+    <PackageReference Include="AddressParser" />
     <PackageReference Include="Nager.PublicSuffix" />
     <PackageReference Include="NameParserSharp" />
     <PackageReference Include="Microsoft.Recognizers.Text.Sequence" />
@@ -20,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="../../src/OneContact/OneContact.csproj" />
     <ProjectReference Include="../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
+    <ProjectReference Include="../../src/OneContact.Phones.Geo/OneContact.Phones.Geo.csproj" />
     <ProjectReference Include="../../src/OneContact.Models.Tier1/OneContact.Models.Tier1.csproj" />
   </ItemGroup>
 
