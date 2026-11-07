@@ -188,10 +188,10 @@ public class PhoneTests
     [Fact]
     public void A_region_with_no_data_is_reported_as_such()
     {
-        OperationStatus status = PhoneNumber.TryParse("2024561111", Region.Parse("XX"), out _, out ParseDetail d);
+        OperationStatus status = PhoneNumber.TryParse("2024561111", Region.Parse("BV"), out _, out ParseDetail d);
         Assert.Equal(OperationStatus.InvalidData, status);
         Assert.Equal(ReasonCode.PhoneUnknownRegion, d.PrimaryReason);
-        Assert.Equal("+12024561111", PhoneNumber.Parse("+1 202 456 1111", Region.Parse("XX")).E164);
+        Assert.Equal("+12024561111", PhoneNumber.Parse("+1 202 456 1111", Region.Parse("BV")).E164);
     }
 
     [Fact]
@@ -243,7 +243,7 @@ public class PhoneTests
         Assert.Equal("+44 20 7946 0958", uk.FormatOutOfCountry(BR));
         Assert.Equal("020 7946 0958", uk.FormatOutOfCountry(GB));
         Assert.Equal("8~10 44 20 7946 0958", uk.FormatOutOfCountry(RU));
-        Assert.Equal("+44 20 7946 0958", uk.FormatOutOfCountry(Region.Parse("XX")));
+        Assert.Equal("+44 20 7946 0958", uk.FormatOutOfCountry(Region.Parse("BV")));
 
         PhoneNumber us = PhoneNumber.Parse("+1 202 456 1111 ext 123");
         Assert.Equal("1 (202) 456-1111 ext. 123", us.FormatOutOfCountry(Region.CA));
@@ -343,7 +343,7 @@ public class PhoneTests
         Assert.Equal("0", p.GetNationalPrefix(GB));
         Assert.Equal("1", p.GetNationalPrefix(Region.US));
         Assert.Null(p.GetNationalPrefix(Region.Parse("AC")));
-        Assert.Null(p.GetNationalPrefix(Region.Parse("XX")));
+        Assert.Null(p.GetNationalPrefix(Region.Parse("BV")));
     }
 
     [Fact]
@@ -398,7 +398,7 @@ public class PhoneTests
         Assert.Equal(GB, md.GetRegions(44)[0]);
         Assert.Contains(Region.CA, md.GetRegions(1));
         Assert.Equal(44, md.GetCallingCode(GB));
-        Assert.Equal(0, md.GetCallingCode(Region.Parse("XX")));
+        Assert.Equal(0, md.GetCallingCode(Region.Parse("BV")));
     }
 
     [Fact]

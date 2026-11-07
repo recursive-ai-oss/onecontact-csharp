@@ -25,6 +25,19 @@ public static class RuleAddressParser
         UsCountryNames.Concat(CaCountryNames).Select(n => n[(n.LastIndexOf(' ') + 1)..]),
         StringComparer.Ordinal);
 
+    /// <summary>Reads an address with an explicit model, used instead of the registered one for this call.</summary>
+    /// <param name="input">The text: one or several lines. Offsets in the result index this span.</param>
+    /// <param name="hint">The country to assume when the content does not say; <see cref="Region.Unknown"/> for none.</param>
+    /// <param name="model">The address model, for example one loaded from a file; <see langword="null"/> reads by rules only, whatever model package is referenced.</param>
+    /// <param name="address">The parsed address, or <see langword="null"/> when the status is not <see cref="OperationStatus.Done"/>.</param>
+    /// <param name="detail">Issues, and per field its offsets and decision source.</param>
+    /// <returns><see cref="OperationStatus.Done"/>, or <see cref="OperationStatus.InvalidData"/> with the reason in <paramref name="detail"/>.</returns>
+    public static OperationStatus TryParse(ReadOnlySpan<char> input, Region hint, Models.IAddressFieldModel? model, out ParsedAddress? address, out ParseDetail detail)
+    {
+        using IDisposable scope = Models.ContactModels.Use(model, Models.ContactModels.Name, Models.ContactModels.Spans);
+        return TryParse(input, hint, out address, out detail);
+    }
+
     /// <summary>Reads an address.</summary>
     /// <param name="input">The text: one or several lines. Offsets in the result index this span.</param>
     /// <param name="hint">The country to assume when the content does not say; <see cref="Region.Unknown"/> for none. A hint outside the United States, Canada and the Tier 2 countries (France with its overseas departments, Monaco, Belgium, the Netherlands, Luxembourg, Germany, Austria, Switzerland, Liechtenstein; the United Kingdom with Jersey, Guernsey and the Isle of Man, Ireland, Spain, Portugal, Italy, San Marino, the Vatican, Malta, Andorra) is refused.</param>

@@ -65,11 +65,14 @@ public readonly partial struct PhoneNumber
         return new PhoneNumber(countryCode, nn, zeros, extension, null, CountryCodeSource.Unspecified, null, default, PhoneNumberParser.Default.IsValid(n) ? PhoneFacts.Valid : PhoneFacts.None);
     }
 
+    // The parser whose metadata answers the members: the one that produced the value, else the built-in one.
+    private PhoneNumberParser Engine => _engine ?? PhoneNumberParser.Default;
+
     internal PhoneNumber WithoutExtension() =>
-        _extension is null ? this : new PhoneNumber(_countryCode, _nationalNumber, _leadingZeros, null, _rawInput, _codeSource, _carrierCode, Source, Flags, CachedType);
+        _extension is null ? this : new PhoneNumber(_countryCode, _nationalNumber, _leadingZeros, null, _rawInput, _codeSource, _carrierCode, Source, Flags, CachedType, _engine);
 
     /// <summary>Gets the type of line (fixed, mobile, toll free, ...) by the numbering plan of the number's region.</summary>
-    public PhoneNumberType Type => CachedType ?? PhoneNumberParser.Default.GetNumberType(this);
+    public PhoneNumberType Type => CachedType ?? Engine.GetNumberType(this);
 
     internal PhoneNumberType? CachedType => _typePlusOne == 0 ? null : (PhoneNumberType)(_typePlusOne - 1);
 
@@ -77,42 +80,42 @@ public readonly partial struct PhoneNumber
     public bool IsValid => Type != PhoneNumberType.Unknown;
 
     /// <summary>Gets the region the number belongs to, or <see cref="Region.Unknown"/> when it matches none or is a non-geographic number.</summary>
-    public Region Region => PhoneNumberParser.Default.GetRegion(this);
+    public Region Region => Engine.GetRegion(this);
 
     /// <summary>Gets the E.164 form: <c>+</c>, the calling code and the national significant number. The extension is not part of it.</summary>
-    public string E164 => PhoneNumberParser.Default.Format(this, PhoneFormat.E164);
+    public string E164 => _countryCode == 0 ? string.Empty : Engine.Format(this, PhoneFormat.E164);
 
     /// <summary>Writes the number in a standard format.</summary>
     /// <param name="format">The format.</param>
     /// <returns>The text.</returns>
-    public string Format(PhoneFormat format) => PhoneNumberParser.Default.Format(this, format);
+    public string Format(PhoneFormat format) => _countryCode == 0 ? string.Empty : Engine.Format(this, format);
 
     /// <summary>Tells whether the number is valid in a particular region.</summary>
     /// <param name="region">The region.</param>
     /// <returns><see langword="true"/> when the region's plan has the number.</returns>
-    public bool IsValidForRegion(Region region) => PhoneNumberParser.Default.IsValidForRegion(this, region);
+    public bool IsValidForRegion(Region region) => Engine.IsValidForRegion(this, region);
 
     /// <summary>Tells whether the length of the number is plausible, and if not, how it misses.</summary>
     /// <param name="type">The line type to test against, or <see cref="PhoneNumberType.Unknown"/> for any.</param>
     /// <returns>The verdict.</returns>
-    public PhonePossibility GetPossibility(PhoneNumberType type = PhoneNumberType.Unknown) => PhoneNumberParser.Default.GetPossibility(this, type);
+    public PhonePossibility GetPossibility(PhoneNumberType type = PhoneNumberType.Unknown) => Engine.GetPossibility(this, type);
 
     /// <summary>Writes the number as it should be dialled from another region.</summary>
     /// <param name="callingFrom">The region the call is placed from.</param>
     /// <returns>The text.</returns>
-    public string FormatOutOfCountry(Region callingFrom) => PhoneNumberParser.Default.FormatOutOfCountry(this, callingFrom);
+    public string FormatOutOfCountry(Region callingFrom) => Engine.FormatOutOfCountry(this, callingFrom);
 
     /// <summary>Writes the number as a mobile phone should be given it to dial.</summary>
     /// <param name="callingFrom">The region the call is placed from.</param>
     /// <param name="withFormatting">Whether to keep punctuation.</param>
     /// <returns>The text.</returns>
     public string FormatForMobileDialing(Region callingFrom, bool withFormatting) =>
-        PhoneNumberParser.Default.FormatForMobileDialing(this, callingFrom, withFormatting);
+        Engine.FormatForMobileDialing(this, callingFrom, withFormatting);
 
     /// <summary>Writes the number in the format it was typed in, using the raw input kept at parse time.</summary>
     /// <param name="callingFrom">The region the number is shown in.</param>
     /// <returns>The text.</returns>
-    public string FormatInOriginalFormat(Region callingFrom) => PhoneNumberParser.Default.FormatInOriginalFormat(this, callingFrom);
+    public string FormatInOriginalFormat(Region callingFrom) => Engine.FormatInOriginalFormat(this, callingFrom);
 
     /// <summary>Gets an example number for a region.</summary>
     /// <param name="region">The region.</param>

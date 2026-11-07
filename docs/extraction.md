@@ -61,7 +61,7 @@ Nothing is silently picked. `ContactRecord.Disagreements` lists, per kind, field
 
 ## Limits
 
-JSON nesting 64; microdata, RDFa and h-card item nesting 32; 200,000 item visits and 100,000 fields per page, after which the result holds what was read and an `ExtractIssue` of kind `LimitExceeded` says so. OneHtml's own parse limits apply (`HtmlLimitExceededException` propagates). The readers use explicit stacks, so deeply nested HTML does not exhaust the call stack. A core parser that throws on a hostile value does not cost the page: the field is kept unnormalized.
+JSON nesting 64; microdata, RDFa and h-card item nesting 32; 200,000 item visits and 100,000 fields per page, after which the result holds what was read and an `ExtractIssue` of kind `LimitExceeded` says so. The input limits are `ContactExtractor.Limits` (`ExtractionLimits`: `MaxInputLength` 64 MiB, `MaxNesting` 4096, `MaxNodes` 4,194,304, `MaxFields` 100,000); an input past the first three throws `ContactExtractionException` (with `LimitName`, `Limit`, `Actual`, and the HTML parser's exception as `InnerException`), and past `MaxFields` the result holds what was read. The readers use explicit stacks, so deeply nested HTML does not exhaust the call stack. A core parser that throws on a hostile value does not cost the page: the field is kept unnormalized.
 
 ## Visible text
 
@@ -210,4 +210,4 @@ SiteExtraction run = extractor.BeginSite();  run.Add(page);  SiteExtractResult d
 
 **Region.** `SiteExtractResult.Region` is the one region the site's own content points to: the `lang` regions of its pages and the countries its markup gives for addresses, when they all agree. A page that has values needing a region (a national phone number, a free-text address) and names none is read a second time in that region; its values carry `RegionInferred` and its `SitePage.RegionFromSite` is true. A site with two regions has none; a region is never guessed, and a `DefaultRegion` the caller gave always stands in place of it.
 
-**Errors and limits.** A default `ContactPage`, a duplicate id or a null set throws `ArgumentException` / `ArgumentNullException`; a page over OneHtml's parse limits throws as for a single page. Problems of a page (`MalformedJsonLd`, `LimitExceeded`) come back in `Issues` with the page id. The single-page limits apply per page; the number of pages is the caller's to bound.
+**Errors and limits.** A default `ContactPage`, a duplicate id or a null set throws `ArgumentException` / `ArgumentNullException`; a page past the extractor's limits throws `ContactExtractionException` as for a single page. Problems of a page (`MalformedJsonLd`, `LimitExceeded`) come back in `Issues` with the page id. The single-page limits apply per page; the number of pages is the caller's to bound.

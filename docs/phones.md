@@ -21,7 +21,7 @@ Indicative measurement (BenchmarkDotNet short job, in process, AMD Ryzen 9 7950X
 
 Input classes accepted, each matching the reference's observable behaviour: surrounding junk before the first digit or `+`; punctuation; letters (vanity numbers: three or more letters map by the keypad, after upper-casing); full-width and other Unicode decimal digits; extensions (`ext`, `ext.`, `x`, `;ext=`, `#` and others); RFC 3966 `tel:` with `;ext=` and `phone-context` (global digits or a domain name; an empty context is refused); international prefixes of the default region; national prefixes and carrier-selection codes of the default region.
 
-- No region: only `+`-prefixed text parses; anything else fails with `phone.region-required`. A well-formed region with no metadata fails with `phone.unknown-region`.
+- No region: only `+`-prefixed text parses; anything else fails with `phone.region-required`. A well-formed region with no metadata fails with `phone.unknown-region`. A `PhoneNumber` parsed by a `PhoneNumberParser` over your own metadata (or found by a matcher built on one) answers `Format`, `IsValid`, `Type`, `Region`, `GetPossibility` and the other members from that metadata; equality, the key and JSON use the canonical form only, and reading JSON always parses with the built-in metadata.
 - Text longer than 250 characters fails with `phone.too-long` before anything else.
 - `PhoneNumber.Source` is the extent of the number after leading junk is skipped (for `tel:`/`phone-context` input, the whole trimmed text).
 - String overloads keep the raw input (needed by original-format output and carrier codes); span overloads do not unless `keepRawInput` is set.

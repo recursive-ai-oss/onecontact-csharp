@@ -8,9 +8,7 @@ namespace RecursiveAI.OneContact.Extraction.Markup;
 /// <summary>Runs the readers over one page and assembles the result.</summary>
 internal static class ExtractionPipeline
 {
-    private const int MaxFields = 100_000;
-
-    public static ExtractResult Run(PageContext page, ExtractionSources sources, Region callerDefault)
+    public static ExtractResult Run(PageContext page, ExtractionSources sources, Region callerDefault, int maxFields = 100_000)
     {
         var issues = new List<ExtractIssue>();
         var items = new List<MarkupItem>();
@@ -97,10 +95,10 @@ internal static class ExtractionPipeline
         builder.Records.AddRange(ordered);
 
         int total = builder.Records.Sum(r => r.Fields.Count) + ungrouped.Count;
-        if (total > MaxFields)
+        if (total > maxFields)
         {
             limited = true;
-            Truncate(builder.Records, ungrouped, MaxFields);
+            Truncate(builder.Records, ungrouped, maxFields);
         }
 
         var normalizer = new FieldNormalizer(page, callerDefault);

@@ -19,4 +19,7 @@ public readonly partial struct ReasonCode
 
     /// <summary>The text names a trading name with nothing in it.</summary>
     public static ReasonCode CompanyEmptyTradingName { get; } = new(ContactKind.Company, 6, "empty-trading-name", "the text says trading as but names nothing");
+
+    /// <summary>The text is longer than <see cref="Names.NameParsing.MaxInputLength"/> characters, which no company name is.</summary>
+    public static ReasonCode CompanyTooLong { get; } = new(ContactKind.Company, 7, "too-long", "the text is too long to be a company name");
 }

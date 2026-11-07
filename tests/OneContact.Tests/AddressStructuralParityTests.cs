@@ -92,11 +92,21 @@ public sealed class AddressStructuralParityTests
         int validationCompared = 0;
         int layoutCompared = 0;
         int layoutSkipped = 0;
+        int notRepresentable = 0;
         for (int i = 0; i < cases.Count; i++)
         {
             string[] c = cases[i].Split('\t');
             string[] r = results[i].Split('\t');
             Assert.Equal(c[0], r[0]);
+
+            // The cases that name a country no region code can hold (ZZ, XX and QQ are not assigned; ZZ is the unspecified region) test the reference's
+            // handling of a text value. A Region cannot carry them, so they are not compared; the unspecified region is covered in AddressStructuralTests.
+            if (c[1] is "ZZ" or "XX" or "QQ")
+            {
+                notRepresentable++;
+                continue;
+            }
+
             AddressParts parts = Parts(c);
 
             // Problems per field.
@@ -140,6 +150,7 @@ public sealed class AddressStructuralParityTests
         Assert.True(validationCompared > 25000);
         Assert.True(layoutCompared > 20000);
         _ = layoutSkipped;
+        Assert.True(notRepresentable < 100);
     }
 
     private static string? ReferenceFormat(Dictionary<string, System.Text.Json.JsonElement> formats, AddressParts parts)

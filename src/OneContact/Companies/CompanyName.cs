@@ -156,6 +156,46 @@ public readonly partial struct CompanyName :
     public static OperationStatus TryParse(ReadOnlySpan<char> s, NameHints hints, out CompanyName value, out ParseDetail detail) =>
         CompanyNameParser.TryParse(s, hints, out value, out detail);
 
+    /// <summary>Parses with the country of the name as a hint; a shorthand for <see cref="Parse(string, NameHints)"/> with <see cref="NameHints.ForCountry(Region)"/>.</summary>
+    /// <param name="s">The text to parse. Surrounding white space is ignored.</param>
+    /// <param name="country">The country the name is from; <see cref="Region.Unknown"/> for none.</param>
+    /// <returns>The parsed value.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="s"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ContactParseException">The text cannot be read as this kind of name; <see cref="ContactParseException.Reason"/> says why.</exception>
+    public static CompanyName Parse(string s, Region country) => Parse(s, NameHints.ForCountry(country));
+
+    /// <summary>Tries to parse with hints.</summary>
+    /// <param name="s">The text to parse.</param>
+    /// <param name="hints">The country and language the name is written in.</param>
+    /// <param name="result">The parsed value, or the default value when parsing fails.</param>
+    /// <returns><see langword="true"/> when the text was parsed.</returns>
+    public static bool TryParse([NotNullWhen(true)] string? s, NameHints hints, out CompanyName result)
+    {
+        if (s is null)
+        {
+            result = default;
+            return false;
+        }
+
+        return TryParse(s.AsSpan(), hints, out result, out _) == OperationStatus.Done;
+    }
+
+    /// <summary>Tries to parse with the country of the name as a hint.</summary>
+    /// <param name="s">The text to parse.</param>
+    /// <param name="country">The country the name is from; <see cref="Region.Unknown"/> for none.</param>
+    /// <param name="result">The parsed value, or the default value when parsing fails.</param>
+    /// <returns><see langword="true"/> when the text was parsed.</returns>
+    public static bool TryParse([NotNullWhen(true)] string? s, Region country, out CompanyName result) =>
+        TryParse(s, NameHints.ForCountry(country), out result);
+
+    /// <summary>Tries to parse with hints.</summary>
+    /// <param name="s">The text to parse.</param>
+    /// <param name="hints">The country and language the name is written in.</param>
+    /// <param name="result">The parsed value, or the default value when parsing fails.</param>
+    /// <returns><see langword="true"/> when the text was parsed.</returns>
+    public static bool TryParse(ReadOnlySpan<char> s, NameHints hints, out CompanyName result) =>
+        TryParse(s, hints, out result, out _) == OperationStatus.Done;
+
     static CompanyName IParsable<CompanyName>.Parse(string s, IFormatProvider? provider) => Parse(s);
 
     static bool IParsable<CompanyName>.TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out CompanyName result) =>

@@ -36,7 +36,7 @@ public static class PublicSuffixList
     /// <summary>Gets the public suffix of a domain name.</summary>
     /// <param name="domain">A domain name such as <c>www.example.co.uk</c>, in Unicode or ASCII form.</param>
     /// <param name="includePrivateSection">Whether the list's private section (such as <c>github.io</c>) counts; <see langword="true"/> by default.</param>
-    /// <returns>The public suffix, lowercase, or <see langword="null"/> when the input is not a usable domain name (it is empty, starts or ends with a dot, or has an empty label).</returns>
+    /// <returns>The public suffix, lowercase, or <see langword="null"/> when the input is not a usable domain name (it is empty, starts or ends with a dot, has an empty label, or holds white space or a character of a URL such as <c>/</c> or <c>:</c>).</returns>
     public static string? GetPublicSuffix(string? domain, bool includePrivateSection = true)
     {
         if (!TryAnalyze(domain, includePrivateSection, out string[]? labels, out int suffixLabels))
@@ -221,6 +221,15 @@ public static class PublicSuffixList
         if (string.IsNullOrEmpty(domain))
         {
             return false;
+        }
+
+        // A domain name has no white space and none of the characters that make a URL, an address or a host with a port: those are not names.
+        foreach (char c in domain)
+        {
+            if (c <= ' ' || c is '/' or '\\' or '?' or '#' or '@' or ':' or '[' or ']' or '%')
+            {
+                return false;
+            }
         }
 
         string[] raw = domain.Split('.');

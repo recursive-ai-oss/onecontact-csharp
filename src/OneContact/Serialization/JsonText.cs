@@ -15,6 +15,13 @@ namespace RecursiveAI.OneContact.Serialization;
 /// </summary>
 internal static class JsonText
 {
+    // The exception every converter throws for a value it cannot read. The serializer adds the path, line and position in the document; the
+    // message adds the reason id of the parse failure (the cause is kept as InnerException) and the byte offset of the token in the reader's input.
+    internal static JsonException Invalid(string typeName, ContactParseException? cause, long tokenStart) =>
+        cause is null
+            ? new JsonException($"The JSON value is not a valid {typeName}: expected a JSON string (at byte offset {tokenStart}).")
+            : new JsonException($"The JSON value is not a valid {typeName}: {cause.Reason.Description} ({cause.Reason.Id}) (at byte offset {tokenStart}).", cause);
+
     internal static void WriteString(Utf8JsonWriter writer, string value)
     {
         if (!value.Contains('+', StringComparison.Ordinal))

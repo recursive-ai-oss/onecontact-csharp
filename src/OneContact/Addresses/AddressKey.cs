@@ -34,8 +34,25 @@ public static class AddressKey
             return Compute(address, version);
         }
 
+        // A country the rules do not read (a structurally described country, or one with no style of its own): the key is made from the fields in a fixed order, so
+        // the layout of the country does not change it, and it starts with the country, so addresses in different countries never share a key.
+        if (value.PartsForJson is { } parts)
+        {
+            string lines = string.Join(' ', parts.StreetLines.SelectMany(l => AddressExpander.Normalize(AddressExpander.Fold(l))));
+            return string.Join(
+                '|',
+                parts.Country.IsUnknown ? "zz" : parts.Country.Code.ToLowerInvariant(),
+                lines,
+                Words(parts.DependentLocality),
+                Words(parts.Locality),
+                AddressExpander.Fold(parts.AdminArea),
+                string.Concat(AddressExpander.Fold(parts.PostalCode).Where(char.IsLetterOrDigit)));
+        }
+
         return string.Join(' ', AddressExpander.Normalize(AddressExpander.Fold(value.Canonical)));
     }
+
+    private static string Words(string text) => string.Join(' ', AddressExpander.Normalize(AddressExpander.Fold(text)));
 
     /// <summary>Computes the key of a parsed address.</summary>
     /// <param name="address">The address.</param>

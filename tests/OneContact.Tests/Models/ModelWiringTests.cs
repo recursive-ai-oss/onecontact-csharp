@@ -42,13 +42,13 @@ public class ModelWiringTests
     public void ATier2AddressTheRulesRefuseIsReadFromTheModelsLabelsWithTheHintedCountry()
     {
         var model = new FixedAddressModel(("58", "street.house-number"), ("Hordley Avenue", "street.name"), ("Shrewsbury", "locality"), ("SY4 1AA", "postal-code"));
-        using IDisposable scope = ContactModels.Scope(model, null);
+        using IDisposable scope = ContactModels.Use(model, null);
         Assert.Equal(OperationStatus.Done, RuleAddressParser.TryParse(BritishRunOn, Region.Parse("GB"), out ParsedAddress? a, out ParseDetail d));
         Assert.Equal(Region.Parse("GB"), a!.Country);
         Assert.Equal("SHREWSBURY", a.Locality!.Value.Standard);
         Assert.Equal("SY4 1AA", a.PostalCode!.Value.Standard);
         Assert.All(d.Fields, f => Assert.Equal(DecisionSource.Model, f.Source));
-        Assert.Equal("58 HORDLEY AVENUE\nSHREWSBURY\nSY4 1AA", a.ToString(RecursiveAI.OneContact.Addresses.Standardization.AddressStyle.Postal));
+        Assert.Equal("58 HORDLEY AVENUE\nSHREWSBURY\nSY4 1AA", a.ToString(RecursiveAI.OneContact.AddressStyle.Postal));
         Assert.Equal(BritishRunOn.IndexOf("Hordley", StringComparison.Ordinal), a.Fields.First(f => f.Name == "street.name").Span.Start);
     }
 
@@ -56,7 +56,7 @@ public class ModelWiringTests
     public void ARuleParseOfATier2AddressIsNeverOverruledByTheModel()
     {
         var model = new FixedAddressModel(("Shrewsbury", "street.name"));
-        using IDisposable scope = ContactModels.Scope(model, null);
+        using IDisposable scope = ContactModels.Use(model, null);
         Assert.Equal(OperationStatus.Done, RuleAddressParser.TryParse("58 Hordley Avenue\nShrewsbury\nSY4 1AA", Region.Parse("GB"), out ParsedAddress? a, out ParseDetail d));
         Assert.Equal("SHREWSBURY", a!.Locality!.Value.Standard);
         Assert.All(d.Fields, f => Assert.Equal(DecisionSource.Rule, f.Source));
@@ -68,7 +68,7 @@ public class ModelWiringTests
     public void ARefusedAddressIsReadFromTheModelsLabels()
     {
         var model = new FixedAddressModel(("100", "street.house-number"), ("broadway", "street.name"), ("new york", "locality"), ("ny", "admin-area"), ("10001", "postal-code"));
-        using IDisposable scope = ContactModels.Scope(model, null);
+        using IDisposable scope = ContactModels.Use(model, null);
         OperationStatus status = RuleAddressParser.TryParse(RunOn, default, out ParsedAddress? a, out ParseDetail d);
         Assert.Equal(OperationStatus.Done, status);
         Assert.NotNull(a);
@@ -86,7 +86,7 @@ public class ModelWiringTests
     {
         // The model disagrees with the rules about every field; the rules read the commas and keep their result.
         var model = new FixedAddressModel(("broadway", "locality"), ("new york", "street.name"));
-        using IDisposable scope = ContactModels.Scope(model, null);
+        using IDisposable scope = ContactModels.Use(model, null);
         Assert.Equal(OperationStatus.Done, RuleAddressParser.TryParse("100 broadway, new york, ny 10001", default, out ParsedAddress? a, out ParseDetail d));
         Assert.Equal("NEW YORK", a!.Locality!.Value.Standard);
         Assert.All(d.Fields, f => Assert.Equal(DecisionSource.Rule, f.Source));
@@ -98,7 +98,7 @@ public class ModelWiringTests
         const string text = "Pat Morgan\nAcme Corp\n100 Broadway\nNew York, NY 10001";
         Assert.Equal(OperationStatus.Done, RuleAddressParser.TryParse(text, default, out ParsedAddress? rules, out _));
         var model = new FixedAddressModel(("Pat Morgan", "recipient"), ("Acme Corp", "organization"));
-        using IDisposable scope = ContactModels.Scope(model, null);
+        using IDisposable scope = ContactModels.Use(model, null);
         Assert.Equal(OperationStatus.Done, RuleAddressParser.TryParse(text, default, out ParsedAddress? a, out ParseDetail d));
         Assert.Equal(rules!.Locality, a!.Locality);
         Assert.Equal(rules.DeliveryLines.Count, a.DeliveryLines.Count);
@@ -112,7 +112,7 @@ public class ModelWiringTests
     public void WithoutACountryTheModelsReadingIsRefusedToo()
     {
         var model = new FixedAddressModel(("100", "street.house-number"), ("broadway", "street.name"), ("new york", "locality"));
-        using IDisposable scope = ContactModels.Scope(model, null);
+        using IDisposable scope = ContactModels.Use(model, null);
         Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse("100 broadway new york", default, out _, out ParseDetail d));
         Assert.NotEqual(default, d.PrimaryReason);
     }
@@ -122,7 +122,7 @@ public class ModelWiringTests
     {
         const string text = "jsmith2019";
         Assert.Equal(NameClass.Unknown, NameParsing.Split(text).Class);
-        using IDisposable scope = ContactModels.Scope(null, new FixedNameModel(NameClass.Person, 0.9f, ("jsmith2019", "Given")));
+        using IDisposable scope = ContactModels.Use(null, new FixedNameModel(NameClass.Person, 0.9f, ("jsmith2019", "Given")));
         NameParseResult r = NameParsing.Split(text);
         Assert.Equal(NameClass.Person, r.Class);
         Assert.Single(r.Persons);
@@ -137,7 +137,7 @@ public class ModelWiringTests
         // Two unfamiliar words: the rules take them as one person for want of any evidence of a company (person.no-evidence).
         const string text = "Zorblat Quux";
         Assert.Equal(NameClass.Person, NameParsing.Split(text).Class);
-        using IDisposable scope = ContactModels.Scope(null, new FixedNameModel(NameClass.Company, 0.9f, ("Zorblat Quux", "Base")));
+        using IDisposable scope = ContactModels.Use(null, new FixedNameModel(NameClass.Company, 0.9f, ("Zorblat Quux", "Base")));
         Assert.Equal(NameClass.Company, NameParsing.Split(text, NameHints.ForCountry(Region.US)).Class);
         Assert.Equal(NameClass.Company, NameParsing.Split(text, NameHints.ForCountry(Region.Parse("GB"))).Class);
         Assert.Equal(NameClass.Company, NameParsing.Classify(text, NameHints.ForCountry(Region.Parse("GB"))));
@@ -148,7 +148,7 @@ public class ModelWiringTests
         Assert.Equal(NameClass.Person, NameParsing.Split(text, NameHints.ForLanguage("pl")).Class);
 
         // Where it is allowed in a Tier 2 country the model must be surer (0.8) than for the United States (0.6).
-        using IDisposable unsure = ContactModels.Scope(null, new FixedNameModel(NameClass.Company, 0.7f, ("Zorblat Quux", "Base")));
+        using IDisposable unsure = ContactModels.Use(null, new FixedNameModel(NameClass.Company, 0.7f, ("Zorblat Quux", "Base")));
         Assert.Equal(NameClass.Company, NameParsing.Split(text, NameHints.ForCountry(Region.US)).Class);
         Assert.Equal(NameClass.Person, NameParsing.Split(text, NameHints.ForCountry(Region.Parse("GB"))).Class);
     }
@@ -156,9 +156,9 @@ public class ModelWiringTests
     [Fact]
     public void ANameTheRulesClassifiedIsNeverChangedAndALowConfidenceModelIsIgnored()
     {
-        using IDisposable scope = ContactModels.Scope(null, new FixedNameModel(NameClass.Company, 0.99f, ("Smith", "Base")));
+        using IDisposable scope = ContactModels.Use(null, new FixedNameModel(NameClass.Company, 0.99f, ("Smith", "Base")));
         Assert.Equal(NameClass.Person, NameParsing.Split("John Smith").Class);
-        using IDisposable inner = ContactModels.Scope(null, new FixedNameModel(NameClass.Person, 0.4f, ("jsmith2019", "Given")));
+        using IDisposable inner = ContactModels.Use(null, new FixedNameModel(NameClass.Person, 0.4f, ("jsmith2019", "Given")));
         Assert.Equal(NameClass.Unknown, NameParsing.Split("jsmith2019").Class);
     }
 
@@ -168,7 +168,7 @@ public class ModelWiringTests
         // Two plain words prove nothing: the rules take them as a person for lack of a sign of a company (issue person.no-evidence).
         const string plain = "Bestline Imports";
         Assert.Equal(NameClass.Person, NameParsing.Split(plain).Class);
-        using (ContactModels.Scope(null, new FixedNameModel(NameClass.Company, 0.9f, ("Bestline", "Base"))))
+        using (ContactModels.Use(null, new FixedNameModel(NameClass.Company, 0.9f, ("Bestline", "Base"))))
         {
             Assert.Equal(NameClass.Company, NameParsing.Split(plain).Class);
             Assert.Equal(NameClass.Company, NameParsing.Classify(plain));
@@ -176,7 +176,7 @@ public class ModelWiringTests
             Assert.Equal(NameClass.Person, NameParsing.Split("Dr. Bestline Imports").Class);
         }
 
-        using (ContactModels.Scope(null, new FixedNameModel(NameClass.Company, 0.4f, ("Bestline", "Base"))))
+        using (ContactModels.Use(null, new FixedNameModel(NameClass.Company, 0.4f, ("Bestline", "Base"))))
         {
             Assert.Equal(NameClass.Person, NameParsing.Split(plain).Class);
         }
@@ -187,7 +187,7 @@ public class ModelWiringTests
     {
         // The Tier 1 + Tier 2 package learned Tier 2 person names from small lists, so there it reads only what the rules leave open; United States and Canada texts keep the override.
         const string plain = "Bestline Imports";
-        using (ContactModels.Scope(null, new FixedNameModel(NameClass.Company, 0.9f, ("Bestline", "Base"))))
+        using (ContactModels.Use(null, new FixedNameModel(NameClass.Company, 0.9f, ("Bestline", "Base"))))
         {
             Assert.Equal(NameClass.Person, NameParsing.Split(plain, NameHints.ForCountry(Region.Parse("DE"))).Class);
             Assert.Equal(NameClass.Person, NameParsing.Classify(plain, NameHints.ForCountry(Region.Parse("PL"))));

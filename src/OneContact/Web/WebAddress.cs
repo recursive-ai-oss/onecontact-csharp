@@ -17,6 +17,9 @@ namespace RecursiveAI.OneContact;
 /// <see cref="Key"/>, <see cref="GetKey"/> or <see cref="Contacts.SameKey{T}"/>.</para>
 /// <para>The <see cref="IFormatProvider"/> taken by the <see cref="IParsable{TSelf}"/> and <see cref="IFormattable"/> members is ignored:
 /// results never depend on the current culture.</para>
+/// <para>The canonical form, the JSON form and <c>==</c> leave out the fragment and the tracking parameters (see <see cref="WebFacts.FragmentRemoved"/> and
+/// <see cref="WebFacts.TrackingParametersRemoved"/>), so a round trip through JSON does not bring them back; keep the original text if you need a link that
+/// scrolls to a section. Parsing accepts any scheme: use <see cref="IsWebsite"/> before putting a value in a link.</para>
 /// </remarks>
 [JsonConverter(typeof(WebAddressJsonConverter))]
 public readonly partial struct WebAddress :
@@ -47,6 +50,13 @@ public readonly partial struct WebAddress :
 
     /// <summary>Gets the facts found about the value.</summary>
     public WebFacts Flags { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether this is a website address: the scheme is <c>http</c> or <c>https</c>. It is <see langword="false"/> for <c>javascript:</c>,
+    /// <c>data:</c>, <c>mailto:</c>, <c>file:</c> and every other scheme (they also set <see cref="WebFacts.NonWebScheme"/>), and for the default value. Check it before using a
+    /// parsed address as a link target: parsing accepts any WHATWG URL.
+    /// </summary>
+    public bool IsWebsite => _parts is { Scheme: "http" or "https" };
 
     /// <summary>Gets the scheme, lowercase, such as <c>https</c>. Empty for the default value.</summary>
     public string Scheme => _parts?.Scheme ?? string.Empty;

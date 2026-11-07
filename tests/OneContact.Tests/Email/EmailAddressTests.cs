@@ -155,9 +155,11 @@ public sealed class EmailAddressTests
         Assert.True(v.TryGetEmail(out EmailAddress fromContacts));
         Assert.Equal("jane@example.com", fromContacts.Canonical);
 
+        // The display name is kept by the value, so it is kept by the JSON form too.
         string json = JsonSerializer.Serialize(fromContacts, Serialization.ContactJsonContext.Default.EmailAddress);
-        Assert.Equal("\"jane@example.com\"", json);
-        Assert.Equal(fromContacts, JsonSerializer.Deserialize(json, Serialization.ContactJsonContext.Default.EmailAddress));
+        EmailAddress back = JsonSerializer.Deserialize(json, Serialization.ContactJsonContext.Default.EmailAddress);
+        Assert.Equal(fromContacts, back);
+        Assert.Equal("Jane", back.DisplayName);
 
         Assert.Equal(fromContacts, EmailAddress.Parse("jane@example.com".AsSpan()));
         Assert.Equal("jane@example.com", fromContacts.ToString("C", null));

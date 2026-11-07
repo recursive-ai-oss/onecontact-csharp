@@ -20,12 +20,14 @@ public sealed class SiteExtraction
 {
     private readonly ExtractionSources _sources;
     private readonly Region _defaultRegion;
+    private readonly ExtractionLimits _limits;
     private readonly List<Entry> _pages = [];
     private readonly HashSet<string> _ids = new(StringComparer.Ordinal);
     private bool _completed;
 
-    internal SiteExtraction(ExtractionSources sources, Region defaultRegion)
+    internal SiteExtraction(ExtractionSources sources, Region defaultRegion, ExtractionLimits limits)
     {
+        _limits = limits;
         _sources = sources;
         _defaultRegion = defaultRegion;
     }
@@ -34,7 +36,7 @@ public sealed class SiteExtraction
     /// <param name="page">The page; its id must differ from every page added before.</param>
     /// <exception cref="ArgumentException">The page is a default value, or its id was already added.</exception>
     /// <exception cref="InvalidOperationException"><see cref="Complete"/> was already called.</exception>
-    /// <exception cref="RecursiveAI.OneHtml.HtmlLimitExceededException">The page exceeds OneHtml's default parse limits.</exception>
+    /// <exception cref="ContactExtractionException">The page is past the extractor's <see cref="ExtractionLimits"/>.</exception>
     public void Add(ContactPage page)
     {
         if (_completed)
@@ -53,7 +55,7 @@ public sealed class SiteExtraction
             throw new ArgumentException($"A page with the id '{id}' was already added; ids identify pages and must be unique.", nameof(page));
         }
 
-        ExtractResult result = page.Read(_sources, _defaultRegion);
+        ExtractResult result = page.Read(_sources, _defaultRegion, _limits);
         // Only a page that needs a region and has none keeps its input: the site may be able to supply the region at the end.
         bool needy = _defaultRegion.IsUnknown && result.PageRegion.IsUnknown && NeedsRegion(result);
         _pages.Add(new Entry(id, _pages.Count, result, needy ? page : null));
@@ -80,7 +82,7 @@ public sealed class SiteExtraction
                 {
                     // The page named no region and the site names exactly one: read it again in that region. Its values say so with
                     // RegionInferred, as for a region taken from the page's own language.
-                    e.Result = input.Read(_sources, siteRegion);
+                    e.Result = input.Read(_sources, siteRegion, _limits);
                     e.Input = null;
                     siteRegionPages.Add(e.Id);
                 }

@@ -1,4 +1,4 @@
-namespace RecursiveAI.OneContact.Addresses;
+namespace RecursiveAI.OneContact;
 
 /// <summary>What is wrong with one field of an address, found by structural validation.</summary>
 public enum AddressIssueKind

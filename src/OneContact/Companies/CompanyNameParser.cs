@@ -40,6 +40,13 @@ internal static class CompanyNameParser
 
     internal static OperationStatus TryParse(ReadOnlySpan<char> input, NameHints hints, out CompanyName value, out ParseDetail detail)
     {
+        if (input.Length > NameParsing.MaxInputLength)
+        {
+            value = default;
+            detail = ParseDetail.Failure(ReasonCode.CompanyTooLong, new SourceSpan(0, input.Length));
+            return OperationStatus.InvalidData;
+        }
+
         SourceSpan span = PersonNameParser.Trim(input, 0, input.Length);
         if (span.IsEmpty)
         {

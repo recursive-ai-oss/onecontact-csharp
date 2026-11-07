@@ -139,4 +139,22 @@ public readonly partial struct PostalAddress
 
         return PostalAddressParser.TryParse(text, country, out value, out detail);
     }
+
+    /// <summary>
+    /// Parses free text as an address in a country with an explicit model, used instead of the registered one for this call. This is the low-level form: it returns
+    /// a status and a <see cref="ParseDetail"/>, and keeps the partial reading when the country cannot be told (see <see cref="TryParse(ReadOnlySpan{char}, out PostalAddress, out ParseDetail)"/>).
+    /// </summary>
+    /// <param name="text">The text.</param>
+    /// <param name="country">The country the text is in; <see cref="Region.Unknown"/> tells it from the content.</param>
+    /// <param name="model">The address model to read what the rules leave open with, for example one loaded from a file; <see langword="null"/> reads by rules only, whatever model package is referenced.</param>
+    /// <param name="value">The address, or the default value when the status is not <see cref="OperationStatus.Done"/>.</param>
+    /// <param name="detail">Issues with reason codes.</param>
+    /// <returns><see cref="OperationStatus.Done"/>, or <see cref="OperationStatus.InvalidData"/> with the reason in <paramref name="detail"/>.</returns>
+    public static OperationStatus TryParse(ReadOnlySpan<char> text, Region country, Models.IAddressFieldModel? model, out PostalAddress value, out ParseDetail detail)
+    {
+        using IDisposable scope = Models.ContactModels.Use(model, Models.ContactModels.Name, Models.ContactModels.Spans);
+        return country.IsUnknown
+            ? PostalAddressParser.TryParse(text, Region.Unknown, out value, out detail)
+            : TryParse(text, country, out value, out detail);
+    }
 }

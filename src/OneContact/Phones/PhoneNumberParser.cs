@@ -347,7 +347,8 @@ public sealed partial class PhoneNumberParser
             carrier,
             numberSpan,
             flags,
-            ReferenceEquals(_metadata, PhoneMetadata.Default) ? lineType : null);
+            ReferenceEquals(_metadata, PhoneMetadata.Default) ? lineType : null,
+            ReferenceEquals(_metadata, PhoneMetadata.Default) ? null : this);
         value = number;
         return default;
     }

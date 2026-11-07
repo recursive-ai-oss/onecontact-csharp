@@ -464,7 +464,7 @@ public class NameModelRow
     {
         using FileStream stream = File.OpenRead(Environment.GetEnvironmentVariable("ONECONTACT_TIER1_MODEL") ?? throw new InvalidOperationException("set ONECONTACT_TIER1_MODEL"));
         Tier1Model model = Tier1Model.Load(stream);
-        _scope = ContactModels.Scope(model, model, model);
+        _scope = ContactModels.Use(model, model, model);
         NameParsing.Split("Jane Smith");
     }
 

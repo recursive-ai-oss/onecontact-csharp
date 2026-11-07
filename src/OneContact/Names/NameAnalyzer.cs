@@ -46,6 +46,14 @@ internal static class NameAnalyzer
     internal static Analysis Analyze(ReadOnlySpan<char> whole, NameHints hints)
     {
         Analysis analysis = new();
+
+        // A name is short. Longer input is refused up front so that hostile text cannot make the rules do work in proportion to its size.
+        if (whole.Length > NameParsing.MaxInputLength)
+        {
+            analysis.Issues.Add(new ParseIssue(ReasonCode.PersonTooLong, new SourceSpan(0, whole.Length)));
+            return analysis;
+        }
+
         SourceSpan span = PersonNameParser.Trim(whole, 0, whole.Length);
         analysis.Start = span.Start;
         analysis.End = span.End;
