@@ -61,6 +61,109 @@ public static class PublicSuffixList
         return string.Join('.', labels.AsSpan(labels.Length - suffixLabels - 1).ToArray());
     }
 
+    /// <summary>
+    /// Finds the public suffix and the registrable domain of a host in one pass, as <see cref="GetPublicSuffix"/> and
+    /// <see cref="GetRegistrableDomain"/> would. A host that is plain lowercase ASCII (what URL parsing produces) is read in place and the
+    /// answers are slices of it; anything else takes the general path.
+    /// </summary>
+    /// <param name="host">The host, without a trailing dot.</param>
+    /// <param name="suffix">The public suffix, or null.</param>
+    /// <param name="registrable">The registrable domain, or null.</param>
+    internal static void Analyze(string host, out string? suffix, out string? registrable)
+    {
+        if (host.Length == 0 || host[0] == '.' || host[^1] == '.')
+        {
+            Slow(host, out suffix, out registrable);
+            return;
+        }
+
+        // Label starts from the right: only as many as a rule can use matter, and one more tells whether labels remain on the left.
+        int most = MaxRuleLabels.Value + 2;
+        Span<int> starts = stackalloc int[most + 1]; // bounds: MaxRuleLabels is the longest rule in the list plus two, a few dozen at most
+        int found = 0;
+        int labelEnd = host.Length;
+        bool plain = true;
+        for (int i = host.Length - 1; i >= 0 && plain; i--)
+        {
+            char c = host[i];
+            if (c >= 0x80 || c is >= 'A' and <= 'Z')
+            {
+                plain = false;
+            }
+            else if (c == '.')
+            {
+                if (i + 1 == labelEnd)
+                {
+                    plain = false; // an empty label
+                }
+                else
+                {
+                    if (found < most)
+                    {
+                        starts[found++] = i + 1;
+                    }
+
+                    labelEnd = i;
+                }
+            }
+        }
+
+        if (!plain)
+        {
+            Slow(host, out suffix, out registrable);
+            return;
+        }
+
+        // The leftmost label starts at 0 when the scan reached it with room to spare.
+        bool moreLeft = found >= most;
+        int labels = found;
+        if (!moreLeft)
+        {
+            starts[labels++] = 0;
+        }
+
+        // labelStart(k) is where the k-th label from the right begins; labels available to the right of the cut: min(labels, most).
+        Dictionary<string, byte>.AlternateLookup<ReadOnlySpan<char>> rules = Rules.Value.GetAlternateLookup<ReadOnlySpan<char>>();
+        int maxRule = MaxRuleLabels.Value;
+        int limit = Math.Min(labels, maxRule);
+        int best = 1;
+        int exceptionLabels = 0;
+        for (int k = 1; k <= limit; k++)
+        {
+            if (rules.TryGetValue(host.AsSpan(StartOf(starts, k - 1)), out byte mask))
+            {
+                if ((mask & (NormalIcann | NormalPrivate)) != 0)
+                {
+                    best = Math.Max(best, k);
+                }
+
+                if ((mask & (WildcardIcann | WildcardPrivate)) != 0 && (k < labels || moreLeft))
+                {
+                    best = Math.Max(best, k + 1);
+                }
+
+                if ((mask & (ExceptionIcann | ExceptionPrivate)) != 0)
+                {
+                    exceptionLabels = Math.Max(exceptionLabels, k);
+                }
+            }
+        }
+
+        int suffixLabels = exceptionLabels > 0 ? exceptionLabels - 1 : best;
+        bool hasLabelBefore = suffixLabels < labels || moreLeft;
+        suffixLabels = Math.Min(suffixLabels, moreLeft ? int.MaxValue : labels);
+        suffix = host[StartOf(starts, suffixLabels - 1)..];
+        registrable = hasLabelBefore && suffixLabels + 1 <= labels ? host[StartOf(starts, suffixLabels)..] : null;
+    }
+
+    private static int StartOf(Span<int> starts, int fromRight) => starts[fromRight];
+
+    private static void Slow(string host, out string? suffix, out string? registrable)
+    {
+        suffix = GetPublicSuffix(host);
+        registrable = GetRegistrableDomain(host);
+    }
+
     /// <summary>Tells whether a label is a top-level domain with a rule of its own in the ICANN section of the list.</summary>
     /// <param name="label">The label, in Unicode or ASCII form.</param>
     /// <returns><see langword="true"/> when the ICANN section lists it.</returns>

@@ -21,6 +21,16 @@ if (Environment.GetEnvironmentVariable("ONECONTACT_SPAN_CUT") is { Length: > 0 }
     RecursiveAI.OneContact.Extraction.Text.TextFieldReader.MinConfidence = float.Parse(cut, CultureInfo.InvariantCulture);
 }
 
+if (Environment.GetEnvironmentVariable("ONECONTACT_WEB_MODEL") != "0")
+{
+    RecursiveAI.OneContact.Extraction.Text.TextFieldReader.ModelOnWeb = true;
+}
+
+if (Environment.GetEnvironmentVariable("NAME_TRACE") is { Length: > 0 })
+{
+    RecursiveAI.OneContact.Extraction.Text.NameCandidates.Trace = Console.WriteLine;
+}
+
 string mode = args[0];
 string modelPath = args[1];
 string blocksPath = args[2];
@@ -38,17 +48,112 @@ model.Find("Jane Smith\njane@example.com");
 load.Stop();
 Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"model load + first call: {load.Elapsed.TotalMilliseconds:F0} ms; blocks: {blocks.Count}"));
 
-return mode == "dev" ? Dev(blocks, model) : Speed(blocks, model, count);
+return mode switch { "dev" => Dev(blocks, model), "web" => Web(blocks, model), _ => Speed(blocks, model, count) };
 
 static int Dev(List<Block> blocks, Tier1Model model)
 {
     var extractor = new ContactExtractor { Sources = ExtractionSources.Text, DefaultRegion = Region.US };
     Dictionary<string, Tally> rules = Score(blocks, extractor, "rules only");
+    foreach (string label in rules.Keys.Order(StringComparer.Ordinal))
+    {
+        Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{label,-9} rules only: exact P {rules[label].Precision(false):F4} R {rules[label].Recall(false):F4} F1 {rules[label].F1(false):F4}; overlap P {rules[label].Precision(true):F4} R {rules[label].Recall(true):F4}; gold {rules[label].Gold}"));
+    }
+
+    if (Environment.GetEnvironmentVariable("RULES_ONLY") is { Length: > 0 })
+    {
+        return 0;
+    }
+
     ContactModels.Register(Tier1Model.PackageId, 1, model, model, model);
     Dictionary<string, Tally> both = Score(blocks, extractor, "rules + model");
     foreach (string label in rules.Keys.Order(StringComparer.Ordinal))
     {
         Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{label,-9} exact F1 rules {rules[label].F1(false):F4} -> +model {both[label].F1(false):F4}   overlap F1 {rules[label].F1(true):F4} -> {both[label].F1(true):F4}   gold {rules[label].Gold}"));
+    }
+
+    return 0;
+}
+
+static string Fold(string s) => new string(s.Where(char.IsLetterOrDigit).Select(char.ToLowerInvariant).ToArray());
+
+// Page-view dev blocks wrapped as HTML pages, scored by value (a page counts a value once): the web path of the extractor, with and without the model.
+static int Web(List<Block> blocks, Tier1Model model)
+{
+    List<Block> pages = [.. blocks.Where(b => b.Id.EndsWith(".page", StringComparison.Ordinal))];
+    var extractor = new ContactExtractor { Sources = ExtractionSources.Markup | ExtractionSources.Text, DefaultRegion = Region.US };
+    string[] labels = ["person", "company", "address", "phone", "email", "website"];
+    foreach (string title in new[] { "rules", "rules + model" })
+    {
+        if (title != "rules")
+        {
+            ContactModels.Register(Tier1Model.PackageId, 1, model, model, model);
+        }
+
+        var tp = labels.ToDictionary(l => l, _ => 0);
+        var fp = labels.ToDictionary(l => l, _ => 0);
+        var gold = labels.ToDictionary(l => l, _ => 0);
+        int negativePagesWithName = 0;
+        int negativePages = 0;
+        foreach (Block b in pages)
+        {
+            var sb = new StringBuilder("<!doctype html><html><head><title>Page</title></head><body><main>");
+            foreach (string line in b.Text.Split('\n'))
+            {
+                sb.Append("<p>").Append(System.Net.WebUtility.HtmlEncode(line)).Append("</p>");
+            }
+
+            sb.Append("</main></body></html>");
+            ExtractResult r = extractor.ExtractHtml(sb.ToString());
+            var inOrganization = new HashSet<int>(r.Records.Where(rec => rec.Kind == ContactRecordKind.Organization).SelectMany(rec => rec.Fields).Select(f => f.Id));
+            var found = new HashSet<(string, string)>();
+            foreach (ExtractedField f in r.Fields)
+            {
+                string? label = f.Kind switch
+                {
+                    FieldKind.Name => inOrganization.Contains(f.Id) ? "company" : "person",
+                    FieldKind.Organization => "company",
+                    FieldKind.Address => "address",
+                    FieldKind.Phone => "phone",
+                    FieldKind.Email => "email",
+                    FieldKind.Website => "website",
+                    _ => null,
+                };
+                if (label is not null)
+                {
+                    found.Add((label, Fold(f.Text)));
+                }
+            }
+
+            var want = new HashSet<(string, string)>(b.Spans.Select(s => (s.Label, Fold(b.Text[s.S..s.E]))));
+            foreach (string l in labels)
+            {
+                gold[l] += want.Count(w => w.Item1 == l);
+                tp[l] += found.Count(f => f.Item1 == l && want.Contains(f));
+                fp[l] += found.Count(f => f.Item1 == l && !want.Contains(f));
+            }
+
+            if (b.Spans.Count == 0)
+            {
+                negativePages++;
+                if (found.Any(f => f.Item1 is "person" or "company"))
+                {
+                    negativePagesWithName++;
+                }
+            }
+        }
+
+        Console.WriteLine($"== web pages ({pages.Count}), {title}; negative pages with a person or company: {negativePagesWithName}/{negativePages}");
+        foreach (string l in labels)
+        {
+            double p = tp[l] + fp[l] == 0 ? 0 : (double)tp[l] / (tp[l] + fp[l]);
+            double rc = gold[l] == 0 ? 0 : (double)tp[l] / gold[l];
+            Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{l,-9} value P {p:F4} R {rc:F4} F1 {(p + rc == 0 ? 0 : 2 * p * rc / (p + rc)):F4} gold {gold[l]} fp {fp[l]}"));
+        }
+
+        if (Environment.GetEnvironmentVariable("RULES_ONLY") is { Length: > 0 })
+        {
+            break;
+        }
     }
 
     return 0;
@@ -87,13 +192,24 @@ static Dictionary<string, Tally> Score(List<Block> blocks, ContactExtractor extr
         }
 
         // A name the rules read after a "Company:" label, or a person the grouping took for an organization, is still the field it is.
-        if (Environment.GetEnvironmentVariable("SHOW_MISSES") is { Length: > 0 } show && title == "rules + model")
+        if (Environment.GetEnvironmentVariable("SHOW_FP") is { Length: > 0 } fp && title == "rules only")
+        {
+            foreach ((string fl, int fs, int fe) in found.Where(f => f.Label == fp))
+            {
+                if (!b.Spans.Any(g => g.Label == fl && g.S == fs && g.E == fe) && Tally.Shown++ < 60)
+                {
+                    Console.WriteLine($"FP {fl} [{b.Text[fs..fe].Replace("\n", "\\n")}] in [{b.Text[Math.Max(0, fs - 30)..Math.Min(b.Text.Length, fe + 30)].Replace("\n", "\\n")}] gold-here: {string.Join(" ; ", b.Spans.Where(g => g.S < fe && fs < g.E).Select(g => g.Label + ":" + b.Text[g.S..g.E]))}");
+                }
+            }
+        }
+
+        if (Environment.GetEnvironmentVariable("SHOW_MISSES") is { Length: > 0 } show && title == (Environment.GetEnvironmentVariable("RULES_ONLY") is { Length: > 0 } ? "rules only" : "rules + model"))
         {
             foreach ((string gl, int gs, int ge) in b.Spans.Where(g => g.Label == show))
             {
                 if (!found.Any(f => f.Label == gl && f.S == gs && f.E == ge) && Tally.Shown++ < 40)
                 {
-                    Console.WriteLine($"MISS {gl} [{b.Text[gs..ge].Replace("\n", "\\n")}] found-here: {string.Join(" ; ", found.Where(f => f.S < ge && gs < f.E).Select(f => f.Label + ":" + b.Text[f.S..f.E].Replace("\n", "\\n")))}");
+                    Console.WriteLine($"MISS {gl} [{b.Text[gs..ge].Replace("\n", "\\n")}] in [{b.Text[Math.Max(0, gs - 40)..Math.Min(b.Text.Length, ge + 50)].Replace("\n", "\\n")}] found-here: {string.Join(" ; ", found.Where(f => f.S < ge && gs < f.E).Select(f => f.Label + ":" + b.Text[f.S..f.E].Replace("\n", "\\n")))}");
                 }
             }
         }
@@ -180,7 +296,7 @@ static List<Block> ReadBlocks(string path, int count)
             spans.Add((s[2].GetString()!, s[0].GetInt32(), s[1].GetInt32()));
         }
 
-        result.Add(new Block(root.GetProperty("text").GetString()!, spans));
+        result.Add(new Block(root.GetProperty("text").GetString()!, spans) { Id = root.GetProperty("id").GetString()! });
         if (result.Count == count)
         {
             break;
@@ -190,7 +306,10 @@ static List<Block> ReadBlocks(string path, int count)
     return result;
 }
 
-internal sealed record Block(string Text, List<(string Label, int S, int E)> Spans);
+internal sealed record Block(string Text, List<(string Label, int S, int E)> Spans)
+{
+    public string Id { get; init; } = string.Empty;
+}
 
 internal sealed class Tally
 {
@@ -225,6 +344,10 @@ internal sealed class Tally
             }
         }
     }
+
+    public double Precision(bool overlap) => _found == 0 ? 0 : (double)(overlap ? _foundOverlap : _exactTp) / _found;
+
+    public double Recall(bool overlap) => Gold == 0 ? 0 : (double)(overlap ? _overlapTp : _exactTp) / Gold;
 
     public double F1(bool overlap)
     {

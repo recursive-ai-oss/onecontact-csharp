@@ -1,9 +1,9 @@
 region US
-page careers.html Bytes lang-region=US fields=3
+page careers.html Bytes lang-region=US fields=4
 page index.html Bytes lang-region=US fields=5
-page services.html Bytes lang-region=US fields=3
+page services.html Bytes lang-region=US fields=4
 organization 0
-record 0 Organization pages=index.html,careers.html,services.html conf=1
+record 0 Organization pages=careers.html,index.html,services.html conf=1
   #0 Address careers.html Text raw="77 Dock Rd, Portland, OR 97209" text="77 Dock Rd, Portland, OR 97209" span=158+30 flags=RegionInferred => Address:77 DOCK RD, PORTLAND OR 97209
     also index.html Text span=348+30
     also services.html Text span=159+30
@@ -11,6 +11,9 @@ record 0 Organization pages=index.html,careers.html,services.html conf=1
     also index.html Text span=387+15
     also services.html Text span=198+15
   #2 Name index.html JsonLd raw="Gray Logistics Ltd" text="Gray Logistics Ltd" span=201+18 => Company:Gray Logistics Ltd
+    also index.html Text span=326+18
+    also careers.html Text span=136+18
+    also services.html Text span=137+18
   #3 Email index.html JsonLd raw="info@graylogistics.example.com" text="info@graylogistics.example.com" span=232+30 => Email:info@graylogistics.example.com
     also index.html Text span=406+30
     also careers.html Text span=216+30

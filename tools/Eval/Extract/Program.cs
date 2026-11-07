@@ -36,6 +36,12 @@ if (Environment.GetEnvironmentVariable("ONECONTACT_SPAN_CUT") is { Length: > 0 }
     TextFieldReader.MinConfidence = float.Parse(cut, System.Globalization.CultureInfo.InvariantCulture);
 }
 
+// ONECONTACT_WEB_MODEL=1 lets the gated model read web pages (off by default: rules and markup only there).
+if (Environment.GetEnvironmentVariable("ONECONTACT_WEB_MODEL") == "1")
+{
+    TextFieldReader.ModelOnWeb = true;
+}
+
 if (Environment.GetEnvironmentVariable("ONECONTACT_TIER1_MODEL") is { Length: > 0 } modelPath)
 {
     using FileStream modelStream = File.OpenRead(modelPath);

@@ -1,5 +1,6 @@
 unit Chars
-record 0 Person src=Text conf=0.8 span=33+56
-  #0 Name Text raw="Jane Doe" text="Jane Doe" span=33+8 conf=0.8 => Person:Jane Doe
+record 0 Person src=Text conf=0.7 span=11+78
+  #0 Name Text raw="Jane Doe" text="Jane Doe" span=11+8 conf=0.7 => Person:Jane Doe
+    also Text span=33+8
   #1 Email Text raw="jane@acme.example" text="jane@acme.example" span=49+17 conf=0.9 => Email:jane@acme.example
   #2 Phone Text raw="+1 202 555 0170" text="+1 202 555 0170" span=74+15 conf=0.85 => Phone:+12025550170 facts=Valid|InternationalInput label="Phone"

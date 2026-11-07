@@ -1,6 +1,7 @@
 unit Bytes
 record 0 Person src=Microdata conf=1 span=101+194
   #0 Name Microdata raw="Pat Micro" text="Pat Micro" span=175+9 conf=1 => Person:Pat Micro
+    also Text span=175+9
   #1 Email Microdata raw="pat@micro.example" text="pat@micro.example" span=215+17 conf=1 => Email:pat@micro.example
     also Text span=215+17
   #2 Phone Microdata raw="+1 202 555 0141" text="+1 202 555 0141" span=267+15 conf=1 => Phone:+12025550141 facts=Valid|InternationalInput

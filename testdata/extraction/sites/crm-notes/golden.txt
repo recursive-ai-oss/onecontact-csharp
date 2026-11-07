@@ -1,11 +1,13 @@
 region none
-page note1.txt Chars lang-region=none fields=2
+page note1.txt Chars lang-region=none fields=4
 page note2.txt Chars lang-region=none fields=1
 page site.html Bytes lang-region=none fields=2
 organization none
-record 0 Person pages=site.html,note1.txt conf=1
-  #0 Phone note1.txt Text raw="+1 212 555 0139" text="+1 212 555 0139" span=79+15 => Phone:+12125550139
-  #2 Name site.html JsonLd raw="Pat Quinn" text="Pat Quinn" span=192+9 => Person:Pat Quinn
-  #3 Email site.html JsonLd raw="pat.quinn@poplarfreight.example.com" text="pat.quinn@poplarfreight.example.com" span=214+35 => Email:pat.quinn@poplarfreight.example.com
+record 0 Person pages=note1.txt,site.html conf=1
+  #0 Organization note1.txt Text raw="Poplar Freight LLC" text="Poplar Freight LLC" span=22+18 => Company:Poplar Freight LLC
+  #1 Phone note1.txt Text raw="+1 212 555 0139" text="+1 212 555 0139" span=79+15 => Phone:+12125550139
+  #3 Name site.html JsonLd raw="Pat Quinn" text="Pat Quinn" span=192+9 => Person:Pat Quinn
+    also note1.txt Text span=9+9
+  #4 Email site.html JsonLd raw="pat.quinn@poplarfreight.example.com" text="pat.quinn@poplarfreight.example.com" span=214+35 => Email:pat.quinn@poplarfreight.example.com
     also note1.txt Text span=42+35
-ungrouped #1 Email note2.txt Text raw="billing@poplarfreight.example.com" text="billing@poplarfreight.example.com" span=47+33 => Email:billing@poplarfreight.example.com
+ungrouped #2 Email note2.txt Text raw="billing@poplarfreight.example.com" text="billing@poplarfreight.example.com" span=47+33 => Email:billing@poplarfreight.example.com

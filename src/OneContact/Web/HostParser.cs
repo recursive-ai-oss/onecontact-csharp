@@ -60,7 +60,8 @@ internal static class HostParser
         }
 
         // Host parser step 5 and 6: percent-decode, then UTF-8 decode without BOM (invalid bytes become U+FFFD).
-        string domain = Encoding.UTF8.GetString(PercentEncoding.Decode(input));
+        // Text with no percent sign and no surrogate (a lone one would become U+FFFD) decodes to itself; skip the byte round trip for it.
+        string domain = IsUnchangedByDecoding(input) ? input : Encoding.UTF8.GetString(PercentEncoding.Decode(input));
         if (!TryDomainToAscii(domain, beStrict: false, out string asciiDomain))
         {
             return false;
@@ -150,22 +151,34 @@ internal static class HostParser
         return true;
     }
 
-    // Section 3.5, the ends in a number checker.
-    private static bool EndsInANumber(string input)
+    private static bool IsUnchangedByDecoding(string s)
     {
-        string[] parts = input.Split('.');
-        int count = parts.Length;
-        if (parts[count - 1].Length == 0)
+        foreach (char c in s)
         {
-            if (count == 1)
+            if (c == '%' || char.IsSurrogate(c))
             {
                 return false;
             }
-
-            count--;
         }
 
-        string last = parts[count - 1];
+        return true;
+    }
+
+    // Section 3.5, the ends in a number checker: the last label, ignoring one empty label after a final dot.
+    private static bool EndsInANumber(string input)
+    {
+        ReadOnlySpan<char> s = input;
+        if (s.IsEmpty)
+        {
+            return false;
+        }
+
+        if (s[^1] == '.')
+        {
+            s = s[..^1];
+        }
+
+        ReadOnlySpan<char> last = s[(s.LastIndexOf('.') + 1)..];
         if (last.Length > 0 && IsAllAsciiDigits(last))
         {
             return true;
@@ -174,7 +187,7 @@ internal static class HostParser
         return TryParseIpv4Number(last, out _, out _);
     }
 
-    private static bool IsAllAsciiDigits(string s)
+    private static bool IsAllAsciiDigits(ReadOnlySpan<char> s)
     {
         foreach (char c in s)
         {
@@ -239,7 +252,7 @@ internal static class HostParser
     }
 
     // Section 3.5, the IPv4 number parser. Numbers too large for 64 bits saturate: they are out of range either way.
-    private static bool TryParseIpv4Number(string input, out ulong number, out bool validationError)
+    private static bool TryParseIpv4Number(ReadOnlySpan<char> input, out ulong number, out bool validationError)
     {
         number = 0;
         validationError = false;

@@ -27,6 +27,17 @@ internal static class NormalizationC
             return input.ToArray();
         }
 
+        return NormalizeFull(input);
+    }
+
+    /// <summary>Normalizes code points the caller will not use again, returning the same array when nothing needs to change.</summary>
+    /// <param name="input">The code points.</param>
+    /// <returns>The normalized code points.</returns>
+    internal static int[] NormalizeOwned(int[] input) => IsAllAsciiOrNeedsNothing(input) ? input : NormalizeFull(input);
+
+    /// <summary>Normalizes without the shortcut for code points below <see cref="IdnaTables.NfcStableLimit"/> (the reference for the test of that shortcut).</summary>
+    internal static int[] NormalizeFull(ReadOnlySpan<int> input)
+    {
         var decomposed = new List<int>(input.Length + 8);
         foreach (int cp in input)
         {
@@ -69,12 +80,12 @@ internal static class NormalizationC
         return Compose(decomposed);
     }
 
-    // Only ASCII is certainly unchanged; anything else is run through the algorithm.
+    // Code points below IdnaTables.NfcStableLimit are certainly unchanged; anything else is run through the algorithm.
     private static bool IsAllAsciiOrNeedsNothing(ReadOnlySpan<int> input)
     {
         foreach (int cp in input)
         {
-            if (cp >= 0x80)
+            if (cp >= IdnaTables.NfcStableLimit)
             {
                 return false;
             }

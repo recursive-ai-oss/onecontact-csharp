@@ -75,7 +75,7 @@ internal sealed class FieldDraft
     public int Line { get; set; } = -1;
 
     /// <summary>A name found after a "Company:" style label; it names the organization, and the grouping decides whether that is the record or its employer.</summary>
-    public bool CompanyLabel { get; init; }
+    public bool CompanyLabel { get; set; }
 }
 
 /// <summary>A record under construction.</summary>

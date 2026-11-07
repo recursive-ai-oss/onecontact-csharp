@@ -28,8 +28,13 @@ internal static class EmailFinder
         int firstNew = sink.Count;
         FindPlain(text, start, end, sink);
         FindObfuscated(text, start, end, sink, firstNew);
-        sink.Sort(firstNew, sink.Count - firstNew, Comparer<EmailHit>.Create((a, b) => a.Start.CompareTo(b.Start)));
+        if (sink.Count - firstNew > 1)
+        {
+            sink.Sort(firstNew, sink.Count - firstNew, ByStart);
+        }
     }
+
+    private static readonly Comparer<EmailHit> ByStart = Comparer<EmailHit>.Create((a, b) => a.Start.CompareTo(b.Start));
 
     private static bool IsLocalChar(char c) =>
         char.IsAsciiLetterOrDigit(c) || c is '.' or '_' or '-' or '+' or '\'' or '&' || (c > 127 && (char.IsLetterOrDigit(c) || char.IsSurrogate(c)));
@@ -104,6 +109,10 @@ internal static class EmailFinder
         return EmailAddress.TryParse(address, out EmailAddress parsed) && !parsed.Flags.HasFlag(EmailFacts.SingleLabelDomain);
     }
 
+    private static readonly System.Collections.Frozen.FrozenSet<string> FileExtensions = System.Collections.Frozen.FrozenSet.ToFrozenSet(
+        ["png", "jpg", "jpeg", "gif", "svg", "webp", "bmp", "ico", "css", "js", "json", "xml", "pdf", "html", "htm", "php", "asp", "aspx", "jsp", "woff", "woff2", "ttf", "eot", "otf", "map", "txt", "gz", "tgz", "avif", "tif", "tiff", "mp3", "mp4", "webm", "wav", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "csv"],
+        StringComparer.Ordinal);
+
     private static bool IsPlausibleTopLevel(string label)
     {
         if (label.StartsWith("xn--", StringComparison.OrdinalIgnoreCase))
@@ -112,6 +121,12 @@ internal static class EmailFinder
         }
 
         if (label.Length < 2)
+        {
+            return false;
+        }
+
+        // "logo@2x.png" is a file name for an image density, not a mailbox: a file extension that is no top-level domain ends no address.
+        if (FileExtensions.Contains(label.ToLowerInvariant()) && !TopLevelDomains.IsKnown(label))
         {
             return false;
         }
@@ -133,16 +148,27 @@ internal static class EmailFinder
 
     private static void FindObfuscated(string text, int start, int end, List<EmailHit> sink, int firstPlain)
     {
-        List<Token> ats = [];
+        // Most lines have no at-token at all; for those nothing else is looked up or allocated.
+        List<Token>? ats = null;
+        for (int p = start; p < end; p++)
+        {
+            // A token inside an address that was written plainly would be skipped below anyway; leaving it out here saves the
+            // dot-token tables for the lines that are only plain addresses.
+            if (TryAtToken(text, p, end, out Token a) && !Overlaps(sink, firstPlain, a.Start, a.End))
+            {
+                (ats ??= []).Add(a);
+            }
+        }
+
+        if (ats is null)
+        {
+            return;
+        }
+
         var dotsByStart = new Dictionary<int, Token>();
         var dotEnds = new HashSet<int>();
         for (int p = start; p < end; p++)
         {
-            if (TryAtToken(text, p, end, out Token a))
-            {
-                ats.Add(a);
-            }
-
             if (TryDotToken(text, p, end, out Token d))
             {
                 dotsByStart[p] = d;

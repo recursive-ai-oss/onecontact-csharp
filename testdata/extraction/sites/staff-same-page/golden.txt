@@ -10,9 +10,11 @@ record 0 Organization pages=index.html,team.html conf=1
   #2 Phone index.html JsonLd raw="+1 415 555 0120" text="+1 415 555 0120" span=273+15 => Phone:+14155550120
 record 1 Person pages=team.html conf=1
   #3 Name team.html Microdata raw="Ann Lee" text="Ann Lee" span=341+7 => Person:Ann Lee
+    also team.html Text span=341+7
   #4 Email team.html Microdata raw="ann.lee@dunerealty.example.net" text="ann.lee@dunerealty.example.net" span=379+30 => Email:ann.lee@dunerealty.example.net
     also team.html Text span=379+30
 record 2 Person pages=team.html conf=1
   #5 Name team.html Microdata raw="Bo Kim" text="Bo Kim" span=496+6 => Person:Bo Kim
+    also team.html Text span=496+6
   #6 Email team.html Microdata raw="bo.kim@dunerealty.example.net" text="bo.kim@dunerealty.example.net" span=533+29 => Email:bo.kim@dunerealty.example.net
     also team.html Text span=533+29

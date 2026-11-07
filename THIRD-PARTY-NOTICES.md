@@ -45,3 +45,9 @@ Credit: Entity Legal Forms code list, GLEIF (gleif.org). The notice is packed wi
 ## disposable-email-domains (CC0 1.0)
 
 The list of disposable email domains (`disposable_email_blocklist.conf`) of the disposable-email-domains project, https://github.com/disposable-email-domains/disposable-email-domains, commit a72c0cecfcdd940d666265e44c0f661282e2d4aa, file SHA-256 e66aa85a1f16d2afa14cbf8a82517091d6df811cf405e29481238c365649c93e. The project dedicates it to the public domain under CC0 1.0 Universal. Credit: the disposable-email-domains contributors. Compiled into the library as the `Disposable` flag data.
+
+## OpenStreetMap address data (ODbL 1.0), pending challenger note
+
+Nothing from this source is packed or shipped. Training examples for a challenger address model are converted from the OpenStreetMap address file of the published libpostal parser training set (https://archive.org/details/libpostal-parser-training-data-20170304, `formatted_addresses_tagged.random.tsv.gz`, SHA-256 `3851ba7c9c6a0a2f5b27e419343faa9f01a571f7f44303bd123c6e4f45a83a69`). The data is made available under the Open Database License 1.0 (https://opendatacommons.org/licenses/odbl/1-0/).
+
+If a model trained on it is ever packed, its notices carry: "Contains information from OpenStreetMap, which is made available under the Open Database License (ODbL). © OpenStreetMap contributors, https://www.openstreetmap.org/copyright." The record is `tools/data/provenance/address-challenger-osm.md`.

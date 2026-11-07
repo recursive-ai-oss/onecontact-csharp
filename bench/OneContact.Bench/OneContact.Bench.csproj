@@ -1,15 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Speed rows next to the managed comparators, which are run as black boxes through their documented APIs. Nothing in src/ references them. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <NuGetAudit>false</NuGetAudit>
+    <NoWarn>$(NoWarn);CA1303;CA1707;CA1812;CA1822;CA2007;CA5394;CA1515</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" />
+    <PackageReference Include="libphonenumber-csharp" />
+    <PackageReference Include="MimeKit" />
+    <PackageReference Include="AngleSharp" />
+    <PackageReference Include="Nager.PublicSuffix" />
+    <PackageReference Include="NameParserSharp" />
+    <PackageReference Include="Microsoft.Recognizers.Text.Sequence" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../../src/OneContact/OneContact.csproj" />
+    <ProjectReference Include="../../src/OneContact.Extraction/OneContact.Extraction.csproj" />
+    <ProjectReference Include="../../src/OneContact.Models.Tier1/OneContact.Models.Tier1.csproj" />
   </ItemGroup>
 
 </Project>

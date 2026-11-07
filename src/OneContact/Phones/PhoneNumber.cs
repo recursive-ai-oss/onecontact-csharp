@@ -35,6 +35,9 @@ public readonly partial struct PhoneNumber :
     private readonly string? _rawInput;
     private readonly string? _carrierCode;
 
+    // The line type by the default metadata plus one, set by the parser so Type and IsValid need no second look at the plan; 0 when unknown.
+    private readonly byte _typePlusOne;
+
     internal PhoneNumber(
         int countryCode,
         ulong nationalNumber,
@@ -44,8 +47,10 @@ public readonly partial struct PhoneNumber :
         CountryCodeSource codeSource,
         string? carrierCode,
         SourceSpan source,
-        PhoneFacts flags)
+        PhoneFacts flags,
+        PhoneNumberType? lineType = null)
     {
+        _typePlusOne = lineType is { } t ? (byte)((int)t + 1) : (byte)0;
         _countryCode = countryCode;
         _nationalNumber = nationalNumber;
         _leadingZeros = (byte)leadingZeros;
@@ -181,7 +186,7 @@ public readonly partial struct PhoneNumber :
             return false;
         }
 
-        return PhoneNumberParser.TryParse(s, defaultRegion, out result, out _) == OperationStatus.Done;
+        return PhoneNumberParser.TryParseQuick(s, defaultRegion, out result);
     }
 
     /// <summary>Tries to parse a phone number, reading numbers without a leading <c>+</c> as national numbers of <paramref name="defaultRegion"/>.</summary>
@@ -190,7 +195,7 @@ public readonly partial struct PhoneNumber :
     /// <param name="result">The parsed number, or the default value when parsing fails.</param>
     /// <returns><see langword="true"/> when the text was parsed.</returns>
     public static bool TryParse(ReadOnlySpan<char> s, Region defaultRegion, out PhoneNumber result) =>
-        TryParse(s, defaultRegion, out result, out _) == OperationStatus.Done;
+        PhoneNumberParser.TryParseQuick(s, defaultRegion, out result);
 
     /// <summary>The low-level parse: returns a status and a <see cref="ParseDetail"/> instead of throwing.</summary>
     /// <param name="s">The text to parse.</param>

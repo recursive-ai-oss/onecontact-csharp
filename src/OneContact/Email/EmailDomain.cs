@@ -104,6 +104,64 @@ internal static class EmailDomain
         return true;
     }
 
+    /// <summary>
+    /// The usual domain: ASCII letters, digits, hyphens and dots only, with two or more labels of 1 to 63 characters that neither start nor
+    /// end with a hyphen, no label that starts with <c>xn--</c>, and a last label that is not all digits. For these the general
+    /// normalization only lowercases, and sets no fact; any other domain returns <see langword="false"/> and takes that route.
+    /// </summary>
+    /// <param name="domain">The domain text.</param>
+    /// <param name="ascii">The lowercase domain.</param>
+    /// <returns><see langword="true"/> when the domain has the plain shape.</returns>
+    internal static bool TryNormalizePlainAscii(ReadOnlySpan<char> domain, out string? ascii)
+    {
+        ascii = null;
+        int labelStart = 0;
+        int labels = 0;
+        for (int i = 0; i <= domain.Length; i++)
+        {
+            if (i < domain.Length)
+            {
+                char c = domain[i];
+                if (c != '.')
+                {
+                    if (!char.IsAsciiLetterOrDigit(c) && c != '-')
+                    {
+                        return false;
+                    }
+
+                    continue;
+                }
+            }
+
+            int length = i - labelStart;
+            if (length is 0 or > 63 || domain[labelStart] == '-' || domain[i - 1] == '-')
+            {
+                return false;
+            }
+
+            if (length >= 4 && domain.Slice(labelStart, 4).Equals("xn--", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (i == domain.Length && IsAllDigits(domain.Slice(labelStart, length)))
+            {
+                return false;
+            }
+
+            labels++;
+            labelStart = i + 1;
+        }
+
+        if (labels < 2)
+        {
+            return false;
+        }
+
+        ascii = string.Create(domain.Length, domain, static (span, src) => src.ToLowerInvariant(span));
+        return true;
+    }
+
     private static bool IsAllDigits(ReadOnlySpan<char> s)
     {
         foreach (char c in s)

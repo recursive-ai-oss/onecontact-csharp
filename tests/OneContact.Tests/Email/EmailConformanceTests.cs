@@ -15,7 +15,7 @@ public sealed class EmailConformanceTests
 
     private sealed record Case(string Id, string Source, string Input, string Expect, string Canonical, string Flags, string Display, string Key);
 
-    private static string Unescape(string s)
+    internal static string Unescape(string s)
     {
         StringBuilder sb = new();
         for (int i = 0; i < s.Length; i++)
@@ -46,7 +46,7 @@ public sealed class EmailConformanceTests
     }
 
     // The corpus is read from the source tree, like the other test data that is located from the test file.
-    private static string CorpusDirectory([System.Runtime.CompilerServices.CallerFilePath] string here = "") =>
+    internal static string CorpusDirectory([System.Runtime.CompilerServices.CallerFilePath] string here = "") =>
         Path.Combine(Path.GetDirectoryName(here)!, "corpus");
 
     private static List<Case> Load(string file)

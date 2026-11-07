@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Converts the OpenStreetMap address file of the published libpostal parser training set (tokens tagged with libpostal's component
+       labels, ODbL) into our JSON Lines training format, for a challenger address model. The data never feeds the default models.
+       It shares the random source, tokenizer, example type and span rules with the register-based tools. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>OneContact.Data.AddressChallenger</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTrimmable>false</IsTrimmable>
+    <NoWarn>$(NoWarn);CA1303;CA1848;CA1307;CA1305;CA1310;CA1304;CA1311;CA1834;CA1861;CA1862;CA1865;CA1866;CA1867;CA1869</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../AddressUsCa/Prng.cs" Link="Shared/Prng.cs" />
+    <Compile Include="../AddressUsCa/Model.cs" Link="Shared/Model.cs" />
+    <Compile Include="../AddressUsCa/Tokenizer.cs" Link="Shared/Tokenizer.cs" />
+    <Compile Include="../AddressUsCa/SpanCheck.cs" Link="Shared/SpanCheck.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../pins/challenger-osm.pin" Link="pins/challenger-osm.pin" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

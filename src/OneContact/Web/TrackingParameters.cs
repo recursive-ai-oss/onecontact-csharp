@@ -51,7 +51,30 @@ internal static class TrackingParameters
     /// <returns>The query without tracking parameters, or <see langword="null"/> when nothing else was left.</returns>
     internal static string? Remove(string query, out bool removed)
     {
+        // Most queries carry no tracking parameter: look at the names in place and allocate nothing for those.
+        var lookup = Names.GetAlternateLookup<ReadOnlySpan<char>>();
         removed = false;
+        ReadOnlySpan<char> rest = query;
+        while (true)
+        {
+            int amp = rest.IndexOf('&');
+            ReadOnlySpan<char> pair = amp < 0 ? rest : rest[..amp];
+            int eq = pair.IndexOf('=');
+            ReadOnlySpan<char> name = eq < 0 ? pair : pair[..eq];
+            if (name.Length > 0 && lookup.Contains(name))
+            {
+                removed = true;
+                break;
+            }
+
+            if (amp < 0)
+            {
+                return query;
+            }
+
+            rest = rest[(amp + 1)..];
+        }
+
         var kept = new StringBuilder();
         foreach (string pair in query.Split('&'))
         {
@@ -59,7 +82,6 @@ internal static class TrackingParameters
             string name = equals < 0 ? pair : pair[..equals];
             if (name.Length > 0 && IsTracking(name))
             {
-                removed = true;
                 continue;
             }
 
@@ -69,11 +91,6 @@ internal static class TrackingParameters
             }
 
             kept.Append(pair);
-        }
-
-        if (!removed)
-        {
-            return query;
         }
 
         return kept.Length == 0 ? null : kept.ToString();

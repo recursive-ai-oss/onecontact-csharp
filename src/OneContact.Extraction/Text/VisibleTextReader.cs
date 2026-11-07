@@ -293,7 +293,9 @@ internal sealed class VisibleTextReader
             return false;
         }
 
-        string first = display.Split(' ')[0];
+        // The first word of the value ("block flow" -> "block").
+        int space = display.IndexOf(' ');
+        string first = space < 0 ? display : display[..space];
         if (first is "inline" or "contents" or "ruby" or "ruby-text" or "ruby-base" or "inline-block" or "inline-flex" or "inline-grid" or "inline-table" or "none")
         {
             return false;

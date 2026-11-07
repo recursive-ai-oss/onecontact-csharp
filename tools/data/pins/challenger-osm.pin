@@ -1,0 +1,5 @@
+register osm-libpostal-parser-20170304
+# One file per line: file <local name> <size in bytes> <sha256> <url> <sha1 published by the host>
+# The host (the Internet Archive item libpostal-parser-training-data-20170304) publishes SHA-1 and MD5 for each file; the SHA-256 is ours,
+# recorded on the first download (RECORD=1 tools/data/fetch-challenger.sh) and checked on every later one.
+file formatted_addresses_tagged.random.tsv.gz 8033490172 3851ba7c9c6a0a2f5b27e419343faa9f01a571f7f44303bd123c6e4f45a83a69 https://archive.org/download/libpostal-parser-training-data-20170304/formatted_addresses_tagged.random.tsv.gz 5c3ec670347257081fc8cb40e8fe7165bb680de0
