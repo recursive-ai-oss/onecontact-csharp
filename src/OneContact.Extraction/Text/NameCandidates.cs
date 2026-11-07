@@ -112,9 +112,7 @@ internal sealed class NameCandidates
         public readonly int CoreEnd = coreEnd;
         public readonly bool LeadPunct = leadPunct;
         public bool TrailPunct = trailPunct;
-        public string? Text;
-        public string? Lower;
-        public string? Fold;
+        public WordInfo? Info;
         public Kind? KindCache;
     }
 
@@ -186,64 +184,44 @@ internal sealed class NameCandidates
 
     private static bool IsTrailPunct(char c) => !(char.IsLetterOrDigit(c) || c is '.' or '&' or '+' or '\'' or '\u2019');
 
-    // A page repeats its words (labels, names, the words of its prose), so the spelling, lower-case and folded forms of a word are made once per distinct word and
-    // shared, instead of once per occurrence.
-    private readonly HashSet<string> _spellings = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, string> _lowers = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, string> _folds = new(StringComparer.Ordinal);
-
-    private string Word(Tok t)
+    // A page repeats its words (labels, names, the words of its prose). Everything that follows from the spelling of a word alone (its lower-case
+    // and folded forms, whether it is a legal form) is made once per distinct word and shared, behind one lookup per occurrence.
+    private sealed class WordInfo(string text, string lower, string fold)
     {
-        if (t.Text is { } known)
+        public readonly string Text = text;
+        public readonly string Lower = lower;
+        public readonly string Fold = fold;
+
+        // 0 = not worked out yet; 1 = not a legal form; 2 = a legal form; 3 = a legal form written as an abbreviation.
+        public byte Legal;
+    }
+
+    private readonly Dictionary<string, WordInfo> _words = new(StringComparer.Ordinal);
+
+    private WordInfo InfoOf(Tok t)
+    {
+        if (t.Info is { } known)
         {
             return known;
         }
 
         ReadOnlySpan<char> w = _text.AsSpan(t.CoreStart, t.CoreEnd - t.CoreStart);
-        HashSet<string>.AlternateLookup<ReadOnlySpan<char>> lookup = _spellings.GetAlternateLookup<ReadOnlySpan<char>>();
-        if (!lookup.TryGetValue(w, out string? spelling))
+        Dictionary<string, WordInfo>.AlternateLookup<ReadOnlySpan<char>> lookup = _words.GetAlternateLookup<ReadOnlySpan<char>>();
+        if (!lookup.TryGetValue(w, out WordInfo? info))
         {
-            spelling = w.ToString();
-            _spellings.Add(spelling);
+            string spelling = w.ToString();
+            info = new WordInfo(spelling, spelling.ToLowerInvariant(), NameFolding.LettersAndDigits(w.TrimEnd('.')));
+            _words[spelling] = info;
         }
 
-        return t.Text = spelling;
+        return t.Info = info;
     }
 
-    private string LowerWord(Tok t)
-    {
-        if (t.Lower is { } known)
-        {
-            return known;
-        }
+    private string Word(Tok t) => InfoOf(t).Text;
 
-        string word = Word(t);
-        if (!_lowers.TryGetValue(word, out string? lower))
-        {
-            lower = word.ToLowerInvariant();
-            _lowers[word] = lower;
-        }
+    private string LowerWord(Tok t) => InfoOf(t).Lower;
 
-        return t.Lower = lower;
-    }
-
-    private string Folded(Tok t)
-    {
-        if (t.Fold is { } cached)
-        {
-            return cached;
-        }
-
-        ReadOnlySpan<char> w = _text.AsSpan(t.CoreStart, t.CoreEnd - t.CoreStart).TrimEnd('.');
-        Dictionary<string, string>.AlternateLookup<ReadOnlySpan<char>> lookup = _folds.GetAlternateLookup<ReadOnlySpan<char>>();
-        if (!lookup.TryGetValue(w, out string? folded))
-        {
-            folded = NameFolding.LettersAndDigits(w);
-            lookup[w] = folded;
-        }
-
-        return t.Fold = folded;
-    }
+    private string Folded(Tok t) => InfoOf(t).Fold;
 
     // Words in a run are joined by white space alone: no comma, bracket or other mark between them.
     private bool Joined(Tok a, Tok b)
@@ -340,6 +318,18 @@ internal sealed class NameCandidates
 
     private bool IsLegalToken(Tok t, out bool abbreviation)
     {
+        WordInfo info = InfoOf(t);
+        if (info.Legal == 0)
+        {
+            info.Legal = (byte)(ComputeLegalToken(t, info, out bool abbr) ? (abbr ? 3 : 2) : 1);
+        }
+
+        abbreviation = info.Legal == 3;
+        return info.Legal >= 2;
+    }
+
+    private bool ComputeLegalToken(Tok t, WordInfo info, out bool abbreviation)
+    {
         abbreviation = false;
         ReadOnlySpan<char> core = _text.AsSpan(t.CoreStart, t.CoreEnd - t.CoreStart);
         ReadOnlySpan<char> bare = core.TrimEnd('.');
@@ -348,7 +338,7 @@ internal sealed class NameCandidates
             return false;
         }
 
-        string folded = Folded(t);
+        string folded = info.Fold;
         if (!NameVocabulary.LegalForms.Contains(folded))
         {
             // "L.L.C." and "S.A." fold to the same letters.

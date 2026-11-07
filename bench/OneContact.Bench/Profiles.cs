@@ -55,6 +55,19 @@ internal static class Profiles
             var ctx = new PageContext(Document.Parse(p.Html), p.Html);
             return VisibleTextReader.Read(ctx, out _).GetHashCode();
         });
+        Time("html: PageContext + VisibleTextReader", pages, p => VisibleTextReader.Read(new PageContext(Document.Parse(p.Html), p.Html), out _).Lines.Count);
+        Time("html: parse + visible + TextFieldReader", pages, p =>
+        {
+            var ctx = new PageContext(Document.Parse(p.Html), p.Html);
+            TextView v = VisibleTextReader.Read(ctx, out _);
+            return TextFieldReader.Read(ctx, v, new MatcherPhoneFinder(Region.US), null, out _).Count;
+        });
+        Time("html: parse + visible + TextFieldReader (shape phones)", pages, p =>
+        {
+            var ctx = new PageContext(Document.Parse(p.Html), p.Html);
+            TextView v = VisibleTextReader.Read(ctx, out _);
+            return TextFieldReader.Read(ctx, v, null, null, out _).Count;
+        });
         Time("plain text: PlainTextView + TextFieldReader", pages, p =>
         {
             PageContext ctx = PageContext.ForPlainText(p.Text);
@@ -102,8 +115,25 @@ internal static class Profiles
         var clock = Stopwatch.StartNew();
         long rounds = 0;
         long sink = 0;
+        double best = double.MaxValue;
+        var batches = new List<double>();
+        double batchStart = 0;
         while (clock.Elapsed.TotalSeconds < seconds)
         {
+            if (rounds % 10 == 0 && rounds > 0)
+            {
+                double now = clock.Elapsed.TotalMilliseconds;
+                double batch = (now - batchStart) / 10;
+                if (now > 3000)
+                {
+                    // Batches after the first three seconds only: the first rounds run code the JIT has not optimised yet.
+                    batches.Add(batch);
+                }
+
+                best = Math.Min(best, batch);
+                batchStart = now;
+            }
+
             switch (kind)
             {
                 case "html":
@@ -123,8 +153,19 @@ internal static class Profiles
             rounds++;
         }
 
-        Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{kind}: {rounds} rounds, {clock.Elapsed.TotalMilliseconds / rounds:F2} ms per round, {(GC.GetAllocatedBytesForCurrentThread() - allocated0) / rounds / 1024.0:F0} KB allocated per round ({sink})"));
+        Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{kind}: {rounds} rounds, {clock.Elapsed.TotalMilliseconds / rounds:F2} ms per round, {(GC.GetAllocatedBytesForCurrentThread() - allocated0) / rounds / 1024.0:F0} KB allocated per round, best batch {best:F2} ms, median steady batch {Median(batches):F2} ms ({sink})"));
         return 0;
+    }
+
+    private static double Median(List<double> values)
+    {
+        if (values.Count == 0)
+        {
+            return double.NaN;
+        }
+
+        values.Sort();
+        return values[values.Count / 2];
     }
 
     public static int Names()
