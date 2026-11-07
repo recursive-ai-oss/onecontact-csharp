@@ -19,6 +19,14 @@ internal static class AddressKeyV1
             return Tier2.T2Key.Compute(a);
         }
 
+        // No country: the key is made from the words of the street fields, the locality, the admin area and the postal code, under the unknown-country prefix.
+        if (a.Facts.HasFlag(AddressFacts.CountryUndetermined))
+        {
+            string street = string.Join(' ', a.Fields.Where(f => f.Name.StartsWith("street.", StringComparison.Ordinal)).Select(f => f.Text));
+            string postalCode = string.Concat(AddressExpander.Fold(a.PostalCode?.Text ?? string.Empty).Where(char.IsLetterOrDigit));
+            return string.Join('|', "zz", Words(street), Words(a.Locality?.Text ?? string.Empty), AddressExpander.Fold(a.AdminArea?.Text ?? string.Empty), postalCode);
+        }
+
         string lang = a.Country == Region.CA ? "en" : "en";
         List<string> segments = [a.Country.IsUnknown ? "zz" : a.Country.ToString().ToLowerInvariant()];
         foreach (StreetLine line in a.DeliveryLines)

@@ -84,9 +84,27 @@ public static class RuleAddressParser
         if (usCaReadByModel && !HasKnownUsCaAdmin(address!) && hint.IsUnknown && Models.ContactModels.PackageId is { } package && package != Models.ContactModels.Tier1PackageId
             && (otherDetail.PrimaryReason.Equals(ReasonCode.AddressCountryUndetermined) || otherDetail.PrimaryReason.Equals(ReasonCode.AddressCountryConflict)))
         {
+            // Several countries read the text and none is told from it: the fields are returned when they all agree, with the country left unknown.
+            if (Tier2.Tier2Reader.TryReadUndetermined(input.ToString(), out ParsedAddress? agreed, out ParseDetail agreedDetail))
+            {
+                address = agreed;
+                detail = agreedDetail;
+                return OperationStatus.Done;
+            }
+
             address = null;
             detail = otherDetail;
             return OperationStatus.InvalidData;
+        }
+
+        // The same for text the United States and Canada rules could not read at all.
+        if (status != OperationStatus.Done && hint.IsUnknown && otherStatus != OperationStatus.Done && detail.PrimaryReason.Equals(ReasonCode.AddressNoLastLine)
+            && (otherDetail.PrimaryReason.Equals(ReasonCode.AddressCountryUndetermined) || otherDetail.PrimaryReason.Equals(ReasonCode.AddressCountryConflict))
+            && Tier2.Tier2Reader.TryReadUndetermined(input.ToString(), out ParsedAddress? agreedFields, out ParseDetail agreedFieldsDetail))
+        {
+            address = agreedFields;
+            detail = agreedFieldsDetail;
+            return OperationStatus.Done;
         }
 
         // Text that has a postcode and a locality of a Tier 2 country but no way to tell which: the reason is more useful than "no last line".

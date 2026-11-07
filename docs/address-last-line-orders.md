@@ -26,3 +26,13 @@ Limits that keep these readings safe:
 
 Not read, left to the model: a voivodeship tail (`31-147 Kraków, woj. małopolskie`), a bilingual locality (`Borriana / Burriana`), dependent-locality lines of the Czech
 Republic, Croatia and Romania (the real-page gold leaves them unlabelled, so reading them as fields would only add predictions).
+
+## Labels, brackets and island names
+
+- **Address labels.** A page may write `Cím: 1053 Budapest, ...`, `Adres: ul. ...` or `Sitz: ...`. The label says what the line is and is no part of the address: it is left out of every field and of the span of the address. A listed label (`Data/T2/t2-address-labels.tsv`: the ordinary words for "address", "registered office", "premises" and "postal address" in Hungarian, Polish, Czech, Slovak, English, German, French, Spanish, Portuguese and Italian, written by us) is dropped at the start of any line when a colon follows it; at the start of the text any single word ending in a colon is dropped. A colon elsewhere stays.
+- **Brackets.** Round or square brackets around the whole address are dropped (offsets stay those of the original text).
+- **Island names.** For a hinted Jersey, Guernsey or Isle of Man address: the island's name written right after the town without a comma (`Douglas Isle of Man IM1 1AA`) is the country and the words before it the locality; a town line followed by the island's name and the postcode with no street line (`Ballasalla, Isle of Man, IM9 2AA`) has the town as locality; a trailing `United Kingdom` or `UK` after the island's postcode is kept as the written country text (never rewritten), the island stays the country, and the two names are reported as a `country-conflict` warning. Without the hint the island's postcode still cannot be called Britain's and the text is refused.
+
+## Scoring conventions
+
+The scorer's `house_number` for a building and flat number written `12/3` is the whole `12/3` (the gold sets and the reference systems write it so). The library keeps a house number (`12`) and a unit number (`3`); `tools/Eval/Rules` joins the two for scoring when only a slash separates them (set `ONECONTACT_EVAL_NO_SLASH_CONVENTION` to score without the join). On the Polish set the join moves hinted field F1 from 89.96 to 96.39; it is a label convention, not an improvement of the reading.

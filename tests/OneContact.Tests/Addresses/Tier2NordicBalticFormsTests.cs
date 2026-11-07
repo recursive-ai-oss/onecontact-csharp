@@ -25,7 +25,8 @@ public class Tier2NordicBalticFormsTests
 
     private static string Fields(ParsedAddress a) => string.Join(" ; ", a.Fields.Select(f => f.Name + "=" + f.Text));
 
-    private static bool Refused(string text) => RuleAddressParser.TryParse(text, Region.Unknown, out _, out _) != OperationStatus.Done;
+    // Refused, or read with the country left unknown (every country that can read the text finds the same fields): no country is guessed.
+    private static bool Refused(string text) => AddressTestData.NamesNoCountry(text);
 
     // Estonia: Omniva puts the postcode before the town; pages also put it after ("Tallinn 10145"), and the county may follow.
     [Theory]

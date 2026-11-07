@@ -134,8 +134,7 @@ public class Tier2GroupCSouthTests
     {
         Assert.Equal(Region.Parse("HR"), Parse("Ulica kneza Branimira 4\n10000 Zagreb", null).Country);
         Assert.Equal(Region.Parse("HR"), Parse("Krapinska 17\nHR-10000 Zagreb", null).Country);
-        Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse("Krapinska 17\n10000 Zagreb", Region.Unknown, out _, out ParseDetail d));
-        Assert.Equal(ReasonCode.AddressCountryUndetermined, d.PrimaryReason);
+        Assert.True(AddressTestData.NamesNoCountry("Krapinska 17\n10000 Zagreb"));
     }
 
     [Fact]
@@ -210,7 +209,7 @@ public class Tier2GroupCSouthTests
     [Fact]
     public void MexicoNeedsItsOwnEvidenceFromFiveDigits()
     {
-        Assert.Equal(OperationStatus.InvalidData, RuleAddressParser.TryParse("Calle 20 de Noviembre 123\n44100 Guadalajara", Region.Unknown, out _, out _));
+        Assert.True(AddressTestData.NamesNoCountry("Calle 20 de Noviembre 123\n44100 Guadalajara"));
         Assert.Equal(Region.Parse("MX"), Parse("Calle 20 de Noviembre 123\n44100 Guadalajara", "MX").Country);
     }
 

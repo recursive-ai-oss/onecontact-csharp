@@ -121,6 +121,8 @@ internal static partial class Tier2Reader
             bool multiLine = text.Contains('\n', StringComparison.Ordinal);
             _multiLine = multiLine;
             List<Unit> units = Units(multiLine);
+            DropAddressLabels(units);
+            DropOuterBrackets(units);
             if (units.Count == 0)
             {
                 detail = ParseDetail.Failure(ReasonCode.Empty, new SourceSpan(0, text.Length));
@@ -657,13 +659,14 @@ internal static partial class Tier2Reader
 
             if (named is { } n)
             {
-                countryName = new ParsedAddressField("country", Slice(n.Span), country.CountryLine, n.Span, 1f, DecisionSource.Rule, "country-name");
+                // The written name stands when it names another country than the one decided ("United Kingdom" beside an island's postcode): it is never rewritten into a country the text did not say.
+                countryName = new ParsedAddressField("country", Slice(n.Span), n.Code == code ? country.CountryLine : Slice(n.Span).ToUpperInvariant(), n.Span, 1f, DecisionSource.Rule, "country-name");
                 fields.Add(countryName.Value);
             }
 
             // Jersey, Guernsey and the Isle of Man: the island's name on the line above the postcode is the country, and the parish or town line above it is the locality
             // (UPU Jersey, Guernsey and Isle of Man sheets print both). The printed layout stays as the sheets have it.
-            if (code is "JE" or "GG" or "IM" && IsIslandName(localityToks) && before.Count >= 2 && parsed[^1] is null && PlaceFits(before[^1].Toks, false, code))
+            if (code is "JE" or "GG" or "IM" && IsIslandName(localityToks) && before.Count >= 1 && parsed[^1] is null && PlaceFits(before[^1].Toks, false, code))
             {
                 SourceSpan placeSpan = Span(before[^1].Toks);
                 int placeAt = fields.FindIndex(f => f.Span.Start == placeSpan.Start && f.Span.Length == placeSpan.Length && f.Name is "leading-line" or "street.other");
@@ -677,6 +680,23 @@ internal static partial class Tier2Reader
                     countryName ??= island;
                     leading.RemoveAll(l => l.Span.Start == placeSpan.Start);
                     delivery.RemoveAll(d => d.Parts.Count == 1 && d.Parts[0].Span.Start == placeSpan.Start);
+                }
+            }
+
+            // "Douglas Isle of Man IM1 1AA": the island's name written right after the town with no comma is the country, and the words before it are the locality.
+            if (code is "JE" or "GG" or "IM" && countryName is null && localityToks.Count >= 2 && TrailingIslandWords(localityToks, code) is int islandWords and > 0 && localityToks.Count > islandWords)
+            {
+                int nameAt = fields.FindIndex(f => f.Name == "locality");
+                if (nameAt >= 0)
+                {
+                    List<Tok> town = localityToks.GetRange(0, localityToks.Count - islandWords);
+                    List<Tok> island = localityToks.GetRange(localityToks.Count - islandWords, islandWords);
+                    SourceSpan townSpan = Span(town);
+                    SourceSpan islandSpan = Span(island);
+                    locality = fields[nameAt] with { Text = Slice(townSpan), Standard = Slice(townSpan), Span = townSpan };
+                    fields[nameAt] = locality.Value;
+                    countryName = new ParsedAddressField("country", Slice(islandSpan), country.CountryLine, islandSpan, 1f, DecisionSource.Rule, "country-name");
+                    fields.Add(countryName.Value);
                 }
             }
 
@@ -1391,6 +1411,18 @@ internal static partial class Tier2Reader
             string? hintCode = !hint.IsUnknown && T2Rules.Handles(hint) ? hint.Code : null;
 
             bool Fits(string c) => match.Candidates.Contains(c) || match.Candidates.Contains(Family(c));
+
+            // Pages of Jersey, Guernsey and the Isle of Man often end with "United Kingdom" or "UK" (the islands are Crown dependencies, not part of the United Kingdom, and Royal Mail
+            // serves them with the same postcode system). With the island as the hint and a postcode of that island, the written name is kept as the country text and the island
+            // stays the country; the two names are reported as a warning rather than refused, because the postcode and the hint agree.
+            if (named == "GB" && hintCode is "JE" or "GG" or "IM" && match.Candidates.Contains(hintCode!))
+            {
+                _issues.Add(new ParseIssue(ReasonCode.AddressCountryConflict, new SourceSpan(0, text.Length), IssueSeverity.Warning));
+                code = hintCode!;
+                confidence = 0.9f;
+                inferred = false;
+                return true;
+            }
 
             if (named is not null && !Fits(named))
             {

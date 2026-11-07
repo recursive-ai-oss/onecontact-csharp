@@ -27,4 +27,10 @@ public enum AddressFacts : uint
 
     /// <summary>The address is in a United States territory or possession served by USPS (Puerto Rico, Guam, the Virgin Islands and the others).</summary>
     Territory = 64,
+
+    /// <summary>
+    /// The fields were read but no country could be told from the text or a hint: every country that can read the text finds the same fields in it. <see cref="PostalAddress.Country"/> is
+    /// <see cref="Region.Unknown"/>, the renderings keep the text as written, and <see cref="PostalAddress.Validate"/> reports the missing country.
+    /// </summary>
+    CountryUndetermined = 128,
 }

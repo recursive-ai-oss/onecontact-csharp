@@ -22,6 +22,12 @@ public static class AddressKey
             return string.Empty;
         }
 
+        // An address without a country has no authority style to read back: its own fields make the key.
+        if (value.ParsedForJson is { } kept && kept.Facts.HasFlag(AddressFacts.CountryUndetermined))
+        {
+            return Compute(kept, version);
+        }
+
         // The canonical form is the postal-style rendering of a parsed address, so reading it back gives the parts the key is made from.
         if (RuleAddressParser.TryParse(value.Canonical, value.Country == Region.US || value.Country == Region.CA || Addresses.Tier2.Tier2Reader.Handles(value.Country) ? value.Country : Region.Unknown, out ParsedAddress? address, out _) == System.Buffers.OperationStatus.Done && address is not null)
         {

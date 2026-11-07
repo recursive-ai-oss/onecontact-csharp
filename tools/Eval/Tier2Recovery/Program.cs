@@ -57,7 +57,7 @@ foreach (string country in args[2].Split(','))
     foreach (bool withHint in new[] { false, true })
     {
         Region hint = withHint ? Region.Parse(country) : Region.Unknown;
-        int examples = 0, everyField = 0, noExtra = 0, wrongCountry = 0;
+        int examples = 0, everyField = 0, noExtra = 0, wrongCountry = 0, undetermined = 0;
         long seen = 0, found = 0, extras = 0;
         Dictionary<string, int> refusals = new(StringComparer.Ordinal);
         Dictionary<string, (int Seen, int Found)> perLabel = new(StringComparer.Ordinal);
@@ -86,7 +86,11 @@ foreach (string country in args[2].Split(','))
                 continue;
             }
 
-            if (parsed.Country != Region.Parse(country))
+            if (parsed.Country.IsUnknown)
+            {
+                undetermined++;
+            }
+            else if (parsed.Country != Region.Parse(country))
             {
                 wrongCountry++;
                 if (misses is not null)
@@ -126,7 +130,7 @@ foreach (string country in args[2].Split(','))
         StringBuilder sb = new();
         double precision = found + extras == 0 ? 0 : 100.0 * found / (found + extras);
         double recall = seen == 0 ? 0 : 100.0 * found / seen;
-        sb.Append($"{country} model={(string.IsNullOrEmpty(modelPath) ? "no" : "yes")} hint={(withHint ? "yes" : "no ")} f1={(precision + recall == 0 ? 0 : 2 * precision * recall / (precision + recall)):0.0} p={precision:0.0} r={recall:0.0} n={examples} every-field={everyField} ({100.0 * everyField / examples:0.0}%) no-extra={noExtra} ({100.0 * noExtra / examples:0.0}%) fields={found}/{seen} ({100.0 * found / Math.Max(1, seen):0.0}%) refused={refused} wrong-country={wrongCountry}");
+        sb.Append($"{country} model={(string.IsNullOrEmpty(modelPath) ? "no" : "yes")} hint={(withHint ? "yes" : "no ")} f1={(precision + recall == 0 ? 0 : 2 * precision * recall / (precision + recall)):0.0} p={precision:0.0} r={recall:0.0} n={examples} every-field={everyField} ({100.0 * everyField / examples:0.0}%) no-extra={noExtra} ({100.0 * noExtra / examples:0.0}%) fields={found}/{seen} ({100.0 * found / Math.Max(1, seen):0.0}%) refused={refused} wrong-country={wrongCountry} undetermined={undetermined}");
         if (refused > 0)
         {
             sb.Append(" [" + string.Join(", ", refusals.OrderBy(k => k.Key, StringComparer.Ordinal).Select(k => k.Key + " " + k.Value)) + "]");

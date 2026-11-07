@@ -43,8 +43,8 @@ public class Tier2HuRoAuFormsTests
     [InlineData("4000 Basel Hauptstrasse 3")]
     [InlineData("1300 Budapest Pf. 12.")]
     [InlineData("1068 Budapest Király utca")]
-    public void HungarianWithoutEvidenceIsRefused(string input) =>
-        Assert.NotEqual(OperationStatus.Done, RuleAddressParser.TryParse(input, Region.Unknown, out _, out _));
+    public void HungarianWithoutEvidenceIsNotGuessed(string input) =>
+        Assert.True(AddressTestData.NamesNoCountry(input), input);
 
     // Romania: the label of the postcode is not part of the address.
     [Theory]

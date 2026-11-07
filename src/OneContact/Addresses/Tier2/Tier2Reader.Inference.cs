@@ -35,25 +35,7 @@ internal static partial class Tier2Reader
             return false;
         }
 
-        List<(string Code, ParsedAddress Address, ParseDetail Detail)> readable = [];
-        foreach (string code in T2Rules.TrialCountries)
-        {
-            Reader trial = new(text, Region.Parse(code)) { Inferring = true };
-            if (trial.Run(out ParsedAddress? read, out ParseDetail readDetail) == OperationStatus.Done && read is not null && read.Country == Region.Parse(code)
-                && !EndsWithOtherCountry(text, code) && ZoneAllows(read, code) && !LeavesAdminCode(read, code) && !LooksDutch(read, code))
-            {
-                readable.Add((code, read, readDetail));
-            }
-        }
-
-        // Swedish postcodes are written with a space after the third digit (UPU Sweden sheet); five digits without it are as likely Finnish, where Swedish-speaking municipalities
-        // (Aland, Nyland, Ostrobothnia) write Swedish street names, so such a text is not read as Swedish.
-        readable.RemoveAll(r => r.Code == "SE" && r.Address.PostalCode is { } p && !p.Text.Contains(' ', StringComparison.Ordinal));
-
-        // A reading that left a province or canton code in the locality loses to one that took it as the admin area, and a four-digit postcode followed by two capital
-        // letters in a locality is a Dutch postcode, not a Belgian town (the text is then refused rather than read as the wrong country).
-        HashSet<string> taken = [.. readable.Where(r => r.Address.AdminArea is not null).Select(r => r.Address.AdminArea!.Value.Text)];
-        readable.RemoveAll(r => r.Address.AdminArea is null && LastWord(r.Address.Locality) is { } word && word.Length == 2 && taken.Contains(word));
+        List<(string Code, ParsedAddress Address, ParseDetail Detail)> readable = ReadCandidates(text);
 
         if (readable.Count == 0)
         {
@@ -83,6 +65,32 @@ internal static partial class Tier2Reader
         address = found;
         detail = foundDetail;
         return true;
+    }
+
+    // The countries that can read the text, each with its reading: a trial read per candidate country, minus the readings that are plainly another country's text.
+    private static List<(string Code, ParsedAddress Address, ParseDetail Detail)> ReadCandidates(string text)
+    {
+        List<(string Code, ParsedAddress Address, ParseDetail Detail)> readable = [];
+        foreach (string code in T2Rules.TrialCountries)
+        {
+            Reader trial = new(text, Region.Parse(code)) { Inferring = true };
+            if (trial.Run(out ParsedAddress? read, out ParseDetail readDetail) == OperationStatus.Done && read is not null && read.Country == Region.Parse(code)
+                && !EndsWithOtherCountry(text, code) && ZoneAllows(read, code) && !LeavesAdminCode(read, code) && !LooksDutch(read, code))
+            {
+                readable.Add((code, read, readDetail));
+            }
+        }
+
+        // Swedish postcodes are written with a space after the third digit (UPU Sweden sheet); five digits without it are as likely Finnish, where Swedish-speaking municipalities
+        // (Aland, Nyland, Ostrobothnia) write Swedish street names, so such a text is not read as Swedish.
+        readable.RemoveAll(r => r.Code == "SE" && r.Address.PostalCode is { } p && !p.Text.Contains(' ', StringComparison.Ordinal));
+
+        // A reading that left a province or canton code in the locality loses to one that took it as the admin area, and a four-digit postcode followed by two capital
+        // letters in a locality is a Dutch postcode, not a Belgian town (the text is then refused rather than read as the wrong country).
+        HashSet<string> taken = [.. readable.Where(r => r.Address.AdminArea is not null).Select(r => r.Address.AdminArea!.Value.Text)];
+        readable.RemoveAll(r => r.Address.AdminArea is null && LastWord(r.Address.Locality) is { } word && word.Length == 2 && taken.Contains(word));
+
+        return readable;
     }
 
     private static bool TryInferProvinceLine(string text, out ParsedAddress? address, out ParseDetail detail)

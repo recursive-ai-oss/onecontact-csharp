@@ -26,3 +26,10 @@
 |Great Western Road 100, Glasgow G12 8HJ
 |12 High Street, London SW1A 2AA
 |Unit 3, Park Road, Dublin D02 X285
+# shared postcode forms with no evidence of the country: the fields are returned when every country that reads the text finds the same ones
+|Hauptstrasse 5, 1010 Wien
+|Karl Marx Straat 7, 3000 Leuven
+|Rue de la Gare 3, 1000 Lausanne
+|Boulevard Haussmann 5, 75009 Paris
+|Rue du Marche 3, 4000 Liege
+|Calle Sol 4, 41001 Sevilla

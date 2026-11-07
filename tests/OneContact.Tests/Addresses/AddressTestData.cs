@@ -1,3 +1,5 @@
+using RecursiveAI.OneContact.Addresses.Parsing;
+
 namespace RecursiveAI.OneContact.Tests.Addresses;
 
 /// <summary>Finds the committed test data under <c>testdata/</c> by walking up from the test binaries to the repository root.</summary>
@@ -35,4 +37,11 @@ internal static class AddressTestData
             yield return cells;
         }
     }
+
+    /// <summary>
+    /// Whether reading the text without a hint names no country: the text is refused, or its fields are returned with the country left unknown (every country that can read it
+    /// finds the same fields). A country that is guessed makes this false.
+    /// </summary>
+    internal static bool NamesNoCountry(string text) =>
+        RuleAddressParser.TryParse(text, Region.Unknown, out ParsedAddress? address, out _) != System.Buffers.OperationStatus.Done || address is null || address.Country.IsUnknown;
 }
