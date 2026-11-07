@@ -1,10 +1,13 @@
 unit Bytes
-record 0 Unknown src=Text conf=0.5 span=186+41
-  #0 Email Text raw="ada@staff.example" text="ada@staff.example" span=186+17 conf=0.9 => Email:ada@staff.example
-  #1 Phone Text raw="+1 202 555 0101" text="+1 202 555 0101" span=212+15 conf=0.8 => Phone:+12025550101 facts=Valid|InternationalInput
-record 1 Unknown src=Text conf=0.5 span=263+40
-  #2 Email Text raw="bo@staff.example" text="bo@staff.example" span=263+16 conf=0.9 => Email:bo@staff.example
-  #3 Phone Text raw="+1 202 555 0102" text="+1 202 555 0102" span=288+15 conf=0.8 => Phone:+12025550102 facts=Valid|InternationalInput
-record 2 Unknown src=Text conf=0.5 span=344+40
-  #4 Phone Text raw="+1 202 555 0103" text="+1 202 555 0103" span=344+15 conf=0.8 => Phone:+12025550103 facts=Valid|InternationalInput
-  #5 Email Text raw="cy@staff.example" text="cy@staff.example" span=368+16 conf=0.9 => Email:cy@staff.example
+record 0 Person src=Text conf=0.7 span=166+61
+  #0 Name Text raw="Ada Example" text="Ada Example" span=166+11 conf=0.7 => Person:Ada Example
+  #1 Email Text raw="ada@staff.example" text="ada@staff.example" span=186+17 conf=0.9 => Email:ada@staff.example
+  #2 Phone Text raw="+1 202 555 0101" text="+1 202 555 0101" span=212+15 conf=0.8 => Phone:+12025550101 facts=Valid|InternationalInput
+record 1 Person src=Text conf=0.7 span=245+58
+  #3 Name Text raw="Bo Sample" text="Bo Sample" span=245+9 conf=0.7 => Person:Bo Sample
+  #4 Email Text raw="bo@staff.example" text="bo@staff.example" span=263+16 conf=0.9 => Email:bo@staff.example
+  #5 Phone Text raw="+1 202 555 0102" text="+1 202 555 0102" span=288+15 conf=0.8 => Phone:+12025550102 facts=Valid|InternationalInput
+record 2 Person src=Text conf=0.7 span=321+63
+  #6 Name Text raw="Cy Placeholder" text="Cy Placeholder" span=321+14 conf=0.7 => Person:Cy Placeholder
+  #7 Phone Text raw="+1 202 555 0103" text="+1 202 555 0103" span=344+15 conf=0.8 => Phone:+12025550103 facts=Valid|InternationalInput
+  #8 Email Text raw="cy@staff.example" text="cy@staff.example" span=368+16 conf=0.9 => Email:cy@staff.example

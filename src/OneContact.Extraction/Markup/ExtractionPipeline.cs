@@ -141,6 +141,7 @@ internal static class ExtractionPipeline
         }
 
         List<FieldDraft> found = TextFieldReader.Read(page, view, (page.PageRegion.IsUnknown ? callerDefault : page.PageRegion) is { IsUnknown: false } textRegion ? new MatcherPhoneFinder(textRegion) : null, ContactModels.Spans, out int[] blockLines);
+        ReconcileNames(builder.Records, found);
         var pending = new List<FieldDraft>();
         foreach (FieldDraft d in found)
         {
@@ -185,6 +186,56 @@ internal static class ExtractionPipeline
                 ungrouped.Add(d);
             }
         }
+    }
+
+    // A name the text states that a record of the markup already has is that record's own name, and says what the name is: a footer
+    // repeating the organization named in JSON-LD is the organization, not a person that the text rules read it as.
+    private static void ReconcileNames(List<RecordDraft> markup, List<FieldDraft> found)
+    {
+        Dictionary<string, ContactRecordKind>? known = null;
+        foreach (FieldDraft d in found)
+        {
+            if (d.Kind is not (FieldKind.Name or FieldKind.Organization) || d.Model)
+            {
+                continue;
+            }
+
+            if (known is null)
+            {
+                known = new Dictionary<string, ContactRecordKind>(StringComparer.Ordinal);
+                foreach (RecordDraft r in markup)
+                {
+                    foreach (FieldDraft f in r.Fields)
+                    {
+                        if (f.Kind == FieldKind.Name && f.Source != FieldSource.Text)
+                        {
+                            known.TryAdd(FoldName(f.Text), r.Kind);
+                        }
+                    }
+                }
+            }
+
+            if (known.TryGetValue(FoldName(d.Text), out ContactRecordKind kind) && kind is ContactRecordKind.Organization or ContactRecordKind.Person)
+            {
+                bool organization = kind == ContactRecordKind.Organization;
+                d.Kind = organization ? FieldKind.Organization : FieldKind.Name;
+                d.CompanyLabel = organization;
+            }
+        }
+    }
+
+    private static string FoldName(string s)
+    {
+        var sb = new System.Text.StringBuilder(s.Length);
+        foreach (char c in s)
+        {
+            if (char.IsLetterOrDigit(c))
+            {
+                sb.Append(char.ToLowerInvariant(c));
+            }
+        }
+
+        return sb.ToString();
     }
 
     // A text field that no group took, and that repeats a field of exactly one record, is another sighting of that field.
