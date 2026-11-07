@@ -85,8 +85,10 @@ public sealed class SupersetModel : IAddressFieldModel, INameModel, IContactSpan
         }
 
         // One pass of the shared encoder serves both heads; calling each head's Process would encode the words twice.
-        PredictShared(doc, (TrainableHead)_nameClass, (TrainableHead)_nameParts);
-        (NameClass cls, float confidence) = SupersetLabels.Vote(doc);
+        // Both heads write the words' confidences, so the class vote is taken right after its head, before the parts head overwrites them.
+        NameClass cls = NameClass.Unknown;
+        float confidence = 0f;
+        PredictShared(doc, () => (cls, confidence) = SupersetLabels.Vote(doc), (TrainableHead)_nameClass, (TrainableHead)_nameParts);
         return new NameModelResult(cls, confidence, SupersetLabels.Spans(doc, TokenColumn.Pos));
     }
 
@@ -128,19 +130,26 @@ public sealed class SupersetModel : IAddressFieldModel, INameModel, IContactSpan
 
     // Encodes the document once and lets each head write its labels from the same encoder output. This is what a head's Process does for itself
     // (no gradients, activations released when done, the head's weights read one caller at a time), with the encoder pass shared.
-    private static void PredictShared(Doc doc, params TrainableHead[] heads)
+    private static void PredictShared(Doc doc, Action afterFirstHead, params TrainableHead[] heads)
     {
         IEncoder encoder = heads[0].Encoder;
         encoder.Weights?.Eval();
         using NoGradScope noGrad = GradMode.NoGrad();
         using var scope = new ActivationScope();
         EncodedBatch encoded = encoder.Encode([doc]);
+        bool first = true;
         foreach (TrainableHead head in heads)
         {
             lock (head)
             {
                 head.Weights.Eval();
                 head.Predict(encoded, [doc]);
+            }
+
+            if (first)
+            {
+                afterFirstHead();
+                first = false;
             }
         }
     }

@@ -88,6 +88,7 @@ static string OutputsHash(IAddressFieldModel addressModel, INameModel nameModel,
         foreach (ModelSpan sp in addressModel.Tag(t)) { Span(sp); }
     }
 
+    string addressHash = Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant();
     foreach (string t in names)
     {
         Add("N" + t);
@@ -96,7 +97,7 @@ static string OutputsHash(IAddressFieldModel addressModel, INameModel nameModel,
         foreach (ModelSpan sp in r.Parts) { Span(sp); }
     }
 
-    return Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant();
+    return "addresses " + addressHash + " names " + Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant();
 }
 
 static List<string> Read(string path, int count)
