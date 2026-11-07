@@ -113,17 +113,32 @@ internal static class PhoneText
     /// <summary>Keeps only the digits of a text, turning every script's decimal digits into ASCII digits.</summary>
     internal static string NormalizeDigitsOnly(ReadOnlySpan<char> text)
     {
-        StringBuilder sb = new(text.Length);
+        int digits = 0;
         foreach (char c in text)
         {
-            int v = DigitValue(c);
-            if (v >= 0)
+            if (DigitValue(c) >= 0)
             {
-                sb.Append((char)('0' + v));
+                digits++;
             }
         }
 
-        return sb.ToString();
+        if (digits == 0)
+        {
+            return string.Empty;
+        }
+
+        return string.Create(digits, text.ToString(), static (span, source) =>
+        {
+            int i = 0;
+            foreach (char c in source)
+            {
+                int v = DigitValue(c);
+                if (v >= 0)
+                {
+                    span[i++] = (char)('0' + v);
+                }
+            }
+        });
     }
 
     /// <summary>Keeps the characters you could dial: ASCII digits, <c>+</c>, <c>*</c> and <c>#</c>.</summary>
@@ -190,6 +205,23 @@ internal static class PhoneText
         }
 
         return letters >= 3;
+    }
+
+    /// <summary>Normalizes a number for parsing: a number with three or more letters is a vanity number and its letters become digits; otherwise only digits are kept.</summary>
+    internal static string Normalize(string text)
+    {
+        // Text that is already ASCII digits only is its own normal form, so the same string is handed back.
+        bool asciiDigits = text.Length > 0;
+        foreach (char c in text)
+        {
+            if (c is not (>= '0' and <= '9'))
+            {
+                asciiDigits = false;
+                break;
+            }
+        }
+
+        return asciiDigits ? text : Normalize(text.AsSpan());
     }
 
     /// <summary>Normalizes a number for parsing: a number with three or more letters is a vanity number and its letters become digits; otherwise only digits are kept.</summary>

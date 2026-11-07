@@ -98,6 +98,7 @@ internal static class Profiles
         Inputs.Page[] pages = Enumerable.Range(1, 8).Select(i => Inputs.MakePage(i, 24)).ToArray();
         var extractor = new ContactExtractor { Sources = ExtractionSources.Markup | ExtractionSources.Text, DefaultRegion = Region.US };
         string phoneText = PhoneMatcherRow.MakeText();
+        long allocated0 = GC.GetAllocatedBytesForCurrentThread();
         var clock = Stopwatch.StartNew();
         long rounds = 0;
         long sink = 0;
@@ -122,7 +123,7 @@ internal static class Profiles
             rounds++;
         }
 
-        Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{kind}: {rounds} rounds, {clock.Elapsed.TotalMilliseconds / rounds:F2} ms per round ({sink})"));
+        Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{kind}: {rounds} rounds, {clock.Elapsed.TotalMilliseconds / rounds:F2} ms per round, {(GC.GetAllocatedBytesForCurrentThread() - allocated0) / rounds / 1024.0:F0} KB allocated per round ({sink})"));
         return 0;
     }
 

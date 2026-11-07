@@ -84,3 +84,32 @@ internal static class PhoneFindProfile
         Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{label,-40} {best,9:F2} ms  {bytes / 1024.0,9:F0} KB"));
     }
 }
+
+/// <summary>Allocated bytes of one parse, for typical candidates the number finder hands to the parser. Run as <c>profile-parse-alloc</c>.</summary>
+internal static class PhoneParseAllocProfile
+{
+    public static int Run()
+    {
+        string[] candidates = ["10", "30", "4471", "2012-12-22", "12", "(202) 456-1111", "202-456-1111", "+1 650 253 0000", "+44 20 7946 0958", "2024561111", "(212) 736-5000 ext. 12"];
+        PhoneNumberParser parser = PhoneNumberParser.Default;
+        foreach (string c in candidates)
+        {
+            for (int i = 0; i < 2000; i++)
+            {
+                parser.TryParseKeepingRaw(c, Region.US, out _);
+            }
+
+            long a0 = GC.GetAllocatedBytesForCurrentThread();
+            bool ok = false;
+            for (int i = 0; i < 1000; i++)
+            {
+                ok = parser.TryParseKeepingRaw(c, Region.US, out PhoneNumber n) && parser.IsValid(n);
+            }
+
+            long bytes = (GC.GetAllocatedBytesForCurrentThread() - a0) / 1000;
+            Console.WriteLine($"{bytes,6} B  valid={ok}  {c}");
+        }
+
+        return 0;
+    }
+}

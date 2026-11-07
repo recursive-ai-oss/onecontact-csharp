@@ -412,7 +412,7 @@ public sealed partial class PhoneNumberParser
             return false;
         }
 
-        national = input.Substring(first, last + 1 - first);
+        national = first == 0 && last == input.Length - 1 ? input : input.Substring(first, last + 1 - first);
         span = new SourceSpan(first, last + 1 - first);
         return true;
     }

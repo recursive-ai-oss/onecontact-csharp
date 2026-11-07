@@ -143,6 +143,11 @@ internal static class Program
             return DiffDump.Run(args[1], args[2]);
         }
 
+        if (args.Length > 0 && args[0] == "profile-parse-alloc")
+        {
+            return PhoneParseAllocProfile.Run();
+        }
+
         if (args.Length > 0 && args[0] == "profile-idn")
         {
             return IdnProfile.Run();
