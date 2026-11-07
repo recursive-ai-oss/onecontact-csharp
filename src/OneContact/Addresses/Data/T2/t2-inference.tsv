@@ -221,9 +221,10 @@ language	BE	nl
 language	LU	lb
 language	DK	da,nb
 language	NO	nb,da
-# lang: a whole word that belongs to a language although no country's evidence rows above list it, or that a language shares with a language the rows give it to (the words of the
-#   rows are French in the first group: allee, chaussee are also French street types; ulica is Croatian and Slovak as well as Slovenian and Polish; aleja is also Croatian
-#   and Slovenian). Street types of the UPU sheets and the posts' guides (La Poste Guide pratique courrier, Correos, CTT, Poczta Polska, Hrvatska posta).
+# lang: a whole word that belongs to a language although no country's evidence rows above list it, or that a language shares with the language the rows give it to (allee and
+#   chaussee are also French street types; ulica is Croatian and Slovak as well as Slovenian and Polish; aleja is also Croatian and Slovenian). Street types of the UPU sheets and
+#   the posts' guides (La Poste Guide pratique courrier, Correos, CTT, Poczta Polska, Hrvatska posta).
+# langsuffix: the same for the end of a street name written as one word; endings under four letters are ignored.
 lang	fr	RUE
 lang	fr	CHEMIN
 lang	fr	IMPASSE

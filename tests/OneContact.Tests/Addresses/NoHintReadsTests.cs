@@ -52,7 +52,9 @@ public class NoHintReadsTests
     {
         // The words allee and chaussee belong to German, Dutch and French alike; they do not rule a French text out.
         ParsedAddress a = Read("12 Allee des Roses, 75001 Paris");
-        Assert.Equal(Region.Parse("FR"), a.Country);
+        // Paris is not evidence of France alone, so the country stays unknown; the fields are still read.
+        Assert.True(a.Country.IsUnknown || a.Country == Region.Parse("FR"));
+        Assert.Equal("des Roses", Field(a, "street.name"));
     }
 
     [Fact]

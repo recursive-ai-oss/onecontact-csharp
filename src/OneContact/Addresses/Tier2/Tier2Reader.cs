@@ -989,7 +989,9 @@ internal static partial class Tier2Reader
                 }
 
                 int island = TrailingIslandAny(locality);
-                if (split >= 1 && locality.Count - island - split - 1 is >= 1 and <= 3 && PlaceFits(locality.GetRange(split + 1, locality.Count - island - split - 1), ireland, family))
+                // The island's name after the post town ("Mill Road Douglas Isle of Man") is not part of the town; when nothing else follows the road, the island name is the town ("Hill Street Jersey").
+                if (split >= 1 && ((locality.Count - split - 1 <= 3 && PlaceFits(locality.GetRange(split + 1, locality.Count - split - 1), ireland, family))
+                    || (locality.Count - island - split - 1 is >= 1 and <= 3 && PlaceFits(locality.GetRange(split + 1, locality.Count - island - split - 1), ireland, family))))
                 {
                     units[u] = new Unit([.. pc, .. locality.GetRange(split + 1, locality.Count - split - 1)]);
                     units.Insert(u, new Unit(locality.GetRange(0, split + 1)));
