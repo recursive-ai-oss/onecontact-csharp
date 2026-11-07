@@ -209,3 +209,7 @@ word	ES	RONDA
 word	ES	TRAVESIA
 word	ES	URBANIZACION
 word	ES	POLIGONO
+word	PL	UL
+word	PL	PLAC
+marked	HU	TER
+marked	HU	KRT

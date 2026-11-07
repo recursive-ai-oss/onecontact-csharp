@@ -175,6 +175,7 @@ internal static partial class Tier2Reader
 
             // The postcode and the locality after it end the address.
             // Two letters after four digits are a Dutch postcode unless the country is known to be another one ("9170 De Klinge" in Belgium); without any hint they must be capitals.
+            StripCountryBeforePostcode(units, ref named);
             string? known = named?.Code ?? (!hint.IsUnknown && T2Rules.Handles(hint) ? hint.Code : null);
             _county = null;
             _province = null;
@@ -197,6 +198,7 @@ internal static partial class Tier2Reader
                 && !FindHungarian(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindStateLine(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindPostcodeAlone(units, known, out unitIndex, out tokenIndex, out match)
+                && !FindPostcodeFirst(units, known, out unitIndex, out tokenIndex, out match)
                 && !FindNoPostcode(units, known, out unitIndex, out tokenIndex, out match))
             {
                 detail = ParseDetail.Failure(ReasonCode.AddressNoLastLine, new SourceSpan(0, text.Length));
@@ -1029,6 +1031,12 @@ internal static partial class Tier2Reader
         private static bool PlaceFits(List<Tok> toks, bool ireland, string family)
         {
             if (toks.Count == 0 || !LocalityFits(toks, ireland) || IsCountyWord(toks[0]))
+            {
+                return false;
+            }
+
+            // "Westside Business Park", "Mill House", "Harbour Centre": a building, estate or park name above the post town is a line of the address, not the post town.
+            if (toks.Count >= 2 && toks[^1].Key is "PARK" or "ESTATE" or "CENTRE" or "CENTER" or "HOUSE" or "BUILDING" or "BUILDINGS" or "TOWER" or "WORKS" or "CAMPUS" or "YARD")
             {
                 return false;
             }
@@ -2148,7 +2156,7 @@ internal static partial class Tier2Reader
 
             if (type is null && country.Profile == "es")
             {
-                return ParseTypeLast(toks, country);
+                return ParseTypeLast(toks, country) ?? ParseUntypedStreet(toks, country);
             }
 
             if (type is null || toks.Count <= typeWords)

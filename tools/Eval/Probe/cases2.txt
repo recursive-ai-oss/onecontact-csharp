@@ -1,0 +1,57 @@
+PL|ul. Długa 5, 31-147 Kraków, woj. małopolskie
+PL|ul. Długa 5, 31-147 Kraków, województwo małopolskie, Polska
+PL|ul. Piotrkowska 100, lok. 5, 90-006 Łódź
+PL|ul. Piotrkowska 100/5, 90-006 Łódź
+PL|Aleje Jerozolimskie 123A, 02-017 Warszawa
+PL|pl. Defilad 1, 00-901 Warszawa
+PL|Plac Defilad 1 // 00-901 Warszawa
+PL|Acme Sp. z o.o., ul. Długa 5, 31-147 Kraków
+PL|os. Słoneczne 12, 61-001 Poznań
+PL|ul. Kościuszki 12, Gdynia 81-001
+PL|Kraków 31-147, ul. Długa 5
+PL|ul. Kościuszki 12 81-001 Gdynia
+HU|1051 Budapest, Nádor utca 22.
+HU|1051 Budapest, Nádor u. 22. 2. em. 5.
+HU|Budapest, 1051 Nádor utca 22.
+HU|1051 Budapest V. ker., Nádor utca 22.
+HU|H-1051 Budapest, Nádor utca 22., Magyarország
+HU|Győr, Baross Gábor út 12., 9024
+HU|9024 Győr, Baross Gábor út 12.
+HU|Pf. 12, 1371 Budapest
+AU|Suite 3, Level 5, 100 Pitt Street, Sydney NSW 2000
+AU|PO Box 123, Collins Street West VIC 8007
+AU|10 Murray St, Hobart TAS 7000
+AU|GPO Box 123, Sydney NSW 2001
+AU|Level 1/45 King William St, Adelaide SA 5000
+AU|45 King William Street, Adelaide, South Australia, 5000
+AU|45 King William Street, Adelaide SA 5000, Australia
+AU|Unit 2, 45 King William Street Adelaide SA 5000
+AU|Acme Pty Ltd, 45 King William Street, Adelaide SA 5000
+AU|Shop 1/2 Main Road, Hobart, TAS, 7000
+GB|10 Downing Street, Westminster, London SW1A 2AA
+GB|Buckingham Palace, London SW1A 1AA
+GB|1 Canada Square, Canary Wharf, London E14 5AB
+GB|Floor 3, 1 Canada Square, London E14 5AB
+GB|The Shard, 32 London Bridge Street, London, SE1 9SG
+GB|St Mary's Church, High Street, Oxford OX1 4AH
+GB|100 Princes Street, Edinburgh EH2 3AA
+GB|Hill House, Rhos-on-Sea, Colwyn Bay, Conwy LL28 4HA
+GB|44 Main Road, Cardiff CF10 1AA, Wales
+GB|44 Main Road, Cardiff, Wales CF10 1AA
+GB|Dept of X, University of Leeds, Woodhouse Lane, Leeds LS2 9JT
+IM|Sea Terminal Building, Douglas, Isle of Man, IM1 2RF
+IM|Government Office, Bucks Road, Douglas IM1 3PN, British Isles
+IM|Peel Road, Douglas, Isle of Man IM1 5PD
+ES|Calle de Alcalá, 100, 28009 Madrid, España
+ES|Calle de Alcalá 100, 3º Izq, 28009 Madrid
+ES|Paseo de Gracia, 43, 08007 Barcelona
+ES|Pº de Gracia 43, Barcelona 08007
+ES|C. Mayor, 12, 28013 Madrid
+ES|Plaza Mayor s/n 37002 Salamanca
+ES|Av. de la Constitución 5, 41004 Sevilla (Sevilla)
+ES|Camino Viejo 3, Pol. Ind. Norte, 28100 Alcobendas, Madrid
+IE|1 Main Street, Dublin 2, Ireland
+IE|Unit 3, Westside Business Park, Galway H91 X2Y3
+IE|Merrion Square, Dublin 2, D02 AB12
+IE|12 Main St., Cork, Co. Cork, T12 AB34
+IE|12 Main St, Cork, County Cork
