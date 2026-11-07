@@ -9,6 +9,8 @@
 #   ADDRESS_COUNT, BIG_COUNT   register-rendered training examples (the Tier 2 files share ADDRESS_COUNT; us, ca and ust get BIG_COUNT each)
 #   NAMES_US_CA, NAMES_TIER2   name sets of the default recipe, a few examples of each (NAMES_COUNT, default 10000, from each), so the name heads exist and the
 #                     file loads; they are not scored and play no part in choosing an epoch
+#   NAMES_JOINT=1  train the name heads with the encoder, as run.sh does (NAMES_COUNT from each name set, 250000 in run.sh) and add their dev sets to the
+#                     epoch choice; used to build the full challenger, whose name and span heads are then retrained on the frozen encoder
 #   OUT, BUDGET, THREADS, SEED, EPOCHS   as run.sh
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
@@ -26,9 +28,14 @@ if [ "${TRAIN_PERMISSIVE:-0}" = 1 ]; then
   for f in "$A"/*.train.jsonl; do train="$train,$f"; done
   args+=(--addresses "${train#,}" --address-count "${ADDRESS_COUNT:-925000}" --address-big-count "${BIG_COUNT:-80000}")
 fi
+joint=()
+if [ "${NAMES_JOINT:-0}" = 1 ]; then
+  joint=(--names-dev "$NAMES_US_CA/dev" --names-dev-count 4000 --names2-dev "$NAMES_TIER2/dev" --names2-dev-count 4000)
+fi
 exec dotnet "$dll" train "${args[@]}" \
   --osm "${otrain#,}" --osm-count "${OSM_COUNT:-1000000}" --osm-dev "${odev#,}" --osm-dev-count "${OSM_DEV_COUNT:-20000}" \
   --names "${NAMES_US_CA:?set NAMES_US_CA}/train" --names-count "${NAMES_COUNT:-10000}" --names2 "${NAMES_TIER2:?set NAMES_TIER2}/train" --names2-count "${NAMES_COUNT:-10000}" \
+  "${joint[@]}" \
   --addresses-dev "${dev#,}" --address-big us,ca,ust --address-dev-count 14000 --address-big-dev-count 1500 \
   --seed "${SEED:-1}" --epochs "${EPOCHS:-4}" --threads "${THREADS:-8}" --budget-seconds "${BUDGET:-1500}" \
   --checkpoint-every 500 --out "$OUT"

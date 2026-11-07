@@ -68,3 +68,27 @@ MODELS_DLL=<tools/Eval/Models build> DEFAULT_MODEL=... C1_MODEL=... C2_MODEL=...
 ```
 
 Provenance: `recipes/models/PROVENANCE-challenger.md`.
+
+## Full candidate on the C2 mix (encoder, address, name and contact-span heads)
+
+A complete `.Models` candidate built on the C2 address mix, scored once against the shipped weights (`0e31f3fd…`) on the rules of the same checkout. It is not the default: one address row loses beyond its interval (below), so the shipped weights stay.
+
+**Build (all three stages `recipes/models`, seed 1, CPU, 8 threads, chunks of 1,380 s that resume from the last checkpoint):**
+
+| Stage | Command | Data | Result |
+|---|---|---|---|
+| Encoder + address head (+ name heads, jointly, as `run.sh` does) | `challenger.sh` with `NAMES_JOINT=1 NAMES_COUNT=250000 TRAIN_PERMISSIVE=1 OSM_COUNT=1200000`, 4 epochs | 1.2M OSM + register sets (925,000 shared by the Tier 2 files, 80,000 each US, CA, territories) + 250,000 + 250,000 name examples | 2,394,521 examples, 3 chunks, 50,467 steps, best dev 0.9839 (epoch 3), sha256 `0482a535…` |
+| Name heads, encoder frozen | `names.sh`, `NAMES2_COUNT=100000`, 4 epochs | `names-us-ca-v1` 250,000; `names-tier2-2` 100,000; Tier 2 companies 123,948 | 1 chunk of 40 s, best dev 0.9781 (epoch 3), sha256 `3ef21c6e…` |
+| Contact-span head, encoder frozen | `spans.sh`, 4 epochs, 500,000 blocks | `blocks-us-ca-v3`, `blocks-tier2-v1` | 3 chunks, 294,646 steps, best dev 0.8963 (epoch 3) |
+
+The finished file: 22,785,395 bytes, sha256 `c5cedca0d4d0991f272cdafa28471a7744423bd65e26f0dc5970dafc2ee9640d` (weights stay on the build machine). The default recipe (`run.sh`, `names.sh`, `spans.sh`, without `challenger.sh`) is unchanged and remains permissive-only.
+
+**Tier 2 name override.** Re-running the dev-name choice (`names-dev`, confidence 0.8, at least 150 items, a gain of at least 0.3 points over the rules) on `names-tier2-2` dev gives no country for the candidate and none for the shipped weights: the rules alone already score 0.99 or more there, so the earlier list (AU, EE, FR, GB, IT, LI, MT) is not reproduced by the current rules on this dev set (`recipes/models/full-candidate/names-dev-override.txt` is the candidate's table). The override list was left as shipped, so both models run with the same rule wiring.
+
+**Rows** (`recipes/models/full-candidate/`; paired 95% bootstrap, 1000 resamples, seed 20261105; candidate minus shipped):
+
+* Addresses, 40 countries, hinted and no hint, field F1 and full parse (`address-rows.tsv`). Gains (interval above zero), field F1 hinted: DE +1.5, LI +1.3, GB +3.3, IE +7.2, IM +7.6, MT +4.7, HU +5.7; no hint: those plus SM +2.3, EE +2.2, HR +1.9. Full parse hinted: IE +9.8, MT +8.2, LV +6.1; no hint: IE, MT, EE +5.5, LV. **One row loses: ES hinted field F1, 84.62 to 83.49, difference -1.13 [-2.46, -0.02]** (ES no hint -0.62 [-1.97, +0.47], ES full parse unchanged). US and CA are within noise.
+* Tier 2 names (`name-rows.txt`, 29 countries; the US and CA rows in the file are retired and not counted): no row's interval lies wholly below zero. Six have an upper end of exactly 0: EE person tokens -3.77 [-11.5, 0.0] and class -2.17 [-6.5, 0.0], FR company tokens -3.39 [-11.3, 0.0] and class -1.72 [-5.2, 0.0], LI company tokens -7.04 [-18.3, 0.0] and class -3.39 [-8.5, 0.0] (EE, FR and LI are override countries). Gain: AU company tokens +4.9 [0.0, +13.6], class +3.9 [0.0, +9.8].
+* Extraction (u18 sets, text and web, one run each, cut 0.4; `extraction-*.txt`): no row loses beyond its interval. Text address 72.7 to 84.6 (+11.9 [+3.1, +22.5]); text record F1 28.9 to 35.3 (+6.5 [+1.0, +13.1]); web rows within 0.4; text person +1.0 and org -0.5 within noise; website text -1.15 [-3.64, 0.00].
+
+**Verdict.** On the stated rule (no row loses beyond noise) the candidate fails on one row, ES hinted address field F1, by 0.02 points of interval. Everything else is equal or better, with large gains in GB, IE, IM, MT, HU, DE and in extraction addresses. The decision is whether to accept the ES row as noise (lower end -2.46, upper -0.02, 69 items) or to retrain with a different OSM share. The ES register data is the thin set (Catastro covers 12% of municipalities); a larger OSM ES share chosen on dev is the obvious try, not done here because each candidate is scored once.
