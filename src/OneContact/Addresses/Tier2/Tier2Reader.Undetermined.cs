@@ -78,7 +78,8 @@ internal static partial class Tier2Reader
         List<(string Group, ParsedAddressField Field)> members = [];
         foreach (ParsedAddressField f in a.Fields)
         {
-            string group = f.Name switch
+            // A settlement line read as a dependent locality in one country is a line kept as written in another: for agreement between candidates it is still part of the road.
+            string group = f.Rule == SettlementLineRule ? "road" : f.Name switch
             {
                 "street.house-number" => "house",
                 "street.unit-designator" or "street.unit-number" or "street.additional-designator" or "street.additional-number" => "unit",

@@ -718,6 +718,8 @@ internal static partial class Tier2Reader
             return string.Join(' ', text.Substring(span.Start, span.Length).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
         }
 
+        private static readonly HashSet<string> HungarianLegalForms = new(StringComparer.Ordinal) { "KFT", "ZRT", "BT", "NYRT", "RT", "KKT", "EV" };
+
         private Line? ParseCentral(List<Tok> toks, T2Country country)
         {
             if (country.Profile == "au")
@@ -813,6 +815,14 @@ internal static partial class Tier2Reader
             {
                 trailing = nameToks[^1];
                 nameToks = nameToks.GetRange(0, nameToks.Count - 1);
+            }
+
+            // Hungarian street names are one to three words before the type (Magyar Posta, helyes címzés: "Kossuth Lajos utca 12."). More words, a company's legal form
+            // (Kft., Zrt., Bt.) or a person's initial before further words mean that an addressee was written on the same line without a comma; where it ends cannot be
+            // told from the words, so the rules leave the line to the model instead of reading the addressee as part of the street name.
+            if (hu && trailing is not null && (nameToks.Count > 3 || nameToks.Take(nameToks.Count - 1).Any(t => HungarianLegalForms.Contains(t.Key) || t.Text.Length == 2 && t.Text[1] == '.' && char.IsUpper(t.Text[0]))))
+            {
+                return null;
             }
 
             List<Piece> pieces = [];
@@ -1065,10 +1075,38 @@ internal static partial class Tier2Reader
         private static bool IsMexicanSettlementLine(List<Tok> toks) =>
             toks.Count >= 2 && (toks[0].Key is "COL" or "COLONIA" or "FRACC" or "FRACCIONAMIENTO" or "BARRIO" or "PUEBLO" or "EJIDO" or "RESIDENCIAL" || toks[0].Key == "UNIDAD" && toks[1].Key == "HABITACIONAL");
 
-        private static Piece CentralOtherPiece(List<Tok> toks, T2Country country)
+        // A line of plain words between the street line and the postcode line names the settlement or the part of the municipality the street is in
+        // (Czech "část obce", Slovak "časť obce", Croatian "naselje"). The registers of those countries keep it as the dependent locality of the address, so it is read as one
+        // when it follows a street line; the printed layout stays as written. A line with a digit, a closing period, a unit, box or street-type word is something else and
+        // stays an additional line.
+        private static bool IsBareSettlementLine(List<Tok> toks, T2Country country)
+        {
+            if (toks.Count is 0 or > 4)
+            {
+                return false;
+            }
+
+            foreach (Tok t in toks)
+            {
+                if (t.Text.Any(char.IsAsciiDigit) || t.Text.EndsWith('.') || !char.IsLetter(t.Text[0]) || t.Text.Length == 1 || T2Rules.UnitWords.Contains(t.Key)
+                    || T2Rules.FindDelivery(country.Code, t.Key) is not null)
+                {
+                    return false;
+                }
+            }
+
+            return T2Rules.FindType(country, toks[0].Key) is null && T2Rules.FindType(country, toks[^1].Key) is null;
+        }
+
+        private static Piece CentralOtherPiece(List<Tok> toks, T2Country country, bool afterStreetLine)
         {
             Piece piece = OtherPiece(toks, country, afterStreet: true);
-            return country.Profile == "mx" && IsMexicanSettlementLine(toks) ? piece with { Rule = "t2-dependent-locality" } : piece;
+            if (country.Profile == "mx")
+            {
+                return IsMexicanSettlementLine(toks) ? piece with { Rule = "t2-dependent-locality" } : piece;
+            }
+
+            return afterStreetLine && country.Profile is "cz" or "sk" or "hr" && IsBareSettlementLine(toks, country) ? piece with { Rule = SettlementLineRule } : piece;
         }
 
         // Written on one line, the colonia follows the street number without a comma ("Calle X 12 Col. Y"); it is a line of its own.

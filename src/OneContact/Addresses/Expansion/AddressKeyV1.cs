@@ -22,9 +22,11 @@ internal static class AddressKeyV1
         // No country: the key is made from the words of the street fields, the locality, the admin area and the postal code, under the unknown-country prefix.
         if (a.Facts.HasFlag(AddressFacts.CountryUndetermined))
         {
-            string street = string.Join(' ', a.Fields.Where(f => f.Name.StartsWith("street.", StringComparison.Ordinal)).Select(f => f.Text));
+            // A settlement line after the street and a Bucharest sector are dependent-locality fields now; the key keeps reading them where it always did, as street and locality words.
+            string street = string.Join(' ', a.Fields.Where(f => f.Name.StartsWith("street.", StringComparison.Ordinal) || f.Rule == Tier2.Tier2Reader.SettlementLineRule).Select(f => f.Text));
+            string sector = string.Join(' ', a.Fields.Where(f => f.Rule == Tier2.Tier2Reader.RomanianSectorRule).Select(f => " " + f.Text));
             string postalCode = string.Concat(AddressExpander.Fold(a.PostalCode?.Text ?? string.Empty).Where(char.IsLetterOrDigit));
-            return string.Join('|', "zz", Words(street), Words(a.Locality?.Text ?? string.Empty), AddressExpander.Fold(a.AdminArea?.Text ?? string.Empty), postalCode);
+            return string.Join('|', "zz", Words(street), Words((a.Locality?.Text ?? string.Empty) + sector), AddressExpander.Fold(a.AdminArea?.Text ?? string.Empty), postalCode);
         }
 
         string lang = a.Country == Region.CA ? "en" : "en";

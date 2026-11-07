@@ -90,3 +90,8 @@ The result then carries confidence 0.97 and the `CountryInferred` flag. Otherwis
 **Vetoes** stop an inference even when the evidence is unique: the text ends in another country's name, a zone of another country, or an Italian province code left in the locality; a Dutch-looking `dddd LL`; an unspaced five-digit postcode in Swedish form (it may be Finnish with Swedish words); letters outside the winner's alphabet.
 
 **Refused by design.** German-language text in Austria, Switzerland, Belgium and Luxembourg without a country name or distinctive word; Czech and Slovak ASCII text whose postcode falls in no zone; Danish and Norwegian text built from shared words (`Postboks ... Oslo`); lines without a postcode (`Verslo g. 5, Vilnius`), which count as evidence only. No gazetteer of places ships, so none is used.
+
+## A person written in front of the street
+
+Denmark, Norway, Sweden and Finland write a street name as one word or end it in a type word (`Karl Johans gate`, `Ole Bulls plass`; Posten Norge, *Adressering*; PostNord; Danmarks Adresser, *Gengivelse af adresse*). Exactly three words before the house number that start with a given name and do not end in a type word (`Nils Larsen Nestangen 58`) are a person written in front of a one-word street with no comma or line break; longer names are read as before, since a four-word street name is as likely as a person with a middle name. Where the person ends cannot be told from the words, so the rules refuse the line and the model reads it; they used to read the person as part of the street name. The given names are our own list (`docs/names.md`).
+

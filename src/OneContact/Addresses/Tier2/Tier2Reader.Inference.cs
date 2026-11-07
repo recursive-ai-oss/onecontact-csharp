@@ -533,6 +533,11 @@ internal static partial class Tier2Reader
             set.Add(word);
         }
 
+        // Whether the word is, on its own, a street type or street ending of the country (Danish "Gade", "Vej"), as the evidence table lists them.
+        internal bool IsStreetWord(string country, string key) =>
+            _words.TryGetValue(country, out HashSet<string>? w) && w.Contains(key)
+            || _suffixes.TryGetValue(country, out List<string>? ends) && ends.Contains(key);
+
         // The languages that own the word, or null when no table says the word belongs to a language. A country's own evidence words belong to the languages it writes
         // (or to those a "language" row names, for countries that write several and whose words are one language's: Belgian Dutch endings), and "lang" and "langsuffix"
         // rows name languages directly. Places and letters say nothing about a language, and an ending of fewer than four letters (Finnish tie, Danish vej) says nothing either:

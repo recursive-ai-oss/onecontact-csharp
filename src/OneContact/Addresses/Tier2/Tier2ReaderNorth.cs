@@ -1,4 +1,5 @@
 using RecursiveAI.OneContact.Addresses.Streets;
+using RecursiveAI.OneContact.Names;
 
 namespace RecursiveAI.OneContact.Addresses.Tier2;
 
@@ -139,6 +140,15 @@ internal static partial class Tier2Reader
                 if (country.Profile == "no" && h == 1 && toks[0].Key is "VEI" or "VEG" && h + 1 < toks.Count && IsNorthNumber(toks[h + 1].Text))
                 {
                     continue;
+                }
+
+                // Exactly three words before the number that start with a given name and do not end in a street type word ("Nils Larsen Nestangen 58") are a person written in front of
+                // a one-word street name with no comma or line break between them (longer names are left to the rules: a four-word street name is as likely as a person with a middle name). These languages write a street name as one word or end it in a type word (Karl Johans gate,
+                // Ole Bulls plass), so where the person ends cannot be told from the words: the line is left to the model instead of reading the person as part of the street.
+                if (h == 3 && country.Profile is "no" or "dk" or "se" or "fi" && NameLexicon.IsGivenName(NameFolding.LettersAndDigits(toks[0].Text))
+                    && T2Rules.FindType(country, toks[h - 1].Key) is null && !InferenceTables.Instance.IsStreetWord(country.Code, toks[h - 1].Key) && toks.Take(h).All(t => char.IsUpper(t.Text[0])))
+                {
+                    return null;
                 }
 
                 Line? line = NorthLine(toks, h, country);
