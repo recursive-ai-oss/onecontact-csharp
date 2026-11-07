@@ -257,33 +257,6 @@ internal sealed class VisibleTextReader
     private static bool AriaHidden(Node el) =>
         string.Equals(PageContext.AttributeValue(el, "aria-hidden")?.Trim(), "true", StringComparison.OrdinalIgnoreCase);
 
-    // The cascade does not read a unitless zero as a length (the font-size of "font-size:0" stays at its default), but a page that hides text
-    // this way is hiding it: the element's own style attribute is read for it.
-    private static bool InlineFontSizeZero(Node el)
-    {
-        string? style = PageContext.AttributeValue(el, "style");
-        if (style is null)
-        {
-            return false;
-        }
-
-        string compact = style.Replace(" ", string.Empty, StringComparison.Ordinal).ToLowerInvariant();
-        const string Declaration = "font-size:0";
-        int at = compact.IndexOf(Declaration, StringComparison.Ordinal);
-        while (at >= 0)
-        {
-            int next = at + Declaration.Length;
-            if (next >= compact.Length || compact[next] is ';' or '!')
-            {
-                return true;
-            }
-
-            at = compact.IndexOf(Declaration, next, StringComparison.Ordinal);
-        }
-
-        return false;
-    }
-
     private static bool IsHeadingName(string name) => name.Length == 2 && name[0] == 'h' && name[1] >= '1' && name[1] <= '6';
 
     private static bool IsBlockLevel(string display)
@@ -419,7 +392,7 @@ internal sealed class VisibleTextReader
             {
                 visible = false;
             }
-            else if (s.FontSizePx < 1 || InlineFontSizeZero(parent))
+            else if (s.FontSizePx < 1)
             {
                 visible = false;
             }
